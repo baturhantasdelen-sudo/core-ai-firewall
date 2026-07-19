@@ -1,0 +1,57 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  DOCKER_IMAGE_NAME: registry.kurum.yerel/security/nexus-quantum-guard
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_TLS_VERIFY: 1
+  DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  key: "${CI_COMMIT_REF_SLUG}-pip"
+  paths:
+    - .cache/pip
+
+🛡️_güvenlik_ve_test:
+  stage: test
+  image: python:3.11-slim
+  before_script:
+    - python -m pip install --upgrade pip
+  script:
+    - pip install -r requirements.txt pytest bandit safety httpx
+    - bandit -r nexus_quantum_guard.py nexus_shield_api.py -ll -c .bandit
+    - safety check -r requirements-docker.txt --full-report
+    - pytest tests/ -v --tb=short
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+🐳_docker_derleme:
+  stage: build
+  image: docker:24.0.7
+  services:
+    - name: docker:24.0.7-dind
+      alias: docker
+  before_script:
+    - docker info
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin registry.kurum.yerel
+    - docker build -t "$DOCKER_IMAGE_NAME:$CI_COMMIT_SHORT_SHA" -t "$DOCKER_IMAGE_NAME:latest" .
+    - docker push "$DOCKER_IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
+    - docker push "$DOCKER_IMAGE_NAME:latest"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+🚀_canliya_dağitim:
+  stage: deploy
+  image: bitnami/kubectl:1.28
+  script:
+    - echo "$KUBECONFIG_BASE64" | base64 -d > kubeconfig.yaml
+    - export KUBECONFIG=kubeconfig.yaml
+    - kubectl set image deployment/nexus-quantum-guard guard-api="$DOCKER_IMAGE_NAME:$CI_COMMIT_SHORT_SHA" -n security
+    - kubectl rollout status deployment/nexus-quantum-guard -n security --timeout=300s
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

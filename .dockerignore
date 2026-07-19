@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+*.log
+.env
+.git/
+.cursor/
+_shield_req*.json
+core_ai_firewall.py
+*.md

@@ -1,0 +1,4 @@
+[bandit]
+exclude_dirs = tests,.github,deploy
+# B105: saldırı referans kalıplarındaki "password" kelimeleri (gerçek credential değil)
+skips = B105

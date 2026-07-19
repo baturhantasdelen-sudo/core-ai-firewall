@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus-quantum-guard
+  namespace: security
+  labels:
+    app: nexus-quantum-guard
+    tier: security
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: nexus-quantum-guard
+  template:
+    metadata:
+      labels:
+        app: nexus-quantum-guard
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+        - name: guard-api
+          image: registry.kurum.yerel/security/nexus-quantum-guard:v1.0.0
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus-quantum-guard
+  namespace: security
+  labels:
+    app: nexus-quantum-guard
+spec:
+  type: ClusterIP
+  selector:
+    app: nexus-quantum-guard
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      protocol: TCP

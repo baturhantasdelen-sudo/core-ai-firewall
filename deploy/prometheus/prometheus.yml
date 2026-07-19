@@ -1,0 +1,22 @@
+# Prometheus — Nexus Quantum Guard scrape yapılandırması
+# ====================================================
+# Kullanım:
+#   prometheus --config.file=deploy/prometheus/prometheus.yml
+#
+# Docker Compose ile Guard aynı host'ta:
+#   targets: ['host.docker.internal:8000']  (Windows/macOS)
+#   targets: ['172.17.0.1:8000']           (Linux bridge)
+
+global:
+  scrape_interval: 5s   # Yüksek hassasiyetli siber güvenlik izlemesi
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: nexus-quantum-guard
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - localhost:8000   # Yerel uvicorn / Docker (-p 8000:8000)
+        labels:
+          service: nexus-quantum-guard
+          environment: production
