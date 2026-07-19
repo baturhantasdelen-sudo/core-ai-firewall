@@ -301,7 +301,7 @@ fi
             Write-Fail "~/.ssh/authorized_keys dosyasi yok."
             Write-Warn "Sunucuda calistirin:"
             Write-Host "  mkdir -p ~/.ssh && chmod 700 ~/.ssh" -ForegroundColor DarkGray
-            Write-Host ("  echo '" + $pubKeyLine + "' >> ~/.ssh/authorized_keys") -ForegroundColor DarkGray
+            Write-Host ("  echo {0} >> ~/.ssh/authorized_keys" -f $pubKeyLine) -ForegroundColor DarkGray
             Write-Host "  chmod 600 ~/.ssh/authorized_keys" -ForegroundColor DarkGray
             $allPassed = $false
         }
@@ -312,7 +312,7 @@ fi
         else {
             Write-Fail "Deploy public key authorized_keys icinde bulunamadi."
             Write-Warn "Sunucuya ekleyin (root icin /root/.ssh/authorized_keys):"
-            Write-Host ("  echo '" + $pubKeyLine + "' >> ~/.ssh/authorized_keys") -ForegroundColor DarkGray
+            Write-Host ("  echo {0} >> ~/.ssh/authorized_keys" -f $pubKeyLine) -ForegroundColor DarkGray
             $allPassed = $false
         }
     }
