@@ -1,31 +1,63 @@
-# Nexus Quantum Guard — Production API Mikroservisi
-FROM python:3.12-slim-bookworm
+# Nexus Quantum Guard — Production API (multi-stage, lightweight)
+# syntax=docker/dockerfile:1
 
-LABEL maintainer="Nexus Quantum Guard"
-LABEL version="1.0.0"
-LABEL description="Enterprise AI Firewall — FastAPI + Semantic Cache"
+# ---------------------------------------------------------------------------
+# Stage 1: build Python dependencies (compiler toolchain stays here)
+# ---------------------------------------------------------------------------
+FROM python:3.11-slim-bookworm AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /build
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-docker.txt requirements.txt
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip install --upgrade pip \
+    && pip install torch --index-url https://download.pytorch.org/whl/cpu \
+    && pip install -r requirements.txt
+
+# ---------------------------------------------------------------------------
+# Stage 2: minimal runtime image
+# ---------------------------------------------------------------------------
+FROM python:3.11-slim-bookworm AS runtime
+
+LABEL maintainer="Nexus Quantum Guard" \
+      version="1.0.0" \
+      description="Enterprise AI Firewall — FastAPI + Semantic Cache"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     HF_HOME=/app/.cache/huggingface \
     TRANSFORMERS_CACHE=/app/.cache/huggingface \
-    SENTENCE_TRANSFORMERS_HOME=/app/.cache/sentence-transformers
+    SENTENCE_TRANSFORMERS_HOME=/app/.cache/sentence-transformers \
+    PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 1000 nexus \
+    && useradd --system --uid 1000 --gid nexus --home-dir /app --shell /usr/sbin/nologin nexus
 
-COPY requirements-docker.txt requirements.txt
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir -r requirements.txt
+COPY --from=builder /opt/venv /opt/venv
 
 COPY nexus_quantum_guard.py nexus_shield_api.py ./
 
-RUN mkdir -p /app/.cache/huggingface /app/.cache/sentence-transformers
+RUN mkdir -p /app/.cache/huggingface /app/.cache/sentence-transformers \
+    && chown -R nexus:nexus /app
+
+USER nexus
 
 EXPOSE 8000
 
