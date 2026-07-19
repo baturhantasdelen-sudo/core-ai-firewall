@@ -1,9 +1,9 @@
 # verify_production_server.ps1
-# Production sunucusunun (GCP / cloud VPS) GitHub Actions deploy icin hazir olup olmadigini dogrular.
+# GCP production sunucusunun GitHub Actions deploy icin hazir olup olmadigini dogrular.
 #
 # Kullanim:
-#   .\verify_production_server.ps1 -ServerIp <GCE_DIS_IP> -SshUser ubuntu
-#   $env:PROD_SERVER_IP = "<GCE_DIS_IP>"; $env:PROD_SERVER_USER = "ubuntu"; .\verify_production_server.ps1
+#   .\verify_production_server.ps1 -ServerIp "<GCE_STATIC_IP>" -SshUser "ubuntu"
+#   $env:PROD_SERVER_IP = "<GCE_STATIC_IP>"; $env:PROD_SERVER_USER = "ubuntu"; .\verify_production_server.ps1
 
 param(
     [string]$ServerIp = $env:PROD_SERVER_IP,
@@ -65,11 +65,36 @@ function Invoke-RemoteCheck {
     $RemoteScript | & $SshExe @args 2>&1
 }
 
+function Test-TcpPort {
+    param(
+        [string]$HostName,
+        [int]$Port,
+        [int]$TimeoutMs = 15000
+    )
+    try {
+        $result = Test-NetConnection -ComputerName $HostName -Port $Port -WarningAction SilentlyContinue
+        return [bool]$result.TcpTestSucceeded
+    }
+    catch {
+        return $false
+    }
+}
+
 if (-not $ServerIp) {
-    $ServerIp = Read-Host "Production sunucu IP (PROD_SERVER_IP)"
+    if ($env:PROD_SERVER_IP) {
+        $ServerIp = $env:PROD_SERVER_IP
+    }
+    else {
+        $ServerIp = Read-Host "GCP dis IP (PROD_SERVER_IP / GCE_STATIC_IP)"
+    }
 }
 if (-not $SshUser) {
-    $SshUser = Read-Host "SSH kullanici adi (PROD_SERVER_USER, ornek: root veya ubuntu)"
+    if ($env:PROD_SERVER_USER) {
+        $SshUser = $env:PROD_SERVER_USER
+    }
+    else {
+        $SshUser = Read-Host "SSH kullanici adi (PROD_SERVER_USER, ornek: ubuntu)"
+    }
 }
 
 Write-Host "`nNexus Quantum Guard — Production Sunucu Dogrulama" -ForegroundColor White
@@ -81,7 +106,7 @@ $allPassed = $true
 # ---------------------------------------------------------------------------
 # 1) Sunucu erisilebilirligi + SSH portu
 # ---------------------------------------------------------------------------
-Write-Step "1/3 Sunucu aktif mi ve SSH (Port $SshPort) acik mi?"
+Write-Step "1/4 Sunucu aktif mi ve SSH (Port $SshPort) acik mi?"
 
 try {
     $tcp = Test-NetConnection -ComputerName $ServerIp -Port $SshPort -WarningAction SilentlyContinue
@@ -110,6 +135,24 @@ try {
 }
 catch {
     Write-Warn "ICMP ping test edilemedi."
+}
+
+# GCP VPC firewall + UFW — gateway portlari (80 zorunlu, 443 TLS icin)
+Write-Step "1b/4 GCP VPC gateway portlari (80 HTTP, 443 HTTPS)"
+$gatewayResults = @{}
+foreach ($port in @(80, 443)) {
+    $open = Test-TcpPort -HostName $ServerIp -Port $port
+    $gatewayResults[$port] = $open
+    if ($open) {
+        Write-Pass "GCP/VPC erisimi OK — port $port acik (${ServerIp}:$port)"
+    }
+    elseif ($port -eq 80) {
+        Write-Fail "Port 80 erisilemiyor (${ServerIp}:80) — GCP Firewall'da tcp:80 inbound acin ve nginx-gateway'i baslatin."
+        $allPassed = $false
+    }
+    else {
+        Write-Warn "Port 443 erisilemiyor (${ServerIp}:443) — TLS henuz yoksa normal; GCP Firewall'da tcp:443 acik olmali."
+    }
 }
 
 # ---------------------------------------------------------------------------
@@ -146,7 +189,7 @@ Write-Host "ssh.exe: $SshExe" -ForegroundColor DarkGray
 # ---------------------------------------------------------------------------
 # 2) Docker + docker compose
 # ---------------------------------------------------------------------------
-Write-Step "2/3 Docker ve Docker Compose kurulu mu?"
+Write-Step "2/4 Docker ve Docker Compose kurulu mu?"
 
 $dockerScript = @'
 set -euo pipefail
@@ -221,7 +264,7 @@ catch {
 # ---------------------------------------------------------------------------
 # 3) authorized_keys dogrulama
 # ---------------------------------------------------------------------------
-Write-Step "3/3 SSH public key authorized_keys icinde mi?"
+Write-Step "3/4 SSH public key authorized_keys icinde mi?"
 
 if (-not (Test-Path $PublicKeyPath)) {
     Write-Fail "Public key olmadan authorized_keys karsilastirmasi yapilamaz."
@@ -281,9 +324,12 @@ fi
 # ---------------------------------------------------------------------------
 # Ozet
 # ---------------------------------------------------------------------------
-Write-Step "Ozet"
+Write-Step "4/4 Ozet"
 if ($allPassed) {
-    Write-Pass "Sunucu deploy icin hazir gorunuyor."
+    Write-Pass "GCP sunucusu deploy icin hazir gorunuyor."
+    if ($gatewayResults[443]) {
+        Write-Pass "HTTPS (443) erisilebilir."
+    }
     exit 0
 }
 

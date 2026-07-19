@@ -1,30 +1,30 @@
 #!/usr/bin/env bash
-# vps_setup.sh — Google Cloud (GCE) Ubuntu VM ilk kurulum
+# vps_setup.sh — Google Cloud (GCE) Ubuntu VM kurumsal ilk kurulum
 #
-# GCP VM'e SSH ile baglandiktan sonra:
-#   sudo bash vps_setup.sh /tmp/nexus_deploy.pub
+# Calistirma (VM icinde, repo klonlandiktan sonra):
+#   sudo DEPLOY_USER=ubuntu bash deploy/vps/vps_setup.sh /tmp/nexus_deploy.pub
 #
 # Ortam degiskenleri (opsiyonel):
-#   DEPLOY_USER=<ssh_kullaniciniz>   — GCE Ubuntu'da genelde VM olustururken belirlediginiz kullanici
+#   DEPLOY_USER=ubuntu
 #   DEPLOY_PATH=/opt/nexus-core-firewall
 #
-# GCP Console: VPC agi > Firewall — tcp:22 (SSH) ve tcp:80 (HTTP) inbound acik olmali.
+# GCP Console > VPC network > Firewall: tcp:22, tcp:80, tcp:443 inbound
 
 set -euo pipefail
 
 DEPLOY_PATH="${DEPLOY_PATH:-/opt/nexus-core-firewall}"
 DEPLOY_USER="${DEPLOY_USER:-ubuntu}"
-SSH_PUB_KEY_FILE="${1:-}"
+SSH_PUB_KEY_FILE="${1:-/tmp/nexus_deploy.pub}"
 
 log() { echo "[vps_setup] $*"; }
+die() { log "HATA: $*"; exit 1; }
 
 if [[ "$(id -u)" -ne 0 ]]; then
-  echo "Lutfen sudo ile calistirin: sudo bash vps_setup.sh [deploy_public_key.pub]"
-  exit 1
+  die "sudo ile calistirin: sudo DEPLOY_USER=ubuntu bash deploy/vps/vps_setup.sh /tmp/nexus_deploy.pub"
 fi
 
 if ! grep -qi ubuntu /etc/os-release 2>/dev/null; then
-  log "Uyari: Ubuntu disi dagitim; script Ubuntu (GCE) icin yazilmistir."
+  log "Uyari: Ubuntu disi dagitim; script GCE Ubuntu icin yazilmistir."
 fi
 
 export DEBIAN_FRONTEND=noninteractive
@@ -33,7 +33,7 @@ log "[1/6] Paket guncellemesi..."
 apt-get update -qq
 apt-get install -y -qq ca-certificates curl gnupg ufw openssh-server git
 
-log "[2/6] Docker + Docker Compose plugin..."
+log "[2/6] Docker Engine + Docker Compose plugin..."
 if ! command -v docker >/dev/null 2>&1; then
   install -m 0755 -d /etc/apt/keyrings
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -52,51 +52,46 @@ if id "$DEPLOY_USER" &>/dev/null; then
   usermod -aG docker "$DEPLOY_USER"
   log "Kullanici '$DEPLOY_USER' docker grubuna eklendi."
 else
-  log "Uyari: '$DEPLOY_USER' yok. GCE kullaniciniz farkliysa: DEPLOY_USER=adınız sudo bash vps_setup.sh"
+  die "Kullanici '$DEPLOY_USER' bulunamadi. DEPLOY_USER ortam degiskenini GCE SSH kullaniciniza gore ayarlayin."
 fi
 
-log "[3/6] Proje deploy dizin yapisi..."
+log "[3/6] Deploy dizin yapisi: $DEPLOY_PATH"
 mkdir -p "$DEPLOY_PATH"
 mkdir -p "${DEPLOY_PATH}/deploy/grafana/provisioning/dashboards"
 mkdir -p "${DEPLOY_PATH}/deploy/grafana/provisioning/datasources"
+chmod 755 "$DEPLOY_PATH"
+chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "$DEPLOY_PATH"
 
-if id "$DEPLOY_USER" &>/dev/null; then
-  chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "$DEPLOY_PATH"
-fi
-
-# Ilk deploy / scp oncesi gerekli dosyalar (GitHub Actions docker compose pull icin)
-REQUIRED_FILES=(
-  "docker-compose.prod.yml"
-  "nginx.conf"
-)
+REQUIRED_FILES=(docker-compose.prod.yml nginx.conf)
 for f in "${REQUIRED_FILES[@]}"; do
   if [[ ! -f "${DEPLOY_PATH}/${f}" ]]; then
-    log "Bekleniyor (ilk deploy oncesi kopyalayin): ${DEPLOY_PATH}/${f}"
+    log "Bekleniyor (ilk GitHub deploy veya scp oncesi): ${DEPLOY_PATH}/${f}"
   fi
 done
 
-log "[4/6] SSH guvenligi..."
-DEPLOY_HOME="$(getent passwd "$DEPLOY_USER" 2>/dev/null | cut -d: -f6 || echo "/root")"
+log "[4/6] SSH sertlestirme + deploy key..."
+DEPLOY_HOME="$(getent passwd "$DEPLOY_USER" | cut -d: -f6)"
 AUTH_KEYS="${DEPLOY_HOME}/.ssh/authorized_keys"
 
-if id "$DEPLOY_USER" &>/dev/null; then
-  mkdir -p "${DEPLOY_HOME}/.ssh"
-  chmod 700 "${DEPLOY_HOME}/.ssh"
-  touch "$AUTH_KEYS"
-  chmod 600 "$AUTH_KEYS"
-  chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "${DEPLOY_HOME}/.ssh"
-fi
+mkdir -p "${DEPLOY_HOME}/.ssh"
+chmod 700 "${DEPLOY_HOME}/.ssh"
+touch "$AUTH_KEYS"
+chmod 600 "$AUTH_KEYS"
+chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "${DEPLOY_HOME}/.ssh"
 
-if [[ -n "$SSH_PUB_KEY_FILE" && -f "$SSH_PUB_KEY_FILE" ]]; then
+if [[ -f "$SSH_PUB_KEY_FILE" ]]; then
+  if ! ssh-keygen -lf "$SSH_PUB_KEY_FILE" >/dev/null 2>&1; then
+    die "Gecersiz deploy public key: $SSH_PUB_KEY_FILE"
+  fi
   PUB_LINE="$(tr -d '\r\n' < "$SSH_PUB_KEY_FILE")"
-  if ! grep -Fq "$PUB_LINE" "$AUTH_KEYS" 2>/dev/null; then
+  if ! grep -Fxq "$PUB_LINE" "$AUTH_KEYS" 2>/dev/null; then
     echo "$PUB_LINE" >> "$AUTH_KEYS"
-    log "GitHub Actions deploy key eklendi."
+    log "Deploy key authorized_keys dosyasina eklendi: $SSH_PUB_KEY_FILE"
   else
     log "Deploy key zaten authorized_keys icinde."
   fi
 else
-  log "Public key verilmedi — GitHub Actions icin nexus_deploy.pub ekleyin."
+  die "Deploy public key bulunamadi: $SSH_PUB_KEY_FILE (ornek: scp nexus_deploy.pub ubuntu@IP:/tmp/)"
 fi
 
 SSHD_CFG="/etc/ssh/sshd_config"
@@ -107,12 +102,13 @@ sed -i 's/^#\?ChallengeResponseAuthentication.*/ChallengeResponseAuthentication 
 sed -i 's/^#\?KbdInteractiveAuthentication.*/KbdInteractiveAuthentication no/' "$SSHD_CFG"
 systemctl restart ssh
 
-log "[5/6] UFW (sunucu firewall)..."
+log "[5/6] UFW — yalnizca 22, 80, 443..."
 ufw --force reset >/dev/null 2>&1 || true
 ufw default deny incoming >/dev/null
 ufw default allow outgoing >/dev/null
 ufw allow 22/tcp comment 'SSH' >/dev/null
-ufw allow 80/tcp comment 'Nexus nginx-gateway' >/dev/null
+ufw allow 80/tcp comment 'HTTP' >/dev/null
+ufw allow 443/tcp comment 'HTTPS' >/dev/null
 ufw --force enable >/dev/null
 
 log "[6/6] Dogrulama..."
@@ -120,6 +116,7 @@ docker --version
 docker compose version
 systemctl is-active docker
 systemctl is-active ssh
+ufw status numbered | head -10
 
 cat <<EOF
 
@@ -128,20 +125,17 @@ cat <<EOF
 Deploy path : $DEPLOY_PATH
 SSH user    : $DEPLOY_USER
 
-GCP Firewall (Console > VPC network > Firewall):
-  - Allow tcp:22  (SSH)
-  - Allow tcp:80  (Nexus gateway)
+GCP VPC Firewall (Console):
+  tcp:22  — SSH (GitHub Actions)
+  tcp:80  — Nexus nginx-gateway
+  tcp:443 — HTTPS (TLS sonrasi)
 
 GitHub Secrets:
-  PROD_SERVER_IP       = <GCE dis (external) IPv4>
+  PROD_SERVER_IP       = <GCE static external IPv4>
   PROD_SERVER_USER     = $DEPLOY_USER
   PROD_SSH_PRIVATE_KEY = nexus_deploy private key
 
-Ilk deploy oncesi (yerel makineden):
-  scp docker-compose.prod.yml nginx.conf \\
-      ${DEPLOY_USER}@<GCE_IP>:${DEPLOY_PATH}/
-
 Windows dogrulama:
-  .\\verify_production_server.ps1 -ServerIp <GCE_IP> -SshUser $DEPLOY_USER
+  .\\verify_production_server.ps1 -ServerIp "<GCE_STATIC_IP>" -SshUser $DEPLOY_USER
 
 EOF
