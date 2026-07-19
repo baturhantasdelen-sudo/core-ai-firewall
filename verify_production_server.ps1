@@ -225,7 +225,8 @@ if [ -d "__DEPLOY_PATH__" ]; then
 else
   echo "DEPLOY_DIR_MISSING __DEPLOY_PATH__"
 fi
-'@ -replace "__DEPLOY_PATH__", $DeployPath
+'@
+$dockerScript = $dockerScript -replace "__DEPLOY_PATH__", $DeployPath
 
 try {
     $dockerOut = Invoke-RemoteCheck -SshExe $SshExe -RemoteScript $dockerScript
@@ -290,7 +291,8 @@ if grep -Fq "__KEY_BODY__" "$AUTH"; then
 else
   echo "AUTH_KEY_NOT_FOUND"
 fi
-'@ -replace "__KEY_BODY__", $pubKeyBody
+'@
+    $authScript = $authScript -replace "__KEY_BODY__", $pubKeyBody
 
     try {
         $authOut = Invoke-RemoteCheck -SshExe $SshExe -RemoteScript $authScript

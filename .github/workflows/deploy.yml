@@ -78,9 +78,14 @@ jobs:
           script: |
             set -euo pipefail
             DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
-            sudo mkdir -p "$DEPLOY_PATH"
-            sudo chown -R "$USER:$USER" "$DEPLOY_PATH"
-            chmod 775 "$DEPLOY_PATH"
+            if mkdir -p "$DEPLOY_PATH" 2>/dev/null; then
+              chmod 775 "$DEPLOY_PATH"
+            else
+              sudo mkdir -p "$DEPLOY_PATH"
+              sudo chown -R "$USER:$USER" "$DEPLOY_PATH"
+              chmod 775 "$DEPLOY_PATH"
+            fi
+            ls -la "$DEPLOY_PATH"
 
       - name: Sync production configs to server (SCP)
         uses: appleboy/scp-action@v1.0.0
