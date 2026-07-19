@@ -37,8 +37,9 @@ function Write-Warn {
 }
 
 function Get-SshExe {
+    $sshCmd = Get-Command ssh.exe -ErrorAction SilentlyContinue
     $candidates = @(
-        (Get-Command ssh.exe -ErrorAction SilentlyContinue)?.Source,
+        $(if ($sshCmd) { $sshCmd.Source }),
         "C:\Windows\System32\OpenSSH\ssh.exe",
         "C:\Program Files\Git\usr\bin\ssh.exe"
     ) | Where-Object { $_ -and (Test-Path $_) }
@@ -300,7 +301,7 @@ fi
             Write-Fail "~/.ssh/authorized_keys dosyasi yok."
             Write-Warn "Sunucuda calistirin:"
             Write-Host "  mkdir -p ~/.ssh && chmod 700 ~/.ssh" -ForegroundColor DarkGray
-            Write-Host "  echo '$pubKeyLine' >> ~/.ssh/authorized_keys" -ForegroundColor DarkGray
+            Write-Host ("  echo '" + $pubKeyLine + "' >> ~/.ssh/authorized_keys") -ForegroundColor DarkGray
             Write-Host "  chmod 600 ~/.ssh/authorized_keys" -ForegroundColor DarkGray
             $allPassed = $false
         }
@@ -311,7 +312,7 @@ fi
         else {
             Write-Fail "Deploy public key authorized_keys icinde bulunamadi."
             Write-Warn "Sunucuya ekleyin (root icin /root/.ssh/authorized_keys):"
-            Write-Host "  echo '$pubKeyLine' >> ~/.ssh/authorized_keys" -ForegroundColor DarkGray
+            Write-Host ("  echo '" + $pubKeyLine + "' >> ~/.ssh/authorized_keys") -ForegroundColor DarkGray
             $allPassed = $false
         }
     }

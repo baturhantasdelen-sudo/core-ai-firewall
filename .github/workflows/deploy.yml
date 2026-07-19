@@ -67,6 +67,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare deploy directory on server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          command_timeout: 5m
+          script: |
+            set -euo pipefail
+            DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
+            sudo mkdir -p "$DEPLOY_PATH"
+            sudo chown -R "$USER:$USER" "$DEPLOY_PATH"
+            chmod 775 "$DEPLOY_PATH"
+
       - name: Sync production configs to server (SCP)
         uses: appleboy/scp-action@v1.0.0
         with:
