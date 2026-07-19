@@ -1,4 +1,5 @@
-version: "3.8"
+# Production stack — image CI'da build edilir; sunucuda yalnizca pull + up.
+# DOCKER_IMAGE ortam degiskeni GitHub Actions deploy adiminda set edilir.
 
 networks:
   nexus_network:
@@ -6,13 +7,11 @@ networks:
 
 services:
   nexus-api:
-    build: .
     image: ${DOCKER_IMAGE:?DOCKER_IMAGE environment variable is required}
     container_name: nexus-api-prod
     environment:
-      - ENV=production
-      - PYTHONIOENCODING=utf-8
-    # Canlı ortamda çoklu iş parçacığı (workers) ile ayağa kaldırıyoruz
+      ENV: production
+      PYTHONIOENCODING: utf-8
     command:
       [
         "python",
@@ -34,10 +33,15 @@ services:
       timeout: 5s
       retries: 3
       start_period: 180s
-    restart: always
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx-gateway:
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     container_name: nginx-gateway-prod
     ports:
       - "80:80"
@@ -48,4 +52,9 @@ services:
         condition: service_healthy
     networks:
       - nexus_network
-    restart: always
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

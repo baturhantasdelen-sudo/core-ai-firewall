@@ -64,6 +64,21 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync production configs to server (SCP)
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          source: "docker-compose.prod.yml,nginx.conf"
+          target: ${{ env.DEPLOY_PATH }}
+          overwrite: true
+          strip_components: 0
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         env:
@@ -80,21 +95,22 @@ jobs:
           script: |
             set -euo pipefail
             export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}"
-            cd "${{ env.DEPLOY_PATH }}"
+            DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
 
-            if [[ ! -f docker-compose.prod.yml ]]; then
-              echo "HATA: ${{ env.DEPLOY_PATH }}/docker-compose.prod.yml bulunamadi."
-              echo "Once sunucuda vps_setup.sh calistirin ve compose dosyalarini kopyalayin."
-              exit 1
-            fi
+            mkdir -p "$DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
+
+            for f in docker-compose.prod.yml nginx.conf; do
+              if [[ ! -f "$f" ]]; then
+                echo "HATA: $DEPLOY_PATH/$f SCP sonrasi bulunamadi."
+                exit 1
+              fi
+            done
 
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-            docker compose -f docker-compose.prod.yml pull nexus-api
-            docker compose -f docker-compose.prod.yml up -d --no-deps nexus-api
-
-            echo "Waiting for API healthcheck..."
-            sleep 30
-
-            docker compose -f docker-compose.prod.yml up -d nginx-gateway
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
             docker image prune -f
+
+            echo "Deploy tamamlandi: $DOCKER_IMAGE"

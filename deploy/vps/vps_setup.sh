@@ -59,15 +59,14 @@ log "[3/6] Deploy dizin yapisi: $DEPLOY_PATH"
 mkdir -p "$DEPLOY_PATH"
 mkdir -p "${DEPLOY_PATH}/deploy/grafana/provisioning/dashboards"
 mkdir -p "${DEPLOY_PATH}/deploy/grafana/provisioning/datasources"
-chmod 755 "$DEPLOY_PATH"
-chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "$DEPLOY_PATH"
 
-REQUIRED_FILES=(docker-compose.prod.yml nginx.conf)
-for f in "${REQUIRED_FILES[@]}"; do
-  if [[ ! -f "${DEPLOY_PATH}/${f}" ]]; then
-    log "Bekleniyor (ilk GitHub deploy veya scp oncesi): ${DEPLOY_PATH}/${f}"
-  fi
-done
+# GitHub Actions (SCP) ve docker compose icin tam okuma/yazma yetkisi
+chown -R "${DEPLOY_USER}:${DEPLOY_USER}" "$DEPLOY_PATH"
+find "$DEPLOY_PATH" -type d -exec chmod 775 {} \;
+find "$DEPLOY_PATH" -type f -exec chmod 664 {} \; 2>/dev/null || true
+chmod 775 "$DEPLOY_PATH"
+
+log "Config dosyalari (docker-compose.prod.yml, nginx.conf) GitHub Actions ile otomatik senkronize edilir."
 
 log "[4/6] SSH sertlestirme + deploy key..."
 DEPLOY_HOME="$(getent passwd "$DEPLOY_USER" | cut -d: -f6)"
@@ -134,6 +133,9 @@ GitHub Secrets:
   PROD_SERVER_IP       = <GCE static external IPv4>
   PROD_SERVER_USER     = $DEPLOY_USER
   PROD_SSH_PRIVATE_KEY = nexus_deploy private key
+
+Ilk push'tan itibaren GitHub Actions config dosyalarini bu dizine SCP ile yazar.
+Manuel scp gerekmez.
 
 Windows dogrulama:
   .\\verify_production_server.ps1 -ServerIp "<GCE_STATIC_IP>" -SshUser $DEPLOY_USER
