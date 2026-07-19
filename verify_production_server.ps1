@@ -15,6 +15,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "verify_remote_scripts.ps1")
 
 function Write-Step {
     param([string]$Message)
@@ -98,7 +99,7 @@ if (-not $SshUser) {
     }
 }
 
-Write-Host "`nNexus Quantum Guard — Production Sunucu Dogrulama" -ForegroundColor White
+Write-Host "`nNexus Quantum Guard - Production Sunucu Dogrulama" -ForegroundColor White
 Write-Host "Hedef: ${SshUser}@${ServerIp}:${SshPort}" -ForegroundColor DarkGray
 Write-Host "Deploy path: $DeployPath" -ForegroundColor DarkGray
 
@@ -116,7 +117,7 @@ try {
     }
     else {
         Write-Fail "TCP baglantisi basarisiz: ${ServerIp}:${SshPort}"
-        Write-Warn "Firewall / Security Group'ta port $SshPort acik mi kontrol edin."
+        Write-Warn "Firewall / Security Group icinde port $SshPort acik mi kontrol edin."
         $allPassed = $false
     }
 }
@@ -131,28 +132,28 @@ try {
         Write-Pass "ICMP ping yanit veriyor (opsiyonel)."
     }
     else {
-        Write-Warn "ICMP ping yanit vermiyor — bu normal olabilir; SSH TCP testi esas kriterdir."
+        Write-Warn "ICMP ping yanit vermiyor - bu normal olabilir; SSH TCP testi esas kriterdir."
     }
 }
 catch {
     Write-Warn "ICMP ping test edilemedi."
 }
 
-# GCP VPC firewall + UFW — gateway portlari (80 zorunlu, 443 TLS icin)
+# GCP VPC firewall + UFW - gateway portlari (80 zorunlu, 443 TLS icin)
 Write-Step "1b/4 GCP VPC gateway portlari (80 HTTP, 443 HTTPS)"
 $gatewayResults = @{}
 foreach ($port in @(80, 443)) {
     $open = Test-TcpPort -HostName $ServerIp -Port $port
     $gatewayResults[$port] = $open
     if ($open) {
-        Write-Pass "GCP/VPC erisimi OK — port $port acik (${ServerIp}:$port)"
+        Write-Pass "GCP/VPC erisimi OK - port $port acik ($ServerIp`:$port)"
     }
     elseif ($port -eq 80) {
-        Write-Fail "Port 80 erisilemiyor (${ServerIp}:80) — GCP Firewall'da tcp:80 inbound acin ve nginx-gateway'i baslatin."
+        Write-Fail "Port 80 erisilemiyor (${ServerIp}:80) - GCP Firewall uzerinde tcp:80 inbound acin ve nginx-gateway servisini baslatin."
         $allPassed = $false
     }
     else {
-        Write-Warn "Port 443 erisilemiyor (${ServerIp}:443) — TLS henuz yoksa normal; GCP Firewall'da tcp:443 acik olmali."
+        Write-Warn "Port 443 erisilemiyor (${ServerIp}:443) - TLS henuz yoksa normal; GCP Firewall uzerinde tcp:443 acik olmali."
     }
 }
 
@@ -192,41 +193,7 @@ Write-Host "ssh.exe: $SshExe" -ForegroundColor DarkGray
 # ---------------------------------------------------------------------------
 Write-Step "2/4 Docker ve Docker Compose kurulu mu?"
 
-$dockerScript = @'
-set -euo pipefail
-
-echo "--- docker version ---"
-docker --version
-
-echo "--- docker compose version ---"
-if docker compose version >/dev/null 2>&1; then
-  docker compose version
-  COMPOSE_OK=1
-elif command -v docker-compose >/dev/null 2>&1; then
-  docker-compose --version
-  COMPOSE_OK=1
-else
-  echo "COMPOSE_MISSING"
-  exit 21
-fi
-
-echo "--- docker daemon ---"
-if docker info >/dev/null 2>&1; then
-  echo "DOCKER_DAEMON_OK"
-else
-  echo "DOCKER_DAEMON_FAIL"
-  exit 22
-fi
-
-echo "--- deploy directory ---"
-if [ -d "__DEPLOY_PATH__" ]; then
-  echo "DEPLOY_DIR_OK __DEPLOY_PATH__"
-  ls -la "__DEPLOY_PATH__" | head -5
-else
-  echo "DEPLOY_DIR_MISSING __DEPLOY_PATH__"
-fi
-'@
-$dockerScript = $dockerScript -replace "__DEPLOY_PATH__", $DeployPath
+$dockerScript = Get-DockerCheckScript -DeployDir $DeployPath
 
 try {
     $dockerOut = Invoke-RemoteCheck -SshExe $SshExe -RemoteScript $dockerScript
@@ -259,7 +226,7 @@ try {
 }
 catch {
     Write-Fail "SSH uzerinden Docker kontrolu basarisiz: $($_.Exception.Message)"
-    Write-Warn "Anahtar authorized_keys'te degilse veya kullanici yanlissa bu adim duser."
+    Write-Warn "Anahtar authorized_keys icinde degilse veya kullanici yanlissa bu adim duser."
     $allPassed = $false
 }
 
@@ -276,23 +243,7 @@ else {
     $pubKeyLine = (Get-Content $PublicKeyPath -Raw).Trim()
     $pubKeyBody = ($pubKeyLine -split "\s+", 3)[1]
 
-    $authScript = @'
-set -euo pipefail
-AUTH="$HOME/.ssh/authorized_keys"
-if [ ! -f "$AUTH" ]; then
-  echo "AUTH_FILE_MISSING"
-  exit 31
-fi
-echo "--- authorized_keys fingerprints ---"
-ssh-keygen -lf "$AUTH" 2>/dev/null || true
-echo "--- grep deploy key ---"
-if grep -Fq "__KEY_BODY__" "$AUTH"; then
-  echo "AUTH_KEY_FOUND"
-else
-  echo "AUTH_KEY_NOT_FOUND"
-fi
-'@
-    $authScript = $authScript -replace "__KEY_BODY__", $pubKeyBody
+    $authScript = Get-AuthCheckScript -KeyBody $pubKeyBody
 
     try {
         $authOut = Invoke-RemoteCheck -SshExe $SshExe -RemoteScript $authScript
