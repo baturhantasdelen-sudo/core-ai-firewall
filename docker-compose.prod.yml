@@ -23,7 +23,7 @@ services:
         "--port",
         "8000",
         "--workers",
-        "4",
+        "1",
       ]
     networks:
       - nexus_network
