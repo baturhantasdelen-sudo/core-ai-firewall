@@ -64,6 +64,7 @@ function Invoke-RemoteCheck {
         "${SshUser}@${ServerIp}",
         "bash -s"
     )
+    $RemoteScript = ($RemoteScript -replace "`r`n", "`n" -replace "`r", "`n").Trim()
     $RemoteScript | & $SshExe @args 2>&1
 }
 

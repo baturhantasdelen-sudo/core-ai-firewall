@@ -25,7 +25,7 @@ function Get-DockerCheckScript {
         "set -euo pipefail",
         "",
         "echo `"--- docker version ---`"",
-        "docker --version",
+        "if command -v docker >/dev/null 2>&1; then docker --version; else echo `"DOCKER_CLI_MISSING`"; fi",
         "",
         "echo `"--- docker compose version ---`"",
         "if docker compose version >/dev/null 2>&1; then",
