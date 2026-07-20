@@ -70,72 +70,70 @@ jobs:
       - name: Configure SSH deploy key
         env:
           SSH_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
+          PROD_SERVER_USER: ${{ secrets.PROD_SERVER_USER }}
         run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "${{ secrets.PROD_SERVER_IP }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
+          ssh-keyscan -H "$PROD_SERVER_IP" >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
+          echo "Deploy key fingerprint:"
+          ssh-keygen -lf "$HOME/.ssh/deploy_key"
+          ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "${PROD_SERVER_USER}@${PROD_SERVER_IP}" "echo SSH_OK"
 
       - name: Prepare deploy directory on server
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.PROD_SERVER_IP }}
-          username: ${{ secrets.PROD_SERVER_USER }}
-          key_path: ~/.ssh/deploy_key
-          port: 22
-          command_timeout: 5m
-          script: |
-            set -euo pipefail
-            DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
-            sudo mkdir -p "$DEPLOY_PATH"
-            sudo chown -R "$USER:$USER" "$DEPLOY_PATH"
-            chmod 775 "$DEPLOY_PATH"
-            ls -la "$DEPLOY_PATH"
+        env:
+          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
+          PROD_SERVER_USER: ${{ secrets.PROD_SERVER_USER }}
+        run: |
+          ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "${PROD_SERVER_USER}@${PROD_SERVER_IP}" bash -s <<'REMOTE'
+          set -euo pipefail
+          DEPLOY_PATH="/opt/nexus-core-firewall"
+          sudo mkdir -p "$DEPLOY_PATH"
+          sudo chown -R "$USER:$USER" "$DEPLOY_PATH"
+          chmod 775 "$DEPLOY_PATH"
+          ls -la "$DEPLOY_PATH"
+          REMOTE
 
       - name: Sync production configs to server (SCP)
-        uses: appleboy/scp-action@v1.0.0
-        with:
-          host: ${{ secrets.PROD_SERVER_IP }}
-          username: ${{ secrets.PROD_SERVER_USER }}
-          key_path: ~/.ssh/deploy_key
-          port: 22
-          source: "docker-compose.prod.yml,nginx.conf"
-          target: ${{ env.DEPLOY_PATH }}
-          overwrite: true
-          strip_components: 0
+        env:
+          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
+          PROD_SERVER_USER: ${{ secrets.PROD_SERVER_USER }}
+        run: |
+          scp -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            docker-compose.prod.yml nginx.conf \
+            "${PROD_SERVER_USER}@${PROD_SERVER_IP}:/opt/nexus-core-firewall/"
 
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
         env:
+          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
+          PROD_SERVER_USER: ${{ secrets.PROD_SERVER_USER }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        with:
-          host: ${{ secrets.PROD_SERVER_IP }}
-          username: ${{ secrets.PROD_SERVER_USER }}
-          key_path: ~/.ssh/deploy_key
-          port: 22
-          command_timeout: 15m
-          script_stop: true
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD
-          script: |
-            set -euo pipefail
-            export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}"
-            DEPLOY_PATH="${{ env.DEPLOY_PATH }}"
+          DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}
+        run: |
+          ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "${PROD_SERVER_USER}@${PROD_SERVER_IP}" bash -s <<REMOTE
+          set -euo pipefail
+          export DOCKER_USERNAME="$DOCKER_USERNAME"
+          export DOCKER_PASSWORD="$DOCKER_PASSWORD"
+          export DOCKER_IMAGE="$DOCKER_IMAGE"
+          DEPLOY_PATH="/opt/nexus-core-firewall"
+          mkdir -p "\$DEPLOY_PATH"
+          cd "\$DEPLOY_PATH"
 
-            mkdir -p "$DEPLOY_PATH"
-            cd "$DEPLOY_PATH"
+          for f in docker-compose.prod.yml nginx.conf; do
+            if [[ ! -f "\$f" ]]; then
+              echo "HATA: \$DEPLOY_PATH/\$f SCP sonrasi bulunamadi."
+              exit 1
+            fi
+          done
 
-            for f in docker-compose.prod.yml nginx.conf; do
-              if [[ ! -f "$f" ]]; then
-                echo "HATA: $DEPLOY_PATH/$f SCP sonrasi bulunamadi."
-                exit 1
-              fi
-            done
-
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-            docker image prune -f
-
-            echo "Deploy tamamlandi: $DOCKER_IMAGE"
+          echo "\$DOCKER_PASSWORD" | docker login -u "\$DOCKER_USERNAME" --password-stdin
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker image prune -f
+          echo "Deploy tamamlandi: \$DOCKER_IMAGE"
+          REMOTE
