@@ -65,7 +65,9 @@ function Invoke-RemoteCheck {
         "bash -s"
     )
     $RemoteScript = ($RemoteScript -replace "`r`n", "`n" -replace "`r", "`n").Trim()
-    $RemoteScript | & $SshExe @args 2>&1
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($RemoteScript))
+    $args[-1] = "echo $encoded | base64 -d | bash"
+    & $SshExe @args 2>&1
 }
 
 function Test-TcpPort {

@@ -100,6 +100,8 @@ def main() -> int:
         print(f"⚠️  {args.name} beklenen secret listesinde yok; yine de yükleniyor.")
 
     value = os.getenv(args.value_env, "")
+    if args.name == "PROD_SSH_PRIVATE_KEY" and value:
+        value = value.replace("\r\n", "\n").replace("\r", "\n").strip() + "\n"
     set_secret(token, args.name, value)
     return 0
 

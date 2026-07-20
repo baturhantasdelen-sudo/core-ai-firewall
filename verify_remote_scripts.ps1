@@ -48,12 +48,12 @@ function Get-DockerCheckScript {
         "fi",
         "",
         "echo `"--- deploy directory ---`"",
-        "if [ -d `"$DeployDir`" ]; then",
-        "  echo `"DEPLOY_DIR_OK $DeployDir`"",
-        "  ls -la `"$DeployDir`" | head -5",
+        "if [ -d `"__DEPLOY_PATH__`" ]; then",
+        "  echo `"DEPLOY_DIR_OK __DEPLOY_PATH__`"",
+        "  ls -la `"__DEPLOY_PATH__`" | head -5",
         "else",
-        "  echo `"DEPLOY_DIR_MISSING $DeployDir`"",
+        "  echo `"DEPLOY_DIR_MISSING __DEPLOY_PATH__`"",
         "fi"
     )
-    return ($lines -join "`n")
+    return (($lines -join "`n") -replace "__DEPLOY_PATH__", $DeployDir)
 }
