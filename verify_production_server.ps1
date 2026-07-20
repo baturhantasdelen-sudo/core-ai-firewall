@@ -150,7 +150,7 @@ foreach ($port in @(80, 443)) {
     }
     elseif ($port -eq 80) {
         Write-Fail "Port 80 erisilemiyor (${ServerIp}:80) - GCP Firewall uzerinde tcp:80 inbound acin ve nginx-gateway servisini baslatin."
-        $allPassed = $false
+        # Deploy oncesi port 80 kapali olabilir; SSH/Docker kontrollerine devam et
     }
     else {
         Write-Warn "Port 443 erisilemiyor (${ServerIp}:443) - TLS henuz yoksa normal; GCP Firewall uzerinde tcp:443 acik olmali."
@@ -181,7 +181,7 @@ else {
 }
 
 if (-not $allPassed) {
-    Write-Host "`nSSH key veya ag erisimi olmadan devam edilemiyor." -ForegroundColor Red
+    Write-Host "`nSSH key veya SSH portu erisilemeden devam edilemiyor." -ForegroundColor Red
     exit 1
 }
 
