@@ -94,6 +94,12 @@ jobs:
           sudo mkdir -p "$DEPLOY_PATH"
           sudo chown -R "$USER:$USER" "$DEPLOY_PATH"
           chmod 775 "$DEPLOY_PATH"
+          if ! swapon --show | grep -q /swapfile; then
+            sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+            sudo chmod 600 /swapfile
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
+          fi
           ls -la "$DEPLOY_PATH"
           REMOTE
 
@@ -114,15 +120,16 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}
         run: |
+          PASS_B64=$(printf '%s' "$DOCKER_PASSWORD" | base64 -w0)
           ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
             "${PROD_SERVER_USER}@${PROD_SERVER_IP}" bash -s <<REMOTE
           set -euo pipefail
           export DOCKER_USERNAME="$DOCKER_USERNAME"
-          export DOCKER_PASSWORD="$DOCKER_PASSWORD"
           export DOCKER_IMAGE="$DOCKER_IMAGE"
           DEPLOY_PATH="/opt/nexus-core-firewall"
           mkdir -p "\$DEPLOY_PATH"
           cd "\$DEPLOY_PATH"
+          printf 'DOCKER_IMAGE=%s\n' "\$DOCKER_IMAGE" > .env
 
           for f in docker-compose.prod.yml nginx.conf; do
             if [[ ! -f "\$f" ]]; then
@@ -131,7 +138,7 @@ jobs:
             fi
           done
 
-          echo "\$DOCKER_PASSWORD" | docker login -u "\$DOCKER_USERNAME" --password-stdin
+          echo "$PASS_B64" | base64 -d | docker login -u "\$DOCKER_USERNAME" --password-stdin
           docker compose -f docker-compose.prod.yml pull
           docker compose -f docker-compose.prod.yml up -d --remove-orphans
           docker image prune -f
