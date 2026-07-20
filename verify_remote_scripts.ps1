@@ -1,5 +1,5 @@
 function Get-AuthCheckScript {
-    param([string]$KeyBody)
+    param([string]$KeyComment = "nexus-github-actions-deploy")
     $lines = @(
         "set -euo pipefail",
         "AUTH=`"`$HOME/.ssh/authorized_keys`"",
@@ -10,13 +10,13 @@ function Get-AuthCheckScript {
         "echo `"--- authorized_keys fingerprints ---`"",
         "ssh-keygen -lf `"`$AUTH`" 2>/dev/null || true",
         "echo `"--- grep deploy key ---`"",
-        "if grep -Fq `"__KEY_BODY__`" `"`$AUTH`"; then",
+        "if grep -Fq `"__KEY_COMMENT__`" `"`$AUTH`"; then",
         "  echo `"AUTH_KEY_FOUND`"",
         "else",
         "  echo `"AUTH_KEY_NOT_FOUND`"",
         "fi"
     )
-    return (($lines -join "`n") -replace "__KEY_BODY__", $KeyBody)
+    return (($lines -join "`n") -replace "__KEY_COMMENT__", $KeyComment)
 }
 
 function Get-DockerCheckScript {

@@ -243,7 +243,7 @@ else {
     $pubKeyLine = (Get-Content $PublicKeyPath -Raw).Trim()
     $pubKeyBody = ($pubKeyLine -split "\s+", 3)[1]
 
-    $authScript = Get-AuthCheckScript -KeyBody $pubKeyBody
+    $authScript = Get-AuthCheckScript -KeyComment "nexus-github-actions-deploy"
 
     try {
         $authOut = Invoke-RemoteCheck -SshExe $SshExe -RemoteScript $authScript
