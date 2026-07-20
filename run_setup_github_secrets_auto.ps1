@@ -24,8 +24,10 @@ if (-not $env:GITHUB_TOKEN) {
 }
 
 $sshKeyPath = Join-Path $env:USERPROFILE ".ssh\nexus_deploy"
-if (-not $config.PROD_SSH_PRIVATE_KEY -and (Test-Path $sshKeyPath)) {
-    $config | Add-Member -NotePropertyName PROD_SSH_PRIVATE_KEY -NotePropertyValue (Get-Content $sshKeyPath -Raw) -Force
+if (Test-Path $sshKeyPath) {
+    # Always prefer the on-disk deploy key over JSON (avoids broken escaped newlines in .secrets.local.json).
+    $fileKey = (Get-Content $sshKeyPath -Raw).Replace("`r`n", "`n").Replace("`r", "`n").TrimEnd() + "`n"
+    $config | Add-Member -NotePropertyName PROD_SSH_PRIVATE_KEY -NotePropertyValue $fileKey -Force
 }
 
 function Set-OneSecret {
