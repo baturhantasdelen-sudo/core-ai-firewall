@@ -53,7 +53,10 @@ function Get-DockerCheckScript {
         "  ls -la `"__DEPLOY_PATH__`" | head -5",
         "else",
         "  echo `"DEPLOY_DIR_MISSING __DEPLOY_PATH__`"",
-        "fi"
+        "fi",
+        "",
+        "echo `"--- prod containers ---`"",
+        "docker ps -a --format '{{.Names}} {{.Status}}' 2>/dev/null | grep -E 'nexus-api|nginx-gateway|cloudflared' || echo `"PROD_CONTAINERS_NONE`""
     )
     return (($lines -join "`n") -replace "__DEPLOY_PATH__", $DeployDir)
 }

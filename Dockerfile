@@ -54,14 +54,16 @@ COPY --from=builder /opt/venv /opt/venv
 
 COPY nexus_quantum_guard.py nexus_shield_api.py ./
 
+# Bake HuggingFace embedding model into image (no runtime download on deploy).
 RUN mkdir -p /app/.cache/huggingface /app/.cache/sentence-transformers \
+    && python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')" \
     && chown -R nexus:nexus /app
 
 USER nexus
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
     CMD curl -fsS http://127.0.0.1:8000/healthz | grep -q HEALTHY || exit 1
 
 CMD ["python", "-m", "uvicorn", "nexus_quantum_guard:app", "--host", "0.0.0.0", "--port", "8000"]

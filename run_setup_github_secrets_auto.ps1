@@ -46,7 +46,7 @@ Write-Host "`n=== GitHub Secrets (non-interactive) ===" -ForegroundColor Cyan
 python check_github_secrets.py
 Write-Host ""
 
-foreach ($name in @("DOCKER_USERNAME", "DOCKER_PASSWORD", "PROD_SERVER_IP", "PROD_SERVER_USER", "PROD_SSH_PRIVATE_KEY")) {
+foreach ($name in @("DOCKER_USERNAME", "DOCKER_PASSWORD", "PROD_SERVER_IP", "PROD_SERVER_USER", "PROD_SSH_PRIVATE_KEY", "CLOUDFLARE_TUNNEL_TOKEN", "PROD_PUBLIC_URL")) {
     Set-OneSecret -Name $name -Value ([string]$config.$name)
 }
 

@@ -119,8 +119,10 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}
+          CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
         run: |
           PASS_B64=$(printf '%s' "$DOCKER_PASSWORD" | base64 -w0)
+          TUNNEL_B64=$(printf '%s' "$CLOUDFLARE_TUNNEL_TOKEN" | base64 -w0)
           ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
             "${PROD_SERVER_USER}@${PROD_SERVER_IP}" bash -s <<REMOTE
           set -euo pipefail
@@ -130,6 +132,7 @@ jobs:
           mkdir -p "\$DEPLOY_PATH"
           cd "\$DEPLOY_PATH"
           printf 'DOCKER_IMAGE=%s\n' "\$DOCKER_IMAGE" > .env
+          printf 'CLOUDFLARE_TUNNEL_TOKEN=%s\n' "$(echo "$TUNNEL_B64" | base64 -d)" >> .env
 
           for f in docker-compose.prod.yml nginx.conf; do
             if [[ ! -f "\$f" ]]; then

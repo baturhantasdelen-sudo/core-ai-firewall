@@ -1,5 +1,6 @@
 # Production stack — image CI'da build edilir; sunucuda yalnizca pull + up.
-# DOCKER_IMAGE ortam degiskeni GitHub Actions deploy adiminda set edilir.
+# HTTPS: Cloudflare Tunnel (cloudflared) -> nginx-gateway:80 -> nexus-api:8000
+# DOCKER_IMAGE ve CLOUDFLARE_TUNNEL_TOKEN .env dosyasinda (GitHub Actions deploy).
 
 networks:
   nexus_network:
@@ -12,6 +13,9 @@ services:
     environment:
       ENV: production
       PYTHONIOENCODING: utf-8
+      HF_HOME: /app/.cache/huggingface
+      TRANSFORMERS_CACHE: /app/.cache/huggingface
+      SENTENCE_TRANSFORMERS_HOME: /app/.cache/sentence-transformers
     command:
       [
         "python",
@@ -32,7 +36,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 600s
+      start_period: 180s
     restart: unless-stopped
     logging:
       driver: json-file
@@ -43,12 +47,28 @@ services:
   nginx-gateway:
     image: nginx:1.27-alpine
     container_name: nginx-gateway-prod
-    ports:
-      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       nexus-api:
+        condition: service_started
+    networks:
+      - nexus_network
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  cloudflared:
+    image: cloudflare/cloudflared:2024.12.2
+    container_name: cloudflared-prod
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN environment variable is required}
+    depends_on:
+      nginx-gateway:
         condition: service_started
     networks:
       - nexus_network

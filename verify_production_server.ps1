@@ -11,7 +11,8 @@ param(
     [string]$PrivateKeyPath = (Join-Path $env:USERPROFILE ".ssh\nexus_deploy"),
     [string]$PublicKeyPath = (Join-Path $env:USERPROFILE ".ssh\nexus_deploy.pub"),
     [int]$SshPort = 22,
-    [string]$DeployPath = "/opt/nexus-core-firewall"
+    [string]$DeployPath = "/opt/nexus-core-firewall",
+    [string]$PublicUrl = $env:PROD_PUBLIC_URL
 )
 
 $ErrorActionPreference = "Stop"
@@ -142,7 +143,7 @@ catch {
     Write-Warn "ICMP ping test edilemedi."
 }
 
-# GCP VPC firewall + UFW - gateway portlari (80 zorunlu, 443 TLS icin)
+# GCP VPC firewall + UFW - gateway portlari (Cloudflare Tunnel: HTTPS public URL)
 Write-Step "1b/4 GCP VPC gateway portlari (80 HTTP, 443 HTTPS)"
 $gatewayResults = @{}
 foreach ($port in @(80, 443)) {
@@ -152,11 +153,10 @@ foreach ($port in @(80, 443)) {
         Write-Pass "GCP/VPC erisimi OK - port $port acik ($ServerIp`:$port)"
     }
     elseif ($port -eq 80) {
-        Write-Fail "Port 80 erisilemiyor (${ServerIp}:80) - GCP Firewall uzerinde tcp:80 inbound acin ve nginx-gateway servisini baslatin."
-        # Deploy oncesi port 80 kapali olabilir; SSH/Docker kontrollerine devam et
+        Write-Warn "Port 80 erisilemiyor (${ServerIp}:80) - Cloudflare Tunnel mimarisinde normal; origin yalnizca Docker aginda dinler."
     }
     else {
-        Write-Warn "Port 443 erisilemiyor (${ServerIp}:443) - TLS henuz yoksa normal; GCP Firewall uzerinde tcp:443 acik olmali."
+        Write-Warn "Port 443 erisilemiyor (${ServerIp}:443) - TLS Cloudflare Tunnel uzerinden saglanir; PROD_PUBLIC_URL ile dogrulayin."
     }
 }
 
@@ -222,9 +222,16 @@ try {
     if ($dockerText -match "DEPLOY_DIR_OK") {
         Write-Pass "Deploy klasoru mevcut: $DeployPath"
     }
-    elseif ($dockerText -match "DEPLOY_DIR_MISSING") {
+    else    if ($dockerText -match "DEPLOY_DIR_MISSING") {
         Write-Warn "Deploy klasoru henuz yok: $DeployPath"
         Write-Warn "Ilk deploy oncesi sunucuda proje dosyalarini bu dizine kopyalayin."
+    }
+
+    if ($dockerText -match "cloudflared-prod") {
+        Write-Pass "cloudflared container calisiyor."
+    }
+    elseif ($dockerText -match "PROD_CONTAINERS_NONE") {
+        Write-Warn "Prod container'lar henuz ayakta degil (deploy sonrasi beklenir)."
     }
 }
 catch {
@@ -284,7 +291,18 @@ else {
 Write-Step "4/4 Ozet"
 if ($allPassed) {
     Write-Pass "GCP sunucusu deploy icin hazir gorunuyor."
-    if ($gatewayResults[443]) {
+    if ($PublicUrl) {
+        Write-Step "5/5 Cloudflare HTTPS /healthz"
+        try {
+            $healthUrl = "$($PublicUrl.TrimEnd('/'))/healthz"
+            $health = Invoke-RestMethod -Uri $healthUrl -TimeoutSec 30
+            Write-Pass "HTTPS /healthz OK: $healthUrl -> $($health | ConvertTo-Json -Compress)"
+        }
+        catch {
+            Write-Warn "HTTPS /healthz henuz erisilemiyor ($PublicUrl): $($_.Exception.Message)"
+        }
+    }
+    elseif ($gatewayResults[443]) {
         Write-Pass "HTTPS (443) erisilebilir."
     }
     exit 0
