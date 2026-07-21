@@ -122,20 +122,25 @@ jobs:
           CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
         run: |
           PASS_B64=$(printf '%s' "$DOCKER_PASSWORD" | base64 -w0)
-          TUNNEL_B64=$(printf '%s' "$CLOUDFLARE_TUNNEL_TOKEN" | base64 -w0)
+          USE_TUNNEL="0"
+          TUNNEL_LINE=""
+          UP_CMD="docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans"
+          if [ -n "$CLOUDFLARE_TUNNEL_TOKEN" ]; then
+            USE_TUNNEL="1"
+            TUNNEL_B64=$(printf '%s' "$CLOUDFLARE_TUNNEL_TOKEN" | base64 -w0)
+            TUNNEL_LINE="CLOUDFLARE_TUNNEL_TOKEN=$(echo "$TUNNEL_B64" | base64 -d)"
+            UP_CMD="docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d --remove-orphans"
+          fi
           ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
             "${PROD_SERVER_USER}@${PROD_SERVER_IP}" bash -s <<REMOTE
           set -euo pipefail
           export DOCKER_USERNAME="$DOCKER_USERNAME"
-          export DOCKER_IMAGE="$DOCKER_IMAGE"
           DEPLOY_PATH="/opt/nexus-core-firewall"
           mkdir -p "\$DEPLOY_PATH"
           cd "\$DEPLOY_PATH"
-          printf 'DOCKER_IMAGE=%s\n' "\$DOCKER_IMAGE" > .env
-          COMPOSE_PROFILE=""
-          if [ -n "$CLOUDFLARE_TUNNEL_TOKEN" ]; then
-            printf 'CLOUDFLARE_TUNNEL_TOKEN=%s\n' "$(echo "$TUNNEL_B64" | base64 -d)" >> .env
-            COMPOSE_PROFILE="--profile cloudflare"
+          printf 'DOCKER_IMAGE=%s\n' "$DOCKER_IMAGE" > .env
+          if [ "$USE_TUNNEL" = "1" ]; then
+            printf '%s\n' "$TUNNEL_LINE" >> .env
           else
             echo "UYARI: CLOUDFLARE_TUNNEL_TOKEN bos; cloudflared atlanacak."
           fi
@@ -149,7 +154,7 @@ jobs:
 
           echo "$PASS_B64" | base64 -d | docker login -u "\$DOCKER_USERNAME" --password-stdin
           docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api nginx-gateway
-          docker compose --env-file .env \$COMPOSE_PROFILE -f docker-compose.prod.yml up -d --remove-orphans
+          $UP_CMD
           docker image prune -f
-          echo "Deploy tamamlandi: \$DOCKER_IMAGE"
+          echo "Deploy tamamlandi: $DOCKER_IMAGE"
           REMOTE
