@@ -132,7 +132,13 @@ jobs:
           mkdir -p "\$DEPLOY_PATH"
           cd "\$DEPLOY_PATH"
           printf 'DOCKER_IMAGE=%s\n' "\$DOCKER_IMAGE" > .env
-          printf 'CLOUDFLARE_TUNNEL_TOKEN=%s\n' "$(echo "$TUNNEL_B64" | base64 -d)" >> .env
+          COMPOSE_PROFILE=""
+          if [ -n "$CLOUDFLARE_TUNNEL_TOKEN" ]; then
+            printf 'CLOUDFLARE_TUNNEL_TOKEN=%s\n' "$(echo "$TUNNEL_B64" | base64 -d)" >> .env
+            COMPOSE_PROFILE="--profile cloudflare"
+          else
+            echo "UYARI: CLOUDFLARE_TUNNEL_TOKEN bos; cloudflared atlanacak."
+          fi
 
           for f in docker-compose.prod.yml nginx.conf; do
             if [[ ! -f "\$f" ]]; then
@@ -143,7 +149,7 @@ jobs:
 
           echo "$PASS_B64" | base64 -d | docker login -u "\$DOCKER_USERNAME" --password-stdin
           docker compose -f docker-compose.prod.yml pull
-          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker compose \$COMPOSE_PROFILE -f docker-compose.prod.yml up -d --remove-orphans
           docker image prune -f
           echo "Deploy tamamlandi: \$DOCKER_IMAGE"
           REMOTE
