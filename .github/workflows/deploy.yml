@@ -148,7 +148,7 @@ jobs:
           done
 
           echo "$PASS_B64" | base64 -d | docker login -u "\$DOCKER_USERNAME" --password-stdin
-          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml pull nexus-api nginx-gateway
           docker compose \$COMPOSE_PROFILE -f docker-compose.prod.yml up -d --remove-orphans
           docker image prune -f
           echo "Deploy tamamlandi: \$DOCKER_IMAGE"
