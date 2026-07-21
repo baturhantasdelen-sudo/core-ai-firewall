@@ -222,7 +222,7 @@ try {
     if ($dockerText -match "DEPLOY_DIR_OK") {
         Write-Pass "Deploy klasoru mevcut: $DeployPath"
     }
-    else    if ($dockerText -match "DEPLOY_DIR_MISSING") {
+    elseif ($dockerText -match "DEPLOY_DIR_MISSING") {
         Write-Warn "Deploy klasoru henuz yok: $DeployPath"
         Write-Warn "Ilk deploy oncesi sunucuda proje dosyalarini bu dizine kopyalayin."
     }
