@@ -26,5 +26,9 @@ _mock_model = MagicMock(
 _mock_sentence_transformers = MagicMock()
 _mock_sentence_transformers.SentenceTransformer = MagicMock(return_value=_mock_model)
 
+_mock_torch = MagicMock()
+_mock_torch.set_num_threads = MagicMock()
+
 # setdefault yerine zorla override — gerçek paket kurulu olsa bile mock kullanılır
 sys.modules["sentence_transformers"] = _mock_sentence_transformers
+sys.modules["torch"] = _mock_torch
