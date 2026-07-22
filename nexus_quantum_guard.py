@@ -62,6 +62,9 @@ from sentence_transformers import SentenceTransformer
 # LANGUAGE SWITCHING saldırıları (Latince, Fransızca vb.) tek modelle yakalanır.
 # İlk Docker build'de image'a bake edilir; runtime'da yalnızca yerel cache kullanılır.
 MODEL_NAME: Final[str] = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+REF_ENCODE_BATCH_SIZE: Final[int] = int(os.getenv("REF_ENCODE_BATCH_SIZE", "16"))
+REF_MATRIX_FILENAME: Final[str] = "reference_matrix.npy"
+REF_MATRIX_META_FILENAME: Final[str] = "reference_matrix.meta.json"
 
 # DİL AGNOSTİK KOSİNÜS EŞİĞİ: False positive azaltımı — engelleme için daha yüksek benzerlik gerekir.
 SIMILARITY_THRESHOLD: Final[float] = 0.72
@@ -1431,6 +1434,44 @@ class SemanticAnalysisResult:
     detail_rows: list[list[str]]
 
 
+def _reference_matrix_cache_dir() -> Path:
+    return Path(os.getenv("NEXUS_CACHE_DIR", "/app/.cache"))
+
+
+def _reference_matrix_path() -> Path:
+    return _reference_matrix_cache_dir() / REF_MATRIX_FILENAME
+
+
+def _reference_matrix_meta_path() -> Path:
+    return _reference_matrix_cache_dir() / REF_MATRIX_META_FILENAME
+
+
+def bake_reference_matrix() -> Path:
+    """Docker build: 71 referans kalıbını encode edip normalize matrisi .npy olarak kaydeder."""
+    cache_dir = _reference_matrix_cache_dir()
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    out_path = _reference_matrix_path()
+    meta_path = _reference_matrix_meta_path()
+    patterns = [ref.pattern for ref in ATTACK_REFERENCE_DB]
+
+    logger.info("Referans matrisi bake ediliyor (%d kalıp)...", len(patterns))
+    model = SentenceTransformer(MODEL_NAME)
+    raw_vectors = model.encode(
+        patterns,
+        convert_to_numpy=True,
+        show_progress_bar=False,
+        batch_size=REF_ENCODE_BATCH_SIZE,
+    )
+    matrix = SemanticVectorGuard._normalize(np.asarray(raw_vectors, dtype=np.float32))
+    np.save(out_path, matrix)
+    meta_path.write_text(
+        json.dumps({"model_name": MODEL_NAME, "n_patterns": len(patterns)}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    logger.info("Referans matrisi kaydedildi: %s shape=%s", out_path, matrix.shape)
+    return out_path
+
+
 class SemanticVectorGuard:
     """
     Çok dilli sentence_transformers ile dil agnostik vektör analizi.
@@ -1456,20 +1497,46 @@ class SemanticVectorGuard:
         )
         self._categories: list[str] = [ref.category for ref in self._references]
 
-        logger.info("Negatif referans seti kodlanıyor (%d kalıp)...", len(patterns))
-        raw_vectors = self._model.encode(
-            patterns,
-            convert_to_numpy=True,
-            show_progress_bar=False,
-            batch_size=64,
-        )
-        self._ref_matrix: np.ndarray = self._normalize(np.asarray(raw_vectors, dtype=np.float32))
+        self._ref_matrix = self._load_or_encode_reference_matrix(patterns)
         logger.info(
             "Çok dilli vektör koruması hazır | eşik=%.0f%% | kalıp=%d",
             SIMILARITY_THRESHOLD * 100,
             len(patterns),
         )
         self.warmup()
+
+    def _load_or_encode_reference_matrix(self, patterns: list[str]) -> np.ndarray:
+        """Bake-in .npy varsa diskten yükler; yoksa encode eder (dev / fallback)."""
+        n_patterns = len(patterns)
+        ref_path = _reference_matrix_path()
+        meta_path = _reference_matrix_meta_path()
+
+        if ref_path.is_file() and meta_path.is_file():
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                if (
+                    meta.get("model_name") == MODEL_NAME
+                    and meta.get("n_patterns") == n_patterns
+                ):
+                    matrix = np.load(ref_path)
+                    if matrix.shape[0] == n_patterns:
+                        logger.info(
+                            "Referans matrisi cache'den yüklendi (%s, shape=%s)",
+                            ref_path,
+                            matrix.shape,
+                        )
+                        return np.asarray(matrix, dtype=np.float32)
+            except (OSError, json.JSONDecodeError, ValueError) as exc:
+                logger.warning("Referans matrisi cache okunamadı, yeniden encode: %s", exc)
+
+        logger.info("Negatif referans seti kodlanıyor (%d kalıp)...", n_patterns)
+        raw_vectors = self._model.encode(
+            patterns,
+            convert_to_numpy=True,
+            show_progress_bar=False,
+            batch_size=REF_ENCODE_BATCH_SIZE,
+        )
+        return self._normalize(np.asarray(raw_vectors, dtype=np.float32))
 
     def warmup(self) -> None:
         """Modeli ilk açılışta belleğe/CPU matrislerine tam oturtmak için dummy inference."""
