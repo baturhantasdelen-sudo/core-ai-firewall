@@ -10,9 +10,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    HF_HOME=/build/.cache/huggingface \
-    TRANSFORMERS_CACHE=/build/.cache/huggingface \
-    SENTENCE_TRANSFORMERS_HOME=/build/.cache/sentence-transformers
+    HF_HOME=/app/.cache/huggingface \
+    TRANSFORMERS_CACHE=/app/.cache/huggingface \
+    SENTENCE_TRANSFORMERS_HOME=/app/.cache/sentence-transformers
 
 WORKDIR /build
 
@@ -29,7 +29,8 @@ RUN pip install --upgrade pip \
     && pip install torch --index-url https://download.pytorch.org/whl/cpu \
     && pip install -r requirements.txt
 
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')"
+RUN mkdir -p /app/.cache/huggingface /app/.cache/sentence-transformers \
+    && python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')"
 
 # ---------------------------------------------------------------------------
 # Stage 2: minimal runtime image
@@ -45,6 +46,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HF_HOME=/app/.cache/huggingface \
     TRANSFORMERS_CACHE=/app/.cache/huggingface \
     SENTENCE_TRANSFORMERS_HOME=/app/.cache/sentence-transformers \
+    TRANSFORMERS_OFFLINE=1 \
+    HF_HUB_OFFLINE=1 \
     PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
@@ -56,7 +59,7 @@ RUN apt-get update \
     && useradd --system --uid 1000 --gid nexus --home-dir /app --shell /usr/sbin/nologin nexus
 
 COPY --from=builder /opt/venv /opt/venv
-COPY --from=builder /build/.cache /app/.cache
+COPY --from=builder /app/.cache /app/.cache
 
 COPY nexus_quantum_guard.py nexus_shield_api.py ./
 

@@ -48,7 +48,7 @@ from sentence_transformers import SentenceTransformer
 
 # ÇOK DİLLİ EMBEDDING MODEL: 50+ dili aynı anlamsal vektör uzayına hizalar.
 # LANGUAGE SWITCHING saldırıları (Latince, Fransızca vb.) tek modelle yakalanır.
-# İlk çalıştırmada Hugging Face cache'inden otomatik indirilir; sonra tamamen yerel.
+# İlk Docker build'de image'a bake edilir; runtime'da yalnızca yerel cache kullanılır.
 MODEL_NAME: Final[str] = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 # DİL AGNOSTİK KOSİNÜS EŞİĞİ: False positive azaltımı — engelleme için daha yüksek benzerlik gerekir.
@@ -1432,7 +1432,10 @@ class SemanticVectorGuard:
 
     def __init__(self) -> None:
         logger.info("Vektör modeli yükleniyor: %s", MODEL_NAME)
-        self._model = SentenceTransformer(MODEL_NAME)
+        self._model = SentenceTransformer(
+            MODEL_NAME,
+            local_files_only=True,
+        )
 
         self._references: list[AttackReference] = list(ATTACK_REFERENCE_DB)
         patterns = [ref.pattern for ref in self._references]

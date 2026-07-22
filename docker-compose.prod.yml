@@ -20,6 +20,8 @@ services:
       HF_HOME: /app/.cache/huggingface
       TRANSFORMERS_CACHE: /app/.cache/huggingface
       SENTENCE_TRANSFORMERS_HOME: /app/.cache/sentence-transformers
+      TRANSFORMERS_OFFLINE: "1"
+      HF_HUB_OFFLINE: "1"
       NEXUS_API_KEY: ${NEXUS_API_KEY:?NEXUS_API_KEY environment variable is required}
       RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-60}
       RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
