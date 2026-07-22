@@ -23,14 +23,15 @@ from __future__ import annotations
 
 import os
 
-# Multi-threading kilitlenmelerini önlemek için (torch/numpy yüklenmeden önce)
-os.environ["OMP_NUM_THREADS"] = "1"
-os.environ["MKL_NUM_THREADS"] = "1"
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
+# CPU thread sayısı — VM boğulmasını önlemek için sınırlı tutulur (torch yüklenmeden önce)
+_TORCH_NUM_THREADS: Final[int] = int(os.getenv("TORCH_NUM_THREADS", "2"))
+os.environ.setdefault("OMP_NUM_THREADS", str(_TORCH_NUM_THREADS))
+os.environ.setdefault("MKL_NUM_THREADS", str(_TORCH_NUM_THREADS))
+os.environ.setdefault("OPENBLAS_NUM_THREADS", str(_TORCH_NUM_THREADS))
 
 import torch
 
-torch.set_num_threads(1)
+torch.set_num_threads(_TORCH_NUM_THREADS)
 
 import asyncio
 import gc
@@ -1503,7 +1504,6 @@ class SemanticVectorGuard:
             SIMILARITY_THRESHOLD * 100,
             len(patterns),
         )
-        self.warmup()
 
     def _load_or_encode_reference_matrix(self, patterns: list[str]) -> np.ndarray:
         """Bake-in .npy varsa diskten yükler; yoksa encode eder (dev / fallback)."""
@@ -2881,6 +2881,11 @@ def record_nexus_inspection_metrics(result: ShieldApiResult) -> None:
     if result.verdict.is_blocked:
         layer = prometheus_layer_label(result.verdict.bypass_strategy)
         NEXUS_BLOCKS.labels(layer=layer).inc()
+
+
+def load_model_and_reference_matrix() -> ThreadSafeGuardService:
+    """Model ve bake-in referans matrisini yükler; tam warm-up lifespan'da ayrı çalışır."""
+    return ThreadSafeGuardService()
 
 
 class ThreadSafeGuardService:

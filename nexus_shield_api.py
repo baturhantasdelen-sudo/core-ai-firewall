@@ -42,6 +42,7 @@ from nexus_quantum_guard import (
     NEXUS_REQUESTS,
     ShieldApiResult,
     ThreadSafeGuardService,
+    load_model_and_reference_matrix,
     record_nexus_inspection_metrics,
 )
 
@@ -49,7 +50,7 @@ logger = logging.getLogger("NexusShieldAPI")
 
 API_VERSION: Final[str] = "1.0.0"
 SERVICE_NAME: Final[str] = "nexus-quantum-shield"
-WARMUP_TEXT: Final[str] = "Warm-up inference task to load model weights into RAM."
+WARMUP_TEXT: Final[str] = "Nexus Quantum Guard warm-up probe sentence."
 WARMUP_SESSION_ID: Final[str] = "startup-warmup"
 API_KEY_HEADER: Final[str] = "X-API-Key"
 DEFAULT_NEXUS_API_KEY: Final[str] = "nexus_secret_key_123"
@@ -158,6 +159,23 @@ def get_model_prediction(text: str, session_id: str = WARMUP_SESSION_ID) -> Shie
     return _service.inspect(text, session_id)
 
 
+def predict_pipeline(text: str, session_id: str = WARMUP_SESSION_ID) -> ShieldApiResult:
+    """POST /v1/shield inceleme pipeline warm-up."""
+    return get_model_prediction(text, session_id)
+
+
+def validate_chat_pipeline(
+    messages: list[str],
+    session_id: str = WARMUP_SESSION_ID,
+) -> ShieldApiResult:
+    """POST /v1/shield/validate-chat pipeline warm-up."""
+    body: dict[str, Any] = {
+        "messages": [{"role": "user", "content": msg} for msg in messages],
+    }
+    user_text = _extract_user_text_from_chat_body(body)
+    return get_model_prediction(user_text, session_id)
+
+
 def _verify_startup_ready() -> HealthzResponse:
     """Warm-up sonrası servisin istek kabul edebileceğini doğrular."""
     health = _check_healthz()
@@ -168,34 +186,47 @@ def _verify_startup_ready() -> HealthzResponse:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Cold start önleme: model servisi yüklenir ve startup warm-up çalıştırılır."""
+    """Cold start önleme: model + referans matrisi yüklenir, her iki pipeline warm-up edilir."""
     global _service
 
-    print("Nexus Quantum Guard mikroservisi başlatılıyor...")
-
-    service = await asyncio.to_thread(ThreadSafeGuardService)
+    logger.info("Nexus Quantum Guard başlatılıyor...")
 
     try:
-        await asyncio.to_thread(service.warmup)
-        app.state.guard_service = service
-        _service = service
+        service = await asyncio.to_thread(load_model_and_reference_matrix)
+    except Exception as e:
+        logger.error("Model yükleme başarısız: %s", e)
+        app.state.guard_service = None
+        _service = None
+        yield
+        return
+
+    app.state.guard_service = service
+    _service = service
+
+    logger.info("Cold-Inference önleyici tam warm-up başlatılıyor...")
+    try:
+        await asyncio.to_thread(predict_pipeline, WARMUP_TEXT)
+        await asyncio.to_thread(validate_chat_pipeline, [WARMUP_TEXT])
+        logger.info("Warm-up başarıyla tamamlandı. Servis istek kabul etmeye hazır!")
+    except Exception as e:
+        logger.warning("Warm-up sırasında hata oluştu (kritik değil): %s", e)
+
+    try:
         health = _verify_startup_ready()
-        logging.info(
+        logger.info(
             "Uygulama istek kabul etmeye hazır | status=%s | cache_size=%d | version=%s",
             health.status,
             health.cache_size,
             API_VERSION,
         )
     except Exception as e:
-        logging.error("Model warm-up failed: %s", e)
-        app.state.guard_service = None
-        _service = None
+        logger.error("Startup readiness check failed: %s", e)
 
     yield
 
+    logger.info("Nexus Quantum Guard kapatılıyor...")
     app.state.guard_service = None
     _service = None
-    print("Nexus Quantum Guard mikroservisi kapatılıyor...")
 
 
 app = FastAPI(
