@@ -78,32 +78,23 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}
           API_KEY_SECRET: ${{ secrets.API_KEY_SECRET }}
-          CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
         with:
           host: ${{ secrets.PROD_SERVER_IP }}
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,API_KEY_SECRET,CLOUDFLARE_TUNNEL_TOKEN
+          timeout: 30m
+          command_timeout: 30m
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,API_KEY_SECRET
           script: |
             set -euo pipefail
             cd /opt/nexus-core-firewall
-
-            printf 'DOCKER_IMAGE=%s\n' "$DOCKER_IMAGE" > .env
-            if [ -n "${API_KEY_SECRET:-}" ]; then
-              printf 'NEXUS_API_KEY=%s\n' "$API_KEY_SECRET" >> .env
-            else
-              echo "HATA: API_KEY_SECRET bos; NEXUS_API_KEY yazilamadi."
-              exit 1
-            fi
-            printf 'RATE_LIMIT_REQUESTS=%s\n' "${RATE_LIMIT_REQUESTS:-60}" >> .env
-            printf 'RATE_LIMIT_WINDOW_SECONDS=%s\n' "${RATE_LIMIT_WINDOW_SECONDS:-60}" >> .env
-            if [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]; then
-              printf 'CLOUDFLARE_TUNNEL_TOKEN=%s\n' "$CLOUDFLARE_TUNNEL_TOKEN" >> .env
-            fi
-
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-            docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api
-            docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
-            docker image prune -f
-            echo "Deploy tamamlandi: $DOCKER_IMAGE"
+            echo "DOCKER_IMAGE=${DOCKER_IMAGE}" > .env
+            echo "NEXUS_API_KEY=${API_KEY_SECRET}" >> .env
+            echo "RATE_LIMIT_REQUESTS=60" >> .env
+            echo "RATE_LIMIT_WINDOW_SECONDS=60" >> .env
+            echo "${DOCKER_PASSWORD}" | sudo docker login -u "${DOCKER_USERNAME}" --password-stdin
+            sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api
+            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
+            sudo docker image prune -f
+            echo "Deploy tamamlandi: ${DOCKER_IMAGE}"
