@@ -8,10 +8,15 @@ Kurumsal FastAPI mikroservisi: async I/O + thread-safe ML tarama + Prometheus.
     uvicorn nexus_shield_api:app --host 0.0.0.0 --port 8080
 
 Uç noktalar:
-    POST /v1/shield   — Prompt injection taraması
-    GET  /healthz     — Production sağlık kontrolü (K8s probe)
+    POST /v1/shield   — Prompt injection taraması (X-API-Key gerekli)
+    GET  /healthz     — Production sağlık kontrolü (K8s probe, public)
     GET  /health      — Detaylı sağlık + önbellek istatistikleri
-    GET  /metrics     — Prometheus metrikleri
+    GET  /metrics           — Prometheus metrikleri (scrape)
+    GET  /metrics/summary   — JSON özet metrikleri (in-memory)
+
+Güvenlik:
+    X-API-Key header — NEXUS_API_KEY env (varsayılan: nexus_secret_key_123)
+    Rate limit       — RATE_LIMIT_REQUESTS / RATE_LIMIT_WINDOW_SECONDS (in-memory)
 """
 
 from __future__ import annotations
@@ -20,11 +25,16 @@ import asyncio
 import json
 import logging
 import os
+import secrets
+import threading
+import time
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
-from typing import Any, Final
+from typing import Annotated, Any, Final
 
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
 
 from nexus_quantum_guard import (
@@ -39,20 +49,158 @@ logger = logging.getLogger("NexusShieldAPI")
 
 API_VERSION: Final[str] = "1.0.0"
 SERVICE_NAME: Final[str] = "nexus-quantum-shield"
+WARMUP_TEXT: Final[str] = "Warm-up inference task to load model weights into RAM."
+WARMUP_SESSION_ID: Final[str] = "startup-warmup"
+API_KEY_HEADER: Final[str] = "X-API-Key"
+DEFAULT_NEXUS_API_KEY: Final[str] = "nexus_secret_key_123"
+NEXUS_API_KEY: Final[str] = os.getenv("NEXUS_API_KEY", DEFAULT_NEXUS_API_KEY)
+RATE_LIMIT_REQUESTS: Final[int] = int(os.getenv("RATE_LIMIT_REQUESTS", "60"))
+RATE_LIMIT_WINDOW_SECONDS: Final[int] = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
+
+_api_key_header = APIKeyHeader(name=API_KEY_HEADER, auto_error=False)
 
 _service: ThreadSafeGuardService | None = None
 
+_metrics_lock = threading.Lock()
+metrics_data: dict[str, int | float] = {
+    "total_requests": 0,
+    "blocked_attacks": 0,
+    "passed_requests": 0,
+    "total_latency_ms": 0.0,
+}
+
+
+class JSONFormatter(logging.Formatter):
+    """Structured JSON log satırları üretir."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        log_obj: dict[str, object] = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "level": record.levelname,
+            "message": record.getMessage(),
+        }
+        extra_data = getattr(record, "extra_data", None)
+        if isinstance(extra_data, dict):
+            log_obj.update(extra_data)
+        return json.dumps(log_obj, ensure_ascii=False)
+
+
+def _configure_structured_logger() -> logging.Logger:
+    structured_logger = logging.getLogger("nexus_shield")
+    if not structured_logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(JSONFormatter())
+        structured_logger.addHandler(handler)
+        structured_logger.setLevel(logging.INFO)
+        structured_logger.propagate = False
+    return structured_logger
+
+
+structured_logger = _configure_structured_logger()
+
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    cf_ip = request.headers.get("CF-Connecting-IP")
+    if cf_ip:
+        return cf_ip
+    return request.client.host if request.client else "unknown"
+
+
+class InMemoryRateLimiter:
+    """Tek worker / tek process için sabit pencere istek sayacı."""
+
+    def __init__(self, max_requests: int, window_seconds: int) -> None:
+        self._max_requests = max_requests
+        self._window_seconds = window_seconds
+        self._hits: dict[str, deque[float]] = defaultdict(deque)
+        self._lock = threading.Lock()
+
+    def check(self, client_key: str) -> None:
+        now = time.monotonic()
+        cutoff = now - self._window_seconds
+        with self._lock:
+            bucket = self._hits[client_key]
+            while bucket and bucket[0] <= cutoff:
+                bucket.popleft()
+            if len(bucket) >= self._max_requests:
+                raise HTTPException(
+                    status_code=429,
+                    detail="Rate limit exceeded. Try again later.",
+                )
+            bucket.append(now)
+
+
+_rate_limiter = InMemoryRateLimiter(RATE_LIMIT_REQUESTS, RATE_LIMIT_WINDOW_SECONDS)
+
+
+async def get_api_key(
+    api_key: Annotated[str | None, Depends(_api_key_header)] = None,
+) -> str:
+    """X-API-Key header doğrulaması — geçersiz/eksik ise 401."""
+    if not api_key or not secrets.compare_digest(api_key, NEXUS_API_KEY):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key.")
+    return api_key
+
+
+async def require_shield_access(api_key: Annotated[str, Depends(get_api_key)]) -> str:
+    """Korumalı /v1/shield uç noktaları için API Key + rate limit bağımlılığı."""
+    _rate_limiter.check(api_key)
+    return api_key
+
+
+def get_model_prediction(text: str, session_id: str = WARMUP_SESSION_ID) -> ShieldApiResult:
+    """Model vektör çıkarımını / tam inceleme pipeline'ını tetikler (warm-up + canlı istekler)."""
+    if _service is None:
+        raise RuntimeError("Nexus AI Shield henüz hazır değil.")
+    return _service.inspect(text, session_id)
+
+
+def _verify_startup_ready() -> HealthzResponse:
+    """Warm-up sonrası servisin istek kabul edebileceğini doğrular."""
+    health = _check_healthz()
+    if health.status != "HEALTHY":
+        raise RuntimeError(f"Startup readiness check failed: status={health.status}")
+    return health
+
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):
-    """Cold start önleme: vektör modeli startup'ta bir kez yüklenir."""
+async def lifespan(app: FastAPI):
+    """Cold start önleme: vektör modeli yüklenir ve dummy inference ile ısıtılır."""
     global _service
-    logger.info("Nexus Quantum Guard mikroservisi başlatılıyor...")
+
+    # --- STARTUP / WARM-UP ---
+    logging.info("Nexus Quantum Guard mikroservisi başlatılıyor...")
     _service = ThreadSafeGuardService()
-    logger.info("Nexus AI Shield hazır | version=%s", API_VERSION)
+
+    logging.info("🔥 [Warm-up] Starting model warm-up task...")
+    try:
+        dummy_input = WARMUP_TEXT
+        started = time.perf_counter()
+        _ = await asyncio.to_thread(get_model_prediction, dummy_input)
+        elapsed_ms = (time.perf_counter() - started) * 1000.0
+        logging.info(
+            "✅ [Warm-up] Model successfully loaded and warmed up in RAM! (%.2f ms)",
+            elapsed_ms,
+        )
+        health = _verify_startup_ready()
+        logging.info(
+            "Uygulama istek kabul etmeye hazır | status=%s | cache_size=%d | version=%s",
+            health.status,
+            health.cache_size,
+            API_VERSION,
+        )
+    except Exception as e:
+        logging.error("⚠️ [Warm-up] Model warm-up failed: %s", e)
+        _service = None
+
     yield
+
+    # --- SHUTDOWN ---
     _service = None
-    logger.info("Nexus AI Shield kapatıldı.")
+    logging.info("🛑 [Shutdown] Cleaning up resources...")
 
 
 app = FastAPI(
@@ -63,6 +211,32 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
 )
+
+
+@app.middleware("http")
+async def monitor_requests(request: Request, call_next):
+    """Her HTTP isteği için latency ölçer, in-memory metrikleri ve JSON log yazar."""
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time_ms = (time.perf_counter() - start_time) * 1000.0
+
+    with _metrics_lock:
+        metrics_data["total_requests"] = int(metrics_data["total_requests"]) + 1
+        metrics_data["total_latency_ms"] = float(metrics_data["total_latency_ms"]) + process_time_ms
+        if response.status_code == 403:
+            metrics_data["blocked_attacks"] = int(metrics_data["blocked_attacks"]) + 1
+        elif 200 <= response.status_code < 300:
+            metrics_data["passed_requests"] = int(metrics_data["passed_requests"]) + 1
+
+    log_payload = {
+        "method": request.method,
+        "path": request.url.path,
+        "status_code": response.status_code,
+        "latency_ms": round(process_time_ms, 2),
+        "client_ip": _client_ip(request),
+    }
+    structured_logger.info("API Request processed", extra={"extra_data": log_payload})
+    return response
 
 
 class GuardRequest(BaseModel):
@@ -178,9 +352,25 @@ async def health() -> dict[str, object]:
     }
 
 
+@app.get("/metrics/summary")
+async def get_metrics_summary() -> dict[str, float | int]:
+    """In-memory JSON metrik özeti — Prometheus /metrics ile birlikte kullanılır."""
+    with _metrics_lock:
+        total_requests = int(metrics_data["total_requests"])
+        total_latency_ms = float(metrics_data["total_latency_ms"])
+        avg_latency = total_latency_ms / total_requests if total_requests > 0 else 0.0
+        return {
+            "total_requests": total_requests,
+            "blocked_attacks": int(metrics_data["blocked_attacks"]),
+            "passed_requests": int(metrics_data["passed_requests"]),
+            "avg_latency_ms": round(avg_latency, 2),
+        }
+
+
 @app.post(
     "/v1/shield",
     response_model=CleanShieldResponse,
+    dependencies=[Depends(require_shield_access)],
     responses={
         403: {
             "description": "Prompt injection engellendi — tetiklenen katman detayları",
@@ -230,7 +420,7 @@ async def check_input(request: GuardRequest) -> CleanShieldResponse | JSONRespon
     return CleanShieldResponse(**clean)
 
 
-@app.post("/v1/shield/validate-chat", status_code=204)
+@app.post("/v1/shield/validate-chat", status_code=204, dependencies=[Depends(require_shield_access)])
 async def validate_chat_completions(request: Request) -> Response:
     """
     Nginx gateway entegrasyonu — OpenAI chat/completions gövdesini doğrular.

@@ -2,14 +2,17 @@
 # syntax=docker/dockerfile:1
 
 # ---------------------------------------------------------------------------
-# Stage 1: build Python dependencies (compiler toolchain stays here)
+# Stage 1: build Python dependencies + bake embedding model
 # ---------------------------------------------------------------------------
 FROM python:3.11-slim-bookworm AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    HF_HOME=/build/.cache/huggingface \
+    TRANSFORMERS_CACHE=/build/.cache/huggingface \
+    SENTENCE_TRANSFORMERS_HOME=/build/.cache/sentence-transformers
 
 WORKDIR /build
 
@@ -25,6 +28,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip \
     && pip install torch --index-url https://download.pytorch.org/whl/cpu \
     && pip install -r requirements.txt
+
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')"
 
 # ---------------------------------------------------------------------------
 # Stage 2: minimal runtime image
@@ -51,19 +56,17 @@ RUN apt-get update \
     && useradd --system --uid 1000 --gid nexus --home-dir /app --shell /usr/sbin/nologin nexus
 
 COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /build/.cache /app/.cache
 
 COPY nexus_quantum_guard.py nexus_shield_api.py ./
 
-# Bake HuggingFace embedding model into image (no runtime download on deploy).
-RUN mkdir -p /app/.cache/huggingface /app/.cache/sentence-transformers \
-    && python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')" \
-    && chown -R nexus:nexus /app
+RUN chown -R nexus:nexus /app
 
 USER nexus
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
     CMD curl -fsS http://127.0.0.1:8000/healthz | grep -q HEALTHY || exit 1
 
 CMD ["python", "-m", "uvicorn", "nexus_quantum_guard:app", "--host", "0.0.0.0", "--port", "8000"]

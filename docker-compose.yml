@@ -14,6 +14,10 @@ services:
     volumes:
       - ./nexus_quantum_guard.py:/app/nexus_quantum_guard.py:ro
       - ./nexus_shield_api.py:/app/nexus_shield_api.py:ro
+    environment:
+      API_KEY_SECRET: ${API_KEY_SECRET:-nexus-dev-test-key}
+      RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-120}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
     command:
       [
         "python",

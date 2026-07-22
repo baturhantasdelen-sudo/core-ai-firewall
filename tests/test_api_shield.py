@@ -15,7 +15,7 @@ from nexus_quantum_guard import (
     ShieldApiResult,
     ThreadSafeGuardService,
 )
-from nexus_shield_api import app
+from nexus_shield_api import API_KEY_HEADER, DEFAULT_NEXUS_API_KEY, app
 
 
 def _clean_verdict() -> GuardVerdict:
@@ -75,6 +75,19 @@ def api_client() -> TestClient:
         yield client
 
 
+def _auth_headers() -> dict[str, str]:
+    return {API_KEY_HEADER: DEFAULT_NEXUS_API_KEY}
+
+
+def test_v1_shield_missing_api_key_returns_401(api_client: TestClient) -> None:
+    payload = {
+        "session_id": "ci-no-key",
+        "user_input": "Yapay zeka güvenliği hakkında bilgi verir misin?",
+    }
+    response = api_client.post("/v1/shield", json=payload)
+    assert response.status_code == 401
+
+
 def test_v1_shield_corporate_whitelist_returns_200(api_client: TestClient) -> None:
     payload = {
         "session_id": "ci-clean",
@@ -90,7 +103,7 @@ def test_v1_shield_corporate_whitelist_returns_200(api_client: TestClient) -> No
             )
         ),
     ):
-        response = api_client.post("/v1/shield", json=payload)
+        response = api_client.post("/v1/shield", json=payload, headers=_auth_headers())
 
     assert response.status_code == 200
     body = response.json()
@@ -113,7 +126,7 @@ def test_v1_shield_leet_attack_returns_403(api_client: TestClient) -> None:
             )
         ),
     ):
-        response = api_client.post("/v1/shield", json=payload)
+        response = api_client.post("/v1/shield", json=payload, headers=_auth_headers())
 
     assert response.status_code == 403
     body = response.json()

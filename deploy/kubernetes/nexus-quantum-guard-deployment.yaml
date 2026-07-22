@@ -33,6 +33,16 @@ spec:
             - name: http
               containerPort: 8000
               protocol: TCP
+          env:
+            - name: API_KEY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: nexus-quantum-guard-secrets
+                  key: API_KEY_SECRET
+            - name: RATE_LIMIT_REQUESTS
+              value: "60"
+            - name: RATE_LIMIT_WINDOW_SECONDS
+              value: "60"
           livenessProbe:
             httpGet:
               path: /healthz

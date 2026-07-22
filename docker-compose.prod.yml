@@ -1,6 +1,10 @@
 # Production stack — image CI'da build edilir; sunucuda yalnizca pull + up.
 # HTTPS: Cloudflare Tunnel (cloudflared) -> nginx-gateway:80 -> nexus-api:8000
-# DOCKER_IMAGE ve CLOUDFLARE_TUNNEL_TOKEN .env dosyasinda (GitHub Actions deploy).
+#
+# .env (GitHub Actions tarafindan yazilir):
+#   DOCKER_IMAGE=<user>/nexus-quantum-guard:<sha>
+#   NEXUS_API_KEY=<API_KEY_SECRET secret degerinden map edilir>
+#   CLOUDFLARE_TUNNEL_TOKEN=<opsiyonel>
 
 networks:
   nexus_network:
@@ -16,6 +20,9 @@ services:
       HF_HOME: /app/.cache/huggingface
       TRANSFORMERS_CACHE: /app/.cache/huggingface
       SENTENCE_TRANSFORMERS_HOME: /app/.cache/sentence-transformers
+      NEXUS_API_KEY: ${NEXUS_API_KEY:?NEXUS_API_KEY environment variable is required}
+      RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-60}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
     command:
       [
         "python",

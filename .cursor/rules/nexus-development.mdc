@@ -1,0 +1,31 @@
+---
+description: Nexus Quantum Guard — architecture, CI/CD, and ops standards
+alwaysApply: true
+---
+
+# Nexus Quantum Guard — Development Rules
+
+## Architecture & Code Standards
+
+- **API:** FastAPI + Uvicorn (`nexus_shield_api.py` / `nexus_quantum_guard:app`).
+- **Model:** Pre-bake `paraphrase-multilingual-MiniLM-L12-v2` in the Docker image at build time. Do **not** download from Hugging Face at container startup.
+- **Auth env:** GitHub Secret `API_KEY_SECRET` → `.env` key `NEXUS_API_KEY` → `docker-compose.prod.yml` `NEXUS_API_KEY`.
+- **Metrics:** Prometheus client on `GET /metrics`. Structured JSON logs via `nexus_shield` logger (+ `/metrics/summary` JSON summary).
+
+## CI/CD (`.github/workflows/deploy.yml`)
+
+Pipeline name: `CI/CD Pipeline - Build, Push & Deploy`
+
+Required jobs/steps:
+1. **`test`** — `pytest` via `requirements-ci.txt`
+2. **`build-and-deploy`** — Docker BuildX push (`:latest`, `:${{ github.sha }}`) with GHA cache
+3. **SCP** — `appleboy/scp-action`: sync `docker-compose.prod.yml`, `nginx.conf` → `/opt/nexus-core-firewall/`
+4. **Deploy** — `appleboy/ssh-action@v1.0.3`: write `.env`, `docker login`, `docker compose pull`, `docker compose up -d --remove-orphans`
+
+Do not remove `.env` generation or config sync when editing the workflow.
+
+## Production paths
+
+- Deploy dir: `/opt/nexus-core-firewall`
+- Public health: `GET /healthz` (no API key)
+- Protected: `POST /v1/shield`, `POST /v1/shield/validate-chat` (`X-API-Key` / `NEXUS_API_KEY`)

@@ -1,8 +1,10 @@
-name: Nexus Quantum Guard — Build & Deploy
+name: CI/CD Pipeline - Build, Push & Deploy
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+      - master
 
 env:
   IMAGE_NAME: nexus-quantum-guard
@@ -13,7 +15,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -30,12 +32,12 @@ jobs:
       - name: Run tests
         run: python -m pytest tests/ -v --tb=short
 
-  build-and-push:
-    name: Build & Push Docker Image
+  build-and-deploy:
+    name: Build & Deploy
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
@@ -47,114 +49,61 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:latest
+            ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
-    name: Deploy to GCP Production (SSH)
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Sync production configs to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          source: "docker-compose.prod.yml,nginx.conf"
+          target: /opt/nexus-core-firewall/
 
-      - name: Configure SSH deploy key
+      - name: Deploy to Production Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
         env:
-          SSH_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
-          PROD_SERVER_USER: ${{ secrets.PROD_SERVER_USER }}
-        run: |
-          install -m 700 -d "$HOME/.ssh"
-          printf '%s\n' "$SSH_KEY" | tr -d '\r' > "$HOME/.ssh/deploy_key"
-          chmod 600 "$HOME/.ssh/deploy_key"
-          ssh-keyscan -H "$PROD_SERVER_IP" >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
-          echo "Deploy key fingerprint:"
-          ssh-keygen -lf "$HOME/.ssh/deploy_key"
-          ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            "${PROD_SERVER_USER}@${PROD_SERVER_IP}" "echo SSH_OK"
-
-      - name: Prepare deploy directory on server
-        env:
-          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
-          PROD_SERVER_USER: ${{ secrets.PROD_SERVER_USER }}
-        run: |
-          ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            "${PROD_SERVER_USER}@${PROD_SERVER_IP}" bash -s <<'REMOTE'
-          set -euo pipefail
-          DEPLOY_PATH="/opt/nexus-core-firewall"
-          sudo mkdir -p "$DEPLOY_PATH"
-          sudo chown -R "$USER:$USER" "$DEPLOY_PATH"
-          chmod 775 "$DEPLOY_PATH"
-          if ! swapon --show | grep -q /swapfile; then
-            sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
-            sudo chmod 600 /swapfile
-            sudo mkswap /swapfile
-            sudo swapon /swapfile
-          fi
-          ls -la "$DEPLOY_PATH"
-          REMOTE
-
-      - name: Sync production configs to server (SCP)
-        env:
-          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
-          PROD_SERVER_USER: ${{ secrets.PROD_SERVER_USER }}
-        run: |
-          scp -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            docker-compose.prod.yml nginx.conf \
-            "${PROD_SERVER_USER}@${PROD_SERVER_IP}:/opt/nexus-core-firewall/"
-
-      - name: Deploy via SSH
-        env:
-          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
-          PROD_SERVER_USER: ${{ secrets.PROD_SERVER_USER }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}
+          API_KEY_SECRET: ${{ secrets.API_KEY_SECRET }}
           CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
-        run: |
-          PASS_B64=$(printf '%s' "$DOCKER_PASSWORD" | base64 -w0)
-          USE_TUNNEL="0"
-          TUNNEL_LINE=""
-          UP_CMD="docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans"
-          if [ -n "$CLOUDFLARE_TUNNEL_TOKEN" ]; then
-            USE_TUNNEL="1"
-            TUNNEL_B64=$(printf '%s' "$CLOUDFLARE_TUNNEL_TOKEN" | base64 -w0)
-            TUNNEL_LINE="CLOUDFLARE_TUNNEL_TOKEN=$(echo "$TUNNEL_B64" | base64 -d)"
-            UP_CMD="docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d --remove-orphans"
-          fi
-          ssh -i "$HOME/.ssh/deploy_key" -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            "${PROD_SERVER_USER}@${PROD_SERVER_IP}" bash -s <<REMOTE
-          set -euo pipefail
-          export DOCKER_USERNAME="$DOCKER_USERNAME"
-          DEPLOY_PATH="/opt/nexus-core-firewall"
-          mkdir -p "\$DEPLOY_PATH"
-          cd "\$DEPLOY_PATH"
-          printf 'DOCKER_IMAGE=%s\n' "$DOCKER_IMAGE" > .env
-          if [ "$USE_TUNNEL" = "1" ]; then
-            printf '%s\n' "$TUNNEL_LINE" >> .env
-          else
-            echo "UYARI: CLOUDFLARE_TUNNEL_TOKEN bos; cloudflared atlanacak."
-          fi
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,API_KEY_SECRET,CLOUDFLARE_TUNNEL_TOKEN
+          script: |
+            set -euo pipefail
+            cd /opt/nexus-core-firewall
 
-          for f in docker-compose.prod.yml nginx.conf; do
-            if [[ ! -f "\$f" ]]; then
-              echo "HATA: \$DEPLOY_PATH/\$f SCP sonrasi bulunamadi."
+            printf 'DOCKER_IMAGE=%s\n' "$DOCKER_IMAGE" > .env
+            if [ -n "${API_KEY_SECRET:-}" ]; then
+              printf 'NEXUS_API_KEY=%s\n' "$API_KEY_SECRET" >> .env
+            else
+              echo "HATA: API_KEY_SECRET bos; NEXUS_API_KEY yazilamadi."
               exit 1
             fi
-          done
+            printf 'RATE_LIMIT_REQUESTS=%s\n' "${RATE_LIMIT_REQUESTS:-60}" >> .env
+            printf 'RATE_LIMIT_WINDOW_SECONDS=%s\n' "${RATE_LIMIT_WINDOW_SECONDS:-60}" >> .env
+            if [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]; then
+              printf 'CLOUDFLARE_TUNNEL_TOKEN=%s\n' "$CLOUDFLARE_TUNNEL_TOKEN" >> .env
+            fi
 
-          echo "$PASS_B64" | base64 -d | docker login -u "\$DOCKER_USERNAME" --password-stdin
-          docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api nginx-gateway
-          $UP_CMD
-          docker image prune -f
-          echo "Deploy tamamlandi: $DOCKER_IMAGE"
-          REMOTE
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api
+            docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f
+            echo "Deploy tamamlandi: $DOCKER_IMAGE"

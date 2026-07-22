@@ -49,7 +49,7 @@ from sentence_transformers import SentenceTransformer
 # ÇOK DİLLİ EMBEDDING MODEL: 50+ dili aynı anlamsal vektör uzayına hizalar.
 # LANGUAGE SWITCHING saldırıları (Latince, Fransızca vb.) tek modelle yakalanır.
 # İlk çalıştırmada Hugging Face cache'inden otomatik indirilir; sonra tamamen yerel.
-MODEL_NAME: Final[str] = "paraphrase-multilingual-MiniLM-L12-v2"
+MODEL_NAME: Final[str] = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 # DİL AGNOSTİK KOSİNÜS EŞİĞİ: False positive azaltımı — engelleme için daha yüksek benzerlik gerekir.
 SIMILARITY_THRESHOLD: Final[float] = 0.72
