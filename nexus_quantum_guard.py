@@ -1469,6 +1469,19 @@ class SemanticVectorGuard:
             SIMILARITY_THRESHOLD * 100,
             len(patterns),
         )
+        self.warmup()
+
+    def warmup(self) -> None:
+        """Modeli ilk açılışta belleğe/CPU matrislerine tam oturtmak için dummy inference."""
+        try:
+            _ = self._model.encode(
+                "warmup query",
+                convert_to_numpy=True,
+                show_progress_bar=False,
+            )
+            logger.info("Vector model warmup completed successfully.")
+        except Exception as e:
+            logger.warning("Model warmup failed: %s", e)
 
     @staticmethod
     def _normalize_text(text: str) -> str:
@@ -2825,6 +2838,13 @@ class ThreadSafeGuardService:
 
     def cache_stats(self) -> dict[str, int | float]:
         return self._cache.stats()
+
+    def warmup(self) -> None:
+        """Startup warm-up: tam inceleme pipeline'ını bir kez çalıştırır."""
+        self.inspect(
+            "Warm-up inference task to load model weights into RAM.",
+            "startup-warmup",
+        )
 
     @staticmethod
     def _verdict_from_cache(

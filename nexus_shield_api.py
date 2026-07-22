@@ -168,23 +168,17 @@ def _verify_startup_ready() -> HealthzResponse:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Cold start önleme: vektör modeli yüklenir ve dummy inference ile ısıtılır."""
+    """Cold start önleme: model servisi yüklenir ve startup warm-up çalıştırılır."""
     global _service
 
-    # --- STARTUP / WARM-UP ---
-    logging.info("Nexus Quantum Guard mikroservisi başlatılıyor...")
-    _service = await asyncio.to_thread(ThreadSafeGuardService)
+    print("Nexus Quantum Guard mikroservisi başlatılıyor...")
 
-    logging.info("🔥 [Warm-up] Starting model warm-up task...")
+    service = await asyncio.to_thread(ThreadSafeGuardService)
+
     try:
-        dummy_input = WARMUP_TEXT
-        started = time.perf_counter()
-        _ = await asyncio.to_thread(get_model_prediction, dummy_input)
-        elapsed_ms = (time.perf_counter() - started) * 1000.0
-        logging.info(
-            "✅ [Warm-up] Model successfully loaded and warmed up in RAM! (%.2f ms)",
-            elapsed_ms,
-        )
+        await asyncio.to_thread(service.warmup)
+        app.state.guard_service = service
+        _service = service
         health = _verify_startup_ready()
         logging.info(
             "Uygulama istek kabul etmeye hazır | status=%s | cache_size=%d | version=%s",
@@ -193,14 +187,15 @@ async def lifespan(app: FastAPI):
             API_VERSION,
         )
     except Exception as e:
-        logging.error("⚠️ [Warm-up] Model warm-up failed: %s", e)
+        logging.error("Model warm-up failed: %s", e)
+        app.state.guard_service = None
         _service = None
 
     yield
 
-    # --- SHUTDOWN ---
+    app.state.guard_service = None
     _service = None
-    logging.info("🛑 [Shutdown] Cleaning up resources...")
+    print("Nexus Quantum Guard mikroservisi kapatılıyor...")
 
 
 app = FastAPI(
