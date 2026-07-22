@@ -173,7 +173,7 @@ async def lifespan(app: FastAPI):
 
     # --- STARTUP / WARM-UP ---
     logging.info("Nexus Quantum Guard mikroservisi başlatılıyor...")
-    _service = ThreadSafeGuardService()
+    _service = await asyncio.to_thread(ThreadSafeGuardService)
 
     logging.info("🔥 [Warm-up] Starting model warm-up task...")
     try:
@@ -331,7 +331,8 @@ def _get_service() -> ThreadSafeGuardService:
 async def _inspect_async(user_input: str, session_id: str) -> ShieldApiResult:
     """CPU-bound inspect işlemini thread pool'da çalıştırır (async uyumlu)."""
     service = _get_service()
-    return await asyncio.to_thread(service.inspect, user_input, session_id)
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, service.inspect, user_input, session_id)
 
 
 @app.get("/healthz", response_model=HealthzResponse)

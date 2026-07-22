@@ -21,6 +21,18 @@ Mimari (Defense-in-Depth — Savunma Derinliği, Düşük Gecikme):
 
 from __future__ import annotations
 
+import os
+
+# Multi-threading kilitlenmelerini önlemek için (torch/numpy yüklenmeden önce)
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+
+import torch
+
+torch.set_num_threads(1)
+
+import asyncio
 import gc
 import hashlib
 import json
@@ -1495,6 +1507,19 @@ class SemanticVectorGuard:
         )
         return self._normalize(np.asarray(vector, dtype=np.float32).reshape(1, -1))[0]
 
+    async def encode_query_async(self, text: str) -> np.ndarray:
+        """Model tahminini thread pool'da çalıştırır; event loop bloklanmaz."""
+        loop = asyncio.get_running_loop()
+        vector = await loop.run_in_executor(
+            None,
+            lambda: self._model.encode(
+                text,
+                convert_to_numpy=True,
+                show_progress_bar=False,
+            ),
+        )
+        return self._normalize(np.asarray(vector, dtype=np.float32).reshape(1, -1))[0]
+
     def analyze(
         self,
         text: str,
@@ -2783,7 +2808,7 @@ class ThreadSafeGuardService:
     Thread-safe inceleme servisi.
 
     SentenceTransformer encode işlemleri CPU-bound ve senkron olduğundan
-    FastAPI tarafında asyncio.to_thread ile çağrılır; Lock eşzamanlı
+    FastAPI tarafında run_in_executor / asyncio.to_thread ile çağrılır; Lock eşzamanlı
     model erişimini seri hale getirerek race condition önler.
 
     Semantik önbellek hızlı yolu pipeline öncesinde devreye girer.
