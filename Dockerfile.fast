@@ -21,6 +21,7 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements-fast.txt
 
 COPY nexus_shield_fast_api.py .
+COPY index.html .
 
 RUN chown -R nexus:nexus /app
 USER nexus

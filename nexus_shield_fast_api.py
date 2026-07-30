@@ -295,9 +295,23 @@ def _verify_api_key(x_api_key: str | None) -> None:
         )
 
 
+async def _redis_cache_size() -> int:
+    redis_client = await _get_redis()
+    if redis_client is None:
+        return 0
+    try:
+        return await redis_client.dbsize()
+    except Exception as exc:
+        logger.warning("Redis cache size okunamadi: %s", exc)
+        return 0
+
+
 @app.get("/healthz")
-async def healthz() -> dict[str, str]:
-    return {"status": "HEALTHY", "mode": "fast", "version": "2.0"}
+async def healthz() -> dict[str, Any]:
+    return {
+        "status": "HEALTHY",
+        "cache_size": await _redis_cache_size(),
+    }
 
 
 @app.websocket("/ws/analytics")
@@ -317,6 +331,24 @@ async def websocket_analytics(websocket: WebSocket) -> None:
         ws_manager.disconnect(websocket)
     except Exception:
         ws_manager.disconnect(websocket)
+
+
+_INDEX_HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
+
+
+def _load_landing_html() -> str:
+    if not os.path.isfile(_INDEX_HTML_PATH):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Landing page (index.html) not found",
+        )
+    with open(_INDEX_HTML_PATH, encoding="utf-8") as landing_file:
+        return landing_file.read()
+
+
+@app.get("/", response_class=HTMLResponse)
+async def landing_page() -> HTMLResponse:
+    return HTMLResponse(content=_load_landing_html())
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
