@@ -80,7 +80,7 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          source: "docker-compose.prod.yml,nginx.conf,deploy/nginx/nexus-shield.conf"
+          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,Dockerfile.fast,nexus_shield_fast_api.py,requirements-fast.txt"
           target: /opt/nexus-core-firewall/
 
       - name: Deploy to Production Server via SSH
@@ -108,7 +108,10 @@ jobs:
             echo "RATE_LIMIT_REQUESTS=60" >> .env
             echo "RATE_LIMIT_WINDOW_SECONDS=60" >> .env
             echo "${DOCKER_PASSWORD}" | sudo docker login -u "${DOCKER_USERNAME}" --password-stdin
-            sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api nexus-shield-api
-            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
+            sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api nexus-shield-api || true
+            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --build --remove-orphans
+            sudo docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
+            curl -fsS http://127.0.0.1:80/ | grep -q "Nexus Shield" || (echo "Landing page check failed on :80" && exit 1)
+            curl -fsS http://127.0.0.1:8080/ | grep -q "Nexus Shield" || (echo "Landing page check failed on :8080" && exit 1)
             sudo docker image prune -f
-            echo "Deploy tamamlandi: ${DOCKER_IMAGE}"
+            echo "Deploy tamamlandi: ${DOCKER_IMAGE} + ${DOCKER_FAST_IMAGE}"

@@ -276,6 +276,25 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# --- Landing page (register first — highest route priority) ---
+_INDEX_HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
+
+
+def _load_landing_html() -> str:
+    if not os.path.isfile(_INDEX_HTML_PATH):
+        logger.error("Landing page missing: %s", _INDEX_HTML_PATH)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Landing page (index.html) not found",
+        )
+    with open(_INDEX_HTML_PATH, encoding="utf-8") as landing_file:
+        return landing_file.read()
+
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def landing_page() -> HTMLResponse:
+    return HTMLResponse(content=_load_landing_html(), media_type="text/html; charset=utf-8")
+
 
 class ShieldRequest(BaseModel):
     user_input: str = Field(..., min_length=1)
@@ -333,27 +352,9 @@ async def websocket_analytics(websocket: WebSocket) -> None:
         ws_manager.disconnect(websocket)
 
 
-_INDEX_HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
-
-
-def _load_landing_html() -> str:
-    if not os.path.isfile(_INDEX_HTML_PATH):
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Landing page (index.html) not found",
-        )
-    with open(_INDEX_HTML_PATH, encoding="utf-8") as landing_file:
-        return landing_file.read()
-
-
-@app.get("/", response_class=HTMLResponse)
-async def landing_page() -> HTMLResponse:
-    return HTMLResponse(content=_load_landing_html())
-
-
-@app.get("/dashboard", response_class=HTMLResponse)
+@app.get("/dashboard", response_class=HTMLResponse, include_in_schema=False)
 async def dashboard() -> HTMLResponse:
-    return HTMLResponse(content=DASHBOARD_HTML)
+    return HTMLResponse(content=DASHBOARD_HTML, media_type="text/html; charset=utf-8")
 
 
 def _build_shield_response(
