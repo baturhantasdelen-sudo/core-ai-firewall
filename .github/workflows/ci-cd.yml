@@ -1,0 +1,75 @@
+name: Nexus Shield CI/CD & Performance Benchmark
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-fast.txt -r requirements-load.txt -r requirements-ci.txt
+
+      - name: Run Unit Tests
+        run: python -m pytest tests/ -v --tb=short --ignore=tests/locustfile.py
+
+      - name: Start Nexus Shield Fast API Service
+        env:
+          NEXUS_API_KEY: ci_cd_secret_key_test
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          nohup uvicorn nexus_shield_fast_api:app --host 0.0.0.0 --port 8080 > api.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY; then
+              echo "Fast API ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Fast API failed to start"
+          cat api.log
+          exit 1
+
+      - name: Run Locust Performance Benchmark Test
+        env:
+          NEXUS_API_KEY: ci_cd_secret_key_test
+        run: |
+          python -m locust -f tests/locustfile.py --headless \
+            -u 10 -r 2 --run-time 20s \
+            --host=http://localhost:8080 \
+            --csv=locust_report
+
+      - name: Upload Test Artifacts (Reports)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: locust-performance-report
+          path: |
+            locust_report*.csv
+            api.log
