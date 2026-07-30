@@ -5,7 +5,58 @@ networks:
     driver: bridge
 
 services:
-  # 🛡️ 1. Nexus Quantum Guard API
+  # ⚡ Nexus Shield v2.0 — ONLY service on host :8080 (nexus_shield_fast_api:app)
+  # Legacy ML pipeline is isolated on :8000 — never bound to 8080.
+  nexus-shield-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.fast
+    container_name: nexus_shield_app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nexus_shield_fast_api.py:/app/nexus_shield_fast_api.py:ro
+    environment:
+      NEXUS_API_KEY: ${NEXUS_API_KEY:-nexus_secret_key_123}
+      REDIS_URL: redis://redis:6379/0
+    command:
+      [
+        "uvicorn",
+        "nexus_shield_fast_api:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8080",
+        "--reload",
+      ]
+    depends_on:
+      - redis
+    networks:
+      - nexus_network
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-fsS",
+          "http://127.0.0.1:8080/healthz",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  redis:
+    image: redis:alpine
+    container_name: nexus_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - nexus_network
+    restart: always
+
+  # 🛡️ Legacy ML Pipeline — internal :8000 only (NOT exposed on host :8080)
   nexus-api:
     build: .
     container_name: nexus_api_container
@@ -40,7 +91,7 @@ services:
       retries: 3
       start_period: 180s
 
-  # 🚀 2. Nginx Gateway / Reverse Proxy
+  # 🚀 Nginx Gateway — /v1/shield → Fast API :8080
   nginx-gateway:
     image: nginx:alpine
     container_name: nginx_gateway_container
@@ -49,13 +100,14 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
+      nexus-shield-api:
+        condition: service_healthy
       nexus-api:
         condition: service_healthy
     networks:
       - nexus_network
     restart: always
 
-  # 📊 3. Prometheus (Metrik Toplayıcı)
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus_container
@@ -70,7 +122,6 @@ services:
       - nexus_network
     restart: always
 
-  # 🎨 4. Grafana (SOC Dashboard)
   grafana:
     image: grafana/grafana-oss:latest
     container_name: grafana_container
