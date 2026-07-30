@@ -80,7 +80,7 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,scripts/fix-cloudflare-tunnel-origin.sh,Dockerfile.fast,nexus_shield_fast_api.py,requirements-fast.txt"
+          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,scripts/fix-cloudflare-tunnel-origin.sh,Dockerfile.fast,nexus_shield_fast_api.py,nexus_auth.py,requirements-fast.txt"
           target: /opt/nexus-core-firewall/
 
       - name: Deploy to Production Server via SSH
