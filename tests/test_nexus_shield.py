@@ -225,6 +225,15 @@ def test_pii_request_http_latency_sla(
 # --- Live integration (docker-compose / CI) ---
 
 
+def test_landing_page_serves_index_html(shield_client: TestClient | httpx.Client) -> None:
+    response = shield_client.get("/")
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    assert "Nexus Shield" in response.text
+    assert "Interactive Security Playground" in response.text
+    assert "/v1/shield" in response.text
+
+
 @pytest.mark.integration
 def test_healthz_live_endpoint(shield_client: TestClient | httpx.Client) -> None:
     if not BASE_URL:
@@ -233,7 +242,8 @@ def test_healthz_live_endpoint(shield_client: TestClient | httpx.Client) -> None
     assert response.status_code == 200
     body = _response_json(response)
     assert body.get("status") == "HEALTHY"
-    assert body.get("version") == "2.0"
+    assert "cache_size" in body
+    assert isinstance(body.get("cache_size"), int)
 
 
 @pytest.mark.integration
