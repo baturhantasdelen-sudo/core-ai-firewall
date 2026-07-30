@@ -5,11 +5,12 @@ Bu belge GCP VM üzerinde Docker Compose ile production deploy adımlarını öz
 ## Mimari
 
 ```
-İstemci → Cloudflare Tunnel (HTTPS) → nginx-gateway:80 → nexus-api:8000
+İstemci → Cloudflare Tunnel (HTTPS) → nginx-gateway:80 → index.html (/) + nexus-shield-api:8080 (/v1/shield)
                                               ↓
-                                    GET /healthz (public)
-                                    POST /v1/shield (X-API-Key gerekli)
+                                    nexus-api:8000 (ML pipeline, internal only)
 ```
+
+- **cloudflared** `network_mode: host` ile çalışır; tunnel origin **http://127.0.0.1:80** olmalı (asla `:8000` değil).
 
 - **nexus-api** konteyneri `nexus_quantum_guard:app` (FastAPI) çalıştırır.
 - Model warm-up startup sırasında otomatik yapılır.
@@ -151,7 +152,22 @@ docker run -d \
 docker logs --tail 30 -f cloudflared-prod
 ```
 
-Cloudflare Zero Trust panelinde tunnel **origin** adresinin `http://127.0.0.1:80` (veya `http://localhost:80`) olduğundan emin olun — nginx-gateway bu portta dinler.
+Cloudflare Zero Trust panelinde tunnel **origin** adresinin `http://127.0.0.1:80` (veya `http://localhost:80`) olduğundan emin olun — nginx-gateway bu portta dinler. **Asla** `http://localhost:8000` kullanmayın (ML API, `/` rotası yok → 404 JSON).
+
+Hızli onarim (sunucuda):
+
+```bash
+cd /opt/nexus-core-firewall
+sudo bash scripts/fix-cloudflare-tunnel-origin.sh
+```
+
+`.env` icinde `CLOUDFLARE_TUNNEL_TOKEN` olmali; yoksa cloudflared baslamaz:
+
+```bash
+grep CLOUDFLARE_TUNNEL_TOKEN .env || echo 'CLOUDFLARE_TUNNEL_TOKEN=<token>' >> .env
+docker rm -f cloudflared-prod 2>/dev/null || true
+docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d cloudflared
+```
 
 **Kalıcı compose yönetimine geri dönmek için:**
 

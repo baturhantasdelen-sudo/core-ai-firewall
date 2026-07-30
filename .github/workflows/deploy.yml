@@ -80,7 +80,7 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,Dockerfile.fast,nexus_shield_fast_api.py,requirements-fast.txt"
+          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,scripts/fix-cloudflare-tunnel-origin.sh,Dockerfile.fast,nexus_shield_fast_api.py,requirements-fast.txt"
           target: /opt/nexus-core-firewall/
 
       - name: Deploy to Production Server via SSH
@@ -91,6 +91,7 @@ jobs:
           DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}
           DOCKER_FAST_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-shield-fast:${{ github.sha }}
           API_KEY_SECRET: ${{ secrets.API_KEY_SECRET }}
+          CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
         with:
           host: ${{ secrets.PROD_SERVER_IP }}
           username: ${{ secrets.PROD_SERVER_USER }}
@@ -98,7 +99,7 @@ jobs:
           port: 22
           timeout: 30m
           command_timeout: 30m
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,DOCKER_FAST_IMAGE,API_KEY_SECRET
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,DOCKER_FAST_IMAGE,API_KEY_SECRET,CLOUDFLARE_TUNNEL_TOKEN
           script: |
             set -euo pipefail
             cd /opt/nexus-core-firewall
@@ -107,11 +108,18 @@ jobs:
             echo "NEXUS_API_KEY=${API_KEY_SECRET}" >> .env
             echo "RATE_LIMIT_REQUESTS=60" >> .env
             echo "RATE_LIMIT_WINDOW_SECONDS=60" >> .env
+            if [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]; then
+              echo "CLOUDFLARE_TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}" >> .env
+            fi
             echo "${DOCKER_PASSWORD}" | sudo docker login -u "${DOCKER_USERNAME}" --password-stdin
             sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api nexus-shield-api || true
             sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --build --remove-orphans
             sudo docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
-            curl -fsS http://127.0.0.1:80/ | grep -q "Nexus Shield" || (echo "Landing page check failed on :80" && exit 1)
-            curl -fsS http://127.0.0.1:8080/ | grep -q "Nexus Shield" || (echo "Landing page check failed on :8080" && exit 1)
+            if grep -q '^CLOUDFLARE_TUNNEL_TOKEN=.\+' .env 2>/dev/null; then
+              docker rm -f cloudflared-prod 2>/dev/null || true
+              sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d cloudflared
+            fi
+            curl -fsS http://127.0.0.1:80/ | grep -q "<title>" || (echo "Landing page check failed on :80" && exit 1)
+            curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY || (echo "Fast API healthz failed on :8080" && exit 1)
             sudo docker image prune -f
             echo "Deploy tamamlandi: ${DOCKER_IMAGE} + ${DOCKER_FAST_IMAGE}"

@@ -1,0 +1,15 @@
+# Cloudflare Tunnel — local config (token modunda ingress Cloudflare panelinden gelir)
+# Systemd kurulumu: /etc/cloudflared/config.yml
+#
+# KRITIK: Origin MUTLAKA Nginx Gateway olmali — ASLA :8000 (nexus_quantum_guard) degil.
+# Nginx :80 -> location = / index.html + /v1/shield -> Fast API :8080
+
+tunnel: ${TUNNEL_ID}
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  - hostname: api.nexusshield.ai
+    service: http://127.0.0.1:80
+  - hostname: nexusshield.ai
+    service: http://127.0.0.1:80
+  - service: http_status:404
