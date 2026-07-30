@@ -9,7 +9,11 @@ Production ML koruması için: nexus_shield_api.py / nexus_quantum_guard.py
     uvicorn nexus_shield_fast_api:app --host 0.0.0.0 --port 8080
 
 Ortam:
-    NEXUS_API_KEY       — API key (zorunlu production'da)
+    NEXUS_API_KEY       — Legacy admin API key (varsayılan: nexus_secret_key_123)
+    NEXUS_API_KEYS_FILE — Müşteri anahtarları JSON dosyası (varsayılan: data/api_keys.json)
+    NEXUS_TRIAL_DAYS    — Deneme süresi gün (varsayılan: 14)
+    STRIPE_WEBHOOK_SECRET — Stripe imza doğrulama (opsiyonel)
+    LEMON_WEBHOOK_SECRET  — Lemon Squeezy imza doğrulama (opsiyonel)
     REDIS_URL           — redis://localhost:6379/0 (opsiyonel; yoksa cache devre dışı)
     REDIS_CACHE_TTL_SEC — önbellek TTL (varsayılan 3600)
 """
@@ -31,6 +35,8 @@ from typing import Any, Final
 from fastapi import FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
+
+from nexus_auth import api_key_store, auth_router
 
 logger = logging.getLogger("NexusShieldFastAPI")
 
@@ -275,6 +281,7 @@ app = FastAPI(
     title="Nexus Shield High-Performance Guardrail API v2.0",
     lifespan=lifespan,
 )
+app.include_router(auth_router)
 
 # --- Landing page (register first — highest route priority) ---
 _INDEX_HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
@@ -306,12 +313,27 @@ def quick_security_scan(user_input: str) -> bool:
     return any(pattern.search(user_input) for pattern in COMPILED_PATTERNS)
 
 
-def _verify_api_key(x_api_key: str | None) -> None:
-    if not x_api_key or not secrets.compare_digest(x_api_key, NEXUS_API_KEY):
+async def _verify_api_key(x_api_key: str | None) -> None:
+    if not x_api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Geçersiz veya eksik API Key",
         )
+    if secrets.compare_digest(x_api_key, NEXUS_API_KEY):
+        return
+
+    record = api_key_store.get(x_api_key)
+    if record is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Geçersiz veya eksik API Key",
+        )
+    if record.is_expired():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Trial süresi doldu — PRO plana yükseltin",
+        )
+    await api_key_store.check_rate_limit(x_api_key, record)
 
 
 async def _redis_cache_size() -> int:
@@ -387,7 +409,7 @@ async def process_shield(
     x_api_key: str | None = Header(default=None, alias="X-API-Key"),
 ):
     start_time = time.perf_counter()
-    _verify_api_key(x_api_key)
+    await _verify_api_key(x_api_key)
 
     # 1. Early Exit regex scan — always before PII, cache, or upstream LLM
     if quick_security_scan(payload.user_input):

@@ -29,3 +29,6 @@ _*.json
 .idea/
 .vscode/
 *.swp
+
+# Customer API keys (trial / pro registry)
+data/api_keys.json

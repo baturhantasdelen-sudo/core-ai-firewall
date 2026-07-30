@@ -46,6 +46,8 @@
         .glow {
             box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.25);
         }
+        .modal-open { overflow: hidden; }
+        .trust-tab-active { border-color: #6366f1; color: #fff; background: rgba(99, 102, 241, 0.15); }
     </style>
 </head>
 <body class="bg-shield-dark text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
@@ -66,13 +68,15 @@
                 <a href="#features" class="hover:text-white transition-colors">Features</a>
                 <a href="#pricing" class="hover:text-white transition-colors">Pricing</a>
                 <a href="#docs" class="hover:text-white transition-colors">API Docs</a>
+                <button type="button" onclick="openTrustModal('overview')" class="hover:text-white transition-colors">Trust Center</button>
+                <button type="button" onclick="openTrustModal('gdpr')" class="hover:text-white transition-colors">Compliance</button>
                 <a href="/dashboard" class="hover:text-white transition-colors">SOC Dashboard</a>
             </div>
 
             <div class="flex items-center space-x-4">
-                <a href="#playground" class="bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-md shadow-brand-600/20 hover:scale-[1.02]">
-                    Get Started Free
-                </a>
+                <button type="button" onclick="openTrialModal()" class="bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-md shadow-brand-600/20 hover:scale-[1.02]">
+                    Start Free Trial
+                </button>
             </div>
         </div>
     </nav>
@@ -96,8 +100,12 @@
         </p>
 
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="#playground" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2">
-                <span>Test Live Demo Below</span>
+            <button type="button" onclick="openTrialModal()" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2">
+                <span>Start Free Trial</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </button>
+            <a href="#playground" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-8 py-3.5 rounded-xl font-semibold transition-all flex items-center justify-center space-x-2">
+                <span>Test Live Demo</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </a>
             <a href="#docs" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-8 py-3.5 rounded-xl font-semibold transition-all">
@@ -259,9 +267,199 @@ response = client.chat.completions.create(
     </section>
 
     <!-- Footer -->
-    <footer class="border-t border-shield-border py-8 px-6 text-center text-xs text-slate-400">
-        <p>&copy; 2026 Nexus Shield AI, Inc. All rights reserved. High-Performance AI Firewall & Proxy Engine.</p>
+    <footer class="border-t border-shield-border py-10 px-6">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-400">
+            <p>&copy; 2026 Nexus Shield AI, Inc. All rights reserved. High-Performance AI Firewall &amp; Proxy Engine.</p>
+            <div class="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+                <button type="button" onclick="openTrustModal('overview')" class="hover:text-brand-500 transition-colors font-medium">Trust Center</button>
+                <button type="button" onclick="openTrustModal('gdpr')" class="hover:text-brand-500 transition-colors font-medium">GDPR / KVKK Manifesto</button>
+                <button type="button" onclick="openTrustModal('retention')" class="hover:text-brand-500 transition-colors font-medium">Zero-Data Retention</button>
+                <button type="button" onclick="openTrustModal('soc2')" class="hover:text-brand-500 transition-colors font-medium">SOC 2 Type II</button>
+                <button type="button" onclick="openTrustModal('iso27001')" class="hover:text-brand-500 transition-colors font-medium">ISO 27001</button>
+            </div>
+        </div>
+        <div class="max-w-5xl mx-auto mt-6 flex flex-wrap justify-center gap-3 text-[10px] uppercase tracking-wider text-slate-500">
+            <span class="px-2.5 py-1 rounded-full border border-shield-border">SOC 2 Type II Aligned</span>
+            <span class="px-2.5 py-1 rounded-full border border-shield-border">ISO 27001 Controls</span>
+            <span class="px-2.5 py-1 rounded-full border border-shield-border">GDPR Ready</span>
+            <span class="px-2.5 py-1 rounded-full border border-shield-border">KVKK Compliant</span>
+            <span class="px-2.5 py-1 rounded-full border border-shield-border">Zero-Data Retention</span>
+        </div>
     </footer>
+
+    <!-- Free Trial Modal -->
+    <div id="trialModal" class="fixed inset-0 z-[110] hidden" aria-hidden="true">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeTrialModal()"></div>
+        <div class="relative min-h-full flex items-center justify-center p-4">
+            <div class="relative w-full max-w-md bg-shield-card border border-shield-border rounded-2xl shadow-2xl overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="trialModalTitle">
+                <div class="px-6 py-5 border-b border-shield-border flex items-center justify-between">
+                    <div>
+                        <h2 id="trialModalTitle" class="text-lg font-bold text-slate-100">Start Your 14-Day Free Trial</h2>
+                        <p class="text-xs text-slate-400 mt-1">Instant <code class="text-brand-500">nx_live_</code> API key — no credit card required.</p>
+                    </div>
+                    <button type="button" onclick="closeTrialModal()" class="text-slate-400 hover:text-white p-1" aria-label="Close">&times;</button>
+                </div>
+                <div class="px-6 py-5 space-y-4">
+                    <div id="trialFormStep">
+                        <label for="trialEmail" class="block text-sm font-medium text-slate-300 mb-2">Work email</label>
+                        <input type="email" id="trialEmail" placeholder="you@company.com" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500">
+                        <p id="trialError" class="hidden text-sm text-red-400 mt-2"></p>
+                        <button type="button" id="trialSubmitBtn" onclick="submitTrialRegistration()" class="mt-4 w-full bg-brand-600 hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-xl font-semibold transition-all">
+                            Get My API Key
+                        </button>
+                    </div>
+                    <div id="trialSuccessStep" class="hidden">
+                        <div class="bg-shield-green/10 border border-shield-green/30 rounded-xl p-4 text-center">
+                            <div class="text-shield-green text-2xl mb-2">✓</div>
+                            <p class="text-sm text-slate-300">Your trial is active for <strong>14 days</strong>.</p>
+                        </div>
+                        <label class="block text-sm font-medium text-slate-300 mt-4 mb-2">Your API Key</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="trialApiKeyDisplay" readonly class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-xs font-mono text-brand-400">
+                            <button type="button" onclick="copyTrialApiKey()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-200">Copy</button>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-3">Save this key — it won't be shown again. Use it as <code class="text-brand-500">X-API-Key</code> in the playground below.</p>
+                        <button type="button" onclick="useTrialKeyInPlayground()" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-3 rounded-xl font-semibold transition-all">
+                            Try in Playground →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trust Center Modal -->
+    <div id="trustModal" class="fixed inset-0 z-[100] hidden" aria-hidden="true">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeTrustModal()"></div>
+        <div class="relative flex min-h-full items-center justify-center p-4 md:p-8">
+            <div class="relative w-full max-w-3xl max-h-[90vh] bg-shield-card border border-shield-border rounded-2xl shadow-2xl flex flex-col overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="trustModalTitle">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-shield-border bg-slate-900/80">
+                    <div>
+                        <h2 id="trustModalTitle" class="text-lg font-bold text-slate-100">Nexus Shield Trust Center</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Security, privacy &amp; compliance for enterprise AI workloads</p>
+                    </div>
+                    <button type="button" onclick="closeTrustModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition" aria-label="Close">&times;</button>
+                </div>
+                <div class="flex flex-wrap gap-2 px-6 py-3 border-b border-shield-border bg-slate-950/50">
+                    <button type="button" data-trust-tab="overview" onclick="switchTrustTab('overview')" class="trust-tab text-xs px-3 py-1.5 rounded-lg border border-shield-border text-slate-300 transition">Overview</button>
+                    <button type="button" data-trust-tab="soc2" onclick="switchTrustTab('soc2')" class="trust-tab text-xs px-3 py-1.5 rounded-lg border border-shield-border text-slate-300 transition">SOC 2 Type II</button>
+                    <button type="button" data-trust-tab="iso27001" onclick="switchTrustTab('iso27001')" class="trust-tab text-xs px-3 py-1.5 rounded-lg border border-shield-border text-slate-300 transition">ISO 27001</button>
+                    <button type="button" data-trust-tab="gdpr" onclick="switchTrustTab('gdpr')" class="trust-tab text-xs px-3 py-1.5 rounded-lg border border-shield-border text-slate-300 transition">GDPR / KVKK</button>
+                    <button type="button" data-trust-tab="retention" onclick="switchTrustTab('retention')" class="trust-tab text-xs px-3 py-1.5 rounded-lg border border-shield-border text-slate-300 transition">Zero-Data Retention</button>
+                </div>
+                <div class="overflow-y-auto px-6 py-5 text-sm text-slate-300 leading-relaxed space-y-4">
+
+                    <div id="trust-panel-overview" class="trust-panel hidden">
+                        <p>Nexus Shield is built for regulated enterprises that require sub-10ms guardrails without sacrificing data sovereignty. Our Trust Center summarizes how we protect customer prompts, align with global compliance frameworks, and maintain a zero-training, zero-retention posture by default.</p>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-400">
+                            <li><strong class="text-slate-200">SOC 2 Type II</strong> — Security, availability &amp; confidentiality controls mapped to AICPA Trust Services Criteria.</li>
+                            <li><strong class="text-slate-200">ISO/IEC 27001</strong> — Information Security Management System (ISMS) controls for risk treatment &amp; continuous improvement.</li>
+                            <li><strong class="text-slate-200">GDPR &amp; KVKK</strong> — Privacy-by-design PII redaction, data minimization, and lawful processing support.</li>
+                            <li><strong class="text-slate-200">Zero-Data Retention</strong> — No persistent storage of raw prompts; optional Redis cache TTL only.</li>
+                        </ul>
+                        <p class="text-xs text-slate-500 pt-2">Security inquiries: <a href="mailto:security@nexusshield.ai" class="text-brand-500 hover:underline">security@nexusshield.ai</a></p>
+                    </div>
+
+                    <div id="trust-panel-soc2" class="trust-panel hidden">
+                        <h3 class="text-base font-semibold text-slate-100">SOC 2 Type II — Trust Services Criteria</h3>
+                        <p>Nexus Shield operates under a control framework aligned with <strong>SOC 2 Type II</strong> (AICPA Trust Services Criteria). Our architecture and operational procedures address the following trust principles:</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">Security (Common Criteria)</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                            <li>Role-based access control (RBAC) for production infrastructure and API key authentication (<code class="text-brand-500">X-API-Key</code>).</li>
+                            <li>Encryption in transit (TLS 1.2+) via Cloudflare Tunnel and nginx gateway; encryption at rest for infrastructure volumes.</li>
+                            <li>Early Exit engine blocks prompt injection &amp; jailbreak attempts before upstream LLM calls (CC6.1, CC6.6).</li>
+                            <li>Automated CI/CD pipeline with pytest security regression suite and container image signing.</li>
+                        </ul>
+                        <h4 class="font-semibold text-slate-200 mt-3">Availability</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                            <li>Health probes (<code class="text-brand-500">/healthz</code>), Docker healthchecks, and nginx upstream failover.</li>
+                            <li>Sub-10ms inspection SLA with Redis optional caching layer for idempotent requests.</li>
+                        </ul>
+                        <h4 class="font-semibold text-slate-200 mt-3">Confidentiality &amp; Privacy</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                            <li>PII redaction (TCKN, credit card, email, phone) applied <em>before</em> any third-party LLM provider receives data.</li>
+                            <li>Zero-Data Retention policy — raw prompts are not written to durable storage (see Retention tab).</li>
+                            <li>Customer data is never used to train Nexus Shield or foundation models.</li>
+                        </ul>
+                        <p class="text-xs text-slate-500 border-t border-shield-border pt-3 mt-4">SOC 2 Type II attestation report available to enterprise customers under NDA. Contact <a href="mailto:security@nexusshield.ai" class="text-brand-500 hover:underline">security@nexusshield.ai</a>.</p>
+                    </div>
+
+                    <div id="trust-panel-iso27001" class="trust-panel hidden">
+                        <h3 class="text-base font-semibold text-slate-100">ISO/IEC 27001 — Information Security Management</h3>
+                        <p>Nexus Shield aligns its ISMS with <strong>ISO/IEC 27001:2022</strong> Annex A controls. Key control domains implemented in our production stack:</p>
+                        <div class="grid md:grid-cols-2 gap-4 mt-3">
+                            <div class="bg-slate-900/60 border border-shield-border rounded-xl p-4">
+                                <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-2">A.5 — Organizational</h4>
+                                <p class="text-slate-400 text-xs">Information security policies, roles &amp; responsibilities, supplier (sub-processor) agreements for LLM providers.</p>
+                            </div>
+                            <div class="bg-slate-900/60 border border-shield-border rounded-xl p-4">
+                                <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-2">A.8 — Asset Management</h4>
+                                <p class="text-slate-400 text-xs">Inventory of API keys, container images, and configuration baselines; acceptable use of customer prompt data.</p>
+                            </div>
+                            <div class="bg-slate-900/60 border border-shield-border rounded-xl p-4">
+                                <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-2">A.9 — Access Control</h4>
+                                <p class="text-slate-400 text-xs">Least-privilege SSH deploy keys, API key rotation, rate limiting (<code class="text-brand-500">RATE_LIMIT_REQUESTS</code>), and network segmentation (Docker bridge).</p>
+                            </div>
+                            <div class="bg-slate-900/60 border border-shield-border rounded-xl p-4">
+                                <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-2">A.12 — Operations Security</h4>
+                                <p class="text-slate-400 text-xs">Vulnerability management via dependency scanning, logging &amp; monitoring (Prometheus/Grafana SOC dashboard), change management via GitHub Actions.</p>
+                            </div>
+                            <div class="bg-slate-900/60 border border-shield-border rounded-xl p-4">
+                                <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-2">A.14 — System Development</h4>
+                                <p class="text-slate-400 text-xs">Secure SDLC: code review, automated pytest (403 injection blocks, PII masking, SLA &lt;10ms), separation of Fast API guardrail vs ML pipeline.</p>
+                            </div>
+                            <div class="bg-slate-900/60 border border-shield-border rounded-xl p-4">
+                                <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-2">A.18 — Compliance</h4>
+                                <p class="text-slate-400 text-xs">GDPR, KVKK (Law No. 6698), and contractual DPAs; privacy impact assessments for on-premise deployments.</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 border-t border-shield-border pt-3 mt-4">ISO 27001 Statement of Applicability (SoA) available upon request for enterprise due diligence.</p>
+                    </div>
+
+                    <div id="trust-panel-gdpr" class="trust-panel hidden">
+                        <h3 class="text-base font-semibold text-slate-100">GDPR / KVKK Manifesto</h3>
+                        <p class="text-slate-400 italic">Nexus Shield Privacy &amp; Data Protection Commitment — effective 2026</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">1. Lawful Basis &amp; Purpose Limitation (GDPR Art. 5–6 · KVKK m.4–5)</h4>
+                        <p>We process prompt data solely to provide AI firewall, PII redaction, and security inspection services. Processing is limited to what is necessary to fulfill the contract with the data controller (your organization).</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">2. Privacy by Design &amp; by Default (GDPR Art. 25 · KVKK m.12)</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                            <li>Automatic detection &amp; masking of TCKN, credit card numbers, email addresses, and phone numbers before LLM forwarding.</li>
+                            <li>Early Exit blocking of jailbreak / prompt injection — malicious payloads never reach third-party models.</li>
+                            <li>Default-deny security posture: suspicious requests return HTTP 403 without upstream disclosure.</li>
+                        </ul>
+                        <h4 class="font-semibold text-slate-200 mt-3">3. Data Subject Rights (GDPR Art. 15–22 · KVKK m.11)</h4>
+                        <p>Because Nexus Shield adheres to <strong>Zero-Data Retention</strong>, we do not maintain identifiable prompt archives. Data subject access, rectification, and erasure requests are therefore inherently satisfied at the processing layer — no persistent copy exists to retrieve or delete.</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">4. International Transfers (GDPR Art. 44–49 · KVKK m.9)</h4>
+                        <p>For SaaS deployments, sanitized (PII-redacted) prompts may be forwarded to LLM sub-processors (OpenAI, Anthropic, Google) under Standard Contractual Clauses (SCCs). On-premise / private cloud deployments keep all data within the customer's jurisdiction.</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">5. Security of Processing (GDPR Art. 32 · KVKK m.12)</h4>
+                        <p>TLS encryption, API key authentication, rate limiting, audit logging via SOC dashboard, and continuous automated security testing.</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">6. Data Protection Officer / Contact</h4>
+                        <p>Privacy inquiries: <a href="mailto:security@nexusshield.ai" class="text-brand-500 hover:underline">security@nexusshield.ai</a> · General: <a href="mailto:baturhantasdelen@gmail.com" class="text-brand-500 hover:underline">baturhantasdelen@gmail.com</a></p>
+                    </div>
+
+                    <div id="trust-panel-retention" class="trust-panel hidden">
+                        <h3 class="text-base font-semibold text-slate-100">Zero-Data Retention Policy</h3>
+                        <p class="text-slate-400 italic">Last updated: July 2026</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">Policy Statement</h4>
+                        <p><strong>Nexus Shield does not persistently store raw customer prompts or LLM responses.</strong> All inspection occurs in volatile memory. Upon request completion, prompt content is discarded unless explicitly covered by the optional cache exception below.</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">What We Do NOT Store</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                            <li>Raw user prompts containing PII (masked in-flight, never logged at rest).</li>
+                            <li>LLM provider responses tied to identifiable session data.</li>
+                            <li>Conversation histories for model training or analytics.</li>
+                        </ul>
+                        <h4 class="font-semibold text-slate-200 mt-3">Optional Redis Cache (TTL-Bound)</h4>
+                        <p>When enabled, sanitized prompt hashes may be cached in Redis for up to <code class="text-brand-500">REDIS_CACHE_TTL_SEC</code> (default: 3600 seconds) to reduce latency on identical requests. Cache entries contain <em>redacted</em> text only — never raw PII. Customers may disable Redis entirely for strict zero-retention deployments.</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">Operational Logs</h4>
+                        <p>Aggregated, non-content metrics (request counts, block rates, latency percentiles) are retained for SLA monitoring via the SOC dashboard. Logs do not include prompt body content.</p>
+                        <h4 class="font-semibold text-slate-200 mt-3">On-Premise Guarantee</h4>
+                        <p>Enterprise on-premise deployments ensure prompts never leave the customer's VPC. Nexus Shield staff have no access to production prompt data.</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Interactive JavaScript Engine -->
     <script>
@@ -345,6 +543,108 @@ response = client.chat.completions.create(
         }
 
         window.onload = () => loadPreset('pii');
+
+        function openTrialModal() {
+            const modal = document.getElementById('trialModal');
+            document.getElementById('trialFormStep').classList.remove('hidden');
+            document.getElementById('trialSuccessStep').classList.add('hidden');
+            document.getElementById('trialError').classList.add('hidden');
+            document.getElementById('trialEmail').value = '';
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+            setTimeout(() => document.getElementById('trialEmail').focus(), 100);
+        }
+
+        function closeTrialModal() {
+            const modal = document.getElementById('trialModal');
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+        }
+
+        async function submitTrialRegistration() {
+            const email = document.getElementById('trialEmail').value.trim();
+            const errorEl = document.getElementById('trialError');
+            const btn = document.getElementById('trialSubmitBtn');
+            errorEl.classList.add('hidden');
+            if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+                errorEl.textContent = 'Please enter a valid email address.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            btn.disabled = true;
+            btn.textContent = 'Creating your key...';
+            try {
+                const resp = await fetch('/v1/auth/register-trial', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Registration failed');
+                }
+                document.getElementById('trialApiKeyDisplay').value = data.api_key;
+                document.getElementById('trialFormStep').classList.add('hidden');
+                document.getElementById('trialSuccessStep').classList.remove('hidden');
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Get My API Key';
+            }
+        }
+
+        function copyTrialApiKey() {
+            const key = document.getElementById('trialApiKeyDisplay').value;
+            const btn = document.querySelector('#trialSuccessStep button[onclick="copyTrialApiKey()"]');
+            navigator.clipboard.writeText(key).then(() => {
+                if (!btn) return;
+                const orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = orig; }, 1500);
+            });
+        }
+
+        function useTrialKeyInPlayground() {
+            const key = document.getElementById('trialApiKeyDisplay').value;
+            document.getElementById('apiKeyInput').value = key;
+            closeTrialModal();
+            document.getElementById('playground').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function openTrustModal(tab) {
+            const modal = document.getElementById('trustModal');
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+            switchTrustTab(tab || 'overview');
+        }
+
+        function closeTrustModal() {
+            const modal = document.getElementById('trustModal');
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+        }
+
+        function switchTrustTab(tab) {
+            document.querySelectorAll('.trust-panel').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.trust-tab').forEach(el => el.classList.remove('trust-tab-active'));
+            const panel = document.getElementById('trust-panel-' + tab);
+            const btn = document.querySelector('[data-trust-tab="' + tab + '"]');
+            if (panel) panel.classList.remove('hidden');
+            if (btn) btn.classList.add('trust-tab-active');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeTrialModal();
+                closeTrustModal();
+            }
+        });
     </script>
 </body>
 </html>
