@@ -1,0 +1,30 @@
+# Nexus Shield Fast API + Redis — local / load-test stack
+# Kullanım: docker compose -f docker-compose.fast.yml up -d --build
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: nexus_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  shield-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.fast
+    container_name: nexus_shield_fast
+    ports:
+      - "8080:8080"
+    environment:
+      NEXUS_API_KEY: ${NEXUS_API_KEY:-nexus_secret_key_123}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped

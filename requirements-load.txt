@@ -1,0 +1,2 @@
+# Locust load / stress test runner (ML bağımlılığı yok)
+locust>=2.32.0

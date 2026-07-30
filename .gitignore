@@ -1,15 +1,31 @@
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
 *.egg-info/
 .venv/
 venv/
+ENV/
+
+# Environment Variables (Güvenlik Kriteri)
 .env
+.env.local
 .secrets.local.json
+
+# Locust / Testing
+.locust/
 *.log
-.cache/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-.huggingface/
 _test*.json
 _*.json
+
+# ML / cache artifacts
+.cache/
+.huggingface/
+
+# Docker / IDE
+.idea/
+.vscode/
+*.swp
