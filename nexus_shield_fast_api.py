@@ -16,11 +16,15 @@ Ortam:
     LEMON_WEBHOOK_SECRET  — Lemon Squeezy imza doğrulama (opsiyonel)
     REDIS_URL           — redis://localhost:6379/0 (opsiyonel; yoksa cache devre dışı)
     REDIS_CACHE_TTL_SEC — önbellek TTL (varsayılan 3600)
+    POSTHOG_API_KEY     — PostHog project API key (opsiyonel)
+    POSTHOG_HOST        — PostHog ingest host (varsayılan: https://us.i.posthog.com)
+    CLOUDFLARE_WEB_ANALYTICS_TOKEN — Cloudflare Web Analytics beacon token (opsiyonel)
 """
 
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import re
@@ -33,7 +37,7 @@ from dataclasses import dataclass, field
 from typing import Any, Final
 
 from fastapi import FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel, Field
 
 from nexus_auth import api_key_store, auth_router
@@ -45,6 +49,9 @@ NEXUS_API_KEY: Final[str] = os.getenv("NEXUS_API_KEY", DEFAULT_NEXUS_API_KEY)
 REDIS_URL: Final[str] = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 REDIS_CACHE_TTL_SEC: Final[int] = int(os.getenv("REDIS_CACHE_TTL_SEC", "3600"))
 UPSTREAM_LLM_LATENCY_SEC: Final[float] = float(os.getenv("UPSTREAM_LLM_LATENCY_SEC", "0.1"))
+POSTHOG_API_KEY: Final[str] = os.getenv("POSTHOG_API_KEY", "")
+POSTHOG_HOST: Final[str] = os.getenv("POSTHOG_HOST", "https://us.i.posthog.com")
+CLOUDFLARE_WEB_ANALYTICS_TOKEN: Final[str] = os.getenv("CLOUDFLARE_WEB_ANALYTICS_TOKEN", "")
 
 PROMPT_INJECTION_BLOCK_DETAIL: Final[str] = (
     "Blocked by Nexus Shield Early Exit Engine (Prompt Injection Detected)"
@@ -301,6 +308,18 @@ def _load_landing_html() -> str:
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def landing_page() -> HTMLResponse:
     return HTMLResponse(content=_load_landing_html(), media_type="text/html; charset=utf-8")
+
+
+@app.get("/analytics-config.js", include_in_schema=False)
+async def analytics_config_js() -> Response:
+    """Runtime analytics keys from environment (served to static landing page)."""
+    payload = {
+        "posthogKey": POSTHOG_API_KEY,
+        "posthogHost": POSTHOG_HOST.rstrip("/"),
+        "cloudflareToken": CLOUDFLARE_WEB_ANALYTICS_TOKEN,
+    }
+    body = f"window.NEXUS_ANALYTICS={json.dumps(payload)};"
+    return Response(content=body, media_type="application/javascript; charset=utf-8")
 
 
 class ShieldRequest(BaseModel):

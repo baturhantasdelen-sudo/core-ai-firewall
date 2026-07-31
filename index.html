@@ -49,6 +49,40 @@
         .modal-open { overflow: hidden; }
         .trust-tab-active { border-color: #6366f1; color: #fff; background: rgba(99, 102, 241, 0.15); }
     </style>
+
+    <!-- Analytics config (PostHog key/host + Cloudflare token from server env) -->
+    <script src="/analytics-config.js"></script>
+
+    <!-- PostHog Analytics -->
+    <script>
+        !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}for((p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r),o="capture identify alias people group trackSubmit trackClick trackInput transitionTo setPersonProperties identifyPerson reset groupAlias setGroupProperties setGroupPropertiesOnce append setOnce unlink cleanup captureException startSessionRecording stopSessionRecording sessionRecordingStarted loadToolbar get_distinct_id getGroups get_property get_session_id".split(" ");o.length>0;)g(e,o.pop());e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+        (function () {
+            var cfg = window.NEXUS_ANALYTICS || {};
+            var posthogKey = cfg.posthogKey || '';
+            var posthogHost = cfg.posthogHost || 'https://us.i.posthog.com';
+            window.nexusCapture = function (event, props) {
+                if (window.posthog && typeof posthog.capture === 'function') {
+                    posthog.capture(event, props || {});
+                }
+            };
+            if (posthogKey) {
+                posthog.init(posthogKey, { api_host: posthogHost, person_profiles: 'identified_only' });
+            }
+        })();
+    </script>
+
+    <!-- Cloudflare Web Analytics -->
+    <script>
+        (function () {
+            var cfg = window.NEXUS_ANALYTICS || {};
+            if (!cfg.cloudflareToken) return;
+            var s = document.createElement('script');
+            s.defer = true;
+            s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+            s.setAttribute('data-cf-beacon', JSON.stringify({ token: cfg.cloudflareToken }));
+            document.head.appendChild(s);
+        })();
+    </script>
 </head>
 <body class="bg-shield-dark text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
 
@@ -545,6 +579,7 @@ response = client.chat.completions.create(
         window.onload = () => loadPreset('pii');
 
         function openTrialModal() {
+            if (typeof nexusCapture === 'function') nexusCapture('clicked_start_free_trial');
             const modal = document.getElementById('trialModal');
             document.getElementById('trialFormStep').classList.remove('hidden');
             document.getElementById('trialSuccessStep').classList.add('hidden');
@@ -588,6 +623,7 @@ response = client.chat.completions.create(
                 document.getElementById('trialApiKeyDisplay').value = data.api_key;
                 document.getElementById('trialFormStep').classList.add('hidden');
                 document.getElementById('trialSuccessStep').classList.remove('hidden');
+                if (typeof nexusCapture === 'function') nexusCapture('api_key_generated', { tier: data.tier || 'trial' });
             } catch (err) {
                 errorEl.textContent = err.message;
                 errorEl.classList.remove('hidden');
@@ -601,6 +637,7 @@ response = client.chat.completions.create(
             const key = document.getElementById('trialApiKeyDisplay').value;
             const btn = document.querySelector('#trialSuccessStep button[onclick="copyTrialApiKey()"]');
             navigator.clipboard.writeText(key).then(() => {
+                if (typeof nexusCapture === 'function') nexusCapture('copied_api_key', { tier: 'trial' });
                 if (!btn) return;
                 const orig = btn.textContent;
                 btn.textContent = 'Copied!';
@@ -616,6 +653,7 @@ response = client.chat.completions.create(
         }
 
         function openTrustModal(tab) {
+            if (typeof nexusCapture === 'function') nexusCapture('opened_trust_center', { tab: tab || 'overview' });
             const modal = document.getElementById('trustModal');
             modal.classList.remove('hidden');
             modal.setAttribute('aria-hidden', 'false');
