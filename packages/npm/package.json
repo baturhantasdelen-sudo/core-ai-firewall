@@ -1,0 +1,30 @@
+{
+  "name": "nexus-shield-ai",
+  "version": "0.1.0",
+  "description": "Sub-10ms in-RAM PII redaction proxy for Vercel AI SDK, LangChain, and Node.js LLM apps.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "vercel-ai-sdk",
+    "llm-guardrails",
+    "pii-redaction",
+    "security",
+    "langchain",
+    "openai-proxy",
+    "sub-10ms",
+    "presidio-alternative"
+  ],
+  "author": "Nexus Shield Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baturhantasdelen-sudo/core-ai-firewall.git"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

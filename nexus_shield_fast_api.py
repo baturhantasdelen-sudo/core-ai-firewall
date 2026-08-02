@@ -19,6 +19,7 @@ Ortam:
     POSTHOG_API_KEY     — PostHog project API key (opsiyonel)
     POSTHOG_HOST        — PostHog ingest host (varsayılan: https://us.i.posthog.com)
     CLOUDFLARE_WEB_ANALYTICS_TOKEN — Cloudflare Web Analytics beacon token (opsiyonel)
+    SANDBOX_RATE_LIMIT_PER_MIN — Playground /api/sandbox IP limiti (varsayılan: 30)
 """
 
 from __future__ import annotations
@@ -36,7 +37,7 @@ from datetime import datetime, timezone
 from dataclasses import dataclass, field
 from typing import Any, Final
 
-from fastapi import FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi import FastAPI, Header, HTTPException, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel, Field
 
@@ -52,6 +53,7 @@ UPSTREAM_LLM_LATENCY_SEC: Final[float] = float(os.getenv("UPSTREAM_LLM_LATENCY_S
 POSTHOG_API_KEY: Final[str] = os.getenv("POSTHOG_API_KEY", "")
 POSTHOG_HOST: Final[str] = os.getenv("POSTHOG_HOST", "https://us.i.posthog.com")
 CLOUDFLARE_WEB_ANALYTICS_TOKEN: Final[str] = os.getenv("CLOUDFLARE_WEB_ANALYTICS_TOKEN", "")
+SANDBOX_RATE_LIMIT_PER_MIN: Final[int] = int(os.getenv("SANDBOX_RATE_LIMIT_PER_MIN", "30"))
 
 PROMPT_INJECTION_BLOCK_DETAIL: Final[str] = (
     "Blocked by Nexus Shield Early Exit Engine (Prompt Injection Detected)"
@@ -355,6 +357,39 @@ async def _verify_api_key(x_api_key: str | None) -> None:
     await api_key_store.check_rate_limit(x_api_key, record)
 
 
+class SandboxRateLimiter:
+    """In-memory IP rate limiter for unauthenticated playground requests."""
+
+    def __init__(self, limit_per_minute: int = SANDBOX_RATE_LIMIT_PER_MIN) -> None:
+        self._limit = limit_per_minute
+        self._lock = asyncio.Lock()
+        self._minute_counts: dict[str, list[float]] = {}
+
+    async def check(self, client_ip: str) -> None:
+        now = time.time()
+        async with self._lock:
+            window = self._minute_counts.setdefault(client_ip, [])
+            window[:] = [t for t in window if now - t < 60]
+            if len(window) >= self._limit:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Sandbox rate limit exceeded — try again in a minute or start a free trial",
+                )
+            window.append(now)
+
+
+sandbox_rate_limiter = SandboxRateLimiter()
+
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    if request.client:
+        return request.client.host
+    return "unknown"
+
+
 async def _redis_cache_size() -> int:
     redis_client = await _get_redis()
     if redis_client is None:
@@ -422,14 +457,7 @@ def _build_shield_response(
     return body
 
 
-@app.post("/v1/shield")
-async def process_shield(
-    payload: ShieldRequest,
-    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
-):
-    start_time = time.perf_counter()
-    await _verify_api_key(x_api_key)
-
+async def _execute_shield(payload: ShieldRequest, start_time: float) -> dict[str, Any]:
     # 1. Early Exit regex scan — always before PII, cache, or upstream LLM
     if quick_security_scan(payload.user_input):
         latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
@@ -519,6 +547,24 @@ async def process_shield(
         source="upstream_llm",
         latency_ms=execution_time,
     )
+
+
+@app.post("/v1/shield")
+async def process_shield(
+    payload: ShieldRequest,
+    x_api_key: str | None = Header(default=None, alias="X-API-Key"),
+):
+    start_time = time.perf_counter()
+    await _verify_api_key(x_api_key)
+    return await _execute_shield(payload, start_time)
+
+
+@app.post("/api/sandbox")
+async def sandbox_shield(request: Request, payload: ShieldRequest):
+    """Public playground endpoint — IP rate-limited, no API key required."""
+    start_time = time.perf_counter()
+    await sandbox_rate_limiter.check(_client_ip(request))
+    return await _execute_shield(payload, start_time)
 
 
 DASHBOARD_HTML = """<!DOCTYPE html>

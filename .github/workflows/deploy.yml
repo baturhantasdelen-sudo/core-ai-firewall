@@ -80,7 +80,7 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,scripts/fix-cloudflare-tunnel-origin.sh,Dockerfile.fast,nexus_shield_fast_api.py,nexus_auth.py,requirements-fast.txt"
+          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,scripts/fix-cloudflare-tunnel-origin.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,Dockerfile.fast,nexus_shield_fast_api.py,nexus_auth.py,requirements-fast.txt"
           target: /opt/nexus-core-firewall/
 
       - name: Deploy to Production Server via SSH
@@ -92,6 +92,9 @@ jobs:
           DOCKER_FAST_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-shield-fast:${{ github.sha }}
           API_KEY_SECRET: ${{ secrets.API_KEY_SECRET }}
           CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+          POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
+          CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
         with:
           host: ${{ secrets.PROD_SERVER_IP }}
           username: ${{ secrets.PROD_SERVER_USER }}
@@ -99,18 +102,36 @@ jobs:
           port: 22
           timeout: 30m
           command_timeout: 30m
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,DOCKER_FAST_IMAGE,API_KEY_SECRET,CLOUDFLARE_TUNNEL_TOKEN
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,DOCKER_FAST_IMAGE,API_KEY_SECRET,CLOUDFLARE_TUNNEL_TOKEN,POSTHOG_API_KEY,POSTHOG_HOST,CLOUDFLARE_WEB_ANALYTICS_TOKEN
           script: |
             set -euo pipefail
             cd /opt/nexus-core-firewall
+            _prev_posthog=""
+            _prev_cf_web=""
+            if [[ -f .env ]]; then
+              _prev_posthog=$(grep '^POSTHOG_API_KEY=' .env 2>/dev/null | cut -d= -f2- || true)
+              _prev_cf_web=$(grep '^CLOUDFLARE_WEB_ANALYTICS_TOKEN=' .env 2>/dev/null | cut -d= -f2- || true)
+            fi
             echo "DOCKER_IMAGE=${DOCKER_IMAGE}" > .env
             echo "DOCKER_FAST_IMAGE=${DOCKER_FAST_IMAGE}" >> .env
             echo "NEXUS_API_KEY=${API_KEY_SECRET}" >> .env
             echo "RATE_LIMIT_REQUESTS=60" >> .env
             echo "RATE_LIMIT_WINDOW_SECONDS=60" >> .env
+            _posthog="${POSTHOG_API_KEY:-${_prev_posthog}}"
+            _cf_web="${CLOUDFLARE_WEB_ANALYTICS_TOKEN:-${_prev_cf_web}}"
+            _posthog_host="${POSTHOG_HOST:-https://us.i.posthog.com}"
+            if [[ -n "${_posthog}" ]]; then
+              echo "POSTHOG_API_KEY=${_posthog}" >> .env
+            fi
+            echo "POSTHOG_HOST=${_posthog_host}" >> .env
+            if [[ -n "${_cf_web}" ]]; then
+              echo "CLOUDFLARE_WEB_ANALYTICS_TOKEN=${_cf_web}" >> .env
+            fi
             if [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]; then
               echo "CLOUDFLARE_TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}" >> .env
             fi
+            sudo mkdir -p /var/log/nginx
+            sudo chown 101:101 /var/log/nginx 2>/dev/null || true
             echo "${DOCKER_PASSWORD}" | sudo docker login -u "${DOCKER_USERNAME}" --password-stdin
             sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api nexus-shield-api || true
             sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --build --remove-orphans
@@ -119,7 +140,12 @@ jobs:
               docker rm -f cloudflared-prod 2>/dev/null || true
               sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d cloudflared
             fi
+            sudo bash scripts/install-traffic-report-cron.sh
             curl -fsS http://127.0.0.1:80/ | grep -q "<title>" || (echo "Landing page check failed on :80" && exit 1)
             curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY || (echo "Fast API healthz failed on :8080" && exit 1)
+            curl -fsS http://127.0.0.1:8080/analytics-config.js | grep -q NEXUS_ANALYTICS || (echo "analytics-config.js check failed" && exit 1)
+            if ! curl -fsS http://127.0.0.1:8080/analytics-config.js | grep -qE '"cloudflareToken": "[^"]+' ; then
+              echo "WARN: CLOUDFLARE_WEB_ANALYTICS_TOKEN not set — add GitHub secret or run scripts/activate_cloudflare_analytics.sh"
+            fi
             sudo docker image prune -f
             echo "Deploy tamamlandi: ${DOCKER_IMAGE} + ${DOCKER_FAST_IMAGE}"

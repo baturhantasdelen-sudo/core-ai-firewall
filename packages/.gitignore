@@ -1,0 +1,8 @@
+# Python build artifacts
+python/dist/
+python/build/
+python/*.egg-info/
+
+# npm build artifacts
+npm/dist/
+npm/node_modules/

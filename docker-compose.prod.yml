@@ -5,6 +5,8 @@
 #   DOCKER_IMAGE=<user>/nexus-quantum-guard:<sha>
 #   NEXUS_API_KEY=<API_KEY_SECRET secret degerinden map edilir>
 #   CLOUDFLARE_TUNNEL_TOKEN=<opsiyonel>
+#   POSTHOG_API_KEY=<opsiyonel>
+#   CLOUDFLARE_WEB_ANALYTICS_TOKEN=<opsiyonel>
 
 networks:
   nexus_network:
@@ -92,6 +94,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./index.html:/usr/share/nginx/html/index.html:ro
+      - /var/log/nginx:/var/log/nginx
     depends_on:
       nexus-api:
         condition: service_started

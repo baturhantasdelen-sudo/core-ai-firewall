@@ -222,6 +222,63 @@ def test_pii_request_http_latency_sla(
     assert elapsed_ms < http_sla, f"HTTP PII path took {elapsed_ms:.2f}ms (limit {http_sla}ms)"
 
 
+# --- Sandbox playground (no API key) ---
+
+
+def _post_sandbox(
+    client: TestClient | httpx.Client,
+    user_input: str,
+    session_id: str = "pytest-sandbox",
+) -> Any:
+    payload = {"user_input": user_input, "session_id": session_id}
+    headers = {"Content-Type": "application/json"}
+    return client.post("/api/sandbox", headers=headers, json=payload)
+
+
+def test_sandbox_pii_without_api_key(
+    shield_client: TestClient | httpx.Client,
+) -> None:
+    response = _post_sandbox(
+        shield_client,
+        "Müşterimiz Ahmet Yılmaz'ın TCKN numarası 12345678901 olarak sisteme işlenmiştir.",
+    )
+    assert response.status_code == 200
+    body = _response_json(response)
+    assert body["pii_detected"] is True
+    assert "TCKN" in body["masked_types"]
+    assert body["latency_ms"] < SLA_MS * 2
+
+
+@pytest.mark.parametrize("attack_text", ATTACK_PAYLOADS)
+def test_sandbox_blocks_injection_without_api_key(
+    shield_client: TestClient | httpx.Client,
+    attack_text: str,
+) -> None:
+    response = _post_sandbox(shield_client, attack_text, session_id="sandbox-attack")
+    assert response.status_code == 403
+    assert _response_json(response)["detail"] == PROMPT_INJECTION_BLOCK_DETAIL
+
+
+def test_sandbox_ip_rate_limit(monkeypatch: pytest.MonkeyPatch) -> None:
+    import nexus_shield_fast_api as api
+
+    monkeypatch.setattr(api, "sandbox_rate_limiter", api.SandboxRateLimiter(limit_per_minute=2))
+    with TestClient(app) as client:
+        for _ in range(2):
+            resp = client.post(
+                "/api/sandbox",
+                headers={"Content-Type": "application/json"},
+                json={"user_input": CLEAN_PROMPT, "session_id": "rate-ok"},
+            )
+            assert resp.status_code == 200
+        blocked = client.post(
+            "/api/sandbox",
+            headers={"Content-Type": "application/json"},
+            json={"user_input": CLEAN_PROMPT, "session_id": "rate-blocked"},
+        )
+    assert blocked.status_code == 429
+
+
 # --- Live integration (docker-compose / CI) ---
 
 
@@ -231,7 +288,7 @@ def test_landing_page_serves_index_html(shield_client: TestClient | httpx.Client
     assert "text/html" in response.headers.get("content-type", "")
     assert "Nexus Shield" in response.text
     assert "Interactive Security Playground" in response.text
-    assert "/v1/shield" in response.text
+    assert "/api/sandbox" in response.text
 
 
 @pytest.mark.integration

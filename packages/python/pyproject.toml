@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexus-shield"
+version = "0.1.0"
+authors = [
+  { name = "Nexus Shield Team", email = "dev@nexusshield.ai" },
+]
+description = "Sub-10ms in-RAM PII redaction and guardrail proxy for LLMs (LiteLLM, LangChain, OpenAI)."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Security",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+keywords = ["llm", "pii", "guardrails", "security", "litellm", "langchain", "presidio", "latency", "proxy"]
+
+[project.urls]
+Homepage = "https://github.com/baturhantasdelen-sudo/core-ai-firewall"
+Documentation = "https://api.nexusshield.ai"
+Repository = "https://github.com/baturhantasdelen-sudo/core-ai-firewall"
+"Bug Tracker" = "https://github.com/baturhantasdelen-sudo/core-ai-firewall/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nexus_shield*"]
