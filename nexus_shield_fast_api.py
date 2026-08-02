@@ -85,7 +85,7 @@ COMPILED_PATTERNS: Final[tuple[re.Pattern[str], ...]] = tuple(
 # --- PII Detection & Redaction (v2.0) — pre-compiled patterns ---
 PII_PATTERNS: Final[dict[str, str]] = {
     "TCKN": r"\b[1-9]\d{10}\b",
-    "CREDIT_CARD": r"\b(?:\d[ -]*?){13,16}\b",
+    "CREDIT_CARD": r"\b(?:\d{4}[-\s]?){3}\d{4}\b|\b(?:\d[ -]*){13,19}\d\b",
     "EMAIL": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
     "PHONE": r"(?:\+?90|0)?\s*[5]\d{2}\s*\d{3}\s*\d{2}\s*\d{2}",
 }
@@ -102,7 +102,7 @@ def apply_pii_redaction(text: str) -> tuple[str, bool, list[str]]:
     for pii_type, pattern in COMPILED_PII_PATTERNS.items():
         if pattern.search(redacted_text):
             detected_types.append(pii_type)
-            redacted_text = pattern.sub(f"[{pii_type}_MASKED]", redacted_text)
+            redacted_text = pattern.sub(f"[{pii_type}_REDACTED]", redacted_text)
 
     return redacted_text, len(detected_types) > 0, detected_types
 
@@ -457,7 +457,12 @@ def _build_shield_response(
     return body
 
 
-async def _execute_shield(payload: ShieldRequest, start_time: float) -> dict[str, Any]:
+async def _execute_shield(
+    payload: ShieldRequest,
+    start_time: float,
+    *,
+    playground: bool = False,
+) -> dict[str, Any]:
     # 1. Early Exit regex scan — always before PII, cache, or upstream LLM
     if quick_security_scan(payload.user_input):
         latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
@@ -522,7 +527,8 @@ async def _execute_shield(payload: ShieldRequest, start_time: float) -> dict[str
             logger.warning("Redis get hatası, cache atlanıyor: %s", exc)
 
     # 3. Upstream LLM receives sanitized input only (PII already stripped)
-    await asyncio.sleep(UPSTREAM_LLM_LATENCY_SEC)
+    if not playground:
+        await asyncio.sleep(UPSTREAM_LLM_LATENCY_SEC)
     llm_response = f"İşlenen yanıt: '{sanitized_input}' güvenli bulundu."
 
     if redis_client is not None:
@@ -564,7 +570,7 @@ async def sandbox_shield(request: Request, payload: ShieldRequest):
     """Public playground endpoint — IP rate-limited, no API key required."""
     start_time = time.perf_counter()
     await sandbox_rate_limiter.check(_client_ip(request))
-    return await _execute_shield(payload, start_time)
+    return await _execute_shield(payload, start_time, playground=True)
 
 
 DASHBOARD_HTML = """<!DOCTYPE html>

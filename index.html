@@ -217,7 +217,7 @@
                     </div>
 
                     <div class="mt-4 flex items-center justify-between">
-                        <span class="text-xs text-slate-400">Endpoint: <code class="text-brand-500">https://api.nexusshield.ai/v1</code></span>
+                        <span class="text-xs text-slate-400">Endpoint: <code class="text-brand-500">POST /api/sandbox</code> (demo)</span>
                         <button onclick="runShieldInspect()" id="inspectBtn" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-lg shadow-brand-600/20">
                             <span>Inspect & Shield</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -238,7 +238,7 @@
                         <!-- Real-time Metrics Bar -->
                         <div class="grid grid-cols-3 gap-2 bg-slate-900 border border-slate-800 p-3 rounded-xl mb-4 text-center">
                             <div>
-                                <div class="text-xs text-slate-500">Inspection Time</div>
+                                <div class="text-xs text-slate-500">Engine Time</div>
                                 <div id="latencyVal" class="text-sm font-bold text-brand-500">0.00 ms</div>
                             </div>
                             <div>
@@ -516,7 +516,6 @@ response = client.chat.completions.create(
             const actionEl = document.getElementById('actionVal');
             const statusBadge = document.getElementById('statusBadge');
             const btn = document.getElementById('inspectBtn');
-            const apiKey = document.getElementById('apiKeyInput').value.trim();
 
             if (!input.trim()) {
                 outputEl.innerText = "Please enter text to test...";
@@ -525,21 +524,20 @@ response = client.chat.completions.create(
 
             outputEl.innerText = "Inspecting via Nexus Shield v2.0 engine...";
             btn.disabled = true;
-            const startTime = performance.now();
-
-            const endpoint = apiKey ? '/v1/shield' : '/api/sandbox';
-            const headers = { 'Content-Type': 'application/json' };
-            if (apiKey) headers['X-API-Key'] = apiKey;
 
             try {
-                const resp = await fetch(endpoint, {
+                const resp = await fetch('/api/sandbox', {
                     method: 'POST',
-                    headers,
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_input: input, session_id: 'playground-' + Date.now() })
                 });
-                const latency = (performance.now() - startTime).toFixed(2);
                 const data = await resp.json().catch(() => ({}));
-                latencyEl.innerText = `${data.latency_ms ?? latency} ms`;
+
+                if (typeof data.latency_ms === 'number') {
+                    latencyEl.innerText = `${data.latency_ms.toFixed(2)} ms`;
+                } else {
+                    latencyEl.innerText = '—';
+                }
                 statusBadge.classList.remove('hidden', 'bg-red-500/10', 'text-red-500', 'bg-green-500/10', 'text-green-500', 'border', 'border-red-500/20', 'border-green-500/20');
 
                 if (resp.status === 403) {
@@ -550,7 +548,9 @@ response = client.chat.completions.create(
                     statusBadge.innerText = 'SECURITY THREAT BLOCKED';
                     statusBadge.classList.add('bg-red-500/10', 'text-red-500', 'border', 'border-red-500/20');
                 } else if (resp.status === 401) {
-                    outputEl.innerText = 'Unauthorized: invalid X-API-Key.';
+                    outputEl.innerText = 'Playground sandbox unavailable. Retrying without API key failed — please refresh or contact support.';
+                } else if (resp.status === 404) {
+                    outputEl.innerText = 'Sandbox endpoint not found. Deploy the latest API (POST /api/sandbox) and refresh.';
                 } else if (resp.status === 429) {
                     outputEl.innerText = 'Demo rate limit reached. Start a free trial for your own API key, or try again in a minute.';
                 } else if (resp.status === 200) {

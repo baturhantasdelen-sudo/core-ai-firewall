@@ -146,7 +146,7 @@ EOF
 
 cat << 'EOF' > packages/npm/package.json
 {
-  "name": "nexus-shield-ai",
+  "name": "@baturhantasdelen/nexus-shield",
   "version": "0.1.0",
   "description": "Sub-10ms in-RAM PII redaction proxy for Vercel AI SDK, LangChain, and Node.js LLM apps.",
   "main": "dist/index.js",

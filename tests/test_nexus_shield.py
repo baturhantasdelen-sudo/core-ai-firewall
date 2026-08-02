@@ -32,31 +32,31 @@ PII_CASES = [
     pytest.param(
         "My TCKN is 12345678901 please store it",
         ["TCKN"],
-        "[TCKN_MASKED]",
+        "[TCKN_REDACTED]",
         id="tckn",
     ),
     pytest.param(
         "Charge card 4111 1111 1111 1111 thanks",
         ["CREDIT_CARD"],
-        "[CREDIT_CARD_MASKED]",
+        "[CREDIT_CARD_REDACTED]",
         id="credit_card",
     ),
     pytest.param(
         "Email me at alice.wonder@example.com today",
         ["EMAIL"],
-        "[EMAIL_MASKED]",
+        "[EMAIL_REDACTED]",
         id="email",
     ),
     pytest.param(
         "Call me on +90 532 123 45 67 after lunch",
         ["PHONE"],
-        "[PHONE_MASKED]",
+        "[PHONE_REDACTED]",
         id="phone_tr",
     ),
     pytest.param(
         "Reach 05321234567 for support",
         ["PHONE"],
-        "[PHONE_MASKED]",
+        "[PHONE_REDACTED]",
         id="phone_local",
     ),
 ]
@@ -155,7 +155,7 @@ def test_clean_request_passes_without_pii_modification(
     assert body["masked_types"] == []
     assert body["redacted_input"] == CLEAN_PROMPT
     assert body["result"] is not None
-    assert "MASKED" not in body["redacted_input"]
+    assert "REDACTED" not in body["redacted_input"]
 
 
 def test_unified_response_schema_fields_present(
