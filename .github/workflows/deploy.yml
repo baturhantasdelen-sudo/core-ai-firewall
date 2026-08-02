@@ -132,17 +132,25 @@ jobs:
             fi
             sudo mkdir -p /var/log/nginx
             sudo chown 101:101 /var/log/nginx 2>/dev/null || true
-            echo "${DOCKER_PASSWORD}" | sudo docker login -u "${DOCKER_USERNAME}" --password-stdin
-            sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api nexus-shield-api || true
-            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --build --remove-orphans
-            sudo docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
             grep -q 'PLAYGROUND_SANDBOX_URL' index.html || (echo "index.html missing sandbox playground JS" && exit 1)
+            echo "${DOCKER_PASSWORD}" | sudo docker login -u "${DOCKER_USERNAME}" --password-stdin
+            echo "==> Disk cleanup before image pull..."
+            sudo docker image prune -af || true
+            sudo docker builder prune -af || true
+            df -h / /var/lib/docker 2>/dev/null || df -h /
+            sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-shield-api || true
+            sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api || true
+            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --build --force-recreate --remove-orphans
+            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --force-recreate nginx-gateway nexus-shield-api
+            sudo docker exec nginx-gateway-prod nginx -s reload 2>/dev/null || \
+              sudo docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
+            curl -fsS http://127.0.0.1:80/ | grep -q 'sandbox-v3' || (echo "Landing page on :80 missing sandbox-v3 marker" && exit 1)
             curl -fsS http://127.0.0.1:80/ | grep -q '/api/sandbox' || (echo "Landing page on :80 missing /api/sandbox" && exit 1)
             if grep -q '^CLOUDFLARE_TUNNEL_TOKEN=.\+' .env 2>/dev/null; then
               docker rm -f cloudflared-prod 2>/dev/null || true
               sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d cloudflared
             fi
-            sudo bash scripts/install-traffic-report-cron.sh
+            sudo bash scripts/install-traffic-report-cron.sh || echo "WARN: traffic report cron install skipped"
             curl -fsS http://127.0.0.1:80/ | grep -q "<title>" || (echo "Landing page check failed on :80" && exit 1)
             curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY || (echo "Fast API healthz failed on :8080" && exit 1)
             curl -fsS http://127.0.0.1:8080/analytics-config.js | grep -q NEXUS_ANALYTICS || (echo "analytics-config.js check failed" && exit 1)
