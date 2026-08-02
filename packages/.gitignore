@@ -2,7 +2,13 @@
 python/dist/
 python/build/
 python/*.egg-info/
+cli/dist/
+cli/build/
+cli/*.egg-info/
 
 # npm build artifacts
 npm/dist/
 npm/node_modules/
+edge/dist/
+edge/node_modules/
+vercel-integration/node_modules/
