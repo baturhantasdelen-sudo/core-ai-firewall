@@ -136,6 +136,8 @@ jobs:
             sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api nexus-shield-api || true
             sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --build --remove-orphans
             sudo docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
+            grep -q 'PLAYGROUND_SANDBOX_URL' index.html || (echo "index.html missing sandbox playground JS" && exit 1)
+            curl -fsS http://127.0.0.1:80/ | grep -q '/api/sandbox' || (echo "Landing page on :80 missing /api/sandbox" && exit 1)
             if grep -q '^CLOUDFLARE_TUNNEL_TOKEN=.\+' .env 2>/dev/null; then
               docker rm -f cloudflared-prod 2>/dev/null || true
               sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d cloudflared

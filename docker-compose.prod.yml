@@ -71,6 +71,7 @@ services:
       CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${CLOUDFLARE_WEB_ANALYTICS_TOKEN:-}
     volumes:
       - ./data:/app/data
+      - ./index.html:/app/index.html:ro
     networks:
       - nexus_network
     healthcheck:
