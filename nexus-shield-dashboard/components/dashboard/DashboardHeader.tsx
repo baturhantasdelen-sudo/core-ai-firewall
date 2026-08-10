@@ -1,0 +1,81 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { BookOpen, Check, Copy, Settings, ShieldCheck } from 'lucide-react';
+import { SetupGuideModal } from './SetupGuideModal';
+
+interface DashboardHeaderProps {
+  apiKey: string;
+}
+
+function maskApiKey(apiKey: string): string {
+  const visibleSuffix = apiKey.slice(-4);
+  return `${apiKey.slice(0, 9)}${'•'.repeat(12)}${visibleSuffix}`;
+}
+
+export function DashboardHeader({ apiKey }: DashboardHeaderProps) {
+  const [copied, setCopied] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(apiKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard access can fail in unsupported/insecure contexts; fail silently.
+    }
+  }
+
+  return (
+    <>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold tracking-tight text-zinc-100 sm:text-2xl">
+            Nexus Shield Dashboard
+          </h1>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            </span>
+            Telemetry Active
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-900/80 px-3 py-2">
+            <ShieldCheck className="h-4 w-4 text-zinc-500" />
+            <code className="font-mono text-xs text-zinc-400 sm:text-sm">{maskApiKey(apiKey)}</code>
+            <button
+              onClick={handleCopy}
+              className="ml-1 rounded-md p-1 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-200"
+              aria-label="Copy API key"
+            >
+              {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+
+          <button
+            onClick={() => setSetupOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-900/80 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-white/20 hover:text-zinc-100"
+          >
+            <BookOpen className="h-4 w-4" />
+            Setup Guide
+          </button>
+
+          <Link
+            href="/dashboard/settings"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-900/80 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-white/20 hover:text-zinc-100"
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </Link>
+        </div>
+      </header>
+
+      {setupOpen ? <SetupGuideModal apiKey={apiKey} onClose={() => setSetupOpen(false)} /> : null}
+    </>
+  );
+}
