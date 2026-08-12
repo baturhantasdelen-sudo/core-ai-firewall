@@ -19,36 +19,17 @@ log() { echo "[fix-tunnel] $*"; }
 COMPOSE=(docker compose --env-file .env -f docker-compose.prod.yml)
 COMPOSE_CLOUDFLARE=(docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml)
 
-log "1/5 Eski cloudflared konteyneri kaldiriliyor (isim cakismasi onlemi)..."
+log "1/4 Eski cloudflared konteyneri kaldiriliyor (isim cakismasi onlemi)..."
 docker rm -f cloudflared-prod 2>/dev/null || true
 
-log "2/5 Docker stack yenileniyor (nginx-gateway :80 + nexus-shield-api :8080 + cloudflared)..."
-if grep -q '^CLOUDFLARE_TUNNEL_TOKEN=.\+' .env 2>/dev/null; then
-  "${COMPOSE_CLOUDFLARE[@]}" up -d --remove-orphans
-else
-  log "WARN: CLOUDFLARE_TUNNEL_TOKEN yok — cloudflared atlaniyor"
-  "${COMPOSE[@]}" up -d --remove-orphans
-fi
-
-log "3/5 nginx-gateway ayakta mi kontrol ediliyor..."
+log "2/4 Docker stack yenileniyor (--profile cloudflare)..."
+"${COMPOSE_CLOUDFLARE[@]}" up -d --remove-orphans
 "${COMPOSE[@]}" up -d nginx-gateway
 
-log "4/5 Yerel dogrulama..."
-curl -fsS http://127.0.0.1:80/ | grep -q "Nexus Shield" || {
-  log "HATA: :80 landing page HTML donmuyor"
-  curl -sS http://127.0.0.1:80/ | head -c 200
-  exit 1
-}
-curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY || {
-  log "HATA: Nginx gateway /healthz basarisiz"
-  exit 1
-}
-curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY || {
-  log "HATA: Fast API healthz basarisiz"
-  exit 1
-}
+log "3/4 Post-deploy healthcheck..."
+bash scripts/post-deploy-healthcheck.sh
 
-log "5/5 Cloudflared network modu:"
+log "4/4 Cloudflared network modu:"
 if docker ps --format '{{.Names}}' | grep -q '^cloudflared-prod$'; then
   docker inspect cloudflared-prod --format 'NetworkMode={{.HostConfig.NetworkMode}}'
 else

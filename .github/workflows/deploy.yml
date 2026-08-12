@@ -80,7 +80,7 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,scripts/fix-cloudflare-tunnel-origin.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,Dockerfile.fast,nexus_shield_fast_api.py,nexus_auth.py,requirements-fast.txt"
+          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,scripts/fix-cloudflare-tunnel-origin.sh,scripts/post-deploy-healthcheck.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,Dockerfile.fast,nexus_shield_fast_api.py,nexus_auth.py,requirements-fast.txt"
           target: /opt/nexus-core-firewall/
 
       - name: Deploy to Production Server via SSH
@@ -141,12 +141,9 @@ jobs:
             sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-shield-api || true
             sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api || true
             docker rm -f cloudflared-prod 2>/dev/null || true
-            if grep -q '^CLOUDFLARE_TUNNEL_TOKEN=.\+' .env 2>/dev/null; then
-              sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d --remove-orphans
-            else
-              sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
-            fi
+            sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d --remove-orphans
             sudo docker compose --env-file .env -f docker-compose.prod.yml up -d nginx-gateway
+            sudo bash scripts/post-deploy-healthcheck.sh
             curl -fsS http://127.0.0.1:80/ | grep -q 'sandbox-v3' || (echo "Landing page on :80 missing sandbox-v3 marker" && exit 1)
             curl -fsS http://127.0.0.1:80/ | grep -q '/api/sandbox' || (echo "Landing page on :80 missing /api/sandbox" && exit 1)
             curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY || (echo "Nginx gateway /healthz failed on :80" && exit 1)

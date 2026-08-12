@@ -10,12 +10,14 @@
 
 networks:
   nexus_network:
+    name: nexus_prod_network
     driver: bridge
 
 services:
   nexus-api:
     image: ${DOCKER_IMAGE:?DOCKER_IMAGE environment variable is required}
     container_name: nexus-api-prod
+    hostname: nexus-api-prod
     environment:
       ENV: production
       PYTHONIOENCODING: utf-8
@@ -41,7 +43,10 @@ services:
         "1",
       ]
     networks:
-      - nexus_network
+      nexus_network:
+        aliases:
+          - nexus-api
+          - nexus-api-prod
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
       interval: 30s
@@ -62,6 +67,7 @@ services:
       context: .
       dockerfile: Dockerfile.fast
     container_name: nexus-shield-api-prod
+    hostname: nexus-shield-api-prod
     ports:
       - "127.0.0.1:8080:8080"
     environment:
@@ -73,7 +79,10 @@ services:
       - ./data:/app/data
       - ./index.html:/app/index.html:ro
     networks:
-      - nexus_network
+      nexus_network:
+        aliases:
+          - nexus-shield-api
+          - nexus-shield-api-prod
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/healthz"]
       interval: 15s
@@ -90,6 +99,7 @@ services:
   nginx-gateway:
     image: nginx:1.27-alpine
     container_name: nginx-gateway-prod
+    hostname: nginx-gateway-prod
     ports:
       - "80:80"
     volumes:
@@ -106,9 +116,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 15s
     networks:
-      - nexus_network
+      nexus_network:
+        aliases:
+          - nginx-gateway
+          - nginx-gateway-prod
     restart: unless-stopped
     logging:
       driver: json-file
@@ -120,6 +133,8 @@ services:
     image: cloudflare/cloudflared:2024.12.2
     container_name: cloudflared-prod
     profiles: ["cloudflare"]
+    # Host network reaches localhost:80 where nginx-gateway publishes port 80.
+    # Cloudflare Zero Trust Public Hostname must use http://127.0.0.1:80 as origin.
     network_mode: host
     command: tunnel --no-autoupdate run
     environment:
