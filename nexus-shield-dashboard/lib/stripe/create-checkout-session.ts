@@ -16,8 +16,9 @@ export async function createProCheckoutSession(
   const { orgId, customerId, billingInterval, appUrl } = input;
 
   const monthlyPriceId =
-    process.env.STRIPE_PRO_MONTHLY_PRICE_ID ?? process.env.STRIPE_PRO_PRICE_ID;
-  const yearlyPriceId = process.env.STRIPE_PRO_YEARLY_PRICE_ID;
+    process.env.STRIPE_PRO_MONTHLY_PRICE_ID?.trim() ??
+    process.env.STRIPE_PRO_PRICE_ID?.trim();
+  const yearlyPriceId = process.env.STRIPE_PRO_YEARLY_PRICE_ID?.trim();
 
   const priceId = billingInterval === 'year' ? yearlyPriceId : monthlyPriceId;
 
