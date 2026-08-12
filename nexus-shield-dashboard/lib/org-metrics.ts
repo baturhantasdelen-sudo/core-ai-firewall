@@ -73,18 +73,31 @@ export async function getOrganizationByGithubInstallationId(
 
 export async function getOrgUsageSummary(orgId: string): Promise<OrgUsageSummary> {
   const supabase = getSupabaseAdmin();
+  const since = startOfCurrentMonthIso();
 
-  const [scanCountResult, repoRowsResult] = await Promise.all([
+  const [scanCountResult, usageEventsResult, repoRowsResult] = await Promise.all([
     supabase
       .from('scan_results')
       .select('id', { count: 'exact', head: true })
       .eq('org_id', orgId)
-      .gte('created_at', startOfCurrentMonthIso()),
+      .gte('created_at', since),
+    supabase
+      .from('usage_events')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .gte('created_at', since),
     supabase.from('scan_results').select('repo_name').eq('org_id', orgId),
   ]);
 
   if (scanCountResult.error) {
     throw new Error(`Failed to count scans: ${scanCountResult.error.message}`);
+  }
+
+  if (usageEventsResult.error) {
+    // usage_events table may not exist until schema-auth.sql is applied
+    if (!usageEventsResult.error.message.includes('usage_events')) {
+      throw new Error(`Failed to count usage events: ${usageEventsResult.error.message}`);
+    }
   }
 
   if (repoRowsResult.error) {
@@ -96,7 +109,7 @@ export async function getOrgUsageSummary(orgId: string): Promise<OrgUsageSummary
   ).size;
 
   return {
-    scansThisMonth: scanCountResult.count ?? 0,
+    scansThisMonth: (scanCountResult.count ?? 0) + (usageEventsResult.count ?? 0),
     connectedRepoCount,
   };
 }

@@ -1,7 +1,7 @@
 export type PlanId = 'free' | 'pro' | 'enterprise';
 
 export const PLAN_SCAN_LIMITS = {
-  free: 1_000,
+  free: 50,
   pro: 500_000,
   enterprise: 999_999_999,
 } as const;

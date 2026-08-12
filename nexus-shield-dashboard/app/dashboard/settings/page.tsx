@@ -1,12 +1,13 @@
 import Link from 'next/link';
-import { ArrowLeft, FolderGit2, ScanSearch, ShieldQuestion } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { ArrowLeft, FolderGit2, ScanSearch } from 'lucide-react';
 import { SubscriptionBadge } from '@/components/dashboard/SubscriptionBadge';
 import { FeatureGate } from '@/components/dashboard/FeatureGate';
 import { ManageSubscriptionButton } from '@/components/dashboard/ManageSubscriptionButton';
 import { GithubIntegrationCard, GithubIntegrationNotice } from '@/components/dashboard/GithubIntegrationCard';
-import { getOrganizationById, getOrgUsageSummary, derivePlanId, OrgRecord } from '@/lib/org-metrics';
+import { getOrgUsageSummary, derivePlanId, type OrgRecord } from '@/lib/org-metrics';
 import { getPlanConfig } from '@/config/plans';
-import { DEMO_ORG_ID } from '@/lib/demo-org';
+import { getAuthContext } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,11 @@ function resolveGithubNotice(params: Record<string, string | string[] | undefine
 }
 
 export default async function DashboardSettingsPage({ searchParams }: DashboardSettingsPageProps) {
-  const [org, resolvedSearchParams] = await Promise.all([getOrganizationById(DEMO_ORG_ID), searchParams]);
+  const auth = await getAuthContext();
+  if (!auth) redirect('/login?next=/dashboard/settings');
+
+  const org = auth.org;
+  const resolvedSearchParams = await searchParams;
   const githubNotice = resolveGithubNotice(resolvedSearchParams);
 
   return (
@@ -41,19 +46,7 @@ export default async function DashboardSettingsPage({ searchParams }: DashboardS
           Dashboard&apos;a dön
         </Link>
 
-        {!org ? (
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/40 p-10 text-center">
-            <ShieldQuestion className="h-8 w-8 text-zinc-600" />
-            <h2 className="text-lg font-semibold text-zinc-200">Organizasyon bulunamadı</h2>
-            <p className="max-w-md text-sm text-zinc-500">
-              Bu sayfa henüz gerçek kimlik doğrulama bağlanmadığı için sabit bir <code>org_id</code> (
-              <code>{DEMO_ORG_ID}</code>) kullanıyor. Kimlik doğrulama entegre edildiğinde bu değer oturumdaki
-              gerçek organizasyon ID&apos;si ile değiştirilmelidir.
-            </p>
-          </div>
-        ) : (
-          <SettingsContent org={org} githubNotice={githubNotice} />
-        )}
+        <SettingsContent org={org} githubNotice={githubNotice} />
       </div>
     </div>
   );

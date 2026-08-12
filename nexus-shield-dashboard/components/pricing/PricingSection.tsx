@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { Check, Sparkles } from 'lucide-react';
 import {
   PRICING_TIERS,
@@ -10,7 +9,6 @@ import {
   displayPrice,
   type BillingInterval,
 } from '@/config/pricing';
-import { DEMO_ORG_ID } from '@/lib/demo-org';
 import { BillingToggle } from './BillingToggle';
 import { UpgradeButton } from './UpgradeButton';
 
@@ -18,7 +16,7 @@ export function PricingSection() {
   const [interval, setInterval] = useState<BillingInterval>('month');
 
   return (
-    <section className="relative">
+    <section id="pricing" className="scroll-mt-20 relative">
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-0 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-indigo-500/10 blur-3xl"
@@ -30,12 +28,12 @@ export function PricingSection() {
             <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
             B2B SaaS Pricing
           </div>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl lg:text-5xl">
-            Ship secure AI &amp; CI/CD without enterprise friction
-          </h1>
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl lg:text-5xl">
+            Simple pricing for AI security
+          </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm text-zinc-400 sm:text-base">
-            Start free with 1,000 API requests. Scale to Pro for production guardrails, SCA, and
-            real-time GitHub Checks — or talk to us for on-premise &amp; compliance.
+            Start with 50 free playground scans. Upgrade to Pro for production guardrails, SCA, and
+            real-time GitHub Checks.
           </p>
 
           <div className="mt-10">
@@ -103,20 +101,16 @@ export function PricingSection() {
 
                 <div className="mt-8 space-y-3">
                   {tier.id === 'developer' ? (
-                    <Link
-                      href="/dashboard"
+                    <a
+                      href="#playground"
                       className="inline-flex w-full items-center justify-center rounded-lg border border-white/10 bg-zinc-800/80 px-4 py-3 text-sm font-semibold text-zinc-200 transition-colors hover:border-white/20 hover:bg-zinc-800"
                     >
                       {tier.cta}
-                    </Link>
+                    </a>
                   ) : null}
 
                   {isPro ? (
-                    <UpgradeButton
-                      orgId={DEMO_ORG_ID}
-                      billingInterval={interval}
-                      label={tier.cta}
-                    />
+                    <UpgradeButton billingInterval={interval} label={tier.cta} />
                   ) : null}
 
                   {isEnterprise ? (

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Check, Copy, Settings, ShieldCheck } from 'lucide-react';
+import { BookOpen, Check, Copy, Settings } from 'lucide-react';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 import { SetupGuideModal } from './SetupGuideModal';
 
 interface DashboardHeaderProps {
@@ -31,10 +32,12 @@ export function DashboardHeader({ apiKey }: DashboardHeaderProps) {
   return (
     <>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold tracking-tight text-zinc-100 sm:text-2xl">
-            Nexus Shield Dashboard
-          </h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <BrandLogo size={32} />
+          <div className="flex items-center gap-3">
+            <h1 className="select-none text-xl font-semibold tracking-tight text-zinc-100 sm:text-2xl">
+              Dashboard
+            </h1>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -42,11 +45,11 @@ export function DashboardHeader({ apiKey }: DashboardHeaderProps) {
             </span>
             Telemetry Active
           </span>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-900/80 px-3 py-2">
-            <ShieldCheck className="h-4 w-4 text-zinc-500" />
             <code className="font-mono text-xs text-zinc-400 sm:text-sm">{maskApiKey(apiKey)}</code>
             <button
               onClick={handleCopy}

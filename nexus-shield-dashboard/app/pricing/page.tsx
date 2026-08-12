@@ -1,13 +1,5 @@
-import { LandingNav } from '@/components/landing/LandingNav';
-import { LandingFooter } from '@/components/landing/LandingFooter';
-import { PricingSection } from '@/components/pricing/PricingSection';
+import { redirect } from 'next/navigation';
 
 export default function PricingPage() {
-  return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <LandingNav />
-      <PricingSection />
-      <LandingFooter />
-    </div>
-  );
+  redirect('/#pricing');
 }

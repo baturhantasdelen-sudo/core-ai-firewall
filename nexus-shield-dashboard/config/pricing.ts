@@ -1,3 +1,7 @@
+export const PRO_PLAN_MONTHLY_USD = 59;
+export const PRO_PLAN_ANNUAL_MONTHLY_USD = 49;
+export const FREE_TIER_MONTHLY_SCANS = 50;
+
 export type BillingInterval = 'month' | 'year';
 
 export interface PricingTier {
@@ -16,16 +20,16 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     id: 'developer',
     name: 'Developer',
-    description: 'Free trial & test limit for indie devs and side projects.',
+    description: 'Free tier with 50 playground scans and indie-dev limits.',
     monthlyPrice: 0,
     annualMonthlyPrice: 0,
     features: [
-      '1,000 API requests / month',
+      '50 free scans / month',
+      'Live PII masking playground',
       'Basic PII redaction & masking',
       'GitHub App & repo integration',
-      'Community support',
     ],
-    cta: 'Get Started Free',
+    cta: 'Start Free Trial',
   },
   {
     id: 'pro',
@@ -40,7 +44,7 @@ export const PRICING_TIERS: PricingTier[] = [
       'Real-time GitHub Checks & webhooks',
       'Standard SLA & email support',
     ],
-    cta: 'Upgrade to Pro',
+    cta: 'Subscribe to Pro',
     highlighted: true,
     badge: 'Most Popular',
   },

@@ -57,6 +57,6 @@ export async function createProCheckoutSession(
       },
     },
     success_url: `${appUrl}/dashboard?payment=success`,
-    cancel_url: `${appUrl}/pricing?payment=cancelled`,
+    cancel_url: `${appUrl}/#pricing?payment=cancelled`,
   });
 }

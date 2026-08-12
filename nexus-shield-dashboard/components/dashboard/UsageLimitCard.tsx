@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Zap } from 'lucide-react';
+import { PRO_PLAN_MONTHLY_USD } from '@/config/pricing';
 
 interface UsageLimitCardProps {
   used: number;
@@ -51,11 +52,11 @@ export function UsageLimitCard({ used, limit, plan }: UsageLimitCardProps) {
 
         {plan === 'free' ? (
           <Link
-            href="/pricing"
+            href="/#pricing"
             className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/20 transition-transform hover:scale-[1.02] hover:shadow-fuchsia-500/30 active:scale-[0.98]"
           >
             <Zap className="h-4 w-4 transition-transform group-hover:scale-110" />
-            Upgrade to Pro ($79/mo) — Unlimited Scans
+            Upgrade to Pro (${PRO_PLAN_MONTHLY_USD}/mo) — Unlimited Scans
           </Link>
         ) : null}
       </div>

@@ -1,5 +1,5 @@
 # Production stack — image CI'da build edilir; sunucuda pull + up.
-# HTTPS: Cloudflare Tunnel (cloudflared) -> nginx-gateway:80 -> nexus-shield-api:8080 + index.html
+# HTTPS: Cloudflare Tunnel (cloudflared) -> nginx-gateway:80 -> FastAPI (/v1/shield, /api/sandbox) + Vercel (/)
 #
 # .env (GitHub Actions tarafindan yazilir):
 #   DOCKER_IMAGE=<user>/nexus-quantum-guard:<sha>

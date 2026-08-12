@@ -1,4 +1,5 @@
-import { LucideIcon, Lock, ShieldCheck, Sparkles, Zap } from 'lucide-react';
+import { Globe, Lock, ShieldCheck, Zap } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface Feature {
   icon: LucideIcon;
@@ -11,40 +12,43 @@ const FEATURES: Feature[] = [
   {
     icon: Zap,
     accent: 'bg-amber-500/10 text-amber-400',
-    title: '0ms Latency Overhead',
+    title: 'Sub-10ms Latency',
     description:
-      'Light-weight regex & checksum validation runs on commit/PR — no build step slowdown, no blocked deploys waiting on a scan queue.',
-  },
-  {
-    icon: Sparkles,
-    accent: 'bg-indigo-500/10 text-indigo-400',
-    title: 'AI False Positive Elimination',
-    description:
-      'Intelligent context analysis (Shannon entropy + pattern validation) prevents false alarms from example keys, test fixtures, and placeholders.',
-  },
-  {
-    icon: ShieldCheck,
-    accent: 'bg-emerald-500/10 text-emerald-400',
-    title: 'GitHub Checks Native',
-    description:
-      'Inline PR annotations land on the exact code line — reviewers see the leak, the type, and the fix without leaving GitHub.',
+      'Early-exit regex and semantic guardrails inspect prompts in single-digit milliseconds — no queue, no build-step slowdown.',
   },
   {
     icon: Lock,
     accent: 'bg-fuchsia-500/10 text-fuchsia-400',
-    title: 'Complete Privacy',
+    title: 'Zero-Data Leaks',
     description:
-      'Your source code stays in your pipeline. Only masked secret metadata (type, file, line) is ever sent to Nexus Shield.',
+      'PII, secrets, and injection payloads are masked or blocked before they reach your LLM. Source code never leaves your pipeline.',
+  },
+  {
+    icon: ShieldCheck,
+    accent: 'bg-emerald-500/10 text-emerald-400',
+    title: 'KVKK / GDPR Compliance',
+    description:
+      'TCKN, credit card, email, and API key patterns are redacted automatically with audit-friendly telemetry metadata.',
+  },
+  {
+    icon: Globe,
+    accent: 'bg-indigo-500/10 text-indigo-400',
+    title: 'Multi-LLM Proxy',
+    description:
+      'One gateway for OpenAI, Google Gemini, Anthropic Claude, and local Ollama — swap models without rewriting security logic.',
   },
 ];
 
 export function FeaturesGrid() {
   return (
-    <section id="features" className="mx-auto max-w-7xl px-6 py-20">
+    <section id="features" className="scroll-mt-20 mx-auto max-w-7xl px-6 py-20">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">Why Nexus Shield?</h2>
+        <h2 className="text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
+          Enterprise-Grade AI Guardrails
+        </h2>
         <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-          Built for teams who ship fast and can&apos;t afford a leaked credential.
+          Protect LLM apps and CI/CD pipelines with zero-latency detection and DevSecOps-native
+          workflows.
         </p>
       </div>
 
