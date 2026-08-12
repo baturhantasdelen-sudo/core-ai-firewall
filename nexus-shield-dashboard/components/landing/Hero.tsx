@@ -53,7 +53,11 @@ export function Hero() {
           </div>
 
           <p className="mt-6 text-xs text-zinc-500">
-            No credit card required · Free tier includes 50 scans/month · GitHub App install in under 2 minutes
+            No credit card required · Free tier includes 1,000 API requests/month · GitHub App
+            install in under 2 minutes ·{' '}
+            <a href="/pricing" className="text-indigo-400 hover:text-indigo-300">
+              View pricing
+            </a>
           </p>
         </div>
 

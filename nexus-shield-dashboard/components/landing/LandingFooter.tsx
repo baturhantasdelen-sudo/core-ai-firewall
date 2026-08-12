@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ShieldCheck } from 'lucide-react';
 
 export function LandingFooter() {
@@ -9,9 +10,9 @@ export function LandingFooter() {
           <span>© {new Date().getFullYear()} Nexus Shield. All rights reserved.</span>
         </div>
         <div className="flex items-center gap-6">
-          <a href="/pricing" className="transition-colors hover:text-zinc-300">
+          <Link href="/pricing" className="transition-colors hover:text-zinc-300">
             Pricing
-          </a>
+          </Link>
           <a href="mailto:demo@nexusshield.dev" className="transition-colors hover:text-zinc-300">
             Contact
           </a>

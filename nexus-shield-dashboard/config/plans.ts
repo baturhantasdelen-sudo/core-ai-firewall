@@ -1,5 +1,11 @@
 export type PlanId = 'free' | 'pro' | 'enterprise';
 
+export const PLAN_SCAN_LIMITS = {
+  free: 1_000,
+  pro: 500_000,
+  enterprise: 999_999_999,
+} as const;
+
 export interface PlanConfig {
   id: PlanId;
   name: string;
@@ -18,7 +24,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanConfig> = {
     id: 'free',
     name: 'Free',
     maxRepositories: 3,
-    maxScansPerMonth: 50,
+    maxScansPerMonth: PLAN_SCAN_LIMITS.free,
     features: {
       customRegexRules: false,
       aiFalsePositiveFilter: false,
@@ -30,7 +36,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanConfig> = {
     id: 'pro',
     name: 'Pro',
     maxRepositories: 25,
-    maxScansPerMonth: 1000,
+    maxScansPerMonth: PLAN_SCAN_LIMITS.pro,
     features: {
       customRegexRules: true,
       aiFalsePositiveFilter: true,
@@ -42,7 +48,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanConfig> = {
     id: 'enterprise',
     name: 'Enterprise',
     maxRepositories: 9999,
-    maxScansPerMonth: 999999,
+    maxScansPerMonth: PLAN_SCAN_LIMITS.enterprise,
     features: {
       customRegexRules: true,
       aiFalsePositiveFilter: true,
