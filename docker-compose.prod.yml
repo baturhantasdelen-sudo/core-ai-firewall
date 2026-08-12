@@ -101,6 +101,12 @@ services:
         condition: service_started
       nexus-shield-api:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - nexus_network
     restart: unless-stopped
@@ -120,7 +126,7 @@ services:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
     depends_on:
       nginx-gateway:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
     logging:
       driver: json-file

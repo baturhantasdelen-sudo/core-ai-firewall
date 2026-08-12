@@ -16,22 +16,31 @@ cd "$DEPLOY_PATH"
 
 log() { echo "[fix-tunnel] $*"; }
 
-log "1/6 Docker stack yenileniyor (nginx-gateway :80 + nexus-shield-api :8080)..."
-docker compose --env-file .env -f docker-compose.prod.yml up -d --build --remove-orphans
+COMPOSE=(docker compose --env-file .env -f docker-compose.prod.yml)
+COMPOSE_CLOUDFLARE=(docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml)
 
-log "2/6 nginx-gateway yeniden baslatiliyor..."
-docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
-
-log "3/6 Eski cloudflared konteyneri kaldiriliyor (isim cakismasi onlemi)..."
+log "1/5 Eski cloudflared konteyneri kaldiriliyor (isim cakismasi onlemi)..."
 docker rm -f cloudflared-prod 2>/dev/null || true
 
-log "4/6 cloudflared (host network -> localhost:80) baslatiliyor..."
-docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d cloudflared
+log "2/5 Docker stack yenileniyor (nginx-gateway :80 + nexus-shield-api :8080 + cloudflared)..."
+if grep -q '^CLOUDFLARE_TUNNEL_TOKEN=.\+' .env 2>/dev/null; then
+  "${COMPOSE_CLOUDFLARE[@]}" up -d --remove-orphans
+else
+  log "WARN: CLOUDFLARE_TUNNEL_TOKEN yok — cloudflared atlaniyor"
+  "${COMPOSE[@]}" up -d --remove-orphans
+fi
 
-log "5/6 Yerel dogrulama..."
+log "3/5 nginx-gateway ayakta mi kontrol ediliyor..."
+"${COMPOSE[@]}" up -d nginx-gateway
+
+log "4/5 Yerel dogrulama..."
 curl -fsS http://127.0.0.1:80/ | grep -q "Nexus Shield" || {
   log "HATA: :80 landing page HTML donmuyor"
   curl -sS http://127.0.0.1:80/ | head -c 200
+  exit 1
+}
+curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY || {
+  log "HATA: Nginx gateway /healthz basarisiz"
   exit 1
 }
 curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY || {
@@ -39,8 +48,12 @@ curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY || {
   exit 1
 }
 
-log "6/6 Cloudflared network modu:"
-docker inspect cloudflared-prod --format 'NetworkMode={{.HostConfig.NetworkMode}}'
+log "5/5 Cloudflared network modu:"
+if docker ps --format '{{.Names}}' | grep -q '^cloudflared-prod$'; then
+  docker inspect cloudflared-prod --format 'NetworkMode={{.HostConfig.NetworkMode}}'
+else
+  log "cloudflared-prod calismiyor (token eksik veya profil devre disi)"
+fi
 
 cat <<'EOF'
 
