@@ -12,7 +12,8 @@ export type IssueType =
   | 'AWS Access Key'
   | 'Private Key'
   | 'JWT'
-  | 'Generic Secret';
+  | 'Generic Secret'
+  | 'High-Entropy Secret';
 
 export interface ScanIssue {
   type: IssueType;
@@ -128,6 +129,65 @@ function luhnCheck(value: string): boolean {
   return sum % 10 === 0;
 }
 
+// Catches unbranded secrets that don't match any known provider prefix
+// (regexes above only recognize keys with a recognizable format, e.g.
+// `sk-...` or `AKIA...`). Assignments to a variable/key with a long,
+// high-entropy quoted value are a strong signal of a leaked credential
+// even without a recognizable prefix.
+const ASSIGNMENT_VALUE_REGEX = /[A-Za-z_][A-Za-z0-9_]*\s*[:=]\s*['"`]([A-Za-z0-9+/_.-]{20,100})['"`]/g;
+const PURE_HEX_REGEX = /^[0-9a-f]+$/i;
+const HIGH_ENTROPY_THRESHOLD = 4.3;
+
+function shannonEntropy(value: string): number {
+  const frequencies = new Map<string, number>();
+  for (const char of value) {
+    frequencies.set(char, (frequencies.get(char) ?? 0) + 1);
+  }
+
+  let entropy = 0;
+  for (const count of frequencies.values()) {
+    const probability = count / value.length;
+    entropy -= probability * Math.log2(probability);
+  }
+
+  return entropy;
+}
+
+function rangesOverlap(a: [number, number], b: [number, number]): boolean {
+  return a[0] < b[1] && b[0] < a[1];
+}
+
+function detectHighEntropySecrets(content: string, matchedRanges: Array<[number, number]>): ScanIssue[] {
+  const issues: ScanIssue[] = [];
+  const regex = new RegExp(ASSIGNMENT_VALUE_REGEX.source, ASSIGNMENT_VALUE_REGEX.flags);
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(content)) !== null) {
+    const value = match[1];
+    const valueStart = match.index + match[0].lastIndexOf(value);
+    const valueRange: [number, number] = [valueStart, valueStart + value.length];
+
+    if (isPlaceholder(value)) continue;
+    // Pure-hex strings (commit SHAs, lockfile integrity hashes, checksums)
+    // are naturally high-entropy but are almost never secrets themselves.
+    if (PURE_HEX_REGEX.test(value)) continue;
+    // Skip values already flagged by a more specific pattern above.
+    if (matchedRanges.some((range) => rangesOverlap(range, valueRange))) continue;
+
+    if (shannonEntropy(value) >= HIGH_ENTROPY_THRESHOLD) {
+      issues.push({
+        type: 'High-Entropy Secret',
+        line: lineNumberAt(content, valueStart),
+        column: columnAt(content, valueStart),
+        preview: maskPreview(value, 'High-Entropy Secret'),
+        matched: value,
+      });
+    }
+  }
+
+  return issues;
+}
+
 function lineNumberAt(content: string, index: number): number {
   return content.slice(0, index).split('\n').length;
 }
@@ -153,7 +213,13 @@ export function maskPreview(value: string, type: IssueType): string {
   return `${prefix}${'*'.repeat(Math.max(4, compact.length - prefix.length - 4))}${visibleTail}`;
 }
 
-function collectMatches(content: string, pattern: ScanPattern, issues: ScanIssue[], seen: Set<string>): void {
+function collectMatches(
+  content: string,
+  pattern: ScanPattern,
+  issues: ScanIssue[],
+  seen: Set<string>,
+  matchedRanges: Array<[number, number]>,
+): void {
   const regex = new RegExp(pattern.regex.source, pattern.regex.flags);
   let match: RegExpExecArray | null;
 
@@ -172,6 +238,7 @@ function collectMatches(content: string, pattern: ScanPattern, issues: ScanIssue
       continue;
     }
     seen.add(dedupeKey);
+    matchedRanges.push([match.index, match.index + matched.length]);
 
     issues.push({
       type: pattern.type,
@@ -207,10 +274,13 @@ export function scanContent(content: string, filename: string): ScanIssue[] {
 
   const issues: ScanIssue[] = [];
   const seen = new Set<string>();
+  const matchedRanges: Array<[number, number]> = [];
 
   for (const pattern of PATTERNS) {
-    collectMatches(content, pattern, issues, seen);
+    collectMatches(content, pattern, issues, seen, matchedRanges);
   }
+
+  issues.push(...detectHighEntropySecrets(content, matchedRanges));
 
   return issues.sort((a, b) => a.line - b.line || a.column - b.column);
 }

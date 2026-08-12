@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  nexus-shield-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nexus-shield-proxy:local
+    ports:
+      - "${NEXUS_PROXY_PORT:-8080}:8080"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      NEXUS_UPSTREAM_TARGET: ${NEXUS_UPSTREAM_TARGET:-http://host.docker.internal:11434/v1}
+    command: >
+      sh -c "nexus-shield proxy --host 0.0.0.0 -p 8080
+      -t $${NEXUS_UPSTREAM_TARGET} --mask-all"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

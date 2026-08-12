@@ -208,6 +208,29 @@ fi
   "$NPM_CMD" run build
 )
 
+echo "📦 5. Edge Runtime npm paketi derleniyor..."
+(
+  cd packages/edge
+  "$NPM_CMD" install --silent
+  "$NPM_CMD" run build
+)
+
+echo "📦 6. CLI paketi derleniyor..."
+(
+  cd packages/cli
+  python3 -m pip install --quiet -e . 2>/dev/null || python -m pip install --quiet -e .
+  python3 -m build 2>/dev/null || python -m build
+)
+
+echo "📦 7. Ollama proxy npm paketi hazırlanıyor..."
+(
+  cd packages/ollama-nexus-shield
+  "$NPM_CMD" install --silent
+)
+
 echo "✅ Paket altyapıları oluşturuldu ve derleme testleri geçti!"
 echo "   Python wheel/sdist: packages/python/dist/"
 echo "   npm output:         packages/npm/dist/"
+echo "   edge output:        packages/edge/dist/"
+echo "   cli output:         packages/cli/dist/"
+echo "   ollama proxy:       packages/ollama-nexus-shield/"

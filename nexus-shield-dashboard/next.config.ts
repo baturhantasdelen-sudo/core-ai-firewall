@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Default Next.js output works on Vercel Serverless Functions — no `standalone`
+  // needed unless self-hosting via Docker/Node.
+  poweredByHeader: false,
 };
 
 export default nextConfig;

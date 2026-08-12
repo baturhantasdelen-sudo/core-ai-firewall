@@ -31,6 +31,11 @@ export function ScanHistoryTable({ scans }: ScanHistoryTableProps) {
         <p className="mt-0.5 text-xs text-zinc-500">Click a row to inspect detected findings.</p>
       </div>
 
+      {scans.length === 0 ? (
+        <p className="px-5 py-10 text-center text-sm text-zinc-500">
+          Henüz bir tarama kaydı yok. Bir push veya pull request yapıldığında burada görünecek.
+        </p>
+      ) : (
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -89,6 +94,7 @@ export function ScanHistoryTable({ scans }: ScanHistoryTableProps) {
           </tbody>
         </table>
       </div>
+      )}
 
       {selectedScan ? (
         <ScanDetailModal scan={selectedScan} onClose={() => setSelectedScan(null)} />

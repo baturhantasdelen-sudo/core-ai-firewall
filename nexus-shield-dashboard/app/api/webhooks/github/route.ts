@@ -10,6 +10,10 @@ import {
 
 export const runtime = 'nodejs';
 
+// Webhook handler returns 200 immediately; `after()` continues the scan in the
+// same serverless invocation. Vercel Pro allows up to 60s (300s on Enterprise).
+export const maxDuration = 60;
+
 const HANDLED_PULL_REQUEST_ACTIONS = new Set(['opened', 'synchronize']);
 
 function logBackgroundError(context: string, error: unknown): void {

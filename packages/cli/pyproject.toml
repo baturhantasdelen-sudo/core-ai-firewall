@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexus-shield-cli"
+version = "0.1.0"
+authors = [
+  { name = "Nexus Shield Team", email = "dev@nexusshield.ai" },
+]
+description = "Local OpenAI-compatible PII guardrail proxy for Ollama, OpenAI, and LiteLLM."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+  "fastapi>=0.110.0",
+  "httpx>=0.27.0",
+  "uvicorn[standard]>=0.27.0",
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Security",
+  "Environment :: Console",
+  "Typing :: Typed",
+]
+keywords = ["llm", "pii", "guardrails", "proxy", "ollama", "openai", "cli"]
+
+[project.scripts]
+nexus-shield = "nexus_shield_cli.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/baturhantasdelen-sudo/core-ai-firewall"
+Documentation = "https://api.nexusshield.ai"
+Repository = "https://github.com/baturhantasdelen-sudo/core-ai-firewall"
+"Bug Tracker" = "https://github.com/baturhantasdelen-sudo/core-ai-firewall/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nexus_shield_cli*"]

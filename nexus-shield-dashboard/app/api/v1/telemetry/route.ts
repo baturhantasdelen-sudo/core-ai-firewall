@@ -7,6 +7,7 @@ export const runtime = 'nodejs';
 
 const findingSchema = z.object({
   type: z.string(),
+  file: z.string().optional(),
   line: z.number().int().optional(),
   preview: z.string().optional(),
 });
@@ -112,10 +113,46 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (insertError) {
+      console.error('[telemetry] scan_results insert error:', {
+        code: insertError.code,
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint,
+        orgId: org.id,
+        repoName: repo_name,
+        commitSha: commit_sha,
+      });
       return NextResponse.json(
         { error: `Failed to record scan result: ${insertError.message}` },
         { status: 500 },
       );
+    }
+
+    if (findings.length > 0) {
+      const findingRows = findings.map((finding) => ({
+        scan_result_id: inserted.id,
+        secret_type: finding.type,
+        file_path: finding.file ?? 'unknown',
+        line_number: finding.line ?? null,
+        masked_preview: finding.preview ?? null,
+      }));
+
+      const { error: findingsError } = await supabase.from('findings').insert(findingRows);
+
+      if (findingsError) {
+        // Non-fatal: the scan_results row (with its jsonb findings summary) is
+        // already persisted, so we log and continue rather than failing the
+        // whole request over the normalized findings rows.
+        console.error('[telemetry] findings insert error:', {
+          code: findingsError.code,
+          message: findingsError.message,
+          details: findingsError.details,
+          hint: findingsError.hint,
+          scanResultId: inserted.id,
+          rowCount: findingRows.length,
+          sampleRow: findingRows[0],
+        });
+      }
     }
 
     return NextResponse.json(

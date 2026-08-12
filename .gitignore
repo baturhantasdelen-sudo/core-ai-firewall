@@ -32,3 +32,6 @@ _*.json
 
 # Customer API keys (trial / pro registry)
 data/api_keys.json
+.vercel
+.env*
+!.env*.example

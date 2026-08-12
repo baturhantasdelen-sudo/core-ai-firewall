@@ -21,8 +21,18 @@ function getAppCredentials(): GithubAppCredentials {
   }
 
   // Most hosting providers only accept single-line env vars, so PEM keys are
-  // usually stored with literal "\n" escapes instead of real newlines.
-  const privateKey = rawPrivateKey.includes('\\n') ? rawPrivateKey.replace(/\\n/g, '\n') : rawPrivateKey;
+  // usually stored with literal "\n" escapes instead of real newlines. Some
+  // .env parsers (dotenv, used by Next.js) additionally expand "\n" inside
+  // double-quoted values themselves, so a key pasted with *both* literal
+  // "\n" prefixes *and* real line breaks ends up with doubled newlines by
+  // the time it reaches process.env — that's invalid PEM and fails to parse.
+  // Normalize unconditionally: expand any literal escapes, unify line
+  // endings, then collapse consecutive newlines down to one.
+  const privateKey = rawPrivateKey
+    .replace(/\\n/g, '\n')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{2,}/g, '\n')
+    .trim();
 
   cachedCredentials = { appId, privateKey };
   return cachedCredentials;

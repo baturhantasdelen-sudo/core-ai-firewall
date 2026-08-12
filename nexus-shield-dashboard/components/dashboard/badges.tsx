@@ -1,5 +1,5 @@
 import { CheckCircle2, ShieldAlert } from 'lucide-react';
-import { FindingType, ScanStatus, isPiiFinding } from '@/lib/mock-dashboard-data';
+import { PII_FINDING_TYPES, ScanStatus } from '@/lib/mock-dashboard-data';
 
 export function StatusBadge({ status }: { status: ScanStatus }) {
   if (status === 'passed') {
@@ -19,15 +19,18 @@ export function StatusBadge({ status }: { status: ScanStatus }) {
   );
 }
 
-export function FindingBadge({ type }: { type: FindingType }) {
-  const pii = isPiiFinding(type);
+export function FindingBadge({ type }: { type: string }) {
+  const pii = (PII_FINDING_TYPES as readonly string[]).includes(type);
+  const isSca = type.startsWith('SCA Vulnerability');
 
   return (
     <span
       className={
-        pii
-          ? 'inline-flex items-center rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-400'
-          : 'inline-flex items-center rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-[11px] font-medium text-rose-400'
+        isSca
+          ? 'inline-flex items-center rounded-md border border-orange-500/20 bg-orange-500/10 px-2 py-0.5 text-[11px] font-medium text-orange-400'
+          : pii
+            ? 'inline-flex items-center rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-400'
+            : 'inline-flex items-center rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-[11px] font-medium text-rose-400'
       }
     >
       {type}

@@ -8,7 +8,8 @@ export type FindingType =
   | 'TCKN'
   | 'Credit Card'
   | 'Email'
-  | 'Generic Secret';
+  | 'Generic Secret'
+  | 'High-Entropy Secret';
 
 export interface ScanFinding {
   type: FindingType;

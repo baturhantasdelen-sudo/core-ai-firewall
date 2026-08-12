@@ -75,6 +75,16 @@ create table if not exists public.findings (
 create index if not exists idx_findings_scan_result_id on public.findings (scan_result_id);
 
 -- ---------------------------------------------------------------------------
+-- waitlist
+-- ---------------------------------------------------------------------------
+-- Email capture from the marketing landing page's "Join Private Beta" form.
+create table if not exists public.waitlist (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  created_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------------------------
 -- Row Level Security
 -- ---------------------------------------------------------------------------
 -- The telemetry API authenticates organizations via `x-nexus-api-key` and
@@ -83,6 +93,7 @@ create index if not exists idx_findings_scan_result_id on public.findings (scan_
 alter table public.organizations enable row level security;
 alter table public.scan_results enable row level security;
 alter table public.findings enable row level security;
+alter table public.waitlist enable row level security;
 
 -- No policies are defined for anon/authenticated roles: all access goes
 -- through the server-side API using the service role key.

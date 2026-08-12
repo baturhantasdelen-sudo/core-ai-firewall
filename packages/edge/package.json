@@ -1,0 +1,40 @@
+{
+  "name": "@baturhantasdelen/nexus-shield-edge",
+  "version": "0.1.0",
+  "description": "Sub-10ms in-RAM PII redaction for Vercel Edge Runtime and Cloudflare Workers.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "vercel-edge",
+    "cloudflare-workers",
+    "vercel-ai-sdk",
+    "llm-guardrails",
+    "pii-redaction",
+    "edge-runtime",
+    "sub-10ms"
+  ],
+  "author": "Nexus Shield Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baturhantasdelen-sudo/core-ai-firewall.git",
+    "directory": "packages/edge"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

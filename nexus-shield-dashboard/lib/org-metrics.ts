@@ -11,6 +11,7 @@ export interface OrgRecord {
   stripe_subscription_status: SubscriptionStatus;
   monthly_scan_limit: number;
   github_installation_id?: number | null;
+  api_key?: string | null;
 }
 
 export interface OrgUsageSummary {
@@ -34,7 +35,9 @@ export async function getOrganizationById(orgId: string): Promise<OrgRecord | nu
 
   const { data, error } = await supabase
     .from('organizations')
-    .select('id, name, stripe_customer_id, stripe_subscription_status, monthly_scan_limit, github_installation_id')
+    .select(
+      'id, name, stripe_customer_id, stripe_subscription_status, monthly_scan_limit, github_installation_id, api_key',
+    )
     .eq('id', orgId)
     .maybeSingle<OrgRecord>();
 
