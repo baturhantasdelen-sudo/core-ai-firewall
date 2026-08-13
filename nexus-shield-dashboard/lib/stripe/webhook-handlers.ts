@@ -4,10 +4,26 @@ import { getSupabaseAdmin } from '@/lib/supabase';
 import { PLAN_SCAN_LIMITS } from '@/config/plans';
 
 const LOG_PREFIX = '[Stripe Webhook]';
+const DB_ERROR_PREFIX = '[Stripe Webhook DB Error]:';
+
+/** Matches `schema.sql` — organizations table columns */
+const ORG_UPDATE_FIELDS = {
+  stripe_subscription_status: 'active' as const,
+  monthly_scan_limit: PLAN_SCAN_LIMITS.pro,
+};
+
+function logDbError(context: string, error: unknown) {
+  console.error(DB_ERROR_PREFIX, context, error);
+}
 
 function resolveOrgIdFromMetadata(metadata: Stripe.Metadata | null | undefined): string | null {
   if (!metadata) return null;
   return metadata.organization_id?.trim() ?? metadata.org_id?.trim() ?? null;
+}
+
+function resolveEmailFromSession(session: Stripe.Checkout.Session): string | null {
+  const email = session.customer_details?.email ?? session.customer_email;
+  return email?.trim().toLowerCase() ?? null;
 }
 
 export async function activateOrganization(orgId: string, customerId: string | null) {
@@ -15,11 +31,29 @@ export async function activateOrganization(orgId: string, customerId: string | n
 
   const supabase = getSupabaseAdmin();
 
+  const { data: existing, error: lookupError } = await supabase
+    .from('organizations')
+    .select('id, stripe_subscription_status, monthly_scan_limit, stripe_customer_id')
+    .eq('id', orgId)
+    .maybeSingle();
+
+  if (lookupError) {
+    logDbError('Pre-activation lookup failed', { orgId, lookupError });
+    throw new Error(`Failed to lookup organization ${orgId}: ${lookupError.message}`);
+  }
+
+  if (!existing) {
+    logDbError('No organization row found before update', { orgId });
+    throw new Error(`Organization ${orgId} not found during activation`);
+  }
+
+  console.log(LOG_PREFIX, 'Organization found before activation', existing);
+
   const { data, error } = await supabase
     .from('organizations')
     .update({
-      stripe_subscription_status: 'active',
-      monthly_scan_limit: PLAN_SCAN_LIMITS.pro,
+      stripe_subscription_status: ORG_UPDATE_FIELDS.stripe_subscription_status,
+      monthly_scan_limit: ORG_UPDATE_FIELDS.monthly_scan_limit,
       ...(customerId ? { stripe_customer_id: customerId } : {}),
     })
     .eq('id', orgId)
@@ -27,11 +61,16 @@ export async function activateOrganization(orgId: string, customerId: string | n
     .maybeSingle();
 
   if (error) {
+    logDbError('Organization activation update failed', { orgId, customerId, error });
     throw new Error(`Failed to activate organization ${orgId}: ${error.message}`);
   }
 
   if (!data) {
-    throw new Error(`Organization ${orgId} not found during activation`);
+    logDbError('Update returned no rows — organization may not exist or RLS blocked write', {
+      orgId,
+      customerId,
+    });
+    throw new Error(`Organization ${orgId} was not updated (0 rows affected)`);
   }
 
   console.log(LOG_PREFIX, 'Organization activated', data);
@@ -42,19 +81,25 @@ export async function downgradeOrganizationByCustomerId(customerId: string) {
 
   const supabase = getSupabaseAdmin();
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('organizations')
     .update({
       stripe_subscription_status: 'free',
       monthly_scan_limit: PLAN_SCAN_LIMITS.free,
     })
-    .eq('stripe_customer_id', customerId);
+    .eq('stripe_customer_id', customerId)
+    .select('id, stripe_subscription_status, monthly_scan_limit, stripe_customer_id');
 
   if (error) {
+    logDbError('Organization downgrade failed', { customerId, error });
     throw new Error(`Failed to downgrade organization for customer ${customerId}: ${error.message}`);
   }
 
-  console.log(LOG_PREFIX, 'Organization downgraded for customer', customerId);
+  if (!data?.length) {
+    logDbError('Downgrade returned no rows', { customerId });
+  } else {
+    console.log(LOG_PREFIX, 'Organization downgraded', data);
+  }
 }
 
 export function extractCustomerId(
@@ -74,7 +119,7 @@ async function findOrgIdByCustomerId(customerId: string): Promise<string | null>
     .maybeSingle<{ id: string }>();
 
   if (error) {
-    console.error(LOG_PREFIX, 'Failed customer lookup', customerId, error.message);
+    logDbError('Customer ID lookup failed', { customerId, error });
     return null;
   }
 
@@ -82,56 +127,85 @@ async function findOrgIdByCustomerId(customerId: string): Promise<string | null>
 }
 
 async function findOrgIdByEmail(email: string): Promise<string | null> {
-  console.log(LOG_PREFIX, 'Looking up organization by email', email);
-
-  const supabase = getSupabaseAdmin();
   const normalizedEmail = email.trim().toLowerCase();
-
-  const { data: usersData, error: userError } = await supabase.auth.admin.listUsers({
-    page: 1,
-    perPage: 200,
+  console.log(LOG_PREFIX, 'Email fallback — resolving org via auth.users → org_members', {
+    email: normalizedEmail,
   });
 
-  if (userError) {
-    console.error(LOG_PREFIX, 'Failed to list auth users', userError.message);
-    return null;
+  const supabase = getSupabaseAdmin();
+  let page = 1;
+  const perPage = 200;
+
+  while (true) {
+    const { data: usersData, error: userError } = await supabase.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+
+    if (userError) {
+      logDbError('auth.users listUsers failed during email fallback', { email: normalizedEmail, userError });
+      return null;
+    }
+
+    const authUser = usersData.users.find(
+      (user) => user.email?.trim().toLowerCase() === normalizedEmail,
+    );
+
+    if (authUser) {
+      console.log(LOG_PREFIX, 'Email fallback — matched auth user', {
+        email: normalizedEmail,
+        userId: authUser.id,
+      });
+
+      const { data: membership, error: memberError } = await supabase
+        .from('org_members')
+        .select('org_id')
+        .eq('user_id', authUser.id)
+        .maybeSingle<{ org_id: string }>();
+
+      if (memberError) {
+        logDbError('org_members lookup failed during email fallback', {
+          email: normalizedEmail,
+          userId: authUser.id,
+          memberError,
+        });
+        return null;
+      }
+
+      if (!membership?.org_id) {
+        logDbError('No org_members row for auth user during email fallback', {
+          email: normalizedEmail,
+          userId: authUser.id,
+        });
+        return null;
+      }
+
+      console.log(LOG_PREFIX, 'Email fallback — resolved organization', {
+        email: normalizedEmail,
+        orgId: membership.org_id,
+      });
+      return membership.org_id;
+    }
+
+    if (usersData.users.length < perPage) {
+      console.log(LOG_PREFIX, 'Email fallback — no auth user found', { email: normalizedEmail });
+      return null;
+    }
+
+    page += 1;
   }
-
-  const authUser = usersData.users.find(
-    (user) => user.email?.trim().toLowerCase() === normalizedEmail,
-  );
-
-  if (!authUser) {
-    console.log(LOG_PREFIX, 'No auth user found for email', normalizedEmail);
-    return null;
-  }
-
-  const { data: membership, error: memberError } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', authUser.id)
-    .maybeSingle<{ org_id: string }>();
-
-  if (memberError) {
-    console.error(LOG_PREFIX, 'Failed org_members lookup', memberError.message);
-    return null;
-  }
-
-  if (membership?.org_id) {
-    console.log(LOG_PREFIX, 'Resolved org via email', { email: normalizedEmail, orgId: membership.org_id });
-  }
-
-  return membership?.org_id ?? null;
 }
 
 async function resolveOrgIdFromCheckoutSession(
   session: Stripe.Checkout.Session,
 ): Promise<string | null> {
+  const resolvedEmail = resolveEmailFromSession(session);
+
   console.log(LOG_PREFIX, 'Resolving org from checkout session', {
     sessionId: session.id,
     clientReferenceId: session.client_reference_id,
     metadata: session.metadata,
-    customerEmail: session.customer_email ?? session.customer_details?.email,
+    customerEmail: resolvedEmail,
   });
 
   if (session.client_reference_id?.trim()) {
@@ -145,9 +219,8 @@ async function resolveOrgIdFromCheckoutSession(
     return fromMetadata;
   }
 
-  const email = session.customer_email ?? session.customer_details?.email;
-  if (email) {
-    const orgId = await findOrgIdByEmail(email);
+  if (resolvedEmail) {
+    const orgId = await findOrgIdByEmail(resolvedEmail);
     if (orgId) return orgId;
   }
 
@@ -237,6 +310,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<v
     invoiceId: invoice.id,
     customerId: extractCustomerId(invoice.customer),
     subscriptionId,
+    customerEmail: invoice.customer_email,
   });
 
   let orgId = resolveOrgIdFromMetadata(invoice.metadata);
