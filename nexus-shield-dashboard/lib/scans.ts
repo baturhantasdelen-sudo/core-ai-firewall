@@ -8,6 +8,13 @@ interface FindingRow {
   masked_preview: string | null;
 }
 
+interface JsonbFindingSummary {
+  type: string;
+  file?: string;
+  line?: number;
+  preview?: string;
+}
+
 interface ScanResultRow {
   id: string;
   repo_name: string;
@@ -15,7 +22,22 @@ interface ScanResultRow {
   pr_number: number | null;
   status: 'passed' | 'failed';
   created_at: string;
-  findings: FindingRow[] | null;
+  findings: FindingRow[] | JsonbFindingSummary[] | null;
+}
+
+export interface ScanIngestFinding {
+  type: string;
+  file?: string;
+  line?: number;
+  preview?: string;
+}
+
+export interface ScanIngestPayload {
+  repo_name: string;
+  commit_sha: string;
+  pr_number?: number | null;
+  findings: ScanIngestFinding[];
+  status: 'passed' | 'failed';
 }
 
 export interface ScanMetrics {
@@ -23,6 +45,15 @@ export interface ScanMetrics {
   secretsBlocked: number;
   piiLeaksBlocked: number;
   complianceScore: number;
+}
+
+function mapJsonbFinding(finding: JsonbFindingSummary): ScanFinding {
+  return {
+    type: finding.type as FindingType,
+    filePath: finding.file ?? 'unknown',
+    line: finding.line ?? 0,
+    preview: finding.preview ?? '',
+  };
 }
 
 function mapFinding(row: FindingRow): ScanFinding {
@@ -34,19 +65,111 @@ function mapFinding(row: FindingRow): ScanFinding {
   };
 }
 
+function normalizeFindings(
+  findings: FindingRow[] | JsonbFindingSummary[] | null | undefined,
+): ScanFinding[] {
+  if (!findings?.length) return [];
+
+  const first = findings[0];
+  if ('secret_type' in first) {
+    return (findings as FindingRow[]).map(mapFinding);
+  }
+
+  return (findings as JsonbFindingSummary[]).map(mapJsonbFinding);
+}
+
 function mapScan(row: ScanResultRow): ScanRecord {
   return {
     id: row.id,
     repoName: row.repo_name,
     commitSha: row.commit_sha,
     prNumber: row.pr_number,
-    // The DB uses 'passed' | 'failed'; the dashboard UI's badges/copy use
-    // 'passed' | 'blocked' (a check run that failed effectively blocked the
-    // merge/push from being "clean").
     status: row.status === 'failed' ? 'blocked' : 'passed',
     createdAt: row.created_at,
-    findings: (row.findings ?? []).map(mapFinding),
+    findings: normalizeFindings(row.findings),
   };
+}
+
+export function mapScanFromRealtime(row: Record<string, unknown>): ScanRecord {
+  return mapScan({
+    id: String(row.id),
+    repo_name: String(row.repo_name),
+    commit_sha: String(row.commit_sha),
+    pr_number: (row.pr_number as number | null) ?? null,
+    status: row.status as 'passed' | 'failed',
+    created_at: String(row.created_at),
+    findings: (row.findings as JsonbFindingSummary[] | null) ?? [],
+  });
+}
+
+export function applyScanToMetrics(metrics: ScanMetrics, scan: ScanRecord): ScanMetrics {
+  let secretsBlocked = metrics.secretsBlocked;
+  let piiLeaksBlocked = metrics.piiLeaksBlocked;
+
+  for (const finding of scan.findings) {
+    if (isPiiFinding(finding.type)) {
+      piiLeaksBlocked += 1;
+    } else {
+      secretsBlocked += 1;
+    }
+  }
+
+  const totalScans = metrics.totalScans + 1;
+  const previousPassed =
+    metrics.totalScans === 0
+      ? 0
+      : Math.round((metrics.complianceScore / 100) * metrics.totalScans);
+  const passedScans = previousPassed + (scan.status === 'passed' ? 1 : 0);
+
+  return {
+    totalScans,
+    secretsBlocked,
+    piiLeaksBlocked,
+    complianceScore: totalScans === 0 ? 100 : Math.round((passedScans / totalScans) * 100),
+  };
+}
+
+export async function recordScanResult(
+  orgId: string,
+  payload: ScanIngestPayload,
+): Promise<{ scanId: string; createdAt: string }> {
+  const supabase = getSupabaseAdmin();
+  const { repo_name, commit_sha, pr_number, findings, status } = payload;
+
+  const { data: inserted, error: insertError } = await supabase
+    .from('scan_results')
+    .insert({
+      org_id: orgId,
+      repo_name,
+      commit_sha,
+      pr_number: pr_number ?? null,
+      findings,
+      status,
+    })
+    .select('id, created_at')
+    .single<{ id: string; created_at: string }>();
+
+  if (insertError) {
+    throw new Error(`Failed to record scan result: ${insertError.message}`);
+  }
+
+  if (findings.length > 0) {
+    const findingRows = findings.map((finding) => ({
+      scan_result_id: inserted.id,
+      secret_type: finding.type,
+      file_path: finding.file ?? 'unknown',
+      line_number: finding.line ?? null,
+      masked_preview: finding.preview ?? null,
+    }));
+
+    const { error: findingsError } = await supabase.from('findings').insert(findingRows);
+
+    if (findingsError) {
+      console.error('[scans] findings insert error:', findingsError.message);
+    }
+  }
+
+  return { scanId: inserted.id, createdAt: inserted.created_at };
 }
 
 /**
