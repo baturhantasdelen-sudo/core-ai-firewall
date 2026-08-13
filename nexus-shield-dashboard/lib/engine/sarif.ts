@@ -1,7 +1,9 @@
 import type { DetectionMatch } from '@/lib/engine/types';
+import type { SecretValidationResult } from '@/lib/engine/validation/types';
 
 export interface SarifFinding extends DetectionMatch {
   file?: string;
+  validation?: SecretValidationResult;
 }
 
 export interface SarifConversionContext {
@@ -74,6 +76,10 @@ export function findingsToSarif(findings: SarifFinding[], context: SarifConversi
             category: finding.category,
             preview: finding.preview,
             entropy: finding.entropy,
+            secretValidationStatus: finding.validation?.status ?? null,
+            secretValidationRiskScore: finding.validation?.risk_score ?? null,
+            secretValidationRiskLevel: finding.validation?.risk_level ?? null,
+            secretValidationMessage: finding.validation?.message ?? null,
           },
         })),
       },

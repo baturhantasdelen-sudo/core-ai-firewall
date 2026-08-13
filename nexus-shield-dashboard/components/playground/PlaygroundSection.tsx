@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Loader2, Shield, Zap } from 'lucide-react';
+import { SecretValidationBadge } from '@/components/dashboard/badges';
 import { UpgradeLimitModal } from '@/components/auth/UpgradeLimitModal';
 import { FREE_TIER_MONTHLY_SCANS } from '@/config/pricing';
 
@@ -25,11 +26,26 @@ const PRESETS: Record<PresetKey, { label: string; emoji: string; text: string }>
   },
 };
 
+interface SandboxFinding {
+  type: string;
+  rule_id?: string;
+  line: number;
+  preview: string;
+  category?: string;
+  validation?: {
+    status: 'ACTIVE' | 'INACTIVE' | 'UNVERIFIED';
+    risk_score: number;
+    risk_level: 'CRITICAL' | 'LOW' | 'MEDIUM';
+    message: string;
+  } | null;
+}
+
 interface SandboxResponse {
   latency_ms?: number;
   masked_types?: string[];
   pii_detected?: boolean;
   pii_masked_count?: number;
+  findings?: SandboxFinding[];
   redacted_input?: string;
   sanitized_prompt?: string;
   sanitizedPrompt?: string;
@@ -58,6 +74,7 @@ export function PlaygroundSection() {
   const [output, setOutput] = useState('Click "Inspect & Shield" to see results...');
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [piiCount, setPiiCount] = useState(0);
+  const [findings, setFindings] = useState<SandboxFinding[]>([]);
   const [actionLabel, setActionLabel] = useState('PASSED');
   const [scansUsed, setScansUsed] = useState(0);
   const [scansLimit, setScansLimit] = useState(FREE_TIER_MONTHLY_SCANS);
@@ -91,6 +108,7 @@ export function PlaygroundSection() {
 
       setStatus('loading');
       setOutput('Inspecting via Nexus Shield engine...');
+      setFindings([]);
 
       try {
         const resp = await fetch('/api/sandbox', {
@@ -153,6 +171,7 @@ export function PlaygroundSection() {
               ? data.pii_masked_count
               : (data.masked_types ?? []).length;
           setPiiCount(maskCount);
+          setFindings(data.findings ?? []);
           const sanitized =
             data.sanitized_prompt ??
             data.sanitizedPrompt ??
@@ -339,6 +358,33 @@ export function PlaygroundSection() {
                 <div className="h-36 overflow-y-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-zinc-950 p-4 font-mono text-sm text-zinc-300">
                   {output}
                 </div>
+
+                {findings.length > 0 ? (
+                  <div className="mt-4">
+                    <div className="mb-2 text-xs font-semibold text-zinc-500">Detected Findings</div>
+                    <ul className="max-h-40 space-y-2 overflow-y-auto">
+                      {findings.map((finding, index) => (
+                        <li
+                          key={`${finding.type}-${finding.line}-${index}`}
+                          className="rounded-lg border border-white/10 bg-zinc-900/80 p-3"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-xs font-medium text-zinc-300">
+                              {finding.type} · line {finding.line}
+                            </span>
+                            {finding.category === 'secret' ? (
+                              <SecretValidationBadge validation={finding.validation} />
+                            ) : null}
+                          </div>
+                          <p className="mt-1 font-mono text-[11px] text-zinc-500">{finding.preview}</p>
+                          {finding.validation?.message ? (
+                            <p className="mt-1 text-[11px] text-zinc-400">{finding.validation.message}</p>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
 
               <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-xs text-zinc-500">

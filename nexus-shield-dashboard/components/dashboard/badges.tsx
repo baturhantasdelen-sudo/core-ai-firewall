@@ -1,5 +1,6 @@
 import { CheckCircle2, ShieldAlert } from 'lucide-react';
 import { PII_FINDING_TYPES, ScanStatus } from '@/lib/mock-dashboard-data';
+import type { SecretValidationResult } from '@/lib/engine/validation/types';
 
 export function StatusBadge({ status }: { status: ScanStatus }) {
   if (status === 'passed') {
@@ -34,6 +35,36 @@ export function FindingBadge({ type }: { type: string }) {
       }
     >
       {type}
+    </span>
+  );
+}
+
+export function SecretValidationBadge({
+  validation,
+}: {
+  validation?: SecretValidationResult | null;
+}) {
+  if (!validation) return null;
+
+  if (validation.status === 'ACTIVE') {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-rose-500/40 bg-rose-500/20 px-2 py-0.5 text-[11px] font-semibold text-rose-300 animate-pulse">
+        🔴 ACTIVE SECRET (CRITICAL)
+      </span>
+    );
+  }
+
+  if (validation.status === 'INACTIVE') {
+    return (
+      <span className="inline-flex items-center rounded-md border border-zinc-500/30 bg-zinc-500/10 px-2 py-0.5 text-[11px] font-medium text-zinc-300">
+        ⚪ INACTIVE
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-300">
+      ⚪ UNVERIFIED
     </span>
   );
 }

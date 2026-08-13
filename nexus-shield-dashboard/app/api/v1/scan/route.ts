@@ -4,6 +4,7 @@ import { authenticateApiKey, extractApiKey } from '@/lib/auth/api-key';
 import { runDetectionEngine, runDetectionEngineOnLines } from '@/lib/engine';
 import { loadPolicyFromObject } from '@/lib/engine/policy';
 import { findingsToSarif, type SarifFinding } from '@/lib/engine/sarif';
+import { validateSecretFindings } from '@/lib/engine/validation';
 import { enforceScanQuota, scanQuotaExceededResponse } from '@/lib/usage/enforce-scan-quota';
 import { recordScanResult } from '@/lib/scans';
 import { parseAddedLinesFromPatch } from '@/lib/scanner/diff';
@@ -79,7 +80,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const findings = engineFindings.map((finding) => ({
+    const enrichedFindings = (await validateSecretFindings(engineFindings)) as SarifFinding[];
+
+    const findings = enrichedFindings.map((finding) => ({
       type: finding.type,
       file: finding.file,
       line: finding.line,
@@ -88,6 +91,7 @@ export async function POST(req: NextRequest) {
       confidence: finding.confidence,
       severity: finding.severity,
       category: finding.category,
+      validation: finding.validation ?? null,
     }));
 
     const status = findings.length > 0 ? 'failed' : 'passed';
@@ -104,7 +108,7 @@ export async function POST(req: NextRequest) {
     const piiCount = findings.filter((f) => f.category === 'pii').length;
 
     if (format === 'sarif') {
-      const sarif = findingsToSarif(engineFindings, {
+      const sarif = findingsToSarif(enrichedFindings, {
         repoName: repo_name,
         commitSha: commit_sha,
         scanId,

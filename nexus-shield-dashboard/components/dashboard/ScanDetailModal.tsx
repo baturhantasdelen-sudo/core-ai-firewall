@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { FileWarning, GitCommit, X } from 'lucide-react';
 import { ScanRecord } from '@/lib/mock-dashboard-data';
-import { FindingBadge, StatusBadge } from './badges';
+import { FindingBadge, SecretValidationBadge, StatusBadge } from './badges';
 
 interface ScanDetailModalProps {
   scan: ScanRecord;
@@ -69,8 +69,14 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
                       <span className="text-zinc-600">·</span>
                       <span className="text-xs text-zinc-500">line {finding.line}</span>
                     </div>
+                  <div className="flex flex-wrap items-center justify-end gap-2">
                     <FindingBadge type={finding.type} />
+                    <SecretValidationBadge validation={finding.validation} />
                   </div>
+                  </div>
+                  {finding.validation?.message ? (
+                    <p className="mt-2 text-xs text-zinc-400">{finding.validation.message}</p>
+                  ) : null}
                   <pre className="mt-3 overflow-x-auto rounded-lg border border-white/5 bg-zinc-950 px-3 py-2 font-mono text-xs text-rose-300">
                     {finding.preview}
                   </pre>

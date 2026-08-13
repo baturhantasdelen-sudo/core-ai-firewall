@@ -64,6 +64,12 @@ export async function POST() {
               filePath: 'src/config.ts',
               line: 12,
               preview: 'sk-proj-****************abcd',
+              validation: {
+                status: 'UNVERIFIED' as const,
+                risk_score: 5.0,
+                risk_level: 'MEDIUM' as const,
+                message: 'Could not verify OpenAI API key status.',
+              },
             },
             {
               type: 'TCKN' as const,

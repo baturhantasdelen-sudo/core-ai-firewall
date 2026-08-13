@@ -2,6 +2,7 @@ import type { DetectionMatch, Profile } from '@/lib/engine/types';
 import { globalPiiDetectors } from '@/lib/engine/detectors/pii';
 import { loadPolicyFromObject, type NexusShieldPolicy } from '@/lib/engine/policy';
 import { runDetectionEngine } from '@/lib/engine/index';
+import { validateSecretFindings, type ValidatedFinding } from '@/lib/engine/validation';
 import { isValidTckn, lineNumberAt, columnAt, hasPiiContext } from '@/lib/engine/utils';
 
 const SANDBOX_EXTRA_PII = globalPiiDetectors.filter((detector) =>
@@ -191,14 +192,14 @@ export interface SandboxSanitizeResult {
   pii_detected: boolean;
   masked_types: string[];
   pii_masked_count: number;
-  findings: DetectionMatch[];
+  findings: ValidatedFinding[];
   latency_ms: number;
 }
 
-export function sanitizePlaygroundInput(
+export async function sanitizePlaygroundInput(
   input: string,
   options?: { profile?: Profile; policy?: Record<string, unknown> | null },
-): SandboxSanitizeResult {
+): Promise<SandboxSanitizeResult> {
   const started = performance.now();
   const policy = loadPolicyFromObject({
     version: 1,
@@ -206,7 +207,8 @@ export function sanitizePlaygroundInput(
     ...(options?.policy ?? {}),
   });
 
-  const findings = mergeSandboxFindings(input, policy);
+  const rawFindings = mergeSandboxFindings(input, policy);
+  const findings = await validateSecretFindings(rawFindings);
   const sanitizedPrompt = findings.length > 0 ? redactContent(input, findings) : input;
   const maskedTypes = [...new Set(findings.map((finding) => finding.type))];
 

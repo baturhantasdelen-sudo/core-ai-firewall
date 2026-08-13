@@ -11,11 +11,19 @@ export type FindingType =
   | 'Generic Secret'
   | 'High-Entropy Secret';
 
+export interface ScanFindingValidation {
+  status: 'ACTIVE' | 'INACTIVE' | 'UNVERIFIED';
+  risk_score: number;
+  risk_level: 'CRITICAL' | 'LOW' | 'MEDIUM';
+  message: string;
+}
+
 export interface ScanFinding {
   type: FindingType;
   filePath: string;
   line: number;
   preview: string;
+  validation?: ScanFindingValidation | null;
 }
 
 export type ScanStatus = 'passed' | 'blocked';

@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     return res;
   }
 
-  const sanitizeResult = sanitizePlaygroundInput(userInput, {
+  const sanitizeResult = await sanitizePlaygroundInput(userInput, {
     profile,
     policy: payload.policy ?? { profile: 'TR' },
   });
@@ -117,6 +117,14 @@ export async function POST(req: NextRequest) {
     pii_detected: sanitizeResult.pii_detected,
     masked_types: sanitizeResult.masked_types,
     pii_masked_count: sanitizeResult.pii_masked_count,
+    findings: sanitizeResult.findings.map((finding) => ({
+      type: finding.type,
+      rule_id: finding.ruleId,
+      line: finding.line,
+      preview: finding.preview,
+      category: finding.category,
+      validation: finding.validation ?? null,
+    })),
     result: sanitizeResult.pii_detected
       ? 'PII redacted — upstream LLM call skipped.'
       : `Processed response: '${sanitizeResult.sanitizedPrompt}' passed clean.`,
