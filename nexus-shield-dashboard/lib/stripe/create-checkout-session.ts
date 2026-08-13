@@ -61,6 +61,17 @@ export async function createProCheckoutSession(
     plan: 'pro',
   };
 
+  console.log('[Stripe Checkout] Creating subscription session', {
+    organizationId,
+    billingInterval,
+    priceId: priceId ?? 'dynamic_price_data',
+    mode: 'subscription',
+  });
+
+  if (priceId && !priceId.startsWith('price_')) {
+    console.warn('[Stripe Checkout] Price ID does not look like a Stripe price_ id', priceId);
+  }
+
   return stripe.checkout.sessions.create({
     mode: 'subscription',
     client_reference_id: organizationId,
@@ -75,7 +86,7 @@ export async function createProCheckoutSession(
         plan: 'pro',
       },
     },
-    success_url: `${appUrl}/dashboard?payment=success`,
+    success_url: `${appUrl}/dashboard?payment=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/#pricing?payment=cancelled`,
   });
 }

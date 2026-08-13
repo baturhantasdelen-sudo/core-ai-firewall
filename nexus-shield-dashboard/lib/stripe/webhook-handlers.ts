@@ -256,14 +256,42 @@ async function resolveOrgIdFromSubscription(
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
+  try {
+    await activateFromCheckoutSession(session);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Activation failed';
+    console.error(LOG_PREFIX, 'checkout.session.completed activation failed', message, error);
+  }
+}
+
+export async function activateFromCheckoutSession(
+  session: Stripe.Checkout.Session,
+  expectedOrgId?: string,
+): Promise<{ orgId: string; activated: true }> {
+  if (session.mode !== 'subscription') {
+    throw new Error(`Invalid checkout session mode: ${session.mode}`);
+  }
+
+  if (session.status !== 'complete') {
+    throw new Error(`Checkout session is not complete (status: ${session.status ?? 'unknown'})`);
+  }
+
+  if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') {
+    throw new Error(`Payment not completed (payment_status: ${session.payment_status ?? 'unknown'})`);
+  }
+
   const orgId = await resolveOrgIdFromCheckoutSession(session);
 
   if (!orgId) {
-    console.error(LOG_PREFIX, 'checkout.session.completed missing org reference', session.id);
-    return;
+    throw new Error('Could not resolve organization from checkout session');
+  }
+
+  if (expectedOrgId && orgId !== expectedOrgId) {
+    throw new Error('Checkout session does not belong to this organization');
   }
 
   await activateOrganization(orgId, extractCustomerId(session.customer));
+  return { orgId, activated: true };
 }
 
 async function handleSubscriptionActivated(

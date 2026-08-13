@@ -5,6 +5,14 @@ import { handleStripeWebhookEvent } from '@/lib/stripe/webhook-handlers';
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
+  console.log('[Stripe Webhook Incoming Request]', {
+    method: req.method,
+    url: req.url,
+    contentType: req.headers.get('content-type'),
+    contentLength: req.headers.get('content-length'),
+    hasSignatureHeader: Boolean(req.headers.get('stripe-signature')),
+  });
+
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
 
   if (!webhookSecret) {
@@ -20,6 +28,8 @@ export async function POST(req: NextRequest) {
   }
 
   const rawBody = await req.text();
+  console.log('[Stripe Webhook Incoming Request] Raw body length', rawBody.length);
+
   const stripe = getStripe();
 
   let event;
