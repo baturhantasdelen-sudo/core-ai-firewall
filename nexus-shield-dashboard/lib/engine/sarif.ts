@@ -6,18 +6,27 @@ export interface SarifFinding extends DetectionMatch {
   file?: string;
   validation?: SecretValidationResult;
   fix?: RemediationFix;
+  confidenceScore?: number;
+  isFalsePositive?: boolean;
+  suppressionReason?: string | null;
+  suppressed?: boolean;
 }
 
 export interface SarifConversionContext {
   repoName: string;
   commitSha: string;
   scanId?: string;
+  includeSuppressed?: boolean;
 }
 
 export function findingsToSarif(findings: SarifFinding[], context: SarifConversionContext) {
+  const visibleFindings = context.includeSuppressed
+    ? findings
+    : findings.filter((finding) => !finding.suppressed);
+
   const ruleMap = new Map<string, Record<string, unknown>>();
 
-  for (const finding of findings) {
+  for (const finding of visibleFindings) {
     if (!ruleMap.has(finding.ruleId)) {
       ruleMap.set(finding.ruleId, {
         id: finding.ruleId,
@@ -53,45 +62,69 @@ export function findingsToSarif(findings: SarifFinding[], context: SarifConversi
             text: `Scan for ${context.repoName}@${context.commitSha.slice(0, 7)}`,
           },
         },
-        results: findings.map((finding) => ({
-          ruleId: finding.ruleId,
-          level: sarifLevel(finding.severity),
-          message: {
-            text: `${finding.type} detected (${finding.confidence} confidence)`,
-          },
-          locations: [
-            {
-              physicalLocation: {
-                artifactLocation: {
-                  uri: finding.file ?? 'unknown',
-                },
-                region: {
-                  startLine: finding.line,
-                  startColumn: finding.column,
-                  endLine: finding.line,
-                  endColumn: finding.column + finding.matched.length,
-                },
-              },
-            },
-          ],
-          fixes: finding.fix ? [sarifFixObject(finding.fix)] : [],
-          properties: {
-            confidence: finding.confidence,
-            severity: finding.severity,
-            category: finding.category,
-            preview: finding.preview,
-            entropy: finding.entropy,
-            secretValidationStatus: finding.validation?.status ?? null,
-            secretValidationRiskScore: finding.validation?.risk_score ?? null,
-            secretValidationRiskLevel: finding.validation?.risk_level ?? null,
-            secretValidationMessage: finding.validation?.message ?? null,
-            remediationReplacement: finding.fix?.replacement ?? null,
-            remediationEnvVar: finding.fix?.envVarName ?? null,
-            remediationEnvExample: finding.fix?.envExampleLine ?? null,
-          },
-        })),
+        results: visibleFindings.map((finding) => sarifResultFromFinding(finding)),
       },
     ],
+  };
+}
+
+function sarifResultFromFinding(finding: SarifFinding): Record<string, unknown> {
+  const suppressed = finding.suppressed === true;
+
+  return {
+    ruleId: finding.ruleId,
+    level: suppressed ? 'note' : sarifLevel(finding.severity),
+    message: {
+      text: suppressed
+        ? `${finding.type} suppressed as likely false positive (${finding.confidenceScore?.toFixed(2) ?? 'n/a'} confidence score)`
+        : `${finding.type} detected (${finding.confidence} confidence)`,
+    },
+    locations: [
+      {
+        physicalLocation: {
+          artifactLocation: {
+            uri: finding.file ?? 'unknown',
+          },
+          region: {
+            startLine: finding.line,
+            startColumn: finding.column,
+            endLine: finding.line,
+            endColumn: finding.column + finding.matched.length,
+          },
+        },
+      },
+    ],
+    fixes: finding.fix ? [sarifFixObject(finding.fix)] : [],
+    ...(suppressed
+      ? {
+          suppressions: [
+            {
+              kind: 'external',
+              status: 'accepted',
+              justification: finding.suppressionReason ?? 'Context-aware false positive filter',
+            },
+          ],
+          baselineState: 'absent',
+        }
+      : {}),
+    properties: {
+      confidence: finding.confidence,
+      severity: finding.severity,
+      category: finding.category,
+      preview: finding.preview,
+      entropy: finding.entropy,
+      confidenceScore: finding.confidenceScore ?? null,
+      isFalsePositive: finding.isFalsePositive ?? false,
+      suppressed: finding.suppressed ?? false,
+      suppressionReason: finding.suppressionReason ?? null,
+      secretValidationStatus: finding.validation?.status ?? null,
+      secretValidationRiskScore: finding.validation?.risk_score ?? null,
+      secretValidationRiskLevel: finding.validation?.risk_level ?? null,
+      secretValidationMessage: finding.validation?.message ?? null,
+      remediationReplacement: finding.fix?.replacement ?? null,
+      remediationEnvVar: finding.fix?.envVarName ?? null,
+      remediationEnvExample: finding.fix?.envExampleLine ?? null,
+    },
   };
 }
 

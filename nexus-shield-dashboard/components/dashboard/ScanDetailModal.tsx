@@ -7,7 +7,7 @@ import { buildPreviewFromFinding } from '@/lib/engine/remediation';
 import type { DetectionMatch } from '@/lib/engine/types';
 import { ScanRecord } from '@/lib/mock-dashboard-data';
 import { AutoFixPreviewModal, type AutoFixPreviewData } from './AutoFixPreviewModal';
-import { FindingBadge, SecretValidationBadge, StatusBadge } from './badges';
+import { FindingBadge, SecretValidationBadge, StatusBadge, SuppressedFindingBadge } from './badges';
 
 interface ScanDetailModalProps {
   scan: ScanRecord;
@@ -66,6 +66,7 @@ function sampleLineForFinding(finding: ScanRecord['findings'][number], matched: 
 
 export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
   const [previewData, setPreviewData] = useState<AutoFixPreviewData | null>(null);
+  const [showSuppressed, setShowSuppressed] = useState(false);
   const policy = useMemo(
     () => ({
       ...DEFAULT_POLICY,
@@ -108,6 +109,10 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
     });
   };
 
+  const activeFindings = scan.findings.filter((finding) => !finding.suppressed);
+  const suppressedFindings = scan.findings.filter((finding) => finding.suppressed);
+  const visibleFindings = showSuppressed ? scan.findings : activeFindings;
+
   return (
     <>
       <div
@@ -143,14 +148,38 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
           </div>
 
           <div className="max-h-[60vh] overflow-y-auto p-6">
-            {scan.findings.length === 0 ? (
+            {suppressedFindings.length > 0 ? (
+              <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-zinc-950/40 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-zinc-200">False positive filter</p>
+                  <p className="text-xs text-zinc-500">
+                    {suppressedFindings.length} suppressed finding(s) hidden from main report
+                  </p>
+                </div>
+                <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-zinc-300">
+                  <input
+                    type="checkbox"
+                    checked={showSuppressed}
+                    onChange={(event) => setShowSuppressed(event.target.checked)}
+                    className="h-4 w-4 rounded border-white/20 bg-zinc-900 text-emerald-500 focus:ring-emerald-500/40"
+                  />
+                  Show Suppressed False Positives
+                </label>
+              </div>
+            ) : null}
+
+            {visibleFindings.length === 0 ? (
               <p className="text-sm text-zinc-500">No PII or secret leaks detected in this scan.</p>
             ) : (
               <ul className="space-y-3">
-                {scan.findings.map((finding, index) => (
+                {visibleFindings.map((finding, index) => (
                   <li
                     key={`${finding.filePath}-${finding.line}-${index}`}
-                    className="rounded-xl border border-white/10 bg-zinc-950/60 p-4"
+                    className={`rounded-xl border p-4 ${
+                      finding.suppressed
+                        ? 'border-emerald-500/20 bg-emerald-950/10'
+                        : 'border-white/10 bg-zinc-950/60'
+                    }`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 text-sm text-zinc-300">
@@ -161,23 +190,38 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-2">
                         <FindingBadge type={finding.type} />
-                        <SecretValidationBadge validation={finding.validation} />
+                        {finding.suppressed ? (
+                          <SuppressedFindingBadge suppressionReason={finding.suppressionReason} />
+                        ) : (
+                          <SecretValidationBadge validation={finding.validation} />
+                        )}
                       </div>
                     </div>
-                    {finding.validation?.message ? (
+                    {finding.suppressed && finding.suppressionReason ? (
+                      <p className="mt-2 text-xs text-emerald-300/80">{finding.suppressionReason}</p>
+                    ) : null}
+                    {!finding.suppressed && finding.validation?.message ? (
                       <p className="mt-2 text-xs text-zinc-400">{finding.validation.message}</p>
                     ) : null}
-                    <pre className="mt-3 overflow-x-auto rounded-lg border border-white/5 bg-zinc-950 px-3 py-2 font-mono text-xs text-rose-300">
+                    <pre
+                      className={`mt-3 overflow-x-auto rounded-lg border px-3 py-2 font-mono text-xs ${
+                        finding.suppressed
+                          ? 'border-emerald-500/10 bg-zinc-950 text-emerald-200/80'
+                          : 'border-white/5 bg-zinc-950 text-rose-300'
+                      }`}
+                    >
                       {finding.preview}
                     </pre>
-                    <button
-                      type="button"
-                      onClick={() => openAutoFixPreview(finding, index)}
-                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/20"
-                    >
-                      <Zap className="h-3.5 w-3.5" />
-                      Auto-Fix Preview
-                    </button>
+                    {!finding.suppressed ? (
+                      <button
+                        type="button"
+                        onClick={() => openAutoFixPreview(finding, index)}
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/20"
+                      >
+                        <Zap className="h-3.5 w-3.5" />
+                        Auto-Fix Preview
+                      </button>
+                    ) : null}
                   </li>
                 ))}
               </ul>

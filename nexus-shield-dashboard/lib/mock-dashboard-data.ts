@@ -28,6 +28,9 @@ export interface ScanFinding {
   category?: 'secret' | 'pii';
   column?: number;
   matched?: string;
+  suppressed?: boolean;
+  suppressionReason?: string | null;
+  confidenceScore?: number;
 }
 
 export type ScanStatus = 'passed' | 'blocked';
@@ -84,6 +87,18 @@ export const mockScans: ScanRecord[] = [
         line: 3,
         preview: '1000000****0146',
       },
+      {
+        type: 'OpenAI API Key',
+        filePath: 'tests/fixtures/mock-config.ts',
+        line: 4,
+        preview: 'sk-proj-*****************cdef',
+        suppressed: true,
+        suppressionReason:
+          "Identified as test mock data due to variable naming 'mock_api_key'; File path indicates fixture/test data directory",
+        confidenceScore: 0.27,
+        ruleId: 'openai-api-key',
+        category: 'secret',
+      },
     ],
   },
   {
@@ -133,12 +148,20 @@ export const mockScans: ScanRecord[] = [
         filePath: 'fixtures/checkout-sample.json',
         line: 41,
         preview: '4242 42** **** 4242',
+        suppressed: true,
+        suppressionReason: 'File path indicates fixture/test data directory',
+        confidenceScore: 0.23,
+        category: 'pii',
       },
       {
         type: 'Email',
         filePath: 'fixtures/checkout-sample.json',
         line: 44,
         preview: 'j***@example.com',
+        suppressed: true,
+        suppressionReason: 'File path indicates fixture/test data directory',
+        confidenceScore: 0.23,
+        category: 'pii',
       },
       {
         type: 'Generic Secret',

@@ -1,7 +1,14 @@
 import type { DetectionMatch, DetectorContext } from '@/lib/engine/types';
+import { applyContextToFindings, type ContextAwareFinding } from '@/lib/engine/context';
 import { detectorsForProfile } from '@/lib/engine/detectors';
 import { DEFAULT_POLICY, loadPolicyFromObject, type NexusShieldPolicy } from '@/lib/engine/policy';
 import { pathMatchesAny, rangesOverlap } from '@/lib/engine/utils';
+
+export type { ContextAwareFinding } from '@/lib/engine/context';
+
+export interface DetectionEngineOptions {
+  includeSuppressed?: boolean;
+}
 
 function isAllowedMatch(matched: string, ctx: DetectorContext): boolean {
   if (ctx.allowlistExact.has(matched)) return true;
@@ -14,17 +21,11 @@ function shouldIncludeFinding(finding: DetectionMatch, policy: NexusShieldPolicy
   return true;
 }
 
-export function runDetectionEngine(
+function collectRawFindings(
   content: string,
   filename: string,
-  policyInput?: NexusShieldPolicy | Record<string, unknown> | null,
+  policy: NexusShieldPolicy,
 ): DetectionMatch[] {
-  if (!content.trim()) return [];
-
-  const policy = policyInput && 'version' in policyInput
-    ? (policyInput as NexusShieldPolicy)
-    : loadPolicyFromObject(policyInput as Record<string, unknown> | null);
-
   const normalizedPath = filename.replace(/\\/g, '/');
   if (pathMatchesAny(normalizedPath, policy.ignore_paths)) {
     return [];
@@ -64,16 +65,40 @@ export function runDetectionEngine(
   return allMatches.sort((a, b) => a.line - b.line || a.column - b.column);
 }
 
+export function runDetectionEngine(
+  content: string,
+  filename: string,
+  policyInput?: NexusShieldPolicy | Record<string, unknown> | null,
+  options?: DetectionEngineOptions,
+): ContextAwareFinding[] {
+  if (!content.trim()) return [];
+
+  const policy =
+    policyInput && 'version' in policyInput
+      ? (policyInput as NexusShieldPolicy)
+      : loadPolicyFromObject(policyInput as Record<string, unknown> | null);
+
+  const normalizedPath = filename.replace(/\\/g, '/');
+  const rawFindings = collectRawFindings(content, normalizedPath, policy);
+
+  return applyContextToFindings(rawFindings, content, normalizedPath, {
+    includeSuppressed: options?.includeSuppressed ?? false,
+  });
+}
+
 export function runDetectionEngineOnLines(
   lines: Array<{ lineNumber: number; content: string }>,
   filename: string,
   policyInput?: NexusShieldPolicy | Record<string, unknown> | null,
-): DetectionMatch[] {
-  const findings: DetectionMatch[] = [];
+  options?: DetectionEngineOptions,
+): ContextAwareFinding[] {
+  const findings: ContextAwareFinding[] = [];
 
   for (const line of lines) {
     if (!line.content.trim()) continue;
-    const lineFindings = runDetectionEngine(line.content, filename, policyInput);
+    const lineFindings = runDetectionEngine(line.content, filename, policyInput, {
+      includeSuppressed: true,
+    });
     findings.push(
       ...lineFindings.map((finding) => ({
         ...finding,
@@ -82,7 +107,11 @@ export function runDetectionEngineOnLines(
     );
   }
 
-  return findings.sort((a, b) => a.line - b.line || a.column - b.column);
+  const sorted = findings.sort((a, b) => a.line - b.line || a.column - b.column);
+  if (options?.includeSuppressed) {
+    return sorted;
+  }
+  return sorted.filter((finding) => !finding.suppressed);
 }
 
 export { DEFAULT_POLICY };

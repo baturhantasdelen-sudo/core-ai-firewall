@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authenticateApiKey, extractApiKey } from '@/lib/auth/api-key';
 import { runDetectionEngine, runDetectionEngineOnLines } from '@/lib/engine';
+import { finalizeFindingsContext, partitionFindingsByContext } from '@/lib/engine/context';
 import { loadPolicyFromObject } from '@/lib/engine/policy';
 import { remediateFiles } from '@/lib/engine/remediation';
 import { findingsToSarif, type SarifFinding } from '@/lib/engine/sarif';
@@ -69,35 +70,70 @@ export async function POST(req: NextRequest) {
 
     const engineFindings: SarifFinding[] = [];
     const scannedFiles: ScannedFile[] = [];
+    const fileContentByPath = new Map<string, string>();
 
     for (const file of files) {
       if (file.patch) {
         const addedLines = parseAddedLinesFromPatch(file.patch);
+        const patchContent = addedLines.map((line) => line.content).join('\n');
+        fileContentByPath.set(file.path, patchContent);
+        scannedFiles.push({ path: file.path, content: patchContent });
+
         const lineFindings = runDetectionEngineOnLines(
           addedLines.map((line) => ({ lineNumber: line.lineNumber, content: line.content })),
           file.path,
           policy,
+          { includeSuppressed: true },
         );
         engineFindings.push(...lineFindings.map((finding) => ({ ...finding, file: file.path })));
-        if (includeFixes) {
-          scannedFiles.push({
-            path: file.path,
-            content: addedLines.map((line) => line.content).join('\n'),
-          });
-        }
         continue;
       }
 
       if (file.content !== undefined) {
-        const contentFindings = runDetectionEngine(file.content, file.path, policy);
+        fileContentByPath.set(file.path, file.content);
+        scannedFiles.push({ path: file.path, content: file.content });
+
+        const contentFindings = runDetectionEngine(file.content, file.path, policy, {
+          includeSuppressed: true,
+        });
         engineFindings.push(...contentFindings.map((finding) => ({ ...finding, file: file.path })));
-        if (includeFixes) {
-          scannedFiles.push({ path: file.path, content: file.content });
-        }
       }
     }
 
-    const enrichedFindings = (await validateSecretFindings(engineFindings)) as SarifFinding[];
+    const validatedFindings = (await validateSecretFindings(engineFindings)) as SarifFinding[];
+
+    const validationByKey = new Map<string, NonNullable<SarifFinding['validation']>>();
+    for (const finding of validatedFindings) {
+      if (!finding.validation) continue;
+      validationByKey.set(
+        `${finding.ruleId}:${finding.line}:${finding.matched}`,
+        finding.validation,
+      );
+    }
+
+    const contextualizedFindings = finalizeFindingsContext(
+      validatedFindings,
+      fileContentByPath,
+      validationByKey,
+    ).map((finding) => {
+      const source = validatedFindings.find(
+        (candidate) =>
+          candidate.ruleId === finding.ruleId &&
+          candidate.line === finding.line &&
+          candidate.matched === finding.matched &&
+          candidate.file === (finding as SarifFinding).file,
+      );
+      return {
+        ...finding,
+        file: source?.file,
+        validation: source?.validation,
+      } satisfies SarifFinding;
+    });
+
+    const { active: activeFindings, suppressed: suppressedFindings } =
+      partitionFindingsByContext(contextualizedFindings);
+
+    const enrichedFindings = activeFindings;
 
     let fixedFiles:
       | Array<{
@@ -149,7 +185,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const findings = enrichedFindings.map((finding) => ({
+    const mapFinding = (finding: SarifFinding) => ({
       type: finding.type,
       file: finding.file,
       line: finding.line,
@@ -159,6 +195,9 @@ export async function POST(req: NextRequest) {
       severity: finding.severity,
       category: finding.category,
       validation: finding.validation ?? null,
+      confidence_score: finding.confidenceScore ?? null,
+      suppressed: finding.suppressed ?? false,
+      suppression_reason: finding.suppressionReason ?? null,
       fix: finding.fix
         ? {
             original: finding.fix.original,
@@ -167,7 +206,10 @@ export async function POST(req: NextRequest) {
             env_example_line: finding.fix.envExampleLine ?? null,
           }
         : null,
-    }));
+    });
+
+    const findings = enrichedFindings.map(mapFinding);
+    const suppressed = suppressedFindings.map(mapFinding);
 
     const status = findings.length > 0 ? 'failed' : 'passed';
 
@@ -183,10 +225,11 @@ export async function POST(req: NextRequest) {
     const piiCount = findings.filter((f) => f.category === 'pii').length;
 
     if (format === 'sarif') {
-      const sarif = findingsToSarif(enrichedFindings, {
+      const sarif = findingsToSarif(contextualizedFindings, {
         repoName: repo_name,
         commitSha: commit_sha,
         scanId,
+        includeSuppressed: false,
       });
       return NextResponse.json(sarif, { status: 200 });
     }
@@ -197,6 +240,8 @@ export async function POST(req: NextRequest) {
         scan_id: scanId,
         status,
         findings,
+        suppressed_findings: suppressed,
+        suppressed_count: suppressed.length,
         findings_count: findings.length,
         secrets_blocked: secretsCount,
         pii_leaks_blocked: piiCount,
