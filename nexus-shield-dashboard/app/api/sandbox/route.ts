@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import {
+  PROMPT_INJECTION_BLOCK_DETAIL,
+  quickSecurityScan,
+} from '@/lib/engine/injection';
+import { sanitizePlaygroundInput } from '@/lib/engine/sanitize';
+import type { Profile } from '@/lib/engine/types';
 import {
   VISITOR_COOKIE,
-  SANDBOX_TIMEOUT_MS,
   getUsageSnapshot,
   recordSandboxUsage,
   resolveUsageContext,
@@ -10,7 +16,17 @@ import {
 
 export const runtime = 'nodejs';
 
-const DEFAULT_API_BASE = 'https://api.nexusshield.ai';
+const sandboxRequestSchema = z.object({
+  user_input: z.string().min(1),
+  session_id: z.string().min(1).optional(),
+  target_model: z.string().optional(),
+  policy: z
+    .object({
+      profile: z.enum(['TR', 'GLOBAL', 'US']).optional(),
+    })
+    .passthrough()
+    .optional(),
+});
 
 function attachVisitorCookie(response: NextResponse, visitorId: string, shouldSet: boolean) {
   if (shouldSet) {
@@ -25,7 +41,6 @@ function attachVisitorCookie(response: NextResponse, visitorId: string, shouldSe
 }
 
 export async function POST(req: NextRequest) {
-  const apiBase = (process.env.NEXUS_SHIELD_API_URL ?? DEFAULT_API_BASE).replace(/\/$/, '');
   const { org, visitorId, setVisitorCookie } = await resolveUsageContext(req);
 
   const snapshot = await getUsageSnapshot(org, org ? null : visitorId);
@@ -35,65 +50,101 @@ export async function POST(req: NextRequest) {
     return res;
   }
 
-  let body: string;
+  let payload: z.infer<typeof sandboxRequestSchema>;
   try {
-    body = await req.text();
+    const body = await req.json();
+    const parsed = sandboxRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      const res = NextResponse.json(
+        { error: 'Invalid payload', details: parsed.error.flatten() },
+        { status: 400 },
+      );
+      attachVisitorCookie(res, visitorId, setVisitorCookie);
+      return res;
+    }
+    payload = parsed.data;
   } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    const res = NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    attachVisitorCookie(res, visitorId, setVisitorCookie);
+    return res;
   }
 
   const started = performance.now();
+  const userInput = payload.user_input;
+  const profile = (payload.policy?.profile ?? 'TR') as Profile;
 
-  try {
-    const upstream = await fetch(`${apiBase}/api/sandbox`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-      cache: 'no-store',
-      signal: AbortSignal.timeout(SANDBOX_TIMEOUT_MS),
+  if (quickSecurityScan(userInput)) {
+    const latencyMs = performance.now() - started;
+    await recordSandboxUsage({
+      orgId: org?.id ?? null,
+      visitorId,
+      status: 'blocked',
+      latencyMs,
     });
 
-    const proxyLatencyMs = performance.now() - started;
-    const responseText = await upstream.text();
-
-    let upstreamLatency: number | undefined;
-    try {
-      const parsed = JSON.parse(responseText) as { latency_ms?: number };
-      if (typeof parsed.latency_ms === 'number') upstreamLatency = parsed.latency_ms;
-    } catch {
-      // non-json upstream body
-    }
-
-    const measuredLatency = upstreamLatency ?? proxyLatencyMs;
-    const shouldCount = upstream.status === 200 || upstream.status === 403;
-
-    if (shouldCount) {
-      await recordSandboxUsage({
-        orgId: org?.id ?? null,
-        visitorId,
-        status: upstream.status === 403 ? 'blocked' : 'passed',
-        latencyMs: measuredLatency,
-      });
-    }
-
-    const res = new NextResponse(responseText, {
-      status: upstream.status,
-      headers: {
-        'Content-Type': upstream.headers.get('Content-Type') ?? 'application/json',
-        'X-Nexus-Latency-Ms': measuredLatency.toFixed(2),
-        'X-Nexus-Proxy-Ms': proxyLatencyMs.toFixed(2),
-      },
-    });
-    attachVisitorCookie(res, visitorId, setVisitorCookie);
-    return res;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Sandbox proxy failed';
-    const isTimeout = message.toLowerCase().includes('timeout') || message.includes('aborted');
     const res = NextResponse.json(
-      { error: isTimeout ? 'Sandbox request timed out' : message },
-      { status: isTimeout ? 504 : 502 },
+      {
+        error: PROMPT_INJECTION_BLOCK_DETAIL,
+        detail: PROMPT_INJECTION_BLOCK_DETAIL,
+        code: 'PROMPT_INJECTION_BLOCKED',
+        latency_ms: latencyMs,
+      },
+      { status: 403 },
     );
+    res.headers.set('X-Nexus-Latency-Ms', latencyMs.toFixed(2));
     attachVisitorCookie(res, visitorId, setVisitorCookie);
     return res;
   }
+
+  const sanitizeResult = sanitizePlaygroundInput(userInput, {
+    profile,
+    policy: payload.policy ?? { profile: 'TR' },
+  });
+  const latencyMs = performance.now() - started;
+
+  await recordSandboxUsage({
+    orgId: org?.id ?? null,
+    visitorId,
+    status: 'passed',
+    latencyMs,
+  });
+
+  const responseBody = {
+    status: sanitizeResult.pii_detected ? 'clean' : 'success',
+    redacted_input: sanitizeResult.redacted_input,
+    sanitized_prompt: sanitizeResult.sanitized_prompt,
+    sanitizedPrompt: sanitizeResult.sanitizedPrompt,
+    pii_detected: sanitizeResult.pii_detected,
+    masked_types: sanitizeResult.masked_types,
+    pii_masked_count: sanitizeResult.pii_masked_count,
+    result: sanitizeResult.pii_detected
+      ? 'PII redacted — upstream LLM call skipped.'
+      : `Processed response: '${sanitizeResult.sanitizedPrompt}' passed clean.`,
+    latency_ms: Math.round(latencyMs * 100) / 100,
+    engine: 'nexus-shield-modular',
+    profile,
+  };
+
+  const res = NextResponse.json(responseBody, { status: 200 });
+  res.headers.set('X-Nexus-Latency-Ms', latencyMs.toFixed(2));
+  attachVisitorCookie(res, visitorId, setVisitorCookie);
+  return res;
+}
+
+export async function GET() {
+  return NextResponse.json({
+    endpoint: '/api/sandbox',
+    method: 'POST',
+    auth: 'none (visitor quota)',
+    body: {
+      user_input: 'Sample prompt text',
+      session_id: 'playground-demo',
+      policy: { profile: 'TR' },
+    },
+    response: {
+      sanitized_prompt: 'Masked text forwarded to LLM',
+      pii_masked_count: 2,
+      masked_types: ['TCKN', 'Credit Card'],
+    },
+  });
 }

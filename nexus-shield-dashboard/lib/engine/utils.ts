@@ -104,7 +104,9 @@ export function hasPiiContext(content: string, index: number): boolean {
   const windowEnd = Math.min(content.length, index + 60);
   const window = content.slice(windowStart, windowEnd).toLowerCase();
 
-  return /(?:customer|user|patient|email|phone|ssn|tckn|iban|tax|identity|billing)/.test(window);
+  return /(?:customer|müşteri|user|patient|email|phone|ssn|tckn|iban|tax|identity|billing|kredi\s*kart|credit\s*card|\bcard\b)/i.test(
+    window,
+  );
 }
 
 export function confidenceFromSignals(params: {

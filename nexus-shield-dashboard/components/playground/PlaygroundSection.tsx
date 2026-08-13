@@ -11,7 +11,7 @@ const PRESETS: Record<PresetKey, { label: string; emoji: string; text: string }>
   pii: {
     label: 'TCKN & Credit Card (PII)',
     emoji: '💳',
-    text: "Müşterimiz Ahmet Yılmaz'ın TCKN numarası 12345678901 ve kredi kartı 4543-6012-3456-7890 olarak sisteme işlenmiştir.",
+    text: "Müşterimiz Ahmet Yılmaz'ın TCKN numarası 10000000146 ve kredi kartı 4543-6012-3456-7890 olarak sisteme işlenmiştir.",
   },
   leet: {
     label: 'LeetSpeak Injection',
@@ -29,7 +29,10 @@ interface SandboxResponse {
   latency_ms?: number;
   masked_types?: string[];
   pii_detected?: boolean;
+  pii_masked_count?: number;
   redacted_input?: string;
+  sanitized_prompt?: string;
+  sanitizedPrompt?: string;
   result?: string;
   detail?: string;
   code?: string;
@@ -97,6 +100,7 @@ export function PlaygroundSection() {
             user_input: text,
             session_id: `playground-${Date.now()}`,
             target_model: targetModel,
+            policy: { profile: 'TR' },
           }),
         });
 
@@ -144,11 +148,18 @@ export function PlaygroundSection() {
                 : 'Sandbox unavailable. The production API may be temporarily offline.',
           );
         } else if (resp.status === 200) {
-          const types = data.masked_types ?? [];
-          setPiiCount(types.length);
-          const sanitized = data.redacted_input ?? '';
+          const maskCount =
+            typeof data.pii_masked_count === 'number'
+              ? data.pii_masked_count
+              : (data.masked_types ?? []).length;
+          setPiiCount(maskCount);
+          const sanitized =
+            data.sanitized_prompt ??
+            data.sanitizedPrompt ??
+            data.redacted_input ??
+            text;
           const suffix = data.result ? `\n\n${data.result}` : '';
-          setOutput(`${sanitized}${suffix}`);
+          setOutput(sanitized.trim() ? `${sanitized}${suffix}` : text);
 
           if (data.pii_detected) {
             setActionLabel('SANITIZED & PASSED');
@@ -198,10 +209,10 @@ export function PlaygroundSection() {
       <section id="playground" className="scroll-mt-20 mx-auto max-w-7xl px-6 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
-            Live AI PII Firewall &amp; Security Playground
+            Ultra-Fast PII &amp; Secret Protection Playground
           </h2>
           <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-            Test PII masking and prompt injection blocking in real time — no API key required.
+            Test policy-driven PII masking and secret protection in real time for developer workflows.
           </p>
           <p className="mt-2 text-xs text-indigo-400/90">
             {scansRemaining} of {scansLimit} free scans remaining
@@ -308,7 +319,7 @@ export function PlaygroundSection() {
                   </div>
                   <div>
                     <div className="text-xs text-zinc-500">PII Masked</div>
-                    <div className="text-sm font-bold text-zinc-200">{piiCount} Type(s)</div>
+                    <div className="text-sm font-bold text-zinc-200">{piiCount} Mask(s)</div>
                   </div>
                   <div>
                     <div className="text-xs text-zinc-500">Action</div>

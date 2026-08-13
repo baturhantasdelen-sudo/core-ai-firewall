@@ -16,23 +16,22 @@ export function Hero() {
       <div className="relative mx-auto max-w-4xl px-6 py-20 text-center sm:py-28">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/80 px-3 py-1 text-xs font-medium text-zinc-400">
           <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-          AI PII Firewall · Prompt Injection Guard · CI/CD Secret Scanning
+          DevSecOps Native — Regional PII &amp; Secret Engine
         </div>
 
         <h1 className="mt-6 text-4xl font-semibold tracking-tight text-zinc-100 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-          Secure Every{' '}
+          Ultra-fast, policy-driven{' '}
           <span className="bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-indigo-400 bg-clip-text text-transparent">
-            LLM Request
+            PII &amp; secret protection
           </span>{' '}
-          Before It Reaches Your Model
+          for developer workflows
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-base text-zinc-400 sm:text-lg">
-          Mask PII, block prompt injection, and stop credential leaks — with{' '}
-          <span className="font-medium text-zinc-200">sub-10ms latency</span>,{' '}
-          <span className="font-medium text-zinc-200">KVKK/GDPR-ready redaction</span>, and a{' '}
-          <span className="font-medium text-zinc-200">multi-LLM proxy</span> for OpenAI, Gemini,
-          and Ollama.
+          Prevent data leaks, mask PII, and block credential exposure across GitHub, GitLab, and
+          CI/CD pipelines with{' '}
+          <span className="font-medium text-zinc-200">sub-10ms policy-driven engine</span> and{' '}
+          <span className="font-medium text-zinc-200">SARIF 2.1.0 support</span>.
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
