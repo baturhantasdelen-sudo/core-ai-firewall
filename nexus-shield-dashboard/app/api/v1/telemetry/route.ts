@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authenticateApiKey, extractApiKey } from '@/lib/auth/api-key';
+import { findingsToSarif, type SarifFinding } from '@/lib/engine/sarif';
 import { enforceScanQuota, scanQuotaExceededResponse } from '@/lib/usage/enforce-scan-quota';
 import { recordScanResult } from '@/lib/scans';
 
@@ -11,6 +12,10 @@ const findingSchema = z.object({
   file: z.string().optional(),
   line: z.number().int().optional(),
   preview: z.string().optional(),
+  rule_id: z.string().optional(),
+  confidence: z.enum(['HIGH', 'MEDIUM', 'LOW']).optional(),
+  severity: z.enum(['critical', 'high', 'medium', 'low', 'note']).optional(),
+  category: z.enum(['secret', 'pii']).optional(),
 });
 
 const telemetrySchema = z.object({
@@ -55,6 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { repo_name, commit_sha, pr_number, findings, status } = parsed.data;
+    const format = req.nextUrl.searchParams.get('format');
 
     const { scanId } = await recordScanResult(org.id, {
       repo_name,
@@ -63,6 +69,30 @@ export async function POST(req: NextRequest) {
       findings,
       status,
     });
+
+    if (format === 'sarif') {
+      const sarifFindings: SarifFinding[] = findings.map((finding, index) => ({
+        ruleId: finding.rule_id ?? finding.type.toLowerCase().replace(/\s+/g, '-'),
+        type: finding.type,
+        line: finding.line ?? 1,
+        column: 1,
+        preview: finding.preview ?? '',
+        matched: finding.preview ?? finding.type,
+        confidence: finding.confidence ?? 'MEDIUM',
+        severity: finding.severity ?? 'medium',
+        category: finding.category ?? 'secret',
+        file: finding.file,
+        entropy: undefined,
+      }));
+
+      const sarif = findingsToSarif(sarifFindings, {
+        repoName: repo_name,
+        commitSha: commit_sha,
+        scanId,
+      });
+
+      return NextResponse.json(sarif, { status: 200 });
+    }
 
     return NextResponse.json(
       {

@@ -1,0 +1,15 @@
+version: 1
+profile: TR
+ignore_paths:
+  - node_modules/**
+  - tests/**
+  - dist/**
+  - .next/**
+allowlist:
+  exact_matches:
+    - sk-proj-example-placeholder-key
+  regex_patterns:
+    - '^EXAMPLE_.*$'
+rules:
+  secret_detection: block
+  pii_detection: warn

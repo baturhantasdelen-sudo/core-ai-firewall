@@ -3,7 +3,8 @@ import { getSupabaseAdmin } from '@/lib/supabase';
 import { getInstallationOctokit } from '@/lib/github/app-client';
 import { startCheckRun, markCheckRunInProgress, completeCheckRun, CheckRunAnnotation } from '@/lib/github/checks';
 import { scanContent, ScanIssue } from '@/lib/scanner/patterns';
-import { scannableContentFor, ChangedFile } from '@/lib/scanner/diff';
+import { scannableAddedLinesFor, scannableContentFor, ChangedFile } from '@/lib/scanner/diff';
+import { runDetectionEngineOnLines } from '@/lib/engine';
 import { scanScaForChangedFiles, ScaFinding, scaFindingType } from '@/lib/scanner/sca';
 import { getOrganizationByGithubInstallationId, getOrgUsageSummary, derivePlanId } from '@/lib/org-metrics';
 import { getPlanConfig } from '@/config/plans';
@@ -116,10 +117,26 @@ async function fetchRepositoryFile(
 
 function scanSecretsInChangedFiles(files: ChangedFile[]): FileIssues[] {
   return files
-    .map((file) => ({
-      filename: file.filename,
-      issues: scanContent(scannableContentFor(file), file.filename).map(scanIssueToUnified),
-    }))
+    .map((file) => {
+      const addedLines = scannableAddedLinesFor(file);
+      const issues =
+        addedLines.length > 0
+          ? runDetectionEngineOnLines(
+              addedLines.map((line) => ({ lineNumber: line.lineNumber, content: line.content })),
+              file.filename,
+            ).map((finding) =>
+              scanIssueToUnified({
+                type: finding.type,
+                line: finding.line,
+                column: finding.column,
+                preview: finding.preview,
+                matched: finding.matched,
+              }),
+            )
+          : scanContent(scannableContentFor(file), file.filename).map(scanIssueToUnified);
+
+      return { filename: file.filename, issues };
+    })
     .filter((result) => result.issues.length > 0);
 }
 
