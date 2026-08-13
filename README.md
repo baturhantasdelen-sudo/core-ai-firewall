@@ -76,6 +76,60 @@ Nexus Shield is designed for strict security environments including Defence, Fin
 
 ---
 
+## Integrations & IDE Support
+
+Nexus Shield meets developers where they work — in the IDE, CI pipeline, and GitHub workflow.
+
+### VS Code / Cursor Extension
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  $(shield) Nexus Shield: ON          Real-time · sub-10ms  │
+├─────────────────────────────────────────────────────────────┤
+│  const tckn = "10000000146";                                │
+│              ~~~~~~~~~~~~~  ← 🛡️ TCKN Detected!             │
+│              Masking recommended before push.               │
+│                                                             │
+│  Quick Fix (Ctrl+.)  →  Mask with Nexus Shield              │
+│                         →  [MASKED_TCKN]                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| Capability | Description |
+|------------|-------------|
+| **Real-time protection** | 300ms debounced scan on every keystroke (`onDidChangeTextDocument`) |
+| **Red diagnostics** | `DiagnosticSeverity.Error` squiggles for TCKN, IBAN, API keys, and more |
+| **Quick Fix masking** | One-click replace with `[MASKED_TCKN]`, `[MASKED_SECRET]`, etc. |
+| **Local engine** | In-process policy engine — sub-10ms, no network required |
+| **Cloud API mode** | Optional routing through `POST /api/v1/scan` with your API key |
+
+**Commands:** `Nexus Shield: Scan Current File` · `Nexus Shield: Toggle Real-time Protection`
+
+**Install from VSIX (local):**
+
+```bash
+cd packages/vscode-extension
+npm install && npm run package
+code --install-extension nexus-shield-vscode-0.1.0.vsix
+# Cursor:
+cursor --install-extension nexus-shield-vscode-0.1.0.vsix
+```
+
+Full build, debug (F5), and Marketplace publish guide: **[VSCODE_EXTENSION.md](VSCODE_EXTENSION.md)**
+
+### GitHub Actions
+
+Use the composite action at the repo root ([`action.yml`](action.yml)) or the standalone [`nexus-shield-action`](nexus-shield-action/) repo for SARIF-native secret & PII scanning in CI.
+
+```yaml
+- uses: baturhantasdelen-sudo/nexus-shield-action@v1
+  with:
+    api-key: ${{ secrets.NEXUS_SHIELD_API_KEY }}
+    profile: TR
+```
+
+---
+
 ## Architecture
 
 ### Production — API (GCP + Cloudflare Tunnel)
@@ -217,6 +271,8 @@ Detailed Locust benchmarks: **[PERFORMANCE.md](PERFORMANCE.md)**
 | `nexus-shield-dashboard/` | Next.js SaaS app (landing, dashboard, GitHub App, waitlist) |
 | `nexus-shield-dashboard/lib/scanner/` | Secret + SCA scanning modules |
 | `nexus-shield-dashboard/lib/services/github-scanner.ts` | GitHub webhook scan orchestrator |
+| `packages/vscode-extension/` | VS Code / Cursor extension — real-time PII & secret scanning |
+| `VSCODE_EXTENSION.md` | Extension build, VSIX install, and debug guide |
 | `scripts/fix-cloudflare-tunnel-origin.sh` | Cloudflare Tunnel / Nginx origin repair |
 | `DEPLOYMENT.md` | GCP + Cloudflare production deploy guide |
 | `ENTERPRISE.md` | Enterprise sales & GTM playbook |

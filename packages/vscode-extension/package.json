@@ -1,0 +1,90 @@
+{
+  "name": "nexus-shield-vscode",
+  "displayName": "Nexus Shield",
+  "description": "Real-time PII & Secret scanning in your IDE with sub-10ms policy engine.",
+  "version": "0.1.0",
+  "publisher": "nexus-shield",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baturhantasdelen-sudo/core-ai-firewall.git",
+    "directory": "packages/vscode-extension"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "pii",
+    "secrets",
+    "security",
+    "kvkk",
+    "gdpr",
+    "tckn",
+    "devsecops"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "nexus-shield.scanFile",
+        "title": "Nexus Shield: Scan Current File"
+      },
+      {
+        "command": "nexus-shield.toggleRealtime",
+        "title": "Nexus Shield: Toggle Real-time Protection"
+      }
+    ],
+    "configuration": {
+      "title": "Nexus Shield",
+      "properties": {
+        "nexusShield.profile": {
+          "type": "string",
+          "enum": ["TR", "US", "GLOBAL"],
+          "default": "TR",
+          "description": "Regional PII profile for the policy engine."
+        },
+        "nexusShield.realtimeEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Scan files automatically while typing (300ms debounce)."
+        },
+        "nexusShield.apiUrl": {
+          "type": "string",
+          "default": "https://nexus-shield-dashboard.vercel.app/api/v1/scan",
+          "description": "Optional remote scan API URL (requires API key)."
+        },
+        "nexusShield.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Optional Nexus Shield API key for remote validation."
+        },
+        "nexusShield.useRemoteApi": {
+          "type": "boolean",
+          "default": false,
+          "description": "When true, scan via Nexus Shield API instead of the local engine."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npm run compile && vsce package",
+    "lint": "tsc -p ./ --noEmit",
+    "test": "tsx --test test/scanner.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.1",
+    "tsx": "^4.23.12",
+    "typescript": "^5.4.0"
+  }
+}
