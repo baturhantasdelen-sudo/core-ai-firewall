@@ -48,6 +48,23 @@ npm install @baturhantasdelen/nexus-shield   # Node.js SDK
 | **Waitlist API** | Supabase-backed signup (`/api/waitlist`, `/api/v1/waitlist`) |
 | **Org dashboard** | `/dashboard` — scan history, findings, GitHub App install flow |
 | **Stripe billing** | Pro upgrade checkout and customer portal |
+| **KVKK / GDPR PDF Export** | One-click compliance audit report from `/dashboard/compliance` |
+
+### 📄 One-Click KVKK / GDPR Audit Report
+
+Generate an enterprise-grade PDF directly from the dashboard — no manual spreadsheet work:
+
+1. Open **[Dashboard → Compliance](/dashboard/compliance)** (or click **Compliance** in the header).
+2. Click **Download KVKK Compliance Report (PDF)**.
+3. Receive a branded report with:
+   - **Security grade** (A+ through F) and compliance score
+   - **KVKK & GDPR summary** — TCKN, IBAN, VKN, credit card, and masking statistics
+   - **Violation risk table** with severity and status
+   - **Masked findings list** — PII and secrets never exported in raw form
+
+> Executive summary: *"Bu rapor KVKK Madde 12 ve BDDK Veri Güvenliği Rehberi standartlarında otomatik oluşturulmuştur."*
+
+Powered by `@react-pdf/renderer` via `GET /api/reports/compliance`.
 
 ### 🏢 Enterprise & Air-Gapped Deployment
 
