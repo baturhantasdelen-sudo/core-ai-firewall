@@ -55,8 +55,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
 
+    if (!org.id) {
+      return NextResponse.json({ error: 'Organization ID is missing' }, { status: 400 });
+    }
+
     const session = await createProCheckoutSession({
-      orgId,
+      orgId: org.id,
+      userId: auth.userId,
       customerId: org.stripe_customer_id,
       billingInterval: billingInterval as BillingInterval,
       appUrl: getSiteUrl(req.nextUrl.origin),

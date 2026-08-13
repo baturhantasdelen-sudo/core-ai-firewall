@@ -4,6 +4,7 @@ import type { BillingInterval } from '@/config/pricing';
 
 export interface CreateCheckoutSessionInput {
   orgId: string;
+  userId: string;
   customerId?: string | null;
   billingInterval: BillingInterval;
   appUrl: string;
@@ -13,7 +14,18 @@ export async function createProCheckoutSession(
   input: CreateCheckoutSessionInput,
 ): Promise<Stripe.Checkout.Session> {
   const stripe = getStripe();
-  const { orgId, customerId, billingInterval, appUrl } = input;
+  const { orgId, userId, customerId, billingInterval, appUrl } = input;
+
+  const organizationId = orgId?.trim();
+  const authUserId = userId?.trim();
+
+  if (!organizationId) {
+    throw new Error('Organization ID is required for Stripe checkout');
+  }
+
+  if (!authUserId) {
+    throw new Error('User ID is required for Stripe checkout');
+  }
 
   const monthlyPriceId =
     process.env.STRIPE_PRO_MONTHLY_PRICE_ID?.trim() ??
@@ -41,19 +53,25 @@ export async function createProCheckoutSession(
         },
       ];
 
+  const sessionMetadata = {
+    organization_id: organizationId,
+    user_id: authUserId,
+    org_id: organizationId,
+    billing_interval: billingInterval,
+    plan: 'pro',
+  };
+
   return stripe.checkout.sessions.create({
     mode: 'subscription',
-    client_reference_id: orgId,
+    client_reference_id: organizationId,
     customer: customerId ?? undefined,
     line_items: lineItems,
-    metadata: {
-      org_id: orgId,
-      billing_interval: billingInterval,
-      plan: 'pro',
-    },
+    metadata: sessionMetadata,
     subscription_data: {
       metadata: {
-        org_id: orgId,
+        organization_id: organizationId,
+        user_id: authUserId,
+        org_id: organizationId,
         plan: 'pro',
       },
     },

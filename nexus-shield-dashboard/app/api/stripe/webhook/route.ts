@@ -22,10 +22,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    console.log('[Stripe Webhook] Received event', { type: event.type, id: event.id });
     await handleStripeWebhookEvent(event);
+    console.log('[Stripe Webhook] Successfully handled event', { type: event.type, id: event.id });
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Webhook processing failed';
+    console.error('[Stripe Webhook] Error', message);
     const status = message.includes('signature') ? 400 : 500;
     return NextResponse.json({ error: message }, { status });
   }
