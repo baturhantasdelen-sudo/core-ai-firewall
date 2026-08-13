@@ -24,6 +24,10 @@ export interface ScanFinding {
   line: number;
   preview: string;
   validation?: ScanFindingValidation | null;
+  ruleId?: string;
+  category?: 'secret' | 'pii';
+  column?: number;
+  matched?: string;
 }
 
 export type ScanStatus = 'passed' | 'blocked';

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:validation": "tsx --test lib/engine/validation/index.test.ts",
-    "test:reports": "tsx --test lib/reports/build-compliance-report.test.ts"
+    "test:reports": "tsx --test lib/reports/build-compliance-report.test.ts",
+    "test:remediation": "tsx --test lib/engine/remediation/index.test.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "^8.3.0",

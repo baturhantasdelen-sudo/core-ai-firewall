@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authenticateApiKey, extractApiKey } from '@/lib/auth/api-key';
 import { runDetectionEngine, runDetectionEngineOnLines } from '@/lib/engine';
 import { loadPolicyFromObject } from '@/lib/engine/policy';
+import { remediateFiles } from '@/lib/engine/remediation';
 import { findingsToSarif, type SarifFinding } from '@/lib/engine/sarif';
 import { validateSecretFindings } from '@/lib/engine/validation';
 import { enforceScanQuota, scanQuotaExceededResponse } from '@/lib/usage/enforce-scan-quota';
@@ -24,6 +25,11 @@ const scanRequestSchema = z.object({
   files: z.array(fileSchema).min(1).max(100),
   policy: z.record(z.string(), z.unknown()).optional(),
 });
+
+interface ScannedFile {
+  path: string;
+  content: string;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -59,8 +65,10 @@ export async function POST(req: NextRequest) {
     const { repo_name, commit_sha, pr_number, files, policy: policyInput } = parsed.data;
     const policy = loadPolicyFromObject(policyInput ?? null);
     const format = req.nextUrl.searchParams.get('format');
+    const includeFixes = req.nextUrl.searchParams.get('include_fixes') === 'true';
 
     const engineFindings: SarifFinding[] = [];
+    const scannedFiles: ScannedFile[] = [];
 
     for (const file of files) {
       if (file.patch) {
@@ -71,16 +79,75 @@ export async function POST(req: NextRequest) {
           policy,
         );
         engineFindings.push(...lineFindings.map((finding) => ({ ...finding, file: file.path })));
+        if (includeFixes) {
+          scannedFiles.push({
+            path: file.path,
+            content: addedLines.map((line) => line.content).join('\n'),
+          });
+        }
         continue;
       }
 
       if (file.content !== undefined) {
         const contentFindings = runDetectionEngine(file.content, file.path, policy);
         engineFindings.push(...contentFindings.map((finding) => ({ ...finding, file: file.path })));
+        if (includeFixes) {
+          scannedFiles.push({ path: file.path, content: file.content });
+        }
       }
     }
 
     const enrichedFindings = (await validateSecretFindings(engineFindings)) as SarifFinding[];
+
+    let fixedFiles:
+      | Array<{
+          path: string;
+          content: string;
+          original_content: string;
+          fixes: Array<Record<string, unknown>>;
+        }>
+      | undefined;
+    let envExampleAdditions: string[] | undefined;
+
+    if (includeFixes && enrichedFindings.length > 0) {
+      const remediationInput = scannedFiles.map((file) => ({
+        path: file.path,
+        content: file.content,
+        findings: enrichedFindings.filter((finding) => finding.file === file.path),
+      }));
+
+      const batch = remediateFiles(remediationInput, policy);
+      fixedFiles = batch.files.map((file) => ({
+        path: file.path,
+        content: file.content,
+        original_content: file.originalContent,
+        fixes: file.fixes.map((fix) => ({
+          rule_id: fix.ruleId,
+          type: fix.type,
+          category: fix.category,
+          line: fix.line,
+          column: fix.column,
+          original: fix.original,
+          replacement: fix.replacement,
+          env_var: fix.envVarName ?? null,
+          env_example_line: fix.envExampleLine ?? null,
+        })),
+      }));
+      envExampleAdditions = batch.envExampleAdditions;
+
+      const fixByKey = new Map<string, (typeof batch.files)[number]['fixes'][number]>();
+      for (const file of batch.files) {
+        for (const fix of file.fixes) {
+          fixByKey.set(`${fix.file}:${fix.line}:${fix.column}:${fix.original}`, fix);
+        }
+      }
+
+      for (const finding of enrichedFindings) {
+        const key = `${finding.file}:${finding.line}:${finding.column}:${finding.matched}`;
+        const fix = fixByKey.get(key);
+        if (fix) finding.fix = fix;
+      }
+    }
 
     const findings = enrichedFindings.map((finding) => ({
       type: finding.type,
@@ -92,6 +159,14 @@ export async function POST(req: NextRequest) {
       severity: finding.severity,
       category: finding.category,
       validation: finding.validation ?? null,
+      fix: finding.fix
+        ? {
+            original: finding.fix.original,
+            replacement: finding.fix.replacement,
+            env_var: finding.fix.envVarName ?? null,
+            env_example_line: finding.fix.envExampleLine ?? null,
+          }
+        : null,
     }));
 
     const status = findings.length > 0 ? 'failed' : 'passed';
@@ -128,6 +203,12 @@ export async function POST(req: NextRequest) {
         scans_used_this_month: quota.used + 1,
         monthly_scan_limit: quota.limit,
         remaining: Math.max(0, quota.remaining - 1),
+        ...(includeFixes
+          ? {
+              fixed_files: fixedFiles ?? [],
+              env_example_additions: envExampleAdditions ?? [],
+            }
+          : {}),
       },
       { status: 200 },
     );
@@ -143,12 +224,12 @@ export async function GET() {
     endpoint: '/api/v1/scan',
     method: 'POST',
     auth: 'x-api-key or x-nexus-api-key',
-    query: { format: 'json | sarif' },
+    query: { format: 'json | sarif', include_fixes: 'true | false' },
     body: {
       repo_name: 'owner/repo',
       commit_sha: 'abc123',
       pr_number: null,
-      policy: { version: 1, profile: 'TR' },
+      policy: { version: 1, profile: 'TR', remediation: { pii_mask_style: 'partial' } },
       files: [
         { path: 'src/config.ts', content: 'const API_KEY = "sk-proj-..."' },
         { path: 'src/app.ts', patch: '@@ -1,1 +1,2 @@\\n+const token = "ghp_..."' },

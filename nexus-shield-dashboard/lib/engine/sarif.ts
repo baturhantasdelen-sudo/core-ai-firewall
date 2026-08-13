@@ -1,9 +1,11 @@
 import type { DetectionMatch } from '@/lib/engine/types';
 import type { SecretValidationResult } from '@/lib/engine/validation/types';
+import type { RemediationFix } from '@/lib/engine/remediation';
 
 export interface SarifFinding extends DetectionMatch {
   file?: string;
   validation?: SecretValidationResult;
+  fix?: RemediationFix;
 }
 
 export interface SarifConversionContext {
@@ -66,10 +68,13 @@ export function findingsToSarif(findings: SarifFinding[], context: SarifConversi
                 region: {
                   startLine: finding.line,
                   startColumn: finding.column,
+                  endLine: finding.line,
+                  endColumn: finding.column + finding.matched.length,
                 },
               },
             },
           ],
+          fixes: finding.fix ? [sarifFixObject(finding.fix)] : [],
           properties: {
             confidence: finding.confidence,
             severity: finding.severity,
@@ -80,8 +85,44 @@ export function findingsToSarif(findings: SarifFinding[], context: SarifConversi
             secretValidationRiskScore: finding.validation?.risk_score ?? null,
             secretValidationRiskLevel: finding.validation?.risk_level ?? null,
             secretValidationMessage: finding.validation?.message ?? null,
+            remediationReplacement: finding.fix?.replacement ?? null,
+            remediationEnvVar: finding.fix?.envVarName ?? null,
+            remediationEnvExample: finding.fix?.envExampleLine ?? null,
           },
         })),
+      },
+    ],
+  };
+}
+
+function sarifFixObject(fix: RemediationFix): Record<string, unknown> {
+  const endColumn = fix.column + fix.original.length;
+  const description =
+    fix.category === 'pii'
+      ? `Mask ${fix.type} according to Nexus Shield policy`
+      : `Replace leaked ${fix.type} with environment variable reference`;
+
+  return {
+    description: { text: description },
+    artifactChanges: [
+      {
+        artifactLocation: {
+          uri: fix.file ?? 'unknown',
+          uriBaseId: '%SRCROOT%',
+        },
+        replacements: [
+          {
+            deletedRegion: {
+              startLine: fix.line,
+              startColumn: fix.column,
+              endLine: fix.line,
+              endColumn,
+            },
+            insertedContent: {
+              text: fix.replacement,
+            },
+          },
+        ],
       },
     ],
   };

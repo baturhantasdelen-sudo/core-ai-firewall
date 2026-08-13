@@ -13,3 +13,6 @@ allowlist:
 rules:
   secret_detection: block
   pii_detection: warn
+remediation:
+  pii_mask_style: partial
+  secret_use_env: true

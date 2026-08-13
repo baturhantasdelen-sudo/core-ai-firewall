@@ -13,6 +13,10 @@ export interface NexusShieldPolicy {
     secret_detection: RuleAction;
     pii_detection: RuleAction;
   };
+  remediation?: {
+    pii_mask_style: 'partial' | 'token';
+    secret_use_env: boolean;
+  };
 }
 
 export const DEFAULT_POLICY: NexusShieldPolicy = {
@@ -45,6 +49,12 @@ const policySchema = z.object({
       pii_detection: z.enum(['block', 'warn', 'off']).default('warn'),
     })
     .default(DEFAULT_POLICY.rules),
+  remediation: z
+    .object({
+      pii_mask_style: z.enum(['partial', 'token']).default('token'),
+      secret_use_env: z.boolean().default(true),
+    })
+    .optional(),
 });
 
 function parseSimpleYaml(raw: string): unknown {
@@ -96,6 +106,18 @@ function parseSimpleYaml(raw: string): unknown {
           root.rules = currentNested;
         }
         if (currentNested) currentNested[key] = parsedValue;
+        continue;
+      }
+
+      if (key === 'pii_mask_style' || key === 'secret_use_env') {
+        if (!currentNested && currentKey === 'remediation') {
+          currentNested = (root.remediation as Record<string, unknown>) ?? {};
+          root.remediation = currentNested;
+        }
+        if (currentNested) {
+          currentNested[key] =
+            parsedValue === 'true' ? true : parsedValue === 'false' ? false : parsedValue;
+        }
         continue;
       }
 
