@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Building2, Sparkles } from 'lucide-react';
 
 export function Hero() {
   return (
@@ -14,9 +14,15 @@ export function Hero() {
       />
 
       <div className="relative mx-auto max-w-4xl px-6 py-20 text-center sm:py-28">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/80 px-3 py-1 text-xs font-medium text-zinc-400">
-          <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-          DevSecOps Native — Regional PII &amp; Secret Engine
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/80 px-3 py-1 text-xs font-medium text-zinc-400">
+            <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+            DevSecOps Native — Regional PII &amp; Secret Engine
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300">
+            <Building2 className="h-3.5 w-3.5" />
+            Enterprise &amp; Defence Ready
+          </div>
         </div>
 
         <h1 className="mt-6 text-4xl font-semibold tracking-tight text-zinc-100 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
@@ -33,6 +39,21 @@ export function Hero() {
           <span className="font-medium text-zinc-200">sub-10ms policy-driven engine</span> and{' '}
           <span className="font-medium text-zinc-200">SARIF 2.1.0 support</span>.
         </p>
+
+        <ul className="mx-auto mt-5 max-w-2xl space-y-2 text-left text-sm text-zinc-500 sm:text-center">
+          <li>
+            <span className="font-medium text-zinc-300">Air-Gapped &amp; On-Premise Support</span>{' '}
+            — zero data egress; sensitive workloads never leave your closed network.
+          </li>
+          <li>
+            <span className="font-medium text-zinc-300">Self-Hosted GitLab &amp; Jenkins Integration</span>{' '}
+            — deploy in private CI/CD with GitHub Enterprise Server.
+          </li>
+          <li>
+            <span className="font-medium text-zinc-300">Local Data Protection &amp; TR PII Standards</span>{' '}
+            — KVKK-aligned TCKN, VKN, IBAN, and regional policy profiles out of the box.
+          </li>
+        </ul>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a

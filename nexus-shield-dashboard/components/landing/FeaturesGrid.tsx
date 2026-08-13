@@ -1,4 +1,4 @@
-import { Globe, Lock, ShieldCheck, Zap } from 'lucide-react';
+import { Building2, Globe, Lock, ShieldCheck, Zap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface Feature {
@@ -37,6 +37,13 @@ const FEATURES: Feature[] = [
     description:
       'One gateway for OpenAI, Google Gemini, Anthropic Claude, and local Ollama — swap models without rewriting security logic.',
   },
+  {
+    icon: Building2,
+    accent: 'bg-amber-500/10 text-amber-400',
+    title: 'Enterprise & Defence Ready',
+    description:
+      'Air-gapped and on-premise deployment with zero external egress. Native Self-Hosted GitLab, Jenkins, and GitHub Enterprise integration with TR PII compliance.',
+  },
 ];
 
 export function FeaturesGrid() {
@@ -52,7 +59,7 @@ export function FeaturesGrid() {
         </p>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {FEATURES.map(({ icon: Icon, accent, title, description }) => (
           <div
             key={title}

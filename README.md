@@ -49,6 +49,14 @@ npm install @baturhantasdelen/nexus-shield   # Node.js SDK
 | **Org dashboard** | `/dashboard` — scan history, findings, GitHub App install flow |
 | **Stripe billing** | Pro upgrade checkout and customer portal |
 
+### 🏢 Enterprise & Air-Gapped Deployment
+
+Nexus Shield is designed for strict security environments including Defence, Finance, and Public Sectors:
+
+- **Zero External Egress:** Run 100% locally on Air-Gapped networks.
+- **On-Premise Support:** Native integration with Self-Hosted GitLab CI, Jenkins, and GitHub Enterprise.
+- **Regional Compliance:** Out-of-the-box TR PII (TCKN/VKN/IBAN) & US/EU data protection.
+
 ---
 
 ## Architecture
