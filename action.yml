@@ -1,0 +1,53 @@
+name: 'Nexus Shield Security Scan'
+description: 'Ultra-fast, policy-driven PII & secret protection for developer workflows'
+author: 'Nexus Shield'
+branding:
+  icon: 'shield'
+  color: 'purple'
+
+inputs:
+  api_key:
+    description: 'Nexus Shield API Key'
+    required: true
+  profile:
+    description: 'PII Profile (TR, US, GLOBAL)'
+    required: false
+    default: 'TR'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Nexus Shield Scan
+      shell: bash
+      env:
+        NEXUS_API_KEY: ${{ inputs.api_key }}
+        NEXUS_PROFILE: ${{ inputs.profile }}
+        REPO_NAME: ${{ github.repository }}
+        COMMIT_SHA: ${{ github.sha }}
+        SCAN_PATH: ${{ github.event.head_commit.modified[0] || 'src/config.ts' }}
+      run: |
+        set -euo pipefail
+
+        FILE_PATH="${SCAN_PATH}"
+        if [ -f "$FILE_PATH" ]; then
+          FILE_CONTENT=$(python3 -c "import json, pathlib; print(json.dumps(pathlib.Path('${FILE_PATH}').read_text(encoding='utf-8', errors='replace')))")
+        else
+          FILE_CONTENT='"check"'
+        fi
+
+        curl -fsSL -X POST "https://nexus-shield-dashboard.vercel.app/api/v1/scan?format=sarif" \
+          -H "x-api-key: ${NEXUS_API_KEY}" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"repo_name\": \"${REPO_NAME}\",
+            \"commit_sha\": \"${COMMIT_SHA}\",
+            \"policy\": { \"profile\": \"${NEXUS_PROFILE}\" },
+            \"files\": [{ \"path\": \"${FILE_PATH}\", \"content\": ${FILE_CONTENT} }]
+          }" -o results.sarif
+
+        echo "SARIF results written to results.sarif"
+
+    - name: Upload SARIF file to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: results.sarif
