@@ -29,13 +29,16 @@ export default async function TrustHubPage() {
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to Dashboard
           </Link>
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-cyan-400" />
             <h1 className="text-2xl font-semibold tracking-tight">Agent Trust Hub</h1>
+            <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-cyan-200">
+              Katman 3 — TRUST
+            </span>
           </div>
           <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-            Unified view of tool-chain trajectories, evidence chain verification, MCP guardrails,
-            memory integrity, and inter-agent reputation for advanced AI agent governance.
+            Evidence Chain verification, Memory Integrity &amp; Poisoning quarantine, Agent Reputation
+            scoring, and Inter-Agent Trust delegation for advanced AI agent governance.
           </p>
         </div>
 

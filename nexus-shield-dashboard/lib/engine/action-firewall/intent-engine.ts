@@ -1,4 +1,14 @@
 import type { TrajectoryEntry } from './trajectory';
+import {
+  analyzeIntentDivergence,
+  inferIntentTags,
+  INTENT_DIVERGENCE_THRESHOLD,
+  type IntentDivergenceReport,
+  type ToolCallStep,
+} from './intent-divergence';
+
+export type { IntentDivergenceReport, ToolCallStep, DivergenceSeverity, DivergenceRecommendation } from './intent-divergence';
+export { analyzeIntentDivergence, inferIntentTags, INTENT_DIVERGENCE_THRESHOLD } from './intent-divergence';
 
 export interface IntentDivergenceResult {
   divergencePercent: number;
@@ -7,6 +17,7 @@ export interface IntentDivergenceResult {
   shouldBlock: boolean;
   intentTags: string[];
   trajectoryTags: string[];
+  report?: IntentDivergenceReport;
 }
 
 const INTENT_KEYWORDS: Record<string, RegExp[]> = {
@@ -19,92 +30,38 @@ const INTENT_KEYWORDS: Record<string, RegExp[]> = {
   database: [/\bdatabase\b/i, /\bsql\b/i, /\bquery\b/i, /\bdb\b/i, /\brecord\b/i],
 };
 
-const TRAJECTORY_TAG_MAP: Array<{ pattern: RegExp; tag: string }> = [
-  { pattern: /read_invoice|invoice_read|get_invoice/i, tag: 'invoice' },
-  { pattern: /read_db|db_read|sql_query|db_query|database/i, tag: 'database' },
-  { pattern: /export_csv|bulk_export|export_db|dump|download/i, tag: 'export' },
-  { pattern: /stripe|payment|transfer|financial|billing/i, tag: 'payment' },
-  { pattern: /exec|shell|run_command|subprocess/i, tag: 'execute' },
-  { pattern: /read_file|fetch_|get_|load_/i, tag: 'read' },
-  { pattern: /search|web_search|browse/i, tag: 'search' },
-];
-
-export const INTENT_DIVERGENCE_THRESHOLD = 80;
-
 function normalizeForTokenMatch(text: string): string {
   return text.replace(/_/g, ' ');
 }
 
-export function inferIntentTags(userIntent: string): string[] {
-  const intent = normalizeForTokenMatch(userIntent.toLowerCase());
-  return Object.entries(INTENT_KEYWORDS)
-    .filter(([, patterns]) => patterns.some((pattern) => pattern.test(intent)))
-    .map(([tag]) => tag);
-}
-
-function extractTrajectoryTags(trajectory: TrajectoryEntry[] | string[]): string[] {
-  const toolNames =
-    typeof trajectory[0] === 'string'
-      ? (trajectory as string[])
-      : (trajectory as TrajectoryEntry[]).map((entry) => entry.toolName);
-
-  const tags = new Set<string>();
-  for (const toolName of toolNames) {
-    for (const mapping of TRAJECTORY_TAG_MAP) {
-      if (mapping.pattern.test(toolName)) {
-        tags.add(mapping.tag);
-      }
-    }
+function toToolCallSteps(trajectory: TrajectoryEntry[] | string[]): ToolCallStep[] {
+  if (trajectory.length === 0) return [];
+  if (typeof trajectory[0] === 'string') {
+    return (trajectory as string[]).map((tool) => ({ tool }));
   }
-  return [...tags];
-}
-
-function computeAlignment(intentTags: string[], trajectoryTags: string[]): number {
-  if (intentTags.length === 0) {
-    return trajectoryTags.length === 0 ? 100 : 40;
-  }
-  const overlap = intentTags.filter((tag) => trajectoryTags.includes(tag));
-  return Math.round((overlap.length / intentTags.length) * 100);
+  return (trajectory as TrajectoryEntry[]).map((entry) => ({
+    tool: entry.toolName,
+    timestamp: entry.timestamp,
+  }));
 }
 
 export function calculateIntentDivergence(
   intent: string,
   trajectory: TrajectoryEntry[] | string[],
 ): IntentDivergenceResult {
-  const intentTags = inferIntentTags(intent);
-  const trajectoryTags = extractTrajectoryTags(trajectory);
-  const intentMatchScore = computeAlignment(intentTags, trajectoryTags);
-  const divergencePercent = Math.max(0, 100 - intentMatchScore);
+  const steps = toToolCallSteps(trajectory);
+  const report = analyzeIntentDivergence(intent, steps);
 
-  const exportWithoutIntent =
-    trajectoryTags.includes('export') && !intentTags.includes('export') && intentTags.includes('read');
-  const paymentWithoutIntent =
-    trajectoryTags.includes('payment') && !intentTags.includes('payment');
-  const executeWithoutIntent =
-    trajectoryTags.includes('execute') && !intentTags.includes('execute');
-
-  let violation: string | undefined;
-  if (divergencePercent > INTENT_DIVERGENCE_THRESHOLD) {
-    violation = `INTENT_ACTION_DIVERGENCE: ${divergencePercent}% mismatch between user intent and action trajectory`;
-  } else if (exportWithoutIntent) {
-    violation = `INTENT_ACTION_DIVERGENCE: read intent vs export trajectory (${divergencePercent}% divergence)`;
-  } else if (paymentWithoutIntent && divergencePercent > 50) {
-    violation = `INTENT_ACTION_DIVERGENCE: non-financial intent vs payment trajectory (${divergencePercent}% divergence)`;
-  } else if (executeWithoutIntent && divergencePercent > 50) {
-    violation = `INTENT_ACTION_DIVERGENCE: non-execute intent vs shell trajectory (${divergencePercent}% divergence)`;
-  }
-
-  const shouldBlock = divergencePercent > INTENT_DIVERGENCE_THRESHOLD;
+  const trajectoryTags = [...new Set(steps.map((step) => step.tool))];
 
   return {
-    divergencePercent,
-    intentMatchScore,
-    violation: shouldBlock
-      ? (violation ?? `INTENT_ACTION_DIVERGENCE: ${divergencePercent}% mismatch between user intent and action trajectory`)
-      : undefined,
-    shouldBlock,
-    intentTags,
+    divergencePercent: report.divergenceScore,
+    intentMatchScore: report.intentMatchScore,
+    violation: report.violation,
+    shouldBlock: report.shouldBlock,
+    intentTags: report.intentTags,
     trajectoryTags,
+    report,
   };
 }
 
@@ -132,7 +89,7 @@ export function scoreIntentConsistency(
       : Math.round((overlap.length / intentTags.length) * 100);
 
   const invoiceLike = /invoice|billing|receipt|fatura/i.test(intent);
-  const exportLike = /bulk_export|export_db|dump|download_all|sql_export/i.test(tool);
+  const exportLike = /bulk_export|export_db|dump|download_all|sql_export|export_customer_database/i.test(tool);
   const paymentLike = /payment|transfer|stripe|charge|refund/i.test(tool);
   const executeLike = /exec|shell|run_command|subprocess/i.test(tool);
   const readLikeIntent = /\bcheck\b|\bview\b|\binspect\b|\blookup\b|\bread\b/i.test(intent);

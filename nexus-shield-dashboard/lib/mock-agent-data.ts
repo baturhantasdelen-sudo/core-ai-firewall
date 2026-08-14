@@ -1,5 +1,9 @@
-import type { AgentAsset, AgentDiscoveryResult } from '@/lib/engine/discovery';
-import { enrichAgentInventory, type EnrichedAgentDiscoveryResult } from '@/lib/engine/agents/inventory';
+import type { AgentAsset } from '@/lib/engine/discovery';
+import {
+  scanEnvironment,
+  type AgentInventoryRecord,
+  type EnvironmentScanResult,
+} from '@/lib/engine/agents/inventory';
 
 export const mockAgentInventory: AgentAsset[] = [
   {
@@ -11,11 +15,7 @@ export const mockAgentInventory: AgentAsset[] = [
     capabilities: ['READ', 'WEB_SEARCH', 'API_CALL'],
     riskLevel: 'MEDIUM',
     mcpConnections: [
-      {
-        serverName: 'filesystem',
-        transport: 'stdio',
-        tools: ['read_file', 'write_file'],
-      },
+      { serverName: 'filesystem', transport: 'stdio', tools: ['read_file', 'read_invoice'] },
     ],
   },
   {
@@ -24,19 +24,11 @@ export const mockAgentInventory: AgentAsset[] = [
     framework: 'CrewAI',
     sourceFile: 'src/agents/ops_crew.py',
     line: 42,
-    capabilities: ['EXECUTE', 'DB_QUERY', 'API_CALL'],
+    capabilities: ['READ', 'DB_QUERY', 'API_CALL'],
     riskLevel: 'CRITICAL',
     mcpConnections: [
-      {
-        serverName: 'postgres-mcp',
-        transport: 'sse',
-        tools: ['sql_query', 'run_command'],
-      },
-      {
-        serverName: 'billing-tools',
-        transport: 'stdio',
-        tools: ['stripe_payment', 'financial_report'],
-      },
+      { serverName: 'postgres-mcp', transport: 'sse', tools: ['sql_query', 'bulk_export_db', 'delete_records'] },
+      { serverName: 'billing-tools', transport: 'stdio', tools: ['stripe_payment', 'financial_report'] },
     ],
   },
   {
@@ -57,40 +49,83 @@ export const mockAgentInventory: AgentAsset[] = [
     capabilities: ['READ', 'WRITE', 'EXECUTE'],
     riskLevel: 'HIGH',
     mcpConnections: [
-      {
-        serverName: 'dev-tools',
-        transport: 'stdio',
-        tools: ['read_file', 'write_file', 'execute_shell'],
-      },
+      { serverName: 'dev-tools', transport: 'stdio', tools: ['read_file', 'write_file', 'execute_shell'] },
+    ],
+  },
+  {
+    id: 'rogue-shadow-agent-1',
+    name: 'Shadow Invoice Bot',
+    framework: 'Custom Agent',
+    sourceFile: 'src/agents/shadow_bot.py',
+    line: 8,
+    capabilities: ['READ'],
+    riskLevel: 'LOW',
+    mcpConnections: [
+      { serverName: 's3-tools', transport: 'http', tools: ['s3_delete', 'bulk_export_db'] },
+    ],
+  },
+  {
+    id: 'rogue-finance-agent-1',
+    name: 'Unverified Finance Runner',
+    framework: 'AutoGPT',
+    sourceFile: 'src/agents/finance_runner.py',
+    line: 31,
+    capabilities: ['READ', 'API_CALL'],
+    riskLevel: 'MEDIUM',
+    mcpConnections: [
+      { serverName: 'erp-bridge', transport: 'sse', tools: ['erp_pay', 'swift_transfer'] },
     ],
   },
 ];
 
 const MOCK_FILE_CONTENT: Record<string, string> = {
+  'src/agents/support_agent.py': `
+    scopes="read:invoices readonly"
+    declared_role="Read customer invoices only"
+  `,
   'src/agents/ops_crew.py': `
-    scopes="write:all delete:records payment:stripe execute:shell"
+    scopes="write:all delete:records payment:stripe export:database"
     STRIPE_SECRET_KEY=sk_live_ops_agent
+    DATABASE_URL=postgres://admin:secret@db.internal:5432/production?superuser=true
+  `,
+  'src/agents/shadow_bot.py': `
+    AWS_SECRET_ACCESS_KEY=DELETE_ALL
+    DATABASE_URL=postgres://root:pass@db/shadow?tenant_id=*&cross_org=true
+  `,
+  'src/agents/finance_runner.py': `
+    SWIFT_API_KEY=swift_live_key
+    ERP_WRITE_KEY=erp_prod_write
   `,
   '.mcp/config.json': `{ "tools": ["write_file", "execute_shell"] }`,
 };
 
-export function buildMockAgentDiscovery(): EnrichedAgentDiscoveryResult {
+/** Demo-scale fleet extension for AI Environment Overview stats */
+const DEMO_FLEET_MULTIPLIER = {
+  totalAiAgents: 183,
+  connectedTools: 421,
+  mcpServers: 37,
+  unknownRogueAgents: 14,
+};
+
+export function buildMockEnvironmentScan(): EnvironmentScanResult {
   const contentMap = new Map(Object.entries(MOCK_FILE_CONTENT));
-  const agents = enrichAgentInventory(mockAgentInventory, contentMap);
-  const totalMcpTools = agents.reduce(
-    (sum, agent) => sum + agent.mcpConnections.reduce((inner, connection) => inner + connection.tools.length, 0),
-    0,
-  );
+  const scan = scanEnvironment({ agents: mockAgentInventory, fileContents: contentMap });
 
   return {
-    total_agents: agents.length,
-    total_mcp_tools: totalMcpTools,
-    critical_agents: agents.filter(
-      (agent) =>
-        agent.riskLevel === 'CRITICAL' || agent.effectiveAuthority.overallRisk === 'CRITICAL',
-    ).length,
-    agents,
+    ...scan,
+    overview: {
+      totalAiAgents: DEMO_FLEET_MULTIPLIER.totalAiAgents,
+      connectedTools: DEMO_FLEET_MULTIPLIER.connectedTools,
+      mcpServers: DEMO_FLEET_MULTIPLIER.mcpServers,
+      unknownRogueAgents: DEMO_FLEET_MULTIPLIER.unknownRogueAgents,
+    },
   };
 }
 
-export type { AgentDiscoveryResult };
+/** Real computed scan (no demo scaling) — used in tests */
+export function buildMockAgentDiscovery(): EnvironmentScanResult {
+  const contentMap = new Map(Object.entries(MOCK_FILE_CONTENT));
+  return scanEnvironment({ agents: mockAgentInventory, fileContents: contentMap });
+}
+
+export type { AgentInventoryRecord, EnvironmentScanResult };

@@ -158,24 +158,32 @@ export type {
   SimulationVectorStatus,
 } from '@/lib/engine/simulator';
 
-export { verifyActionEvidence } from '@/lib/engine/evidence';
-export type { ActionEvidence, EvidenceStatus, EvidenceVerificationResult } from '@/lib/engine/evidence';
+export { verifyActionEvidence, recordEvidenceChainLog, listEvidenceChainLogs, getEvidenceVerificationRatio, resetEvidenceChainStore } from '@/lib/engine/evidence';
+export type { ActionEvidence, EvidenceStatus, EvidenceVerificationResult, EvidenceType, EvidenceChainResult } from '@/lib/engine/evidence';
 
 export { inspectMCPServer } from '@/lib/engine/mcp/guardrail';
 export type { McpGuardrailResult, McpServerInspectionInput } from '@/lib/engine/mcp/guardrail';
 
-export { scanAgentMemory } from '@/lib/engine/memory/poisoning';
-export type { AgentMemoryScanInput, MemoryPoisoningResult } from '@/lib/engine/memory/poisoning';
+export { scanAgentMemory, scanAndProtectMemory, rollbackMemoryToLastTrustedState, getMemoryIntegrityScore, resetMemoryGuardState } from '@/lib/engine/memory/poisoning';
+export type { AgentMemoryScanInput, MemoryPoisoningResult, MemoryGuardResult, MemoryQuarantineEntry } from '@/lib/engine/memory/poisoning';
 
 export {
   calculateReputationScore,
+  calculateLiveReputationScore,
   getAgentReputation,
+  getAgentReputationCard,
   listAgentReputations,
+  listAgentReputationCards,
   verifyInterAgentTrust,
+  recordAgentIncident,
+  upsertAgentReputation,
   resetReputationStore,
 } from '@/lib/engine/reputation';
 export type {
   AgentIncident,
   AgentReputationRecord,
+  AgentReputationCard,
   InterAgentTrustResult,
+  ReputationMetrics,
+  RiskBadge,
 } from '@/lib/engine/reputation';

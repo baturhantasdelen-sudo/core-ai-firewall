@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArrowLeft, Bot } from 'lucide-react';
+import { ArrowLeft, Bot, Eye } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { AgentInventoryPanel } from '@/components/dashboard/AgentInventoryPanel';
-import { buildMockAgentDiscovery } from '@/lib/mock-agent-data';
+import { buildMockEnvironmentScan } from '@/lib/mock-agent-data';
 import { getAuthContext } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +14,7 @@ export default async function AgentsPage() {
     redirect('/login?next=/dashboard/agents');
   }
 
-  const discovery = buildMockAgentDiscovery();
+  const environmentScan = buildMockEnvironmentScan();
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -33,15 +33,19 @@ export default async function AgentsPage() {
             <div className="mt-3 flex items-center gap-2">
               <Bot className="h-5 w-5 text-indigo-400" />
               <h1 className="text-2xl font-semibold tracking-tight">AI Agent Inventory</h1>
+              <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-violet-200">
+                <Eye className="h-3 w-3" />
+                Katman 1 — SEE
+              </span>
             </div>
             <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-              Discovered LangChain, CrewAI, OpenAI Assistant, and MCP-connected agents across your
-              repositories — with capabilities, MCP servers, and risk scoring.
+              Effective Authority mapping — compare declared agent scopes against real permissions
+              inferred from API keys, OAuth tokens, database connection strings, and MCP tools.
             </p>
           </div>
         </div>
 
-        <AgentInventoryPanel discovery={discovery} />
+        <AgentInventoryPanel scan={environmentScan} />
       </div>
     </div>
   );

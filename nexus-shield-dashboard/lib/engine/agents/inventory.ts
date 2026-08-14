@@ -10,279 +10,253 @@ import {
   discoverAgentsInFile,
   summarizeAgentDiscovery,
 } from '@/lib/engine/discovery';
+import {
+  detectEffectiveAuthority,
+  formatDeclaredSummary,
+  formatEffectiveSummary,
+  type EffectiveAuthorityReport,
+  type ElevatedRiskScope,
+} from './effective-authority';
 
-export type EffectiveAuthorityScope =
-  | 'UNRESTRICTED_WRITE'
-  | 'UNRESTRICTED_DELETE'
-  | 'FINANCIAL_ACCESS'
-  | 'EXECUTE_SHELL'
-  | 'DB_MUTATION'
-  | 'READ_ONLY';
+export type VerifiedStatus = 'VERIFIED' | 'UNVERIFIED' | 'ROGUE';
 
-export type AuthoritySource = 'API_KEY' | 'OAUTH_SCOPE' | 'MCP_TOOL' | 'DECLARED_CAPABILITY';
-
-export interface EffectiveAuthorityEntry {
-  scope: EffectiveAuthorityScope;
-  source: AuthoritySource;
-  riskLevel: AgentRiskLevel;
-  detail: string;
+export interface AgentNhiMetadata {
+  ownerDepartment: string;
+  verifiedStatus: VerifiedStatus;
+  creationTimestamp: string;
+  lastActive: string;
 }
 
-export interface EffectiveAuthorityMatrix {
+export interface AgentConnectivityMap {
+  connectedToolsCount: number;
+  mcpServersCount: number;
+  externalApisCount: number;
+}
+
+export interface AgentInventoryRecord extends AgentAsset {
+  nhi: AgentNhiMetadata;
+  connectivity: AgentConnectivityMap;
+  authorityReport: EffectiveAuthorityReport;
+  /** @deprecated Use authorityReport — kept for backward compatibility */
+  effectiveAuthority: LegacyEffectiveAuthorityMatrix;
+}
+
+export interface EnvironmentOverview {
+  totalAiAgents: number;
+  connectedTools: number;
+  mcpServers: number;
+  unknownRogueAgents: number;
+}
+
+export interface EnvironmentScanResult {
+  overview: EnvironmentOverview;
+  agents: AgentInventoryRecord[];
+  scannedAt: string;
+}
+
+export interface ScanEnvironmentInput {
+  files?: DiscoveryFileInput[];
+  agents?: AgentAsset[];
+  fileContents?: Map<string, string>;
+  nhiMetadata?: Map<string, Partial<AgentNhiMetadata>>;
+}
+
+/** @deprecated Legacy matrix shape — derived from authorityReport for UI compat */
+export interface LegacyEffectiveAuthorityMatrix {
   declared: AgentCapability[];
-  effective: EffectiveAuthorityEntry[];
+  effective: Array<{
+    scope: string;
+    source: string;
+    riskLevel: AgentRiskLevel;
+    detail: string;
+  }>;
   overallRisk: AgentRiskLevel;
   hasUnrestrictedWrite: boolean;
   hasUnrestrictedDelete: boolean;
   hasFinancialAccess: boolean;
 }
 
-export interface EnrichedAgentAsset extends AgentAsset {
-  effectiveAuthority: EffectiveAuthorityMatrix;
-}
+export type EnrichedAgentAsset = AgentInventoryRecord;
+export type EnrichedAgentDiscoveryResult = EnvironmentScanResult;
 
-export interface EnrichedAgentDiscoveryResult extends AgentDiscoveryResult {
-  agents: EnrichedAgentAsset[];
-}
-
-const OAUTH_SCOPE_PATTERNS: Array<{
-  pattern: RegExp;
-  scope: EffectiveAuthorityScope;
-  riskLevel: AgentRiskLevel;
-  detail: string;
-}> = [
-  {
-    pattern: /(?:scope[s]?[=:]\s*['"][^'"]*(?:write|modify|admin)[^'"]*['"])/i,
-    scope: 'UNRESTRICTED_WRITE',
-    riskLevel: 'HIGH',
-    detail: 'OAuth scope grants unrestricted write access',
-  },
-  {
-    pattern: /(?:scope[s]?[=:]\s*['"][^'"]*(?:delete|destroy|purge)[^'"]*['"])/i,
-    scope: 'UNRESTRICTED_DELETE',
-    riskLevel: 'CRITICAL',
-    detail: 'OAuth scope grants unrestricted delete access',
-  },
-  {
-    pattern: /(?:scope[s]?[=:]\s*['"][^'"]*(?:payment|billing|financial|stripe|bank)[^'"]*['"])/i,
-    scope: 'FINANCIAL_ACCESS',
-    riskLevel: 'CRITICAL',
-    detail: 'OAuth scope grants financial mutation access',
-  },
-  {
-    pattern: /(?:scope[s]?[=:]\s*['"][^'"]*(?:execute|shell|run_command)[^'"]*['"])/i,
-    scope: 'EXECUTE_SHELL',
-    riskLevel: 'CRITICAL',
-    detail: 'OAuth scope grants shell execution access',
-  },
-];
-
-const API_KEY_PATTERNS: Array<{
-  pattern: RegExp;
-  scope: EffectiveAuthorityScope;
-  riskLevel: AgentRiskLevel;
-  detail: string;
-}> = [
-  {
-    pattern: /(?:sk_live|STRIPE_SECRET|FINANCIAL_API|BILLING_KEY|PAYMENT_KEY)/i,
-    scope: 'FINANCIAL_ACCESS',
-    riskLevel: 'CRITICAL',
-    detail: 'Live financial API key detected — effective financial access',
-  },
-  {
-    pattern: /(?:ADMIN_KEY|ROOT_TOKEN|SUPERUSER|FULL_ACCESS|WRITE_ALL)/i,
-    scope: 'UNRESTRICTED_WRITE',
-    riskLevel: 'CRITICAL',
-    detail: 'Admin/root API key implies unrestricted write authority',
-  },
-  {
-    pattern: /(?:DELETE_KEY|DESTROY_TOKEN|PURGE_API)/i,
-    scope: 'UNRESTRICTED_DELETE',
-    riskLevel: 'CRITICAL',
-    detail: 'Delete-capable API key detected',
-  },
-];
-
-const MCP_TOOL_AUTHORITY: Array<{
-  pattern: RegExp;
-  scope: EffectiveAuthorityScope;
-  riskLevel: AgentRiskLevel;
-  detail: string;
-}> = [
-  { pattern: /write_file|write_db|store_|upload_/i, scope: 'UNRESTRICTED_WRITE', riskLevel: 'HIGH', detail: 'MCP tool grants write access' },
-  { pattern: /delete_|remove_|purge_|drop_table/i, scope: 'UNRESTRICTED_DELETE', riskLevel: 'CRITICAL', detail: 'MCP tool grants delete access' },
-  { pattern: /stripe|payment|financial|transfer|billing/i, scope: 'FINANCIAL_ACCESS', riskLevel: 'CRITICAL', detail: 'MCP tool grants financial access' },
-  { pattern: /execute_shell|run_command|subprocess|terminal/i, scope: 'EXECUTE_SHELL', riskLevel: 'CRITICAL', detail: 'MCP tool grants shell execution' },
-  { pattern: /sql_mutation|insert_|update_db|modify_db/i, scope: 'DB_MUTATION', riskLevel: 'HIGH', detail: 'MCP tool grants database mutation' },
-];
+export type EffectiveAuthorityScope = ElevatedRiskScope | 'FULL_DB_ADMIN' | 'READ_ONLY';
 
 const RISK_ORDER: AgentRiskLevel[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
-function maxRisk(a: AgentRiskLevel, b: AgentRiskLevel): AgentRiskLevel {
-  return RISK_ORDER.indexOf(a) >= RISK_ORDER.indexOf(b) ? a : b;
+function riskFromScore(score: number): AgentRiskLevel {
+  if (score >= 75) return 'CRITICAL';
+  if (score >= 50) return 'HIGH';
+  if (score >= 25) return 'MEDIUM';
+  return 'LOW';
 }
 
-function inferFromDeclaredCapabilities(capabilities: AgentCapability[]): EffectiveAuthorityEntry[] {
-  const entries: EffectiveAuthorityEntry[] = [];
-
-  if (capabilities.includes('WRITE')) {
-    entries.push({
-      scope: 'UNRESTRICTED_WRITE',
-      source: 'DECLARED_CAPABILITY',
-      riskLevel: 'HIGH',
-      detail: 'Agent declares WRITE capability',
-    });
-  }
-  if (capabilities.includes('EXECUTE')) {
-    entries.push({
-      scope: 'EXECUTE_SHELL',
-      source: 'DECLARED_CAPABILITY',
-      riskLevel: 'CRITICAL',
-      detail: 'Agent declares EXECUTE capability',
-    });
-  }
-  if (capabilities.includes('FINANCIAL')) {
-    entries.push({
-      scope: 'FINANCIAL_ACCESS',
-      source: 'DECLARED_CAPABILITY',
-      riskLevel: 'CRITICAL',
-      detail: 'Agent declares FINANCIAL capability',
-    });
-  }
-  if (capabilities.includes('DB_QUERY') && capabilities.includes('WRITE')) {
-    entries.push({
-      scope: 'DB_MUTATION',
-      source: 'DECLARED_CAPABILITY',
-      riskLevel: 'HIGH',
-      detail: 'Combined DB_QUERY + WRITE implies mutation authority',
-    });
-  }
-
-  return entries;
-}
-
-function inferFromMcpTools(agent: AgentAsset): EffectiveAuthorityEntry[] {
-  const entries: EffectiveAuthorityEntry[] = [];
-  const allTools = agent.mcpConnections.flatMap((connection) => connection.tools);
-
-  for (const tool of allTools) {
-    for (const mapping of MCP_TOOL_AUTHORITY) {
-      if (mapping.pattern.test(tool)) {
-        entries.push({
-          scope: mapping.scope,
-          source: 'MCP_TOOL',
-          riskLevel: mapping.riskLevel,
-          detail: `${mapping.detail}: ${tool}`,
-        });
-      }
-    }
-  }
-
-  return entries;
-}
-
-function inferFromCredentials(content: string): EffectiveAuthorityEntry[] {
-  const entries: EffectiveAuthorityEntry[] = [];
-
-  for (const mapping of OAUTH_SCOPE_PATTERNS) {
-    if (mapping.pattern.test(content)) {
-      entries.push({
-        scope: mapping.scope,
-        source: 'OAUTH_SCOPE',
-        riskLevel: mapping.riskLevel,
-        detail: mapping.detail,
-      });
-    }
-  }
-
-  for (const mapping of API_KEY_PATTERNS) {
-    if (mapping.pattern.test(content)) {
-      entries.push({
-        scope: mapping.scope,
-        source: 'API_KEY',
-        riskLevel: mapping.riskLevel,
-        detail: mapping.detail,
-      });
-    }
-  }
-
-  return entries;
-}
-
-function dedupeEntries(entries: EffectiveAuthorityEntry[]): EffectiveAuthorityEntry[] {
-  const seen = new Set<string>();
-  return entries.filter((entry) => {
-    const key = `${entry.scope}:${entry.source}:${entry.detail}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-export function computeEffectiveAuthority(
-  agent: AgentAsset,
-  fileContent?: string,
-): EffectiveAuthorityMatrix {
-  const effective = dedupeEntries([
-    ...inferFromDeclaredCapabilities(agent.capabilities),
-    ...inferFromMcpTools(agent),
-    ...(fileContent ? inferFromCredentials(fileContent) : []),
-  ]);
-
-  const hasUnrestrictedWrite = effective.some((entry) => entry.scope === 'UNRESTRICTED_WRITE' || entry.scope === 'DB_MUTATION');
-  const hasUnrestrictedDelete = effective.some((entry) => entry.scope === 'UNRESTRICTED_DELETE');
-  const hasFinancialAccess = effective.some((entry) => entry.scope === 'FINANCIAL_ACCESS');
-
-  let overallRisk: AgentRiskLevel = agent.riskLevel;
-  for (const entry of effective) {
-    overallRisk = maxRisk(overallRisk, entry.riskLevel);
-  }
-
-  if (hasUnrestrictedDelete || (hasFinancialAccess && hasUnrestrictedWrite)) {
-    overallRisk = 'CRITICAL';
-  }
+function toLegacyMatrix(agent: AgentAsset, report: EffectiveAuthorityReport): LegacyEffectiveAuthorityMatrix {
+  const overallRisk = riskFromScore(report.riskScore);
 
   return {
     declared: agent.capabilities,
-    effective,
+    effective: report.entries.map((entry) => ({
+      scope: entry.scope,
+      source: entry.source,
+      riskLevel: entry.elevated ? (report.riskScore >= 75 ? 'CRITICAL' : 'HIGH') : 'MEDIUM',
+      detail: entry.detail,
+    })),
     overallRisk,
-    hasUnrestrictedWrite,
-    hasUnrestrictedDelete,
-    hasFinancialAccess,
+    hasUnrestrictedWrite: report.effectiveScopes.some((scope) => /FULL WRITE|FULL DB ADMIN/i.test(scope)),
+    hasUnrestrictedDelete: report.elevatedRisks.includes('UNRESTRICTED_DELETE'),
+    hasFinancialAccess: report.elevatedRisks.includes('FINANCIAL_EXECUTE'),
   };
 }
 
-export function enrichAgentAsset(agent: AgentAsset, fileContent?: string): EnrichedAgentAsset {
+function countExternalApis(agent: AgentAsset, fileContent?: string): number {
+  let count = agent.capabilities.includes('API_CALL') ? 1 : 0;
+  if (fileContent) {
+    const apiMatches = fileContent.match(/https?:\/\/[^\s'"]+|api_key|API_URL|BASE_URL/gi);
+    count += apiMatches ? Math.min(apiMatches.length, 10) : 0;
+  }
+  return count;
+}
+
+function buildConnectivity(agent: AgentAsset, fileContent?: string): AgentConnectivityMap {
+  const connectedToolsCount = agent.mcpConnections.reduce(
+    (sum, connection) => sum + connection.tools.length,
+    0,
+  );
+
+  return {
+    connectedToolsCount,
+    mcpServersCount: agent.mcpConnections.length,
+    externalApisCount: countExternalApis(agent, fileContent),
+  };
+}
+
+function inferNhiMetadata(agent: AgentAsset, report: EffectiveAuthorityReport): AgentNhiMetadata {
+  const rogue =
+    report.privilegeEscalationDetected &&
+    report.elevatedRisks.length > 0 &&
+    !agent.capabilities.includes('FINANCIAL') &&
+    !agent.capabilities.includes('EXECUTE');
+
+  const unverified = report.hiddenPermissions.length > 0 && !rogue;
+
+  return {
+    ownerDepartment: inferDepartment(agent),
+    verifiedStatus: rogue ? 'ROGUE' : unverified ? 'UNVERIFIED' : 'VERIFIED',
+    creationTimestamp: inferCreationTimestamp(agent),
+    lastActive: new Date().toISOString(),
+  };
+}
+
+function inferDepartment(agent: AgentAsset): string {
+  if (/support|customer/i.test(agent.name)) return 'Customer Support';
+  if (/ops|coordinator/i.test(agent.name)) return 'Operations';
+  if (/finance|billing/i.test(agent.name)) return 'Finance';
+  if (agent.framework === 'MCP') return 'Platform Engineering';
+  return 'Engineering';
+}
+
+function inferCreationTimestamp(agent: AgentAsset): string {
+  const seed = agent.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const daysAgo = (seed % 180) + 1;
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  return date.toISOString();
+}
+
+export function buildAgentInventoryRecord(
+  agent: AgentAsset,
+  fileContent?: string,
+  nhiOverride?: Partial<AgentNhiMetadata>,
+): AgentInventoryRecord {
+  const authorityReport = detectEffectiveAuthority(agent, fileContent);
+  const nhi = { ...inferNhiMetadata(agent, authorityReport), ...nhiOverride };
+
   return {
     ...agent,
-    effectiveAuthority: computeEffectiveAuthority(agent, fileContent),
+    nhi,
+    connectivity: buildConnectivity(agent, fileContent),
+    authorityReport,
+    effectiveAuthority: toLegacyMatrix(agent, authorityReport),
   };
+}
+
+export function scanEnvironment(input: ScanEnvironmentInput = {}): EnvironmentScanResult {
+  let agents: AgentAsset[] = [];
+
+  if (input.files?.length) {
+    agents = discoverAgents(input.files).agents;
+  } else if (input.agents?.length) {
+    agents = input.agents;
+  }
+
+  const contentMap =
+    input.fileContents ??
+    new Map(input.files?.map((file) => [file.path.replace(/\\/g, '/'), file.content]) ?? []);
+
+  const inventoryAgents = agents.map((agent) =>
+    buildAgentInventoryRecord(
+      agent,
+      contentMap.get(agent.sourceFile),
+      input.nhiMetadata?.get(agent.id),
+    ),
+  );
+
+  const mcpServerNames = new Set<string>();
+  let connectedTools = 0;
+
+  for (const agent of inventoryAgents) {
+    connectedTools += agent.connectivity.connectedToolsCount;
+    for (const connection of agent.mcpConnections) {
+      mcpServerNames.add(connection.serverName);
+    }
+  }
+
+  const unknownRogueAgents = inventoryAgents.filter(
+    (agent) => agent.nhi.verifiedStatus === 'ROGUE' || agent.nhi.verifiedStatus === 'UNVERIFIED',
+  ).length;
+
+  return {
+    overview: {
+      totalAiAgents: inventoryAgents.length,
+      connectedTools,
+      mcpServers: mcpServerNames.size,
+      unknownRogueAgents,
+    },
+    agents: inventoryAgents,
+    scannedAt: new Date().toISOString(),
+  };
+}
+
+/** @deprecated Use detectEffectiveAuthority */
+export function computeEffectiveAuthority(agent: AgentAsset, fileContent?: string) {
+  const report = detectEffectiveAuthority(agent, fileContent);
+  return toLegacyMatrix(agent, report);
+}
+
+export function enrichAgentAsset(agent: AgentAsset, fileContent?: string): AgentInventoryRecord {
+  return buildAgentInventoryRecord(agent, fileContent);
 }
 
 export function enrichAgentInventory(
   agents: AgentAsset[],
   fileContents?: Map<string, string>,
-): EnrichedAgentAsset[] {
+): AgentInventoryRecord[] {
   return agents.map((agent) =>
-    enrichAgentAsset(agent, fileContents?.get(agent.sourceFile)),
+    buildAgentInventoryRecord(agent, fileContents?.get(agent.sourceFile)),
   );
 }
 
-export function discoverAgentsWithAuthority(files: DiscoveryFileInput[]): EnrichedAgentDiscoveryResult {
-  const result = discoverAgents(files);
-  const contentMap = new Map(files.map((file) => [file.path.replace(/\\/g, '/'), file.content]));
-
-  const agents = enrichAgentInventory(result.agents, contentMap);
-
-  return {
-    ...result,
-    critical_agents: agents.filter(
-      (agent) =>
-        agent.riskLevel === 'CRITICAL' || agent.effectiveAuthority.overallRisk === 'CRITICAL',
-    ).length,
-    agents,
-  };
+export function discoverAgentsWithAuthority(files: DiscoveryFileInput[]): EnvironmentScanResult {
+  return scanEnvironment({ files });
 }
+
+export {
+  detectEffectiveAuthority,
+  formatDeclaredSummary,
+  formatEffectiveSummary,
+};
+
+export type { EffectiveAuthorityReport, ElevatedRiskScope } from './effective-authority';
 
 export {
   discoverAgents,

@@ -3,16 +3,14 @@ import { afterEach, describe, it } from 'node:test';
 import {
   evaluateAgentAction,
   getKillSwitchState,
-  resetKillSwitchState,
+  resetActionFirewallRuntime,
 } from '../lib/engine/action-firewall/index.ts';
 import { resetThreatRegistry } from '../lib/engine/immune/index.ts';
-import { resetTrajectory } from '../lib/engine/action-firewall/trajectory.ts';
 
 describe('action firewall & intent-action engine', () => {
   afterEach(() => {
-    resetKillSwitchState();
+    resetActionFirewallRuntime();
     resetThreatRegistry();
-    resetTrajectory();
   });
 
   it('allows tool calls that match granted capabilities and intent', () => {

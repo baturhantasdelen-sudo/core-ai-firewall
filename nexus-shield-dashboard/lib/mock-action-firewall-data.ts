@@ -1,4 +1,5 @@
 import type { ActionDecision } from '@/lib/engine/action-firewall';
+import type { DivergenceSeverity } from '@/lib/engine/action-firewall/intent-divergence';
 
 export interface ActionFirewallLogEntry {
   id: string;
@@ -11,9 +12,12 @@ export interface ActionFirewallLogEntry {
   decision: ActionDecision;
   riskScore: number;
   intentMatchScore: number;
+  intentDivergenceScore: number;
+  divergenceSeverity: DivergenceSeverity;
   violations: string[];
   killSwitchTriggered: boolean;
-  agentStatus: 'ACTIVE' | 'FROZEN';
+  capabilitiesRevoked: boolean;
+  agentStatus: 'ACTIVE' | 'FROZEN' | 'READ_ONLY';
 }
 
 export const mockActionFirewallLogs: ActionFirewallLogEntry[] = [
@@ -28,8 +32,11 @@ export const mockActionFirewallLogs: ActionFirewallLogEntry[] = [
     decision: 'ALLOW',
     riskScore: 18,
     intentMatchScore: 88,
+    intentDivergenceScore: 12,
+    divergenceSeverity: 'LOW',
     violations: [],
     killSwitchTriggered: false,
+    capabilitiesRevoked: false,
     agentStatus: 'ACTIVE',
   },
   {
@@ -38,16 +45,21 @@ export const mockActionFirewallLogs: ActionFirewallLogEntry[] = [
     agentId: 'crewai-ops-agent-1',
     agentName: 'Ops Coordinator',
     userIntent: 'Invoice Check for customer #4421',
-    toolName: 'bulk_export_db',
+    toolName: 'export_customer_database',
     toolArgs: { table: 'customers', format: 'csv' },
     decision: 'BLOCK',
-    riskScore: 91,
+    riskScore: 96,
     intentMatchScore: 22,
+    intentDivergenceScore: 96,
+    divergenceSeverity: 'CRITICAL',
     violations: [
       'Agent lacks required capability: DB_QUERY',
       'Intent-Action mismatch: invoice check intent vs bulk database export tool',
+      'INTENT_ACTION_DIVERGENCE: 96% mismatch between user intent and action trajectory',
+      'Critical mismatch: invoice review intent vs export_customer_database',
     ],
     killSwitchTriggered: true,
+    capabilitiesRevoked: false,
     agentStatus: 'FROZEN',
   },
   {
@@ -61,8 +73,11 @@ export const mockActionFirewallLogs: ActionFirewallLogEntry[] = [
     decision: 'ALLOW',
     riskScore: 12,
     intentMatchScore: 82,
+    intentDivergenceScore: 18,
+    divergenceSeverity: 'LOW',
     violations: [],
     killSwitchTriggered: false,
+    capabilitiesRevoked: false,
     agentStatus: 'ACTIVE',
   },
   {
@@ -76,9 +91,33 @@ export const mockActionFirewallLogs: ActionFirewallLogEntry[] = [
     decision: 'HUMAN_APPROVAL_REQUIRED',
     riskScore: 68,
     intentMatchScore: 41,
+    intentDivergenceScore: 59,
+    divergenceSeverity: 'MEDIUM',
     violations: ['Agent lacks required capability: FINANCIAL'],
     killSwitchTriggered: false,
+    capabilitiesRevoked: false,
     agentStatus: 'ACTIVE',
+  },
+  {
+    id: 'action_005',
+    timestamp: '2026-08-14T16:46:33.000Z',
+    agentId: 'rogue-shadow-agent-1',
+    agentName: 'Shadow Invoice Bot',
+    userIntent: 'Invoice Check for customer #9912',
+    toolName: 'write_file',
+    toolArgs: { path: '/data/invoices/export.csv' },
+    decision: 'BLOCK',
+    riskScore: 72,
+    intentMatchScore: 35,
+    intentDivergenceScore: 84,
+    divergenceSeverity: 'CRITICAL',
+    violations: [
+      'Capability revoked (read-only mode): WRITE',
+      'INTENT_ACTION_DIVERGENCE: 84% mismatch between user intent and action trajectory',
+    ],
+    killSwitchTriggered: false,
+    capabilitiesRevoked: true,
+    agentStatus: 'READ_ONLY',
   },
 ];
 
@@ -89,6 +128,7 @@ export function getActionFirewallSummary() {
   ).length;
   const allowed = mockActionFirewallLogs.filter((entry) => entry.decision === 'ALLOW').length;
   const frozen = mockActionFirewallLogs.filter((entry) => entry.agentStatus === 'FROZEN').length;
+  const readOnly = mockActionFirewallLogs.filter((entry) => entry.agentStatus === 'READ_ONLY').length;
 
   return {
     total: mockActionFirewallLogs.length,
@@ -96,5 +136,20 @@ export function getActionFirewallSummary() {
     blocked,
     approvalRequired: approval,
     frozenAgents: frozen,
+    readOnlyAgents: readOnly,
   };
+}
+
+export function getCapabilityManagedAgents() {
+  const agentMap = new Map<string, { agentId: string; agentName: string; agentStatus: ActionFirewallLogEntry['agentStatus'] }>();
+  for (const log of mockActionFirewallLogs) {
+    if (log.agentStatus === 'READ_ONLY' || log.agentStatus === 'FROZEN') {
+      agentMap.set(log.agentId, {
+        agentId: log.agentId,
+        agentName: log.agentName,
+        agentStatus: log.agentStatus,
+      });
+    }
+  }
+  return [...agentMap.values()];
 }

@@ -36,10 +36,13 @@ export default async function ActionFirewallPage() {
             <div className="mt-3 flex items-center gap-2">
               <ShieldAlert className="h-5 w-5 text-rose-400" />
               <h1 className="text-2xl font-semibold tracking-tight">Action Firewall Logs</h1>
+              <span className="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-rose-200">
+                Katman 2 — CONTROL
+              </span>
             </div>
             <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-              Runtime Intent-Action enforcement for AI agents — monitor allowed, blocked, and
-              human-approval tool calls with kill switch events.
+              Deep Intent vs. Action divergence scoring with capability revocation — demote agents to
+              READ_ONLY instead of full kill switch when divergence exceeds safe thresholds.
             </p>
           </div>
         </div>

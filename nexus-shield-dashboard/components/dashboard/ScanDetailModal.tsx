@@ -6,6 +6,7 @@ import { DEFAULT_POLICY } from '@/lib/engine/policy';
 import { buildPreviewFromFinding } from '@/lib/engine/remediation';
 import type { DetectionMatch } from '@/lib/engine/types';
 import { buildMockAgentDiscovery } from '@/lib/mock-agent-data';
+import type { EnvironmentScanResult } from '@/lib/engine/agents/inventory';
 import { ScanRecord } from '@/lib/mock-dashboard-data';
 import { AutoFixPreviewModal, type AutoFixPreviewData } from './AutoFixPreviewModal';
 import { AgentInventoryPanel } from './AgentInventoryPanel';
@@ -114,12 +115,27 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
   const activeFindings = scan.findings.filter((finding) => !finding.suppressed);
   const suppressedFindings = scan.findings.filter((finding) => finding.suppressed);
   const visibleFindings = showSuppressed ? scan.findings : activeFindings;
-  const agentDiscovery = scan.agentDiscovery ?? (scan.status === 'blocked' ? buildMockAgentDiscovery() : {
-    total_agents: 0,
-    total_mcp_tools: 0,
-    critical_agents: 0,
+  const emptyScan: EnvironmentScanResult = {
+    overview: { totalAiAgents: 0, connectedTools: 0, mcpServers: 0, unknownRogueAgents: 0 },
     agents: [],
-  });
+    scannedAt: new Date().toISOString(),
+  };
+
+  function isEnvironmentScanResult(value: unknown): value is EnvironmentScanResult {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      'overview' in value &&
+      'scannedAt' in value &&
+      'agents' in value
+    );
+  }
+
+  const agentScan: EnvironmentScanResult = isEnvironmentScanResult(scan.agentDiscovery)
+    ? scan.agentDiscovery
+    : scan.status === 'blocked'
+      ? buildMockAgentDiscovery()
+      : emptyScan;
 
   return (
     <>
@@ -236,12 +252,12 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
             )}
           </div>
 
-          {agentDiscovery.total_agents > 0 ? (
+          {agentScan.overview.totalAiAgents > 0 ? (
             <div className="border-t border-white/10 p-6">
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-400">
                 AI Agent Discovery
               </h3>
-              <AgentInventoryPanel discovery={agentDiscovery} compact />
+              <AgentInventoryPanel scan={agentScan} compact />
             </div>
           ) : null}
         </div>

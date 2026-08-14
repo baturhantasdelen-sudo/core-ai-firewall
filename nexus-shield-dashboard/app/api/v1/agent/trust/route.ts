@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { authenticateApiKey, extractApiKey } from '@/lib/auth/api-key';
 import {
   getAgentReputation,
-  listAgentReputations,
+  getAgentReputationCard,
+  listAgentReputationCards,
   verifyInterAgentTrust,
 } from '@/lib/engine/reputation';
 
@@ -41,7 +42,6 @@ export async function POST(req: NextRequest) {
     }
 
     const { source_agent_id, target_agent_id } = parsed.data;
-    const trust = verifyInterAgentTrust(source_agent_id, target_agent_id);
     const targetRecord = getAgentReputation(target_agent_id);
 
     if (!targetRecord) {
@@ -51,10 +51,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const trust = verifyInterAgentTrust(source_agent_id, target_agent_id);
+    const sourceCard = getAgentReputationCard(source_agent_id);
+    const targetCard = getAgentReputationCard(target_agent_id);
+
     return NextResponse.json({
       success: true,
+      decision: trust.recommendation,
       trust,
-      target: targetRecord,
+      source: sourceCard,
+      target: targetCard,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Internal Server Error';
@@ -66,6 +72,8 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const apiKey = extractApiKey(req);
+    const { searchParams } = new URL(req.url);
+    const agentId = searchParams.get('agent_id');
 
     if (!apiKey) {
       return NextResponse.json(
@@ -79,12 +87,26 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized: Invalid API key' }, { status: 401 });
     }
 
-    const reputations = listAgentReputations();
+    if (agentId) {
+      const card = getAgentReputationCard(agentId);
+      if (!card) {
+        return NextResponse.json(
+          { error: `Agent not found in reputation registry: ${agentId}` },
+          { status: 404 },
+        );
+      }
+      return NextResponse.json({
+        success: true,
+        reputation_card: card,
+      });
+    }
+
+    const cards = listAgentReputationCards();
 
     return NextResponse.json({
       success: true,
-      total_agents: reputations.length,
-      reputations,
+      total_agents: cards.length,
+      reputation_cards: cards,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Internal Server Error';

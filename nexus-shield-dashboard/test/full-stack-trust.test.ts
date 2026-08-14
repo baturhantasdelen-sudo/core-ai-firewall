@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { afterEach, describe, it } from 'node:test';
 import {
-  computeEffectiveAuthority,
   enrichAgentAsset,
 } from '../lib/engine/agents/inventory.ts';
 import {
@@ -10,7 +9,7 @@ import {
   getKillSwitchState,
   getRevokedCapabilities,
   recordToolCall,
-  resetKillSwitchState,
+  resetActionFirewallRuntime,
   resetTrajectory,
   revokeCapabilities,
 } from '../lib/engine/action-firewall/index.ts';
@@ -43,7 +42,7 @@ const SAMPLE_AGENT: AgentAsset = {
 
 describe('full-stack trust runtime (SEE → CONTROL → TRUST)', () => {
   afterEach(() => {
-    resetKillSwitchState();
+    resetActionFirewallRuntime();
     resetTrajectory();
     resetThreatRegistry();
   });
@@ -55,15 +54,15 @@ describe('full-stack trust runtime (SEE → CONTROL → TRUST)', () => {
     `;
 
     const enriched = enrichAgentAsset(SAMPLE_AGENT, fileContent);
-    const matrix = computeEffectiveAuthority(SAMPLE_AGENT, fileContent);
+    const report = enriched.authorityReport;
 
-    assert.equal(enriched.effectiveAuthority.hasFinancialAccess, true);
-    assert.equal(enriched.effectiveAuthority.hasUnrestrictedWrite, true);
-    assert.equal(enriched.effectiveAuthority.hasUnrestrictedDelete, true);
-    assert.equal(matrix.overallRisk, 'CRITICAL');
-    assert.ok(matrix.effective.some((entry) => entry.scope === 'FINANCIAL_ACCESS'));
-    assert.ok(matrix.effective.some((entry) => entry.source === 'API_KEY'));
-    assert.ok(matrix.effective.some((entry) => entry.source === 'OAUTH_SCOPE'));
+    assert.equal(report.privilegeEscalationDetected, true);
+    assert.ok(report.elevatedRisks.includes('FINANCIAL_EXECUTE'));
+    assert.ok(report.elevatedRisks.includes('UNRESTRICTED_DELETE'));
+    assert.ok(report.riskScore >= 50);
+    assert.ok(report.entries.some((entry) => entry.source === 'API_KEY'));
+    assert.ok(report.entries.some((entry) => entry.source === 'OAUTH_TOKEN'));
+    assert.ok(report.hiddenPermissions.length > 0);
   });
 
   it('CONTROL: calculates intent divergence and flags INTENT_ACTION_DIVERGENCE above 80%', () => {

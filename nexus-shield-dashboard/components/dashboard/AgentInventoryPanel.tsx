@@ -1,12 +1,13 @@
 'use client';
 
-import { Bot, Cpu, KeyRound, Network, ShieldAlert, Trash2, Wallet } from 'lucide-react';
+import { Bot, Cpu, Globe, Network, Server, ShieldAlert, ShieldX, Wrench } from 'lucide-react';
 import type { AgentRiskLevel } from '@/lib/engine/discovery';
 import {
   enrichAgentInventory,
-  type EnrichedAgentAsset,
-  type EnrichedAgentDiscoveryResult,
-  type EffectiveAuthorityScope,
+  formatDeclaredSummary,
+  formatEffectiveSummary,
+  type AgentInventoryRecord,
+  type EnvironmentScanResult,
 } from '@/lib/engine/agents/inventory';
 
 function riskBadgeClass(level: AgentRiskLevel): string {
@@ -22,58 +23,111 @@ function riskBadgeClass(level: AgentRiskLevel): string {
   }
 }
 
-function authorityBadge(scope: EffectiveAuthorityScope): { label: string; className: string; icon: typeof KeyRound } {
-  switch (scope) {
-    case 'UNRESTRICTED_WRITE':
-      return { label: 'Unrestricted Write', className: 'border-orange-500/30 bg-orange-500/10 text-orange-200', icon: KeyRound };
-    case 'UNRESTRICTED_DELETE':
-      return { label: 'Unrestricted Delete', className: 'border-rose-500/40 bg-rose-500/15 text-rose-200', icon: Trash2 };
-    case 'FINANCIAL_ACCESS':
-      return { label: 'Financial Access', className: 'border-amber-500/30 bg-amber-500/10 text-amber-200', icon: Wallet };
-    case 'EXECUTE_SHELL':
-      return { label: 'Shell Execute', className: 'border-rose-500/30 bg-rose-500/10 text-rose-300', icon: ShieldAlert };
-    case 'DB_MUTATION':
-      return { label: 'DB Mutation', className: 'border-violet-500/30 bg-violet-500/10 text-violet-200', icon: Network };
+function verifiedBadgeClass(status: AgentInventoryRecord['nhi']['verifiedStatus']): string {
+  switch (status) {
+    case 'ROGUE':
+      return 'border-rose-500/50 bg-rose-500/20 text-rose-200';
+    case 'UNVERIFIED':
+      return 'border-amber-500/40 bg-amber-500/15 text-amber-200';
     default:
-      return { label: 'Read Only', className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200', icon: Bot };
+      return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
   }
 }
 
 interface AgentInventoryPanelProps {
-  discovery: EnrichedAgentDiscoveryResult | import('@/lib/engine/discovery').AgentDiscoveryResult;
+  scan: EnvironmentScanResult;
   compact?: boolean;
 }
 
-function normalizeDiscovery(
-  discovery: AgentInventoryPanelProps['discovery'],
-): EnrichedAgentDiscoveryResult {
-  const first = discovery.agents[0];
-  if (first && 'effectiveAuthority' in first) {
-    return discovery as EnrichedAgentDiscoveryResult;
+function normalizeScan(scan: EnvironmentScanResult | { agents: AgentInventoryRecord[]; overview?: EnvironmentScanResult['overview'] }): EnvironmentScanResult {
+  if ('scannedAt' in scan && scan.overview) {
+    const first = scan.agents[0];
+    if (first && 'authorityReport' in first) {
+      return scan as EnvironmentScanResult;
+    }
   }
+
+  const agents = enrichAgentInventory(
+    scan.agents.map(({ id, name, framework, mcpConnections, capabilities, riskLevel, sourceFile, line }) => ({
+      id,
+      name,
+      framework,
+      mcpConnections,
+      capabilities,
+      riskLevel,
+      sourceFile,
+      line,
+    })),
+  );
+
+  const mcpServerNames = new Set<string>();
+  let connectedTools = 0;
+  for (const agent of agents) {
+    connectedTools += agent.connectivity.connectedToolsCount;
+    for (const connection of agent.mcpConnections) {
+      mcpServerNames.add(connection.serverName);
+    }
+  }
+
   return {
-    ...discovery,
-    agents: enrichAgentInventory(discovery.agents),
+    overview: scan.overview ?? {
+      totalAiAgents: agents.length,
+      connectedTools,
+      mcpServers: mcpServerNames.size,
+      unknownRogueAgents: agents.filter((a) => a.nhi.verifiedStatus !== 'VERIFIED').length,
+    },
+    agents,
+    scannedAt: new Date().toISOString(),
   };
 }
 
-export function AgentInventoryPanel({ discovery, compact = false }: AgentInventoryPanelProps) {
-  const enrichedDiscovery = normalizeDiscovery(discovery);
+export function AgentInventoryPanel({ scan, compact = false }: AgentInventoryPanelProps) {
+  const environmentScan = normalizeScan(scan);
+
   return (
     <div className="space-y-6">
       {!compact ? (
-        <div className="grid gap-4 sm:grid-cols-3">
-          <MetricCard label="Total Agents" value={enrichedDiscovery.total_agents} icon={Bot} />
-          <MetricCard label="MCP Tools" value={enrichedDiscovery.total_mcp_tools} icon={Network} />
-          <MetricCard label="Critical Agents" value={enrichedDiscovery.critical_agents} icon={ShieldAlert} />
-        </div>
+        <>
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-500">
+              AI Environment Overview
+            </h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <OverviewCard
+                label="Total AI Agents"
+                value={environmentScan.overview.totalAiAgents}
+                icon={Bot}
+                accent="text-indigo-400"
+              />
+              <OverviewCard
+                label="Connected Tools"
+                value={environmentScan.overview.connectedTools}
+                icon={Wrench}
+                accent="text-cyan-400"
+              />
+              <OverviewCard
+                label="MCP Servers"
+                value={environmentScan.overview.mcpServers}
+                icon={Server}
+                accent="text-violet-400"
+              />
+              <OverviewCard
+                label="Unknown / Rogue Agents"
+                value={environmentScan.overview.unknownRogueAgents}
+                icon={ShieldX}
+                accent="text-rose-400"
+                alert
+              />
+            </div>
+          </div>
+        </>
       ) : null}
 
-      {enrichedDiscovery.agents.length === 0 ? (
+      {environmentScan.agents.length === 0 ? (
         <p className="text-sm text-zinc-500">No AI agents or MCP assets discovered in this scan.</p>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          {enrichedDiscovery.agents.map((agent) => (
+          {environmentScan.agents.map((agent) => (
             <AgentCard key={agent.id} agent={agent} compact={compact} />
           ))}
         </div>
@@ -82,31 +136,41 @@ export function AgentInventoryPanel({ discovery, compact = false }: AgentInvento
   );
 }
 
-function MetricCard({
+function OverviewCard({
   label,
   value,
   icon: Icon,
+  accent,
+  alert = false,
 }: {
   label: string;
   value: number;
   icon: typeof Bot;
+  accent: string;
+  alert?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-5">
+    <div
+      className={`rounded-2xl border p-5 ${
+        alert
+          ? 'border-rose-500/40 bg-rose-500/10 shadow-[0_0_20px_rgba(244,63,94,0.15)]'
+          : 'border-white/10 bg-zinc-900/60'
+      }`}
+    >
       <div className="flex items-center justify-between">
-        <p className="text-sm text-zinc-400">{label}</p>
-        <Icon className="h-4 w-4 text-indigo-400" />
+        <p className={`text-sm ${alert ? 'text-rose-300' : 'text-zinc-400'}`}>{label}</p>
+        <Icon className={`h-4 w-4 ${accent}`} />
       </div>
-      <p className="mt-2 text-3xl font-semibold text-zinc-100">{value}</p>
+      <p className={`mt-2 text-3xl font-semibold ${alert ? 'text-rose-200' : 'text-zinc-100'}`}>{value}</p>
     </div>
   );
 }
 
-function AgentCard({ agent, compact }: { agent: EnrichedAgentAsset; compact?: boolean }) {
-  const { effectiveAuthority } = agent;
-  const displayRisk = effectiveAuthority.overallRisk;
-
-  const uniqueScopes = [...new Set(effectiveAuthority.effective.map((entry) => entry.scope))];
+function AgentCard({ agent, compact }: { agent: AgentInventoryRecord; compact?: boolean }) {
+  const { authorityReport, effectiveAuthority, nhi, connectivity } = agent;
+  const declaredLabel = formatDeclaredSummary(authorityReport);
+  const effectiveLabel = formatEffectiveSummary(authorityReport);
+  const escalation = authorityReport.privilegeEscalationDetected;
 
   return (
     <article className="rounded-2xl border border-white/10 bg-zinc-950/70 p-5">
@@ -117,68 +181,81 @@ function AgentCard({ agent, compact }: { agent: EnrichedAgentAsset; compact?: bo
             <h3 className="font-semibold text-zinc-100">{agent.name}</h3>
           </div>
           <p className="mt-1 text-xs text-zinc-500">
-            {agent.framework} · <code className="font-mono">{agent.sourceFile}</code>
+            {agent.framework} · {nhi.ownerDepartment} ·{' '}
+            <code className="font-mono">{agent.sourceFile}</code>
             {agent.line ? `:${agent.line}` : ''}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1.5">
-          <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${riskBadgeClass(agent.riskLevel)}`}>
-            Declared: {agent.riskLevel}
+          <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${verifiedBadgeClass(nhi.verifiedStatus)}`}>
+            {nhi.verifiedStatus}
           </span>
-          <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${riskBadgeClass(displayRisk)}`}>
-            Effective: {displayRisk}
+          <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${riskBadgeClass(effectiveAuthority.overallRisk)}`}>
+            Risk {authorityReport.riskScore}
           </span>
         </div>
       </div>
 
-      <div className="mt-4">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Declared Capabilities</p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {agent.capabilities.map((capability) => (
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+        <ConnectivityStat label="Tools" value={connectivity.connectedToolsCount} icon={Wrench} />
+        <ConnectivityStat label="MCP" value={connectivity.mcpServersCount} icon={Network} />
+        <ConnectivityStat label="APIs" value={connectivity.externalApisCount} icon={Globe} />
+      </div>
+
+      <div className="mt-4 rounded-xl border border-white/10 bg-zinc-900/50 p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Effective Authority</p>
+        <div className="mt-3 space-y-2">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="text-zinc-500">Declared:</span>
+            <span className="rounded-md border border-white/10 bg-zinc-950 px-2 py-1 text-zinc-300">
+              {declaredLabel}
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="text-zinc-500">Effective:</span>
             <span
-              key={`${agent.id}-${capability}`}
-              className="rounded-md border border-white/10 bg-zinc-900 px-2 py-1 text-[11px] font-medium text-zinc-300"
+              className={`rounded-md border px-2 py-1 font-semibold ${
+                escalation
+                  ? 'border-rose-500/40 bg-rose-500/15 text-rose-200'
+                  : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+              }`}
             >
-              {capability}
+              {effectiveLabel.toUpperCase()}
+              {escalation ? ' (Privilege Escalation Detected)' : ''}
             </span>
-          ))}
+          </div>
         </div>
-      </div>
 
-      <div className="mt-4">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Effective Authority</p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {uniqueScopes.length === 0 ? (
-            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/5 px-2 py-1 text-[11px] text-emerald-300">
-              READ_ONLY — no elevated scopes detected
-            </span>
-          ) : (
-            uniqueScopes.map((scope) => {
-              const badge = authorityBadge(scope);
-              const Icon = badge.icon;
-              const entry = effectiveAuthority.effective.find((item) => item.scope === scope);
-              return (
-                <span
-                  key={`${agent.id}-${scope}`}
-                  title={entry?.detail ?? scope}
-                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium ${badge.className}`}
-                >
-                  <Icon className="h-3 w-3 shrink-0" />
-                  {badge.label}
-                </span>
-              );
-            })
-          )}
-        </div>
-        {(effectiveAuthority.hasFinancialAccess || effectiveAuthority.hasUnrestrictedDelete) && (
-          <p className="mt-2 text-[11px] text-rose-300/90">
-            {effectiveAuthority.hasFinancialAccess && effectiveAuthority.hasUnrestrictedWrite
-              ? '⚠ Combined financial + write authority detected via credentials or MCP tools'
-              : effectiveAuthority.hasUnrestrictedDelete
-                ? '⚠ Unrestricted delete scope detected — exceeds declared capabilities'
-                : '⚠ Financial access detected from API key or OAuth scope'}
+        {authorityReport.hiddenPermissions.length > 0 ? (
+          <p className="mt-2 text-[11px] text-amber-300/90">
+            Hidden permissions: {authorityReport.hiddenPermissions.join(', ')}
           </p>
-        )}
+        ) : null}
+
+        {escalation ? (
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2">
+            <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-400" />
+            <p className="text-[11px] text-rose-200">
+              Effective authority exceeds declared scopes — review credential bindings immediately.
+            </p>
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          disabled={authorityReport.hiddenPermissions.length === 0}
+          onClick={() => {
+            /* Revoke Unused Scopes — API wiring in Katman 2 CONTROL */
+          }}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-orange-500/30 bg-orange-500/10 px-3 py-1.5 text-[11px] font-medium text-orange-200 transition hover:border-orange-500/50 hover:bg-orange-500/15 disabled:cursor-not-allowed disabled:opacity-40"
+          title={
+            authorityReport.hiddenPermissions.length > 0
+              ? `Revoke: ${authorityReport.hiddenPermissions.join(', ')}`
+              : 'No unused scopes detected'
+          }
+        >
+          Revoke Unused Scopes
+        </button>
       </div>
 
       {!compact && agent.mcpConnections.length > 0 ? (
@@ -206,4 +283,33 @@ function AgentCard({ agent, compact }: { agent: EnrichedAgentAsset; compact?: bo
       ) : null}
     </article>
   );
+}
+
+function ConnectivityStat({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  icon: typeof Bot;
+}) {
+  return (
+    <div className="rounded-lg border border-white/5 bg-zinc-900/40 px-2 py-2">
+      <Icon className="mx-auto h-3.5 w-3.5 text-zinc-500" />
+      <p className="mt-1 text-sm font-semibold text-zinc-200">{value}</p>
+      <p className="text-[10px] text-zinc-500">{label}</p>
+    </div>
+  );
+}
+
+/** @deprecated Use scan prop — backward compat wrapper */
+export function AgentInventoryPanelLegacy({
+  discovery,
+  compact = false,
+}: {
+  discovery: EnvironmentScanResult;
+  compact?: boolean;
+}) {
+  return <AgentInventoryPanel scan={discovery} compact={compact} />;
 }
