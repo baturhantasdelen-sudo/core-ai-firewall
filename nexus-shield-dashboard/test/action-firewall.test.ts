@@ -5,10 +5,12 @@ import {
   getKillSwitchState,
   resetKillSwitchState,
 } from '../lib/engine/action-firewall/index.ts';
+import { resetThreatRegistry } from '../lib/engine/immune/index.ts';
 
 describe('action firewall & intent-action engine', () => {
   afterEach(() => {
     resetKillSwitchState();
+    resetThreatRegistry();
   });
 
   it('allows tool calls that match granted capabilities and intent', () => {
@@ -43,6 +45,8 @@ describe('action firewall & intent-action engine', () => {
   });
 
   it('requires human approval for unauthorized financial actions', () => {
+    resetThreatRegistry({ skipSeed: true });
+
     const result = evaluateAgentAction({
       agentId: 'assistant-1',
       userIntent: 'Review account balance',

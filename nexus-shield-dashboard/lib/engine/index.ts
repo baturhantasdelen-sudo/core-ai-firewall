@@ -138,3 +138,13 @@ export type {
   EvaluateAgentActionInput,
   ToolCallInput,
 } from '@/lib/engine/action-firewall';
+
+export {
+  generateThreatSignature,
+  registerThreatSignature,
+  listThreatSignatures,
+  checkImmuneNetworkSignatures,
+  getImmuneNetworkStats,
+  resetThreatRegistry,
+} from '@/lib/engine/immune';
+export type { BehavioralThreatSignature, ThreatCategory, ThreatSeverity } from '@/lib/engine/immune';

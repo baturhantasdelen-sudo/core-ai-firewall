@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Bot, Check, Copy, FileText, Settings, ShieldAlert } from 'lucide-react';
+import { BookOpen, Bot, Check, Copy, FileText, Radar, Settings, ShieldAlert } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { SetupGuideModal } from './SetupGuideModal';
 
@@ -82,6 +82,14 @@ export function DashboardHeader({ apiKey }: DashboardHeaderProps) {
           >
             <ShieldAlert className="h-4 w-4" />
             Action Firewall
+          </Link>
+
+          <Link
+            href="/dashboard/threat-intel"
+            className="inline-flex items-center gap-2 rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-3 py-2 text-sm font-medium text-indigo-200 transition-colors hover:border-indigo-500/30 hover:bg-indigo-500/20"
+          >
+            <Radar className="h-4 w-4" />
+            Threat Intel
           </Link>
 
           <Link

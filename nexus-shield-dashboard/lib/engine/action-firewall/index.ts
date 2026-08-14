@@ -1,4 +1,10 @@
 import type { AgentCapability } from '@/lib/engine/discovery';
+import {
+  checkImmuneNetworkSignatures,
+  generateThreatSignature,
+  inferIntentTags,
+  registerThreatSignature,
+} from '@/lib/engine/immune';
 import { getKillSwitchState, triggerKillSwitch } from './kill-switch';
 
 export type ActionDecision = 'ALLOW' | 'BLOCK' | 'HUMAN_APPROVAL_REQUIRED';
@@ -164,6 +170,10 @@ function resolveDecision(
   return 'ALLOW';
 }
 
+function shouldRegisterThreatSignature(riskScore: number, killSwitchTriggered: boolean): boolean {
+  return riskScore > 75 || killSwitchTriggered;
+}
+
 export function evaluateAgentAction(input: EvaluateAgentActionInput): ActionEvaluationResult {
   const started = performance.now();
   const granted = normalizeCapabilities(input.agentCapabilities);
@@ -184,12 +194,43 @@ export function evaluateAgentAction(input: EvaluateAgentActionInput): ActionEval
 
   const capabilityViolations = validateCapabilities(requiredCapabilities, granted);
   const intentResult = scoreIntentConsistency(input.userIntent, input.toolCall);
-  const violations = [...capabilityViolations, ...intentResult.violations];
-  const riskScore = computeRiskScore(capabilityViolations, intentResult, requiredCapabilities);
+  const violatedCapabilities = requiredCapabilities.filter(
+    (capability) => !granted.has(capability),
+  );
+
+  const immuneMatch = checkImmuneNetworkSignatures({
+    userIntent: input.userIntent,
+    toolName: input.toolCall.name,
+    violatedCapabilities,
+  });
+
+  const violations = [
+    ...capabilityViolations,
+    ...intentResult.violations,
+    ...(immuneMatch.violation ? [immuneMatch.violation] : []),
+  ];
+
+  let riskScore =
+    computeRiskScore(capabilityViolations, intentResult, requiredCapabilities) + immuneMatch.riskBoost;
+  riskScore = Math.min(100, riskScore);
+
   const killSwitchTriggered = riskScore > 85;
 
   if (killSwitchTriggered) {
     triggerKillSwitch(input.agentId, violations.join('; ') || 'Critical action firewall risk score exceeded');
+  }
+
+  if (shouldRegisterThreatSignature(riskScore, killSwitchTriggered)) {
+    const signature = generateThreatSignature({
+      toolSequence: [input.toolCall.name],
+      intentAnomalyTags: inferIntentTags(input.userIntent),
+      violatedCapabilities,
+      riskScore,
+      killSwitchTriggered,
+    });
+    if (signature) {
+      registerThreatSignature(signature);
+    }
   }
 
   return {
