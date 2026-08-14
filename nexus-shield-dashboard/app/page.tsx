@@ -1,112 +1,188 @@
 import Link from 'next/link';
 import {
   ArrowRight,
+  BookOpen,
   Bot,
+  Copy,
+  Crosshair,
+  FileText,
   Radar,
   ScanSearch,
-  Shield,
+  ShieldCheck,
   ShieldAlert,
   Sparkles,
   Zap,
 } from 'lucide-react';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 import { PlaygroundSection } from '@/components/playground/PlaygroundSection';
 import { PricingSection } from '@/components/pricing/PricingSection';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 
-const PILLARS = [
+const PLATFORM_MODULES = [
   {
-    phase: 'Pillar 1',
-    title: 'Static Gateway & Secret Validation',
-    icon: ScanSearch,
-    accent: 'from-cyan-500/20 to-emerald-500/10',
-    border: 'border-cyan-500/25',
-    iconColor: 'text-cyan-400',
-    glow: 'shadow-cyan-500/10',
+    number: '1',
+    title: 'Setup Guide & Scanner Hub',
+    href: '/dashboard',
+    icon: BookOpen,
+    border: 'border-zinc-500/25',
+    accent: 'text-zinc-300',
+    chip: 'border-white/10 bg-zinc-900/80 text-zinc-300',
     bullets: [
-      'Context-Aware AI false-positive filtering',
-      'Active secret validation (live key probes)',
-      'Auto-Fix PRs with SARIF 2.1.0 remediation',
+      'Quick integration & GitHub App onboarding',
+      'Active secret validation & VS Code extension',
+      'PII/KVKK PDF export from scan hub',
     ],
   },
   {
-    phase: 'Pillar 2',
-    title: 'AI Agent & MCP Discovery Engine',
+    number: '2',
+    title: 'Agent Asset Discovery',
+    href: '/dashboard/agents',
     icon: Bot,
-    accent: 'from-emerald-500/20 to-teal-500/10',
-    border: 'border-emerald-500/25',
-    iconColor: 'text-emerald-400',
-    glow: 'shadow-emerald-500/10',
+    border: 'border-violet-500/25',
+    accent: 'text-violet-400',
+    chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200',
     bullets: [
-      'Auto-discover LangChain, LlamaIndex & CrewAI agents',
-      'OpenAI Assistants & MCP server tool mapping',
-      'Capability risk scoring per agent inventory',
+      'Auto-discover LangChain, LlamaIndex & CrewAI',
+      'OpenAI Assistants & MCP server mapping',
+      'Capability risk scoring per agent',
     ],
   },
   {
-    phase: 'Pillar 3',
-    title: 'Action Firewall & Kill Switch',
+    number: '3',
+    title: 'Action Firewall',
+    href: '/dashboard/actions',
     icon: ShieldAlert,
-    accent: 'from-teal-500/20 to-cyan-500/10',
-    border: 'border-teal-500/25',
-    iconColor: 'text-teal-400',
-    glow: 'shadow-teal-500/10',
+    border: 'border-rose-500/25',
+    accent: 'text-rose-400',
+    chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200',
     bullets: [
       'Intent vs. Action consistency engine',
-      'Sub-10ms tool call interception at runtime',
-      'Instant agent session freeze on critical risk',
+      'Sub-10ms tool call interception',
+      'Instant session Kill Switch freeze',
     ],
   },
   {
-    phase: 'Pillar 4',
-    title: 'Collective Behavioral Immune Network',
+    number: '4',
+    title: 'Threat Intelligence',
+    href: '/dashboard/threat-intel',
     icon: Radar,
-    accent: 'from-green-500/20 to-cyan-500/10',
-    border: 'border-green-500/25',
-    iconColor: 'text-green-400',
-    glow: 'shadow-green-500/10',
+    border: 'border-indigo-500/25',
+    accent: 'text-indigo-400',
+    chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200',
     bullets: [
       'Zero-Knowledge threat signatures (#TS-xxxx)',
-      'Global immune memory sync across the fleet',
-      '+40 risk boost on matched collective patterns',
+      'Global immune memory sync',
+      '+40 risk on collective pattern match',
+    ],
+  },
+  {
+    number: '5',
+    title: 'Red Teaming Simulator',
+    href: '/dashboard/simulator',
+    icon: Crosshair,
+    border: 'border-orange-500/25',
+    accent: 'text-orange-400',
+    chip: 'border-orange-500/20 bg-orange-500/10 text-orange-200',
+    bullets: [
+      '5 synthetic attack vectors per agent',
+      'Automated resilience score (0–100)',
+      'Live console attack replay',
+    ],
+  },
+  {
+    number: '6',
+    title: 'Trust Hub & Reputation',
+    href: '/dashboard/trust-hub',
+    icon: ShieldCheck,
+    border: 'border-cyan-500/25',
+    accent: 'text-cyan-400',
+    chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200',
+    bullets: [
+      'Tool-Chain trajectory enforcement',
+      'Evidence Chain verification',
+      'Memory Poisoning guard & reputation',
+    ],
+  },
+  {
+    number: '7',
+    title: 'Enterprise Compliance',
+    href: '/dashboard/compliance',
+    icon: FileText,
+    border: 'border-indigo-500/25',
+    accent: 'text-indigo-300',
+    chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200',
+    bullets: [
+      'Automated KVKK/GDPR PDF audit reports',
+      'Policy management & masking stats',
+      'Executive-grade compliance grades',
     ],
   },
 ] as const;
 
-const DASHBOARD_MODULES = [
-  {
-    title: 'Scan Hub',
-    description: 'Secret/PII scan history, SARIF findings & auto-fix previews',
-    href: '/dashboard',
-    icon: ScanSearch,
-    accent: 'text-cyan-400',
-    border: 'hover:border-cyan-500/40',
-  },
-  {
-    title: 'Agent Inventory',
-    description: 'LangChain, CrewAI, OpenAI Assistants & MCP capability map',
-    href: '/dashboard/agents',
-    icon: Bot,
-    accent: 'text-emerald-400',
-    border: 'hover:border-emerald-500/40',
-  },
-  {
-    title: 'Action Firewall Logs',
-    description: 'Intent-Action evaluations, kill switch events & risk scores',
-    href: '/dashboard/actions',
-    icon: ShieldAlert,
-    accent: 'text-teal-400',
-    border: 'hover:border-teal-500/40',
-  },
-  {
-    title: 'Threat Intelligence',
-    description: 'Collective immune signatures & blocked attack categories',
-    href: '/dashboard/threat-intel',
-    icon: Radar,
-    accent: 'text-green-400',
-    border: 'hover:border-green-500/40',
-  },
+const QUICK_NAV = [
+  { label: 'Agents', href: '/dashboard/agents', chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200 hover:border-violet-500/40' },
+  { label: 'Action Firewall', href: '/dashboard/actions', chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200 hover:border-rose-500/40' },
+  { label: 'Threat Intel', href: '/dashboard/threat-intel', chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200 hover:border-indigo-500/40' },
+  { label: 'Red Teaming', href: '/dashboard/simulator', chip: 'border-orange-500/20 bg-orange-500/10 text-orange-200 hover:border-orange-500/40' },
+  { label: 'Trust Hub', href: '/dashboard/trust-hub', chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200 hover:border-cyan-500/40' },
+  { label: 'Compliance', href: '/dashboard/compliance', chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200 hover:border-indigo-500/40' },
 ] as const;
+
+function DashboardHeaderPreview() {
+  const navModules = [
+    { label: 'Setup Guide', icon: BookOpen, chip: 'border-white/10 bg-zinc-900/80 text-zinc-300' },
+    { label: 'Agents', icon: Bot, chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200' },
+    { label: 'Action Firewall', icon: ShieldAlert, chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200' },
+    { label: 'Threat Intel', icon: Radar, chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200' },
+    { label: 'Red Teaming', icon: Crosshair, chip: 'border-orange-500/20 bg-orange-500/10 text-orange-200' },
+    { label: 'Trust Hub', icon: ShieldCheck, chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200' },
+    { label: 'Compliance', icon: FileText, chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200' },
+  ] as const;
+
+  return (
+    <div className="mx-auto mt-10 max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 p-4 shadow-2xl shadow-emerald-500/5 backdrop-blur-xl sm:p-5">
+      <p className="mb-3 text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+        Live Interactive Header Navigation
+      </p>
+
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <BrandLogo size={32} />
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="select-none text-lg font-semibold tracking-tight text-zinc-100 sm:text-xl">
+              Dashboard
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.25)]">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              </span>
+              Telemetry Active
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-950/80 px-3 py-2">
+          <code className="font-mono text-[10px] text-zinc-400 sm:text-xs">nex_••••••••••••4421</code>
+          <Copy className="h-3.5 w-3.5 text-zinc-500" aria-hidden />
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {navModules.map(({ label, icon: Icon, chip }) => (
+          <span
+            key={label}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium sm:text-xs ${chip}`}
+          >
+            <Icon className="h-3.5 w-3.5 shrink-0" />
+            {label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
@@ -117,153 +193,145 @@ export default function Home() {
       <section className="relative overflow-hidden">
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-[-12rem] h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-cyan-500/15 blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-[-12rem] h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute right-[-8rem] top-24 h-[28rem] w-[28rem] rounded-full bg-emerald-500/10 blur-3xl"
+          className="pointer-events-none absolute right-[-8rem] top-24 h-[28rem] w-[28rem] rounded-full bg-violet-500/10 blur-3xl"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute bottom-0 left-[-6rem] h-[20rem] w-[20rem] rounded-full bg-green-500/8 blur-3xl"
+          className="pointer-events-none absolute bottom-0 left-[-6rem] h-[20rem] w-[20rem] rounded-full bg-rose-500/8 blur-3xl"
         />
 
-        <div className="relative mx-auto max-w-5xl px-6 py-20 text-center sm:py-28">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-4 py-1.5 text-xs font-medium text-cyan-300 backdrop-blur-sm">
-            <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-            4 Pillars of AI Agent Security
+        <div className="relative mx-auto max-w-6xl px-6 py-16 sm:py-24">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-4 py-1.5 text-xs font-medium text-emerald-300 backdrop-blur-sm">
+              <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+              Complete Runtime Security Platform
+            </div>
+
+            <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
+              Nexus Shield —{' '}
+              <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
+                AI Agent Trust &amp; Runtime Security Platform
+              </span>
+            </h1>
+
+            <p className="mt-5 text-lg font-medium text-emerald-200/90 sm:text-xl">
+              Give every AI agent an identity, a reputation, and a limit.
+            </p>
+
+            <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-400 sm:text-lg">
+              Discover every agent. Control every action. Prove every critical execution.
+            </p>
+
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href="/dashboard"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-7 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/25 transition-transform hover:scale-[1.02] hover:shadow-emerald-500/40 active:scale-[0.98]"
+              >
+                Launch Live Dashboard
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="/dashboard/trust-hub"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500/25 bg-cyan-500/5 px-7 py-3.5 text-sm font-semibold text-cyan-100 backdrop-blur-md transition-colors hover:border-cyan-500/40 hover:bg-cyan-500/10"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Explore Trust Hub
+              </Link>
+            </div>
           </div>
 
-          <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-            Nexus Shield —{' '}
-            <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-green-400 bg-clip-text text-transparent">
-              AI Agent Trust &amp; Runtime Security Platform
-            </span>
-          </h1>
+          <DashboardHeaderPreview />
 
-          <p className="mt-5 text-lg font-medium text-cyan-200/90 sm:text-xl">
-            Give every AI agent an identity, a reputation, and a limit.
-          </p>
-
-          <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-400 sm:text-lg">
-            Discover every agent. Control every action. Learn from every threat.
-          </p>
-
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/dashboard"
-              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 px-7 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-cyan-500/25 transition-transform hover:scale-[1.02] hover:shadow-cyan-500/40 active:scale-[0.98]"
-            >
-              Launch Live Dashboard
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-            <Link
-              href="/dashboard/agents"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500/25 bg-cyan-500/5 px-7 py-3.5 text-sm font-semibold text-cyan-100 backdrop-blur-md transition-colors hover:border-cyan-500/40 hover:bg-cyan-500/10"
-            >
-              <Bot className="h-4 w-4" />
-              Explore Agent Inventory
-            </Link>
-          </div>
-
-          <div className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mx-auto mt-8 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: 'Sub-10ms', sub: 'Runtime interception' },
-              { label: '4 Pillars', sub: 'End-to-end security' },
-              { label: '#TS-xxxx', sub: 'Collective immunity' },
+              { label: '7 Modules', sub: 'Full platform stack' },
+              { label: 'Telemetry', sub: 'Live SOC signals' },
+              { label: 'Sub-10ms', sub: 'Runtime intercept' },
+              { label: '#TS-xxxx', sub: 'Immune network' },
             ].map(({ label, sub }) => (
               <div
                 key={label}
-                className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 backdrop-blur-md"
+                className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 text-center backdrop-blur-md"
               >
-                <p className="text-lg font-semibold text-cyan-300">{label}</p>
-                <p className="text-xs text-zinc-500">{sub}</p>
+                <p className="text-sm font-semibold text-emerald-300 sm:text-base">{label}</p>
+                <p className="text-[10px] text-zinc-500 sm:text-xs">{sub}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 4 Pillars */}
-      <section id="pillars" className="scroll-mt-20 mx-auto max-w-7xl px-6 py-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-xs font-medium text-emerald-300">
-            <Shield className="h-3.5 w-3.5" />
-            Platform Architecture
-          </div>
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-            4 Pillars of AI Agent Security
-          </h2>
-          <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-            From static scanning to collective behavioral immunity — one platform for the entire
-            agent lifecycle.
-          </p>
-        </div>
-
-        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
-          {PILLARS.map(({ phase, title, icon: Icon, accent, border, iconColor, glow, bullets }) => (
-            <article
-              key={phase}
-              className={`group relative overflow-hidden rounded-2xl border ${border} bg-gradient-to-br ${accent} p-6 backdrop-blur-xl transition-all hover:scale-[1.01] hover:shadow-lg ${glow}`}
-            >
-              <div className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm" />
-              <div className="relative">
-                <div className="flex items-start justify-between gap-4">
-                  <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-zinc-900/60 ${iconColor}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="rounded-full border border-white/10 bg-zinc-900/60 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-                    {phase}
-                  </span>
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-zinc-50">{title}</h3>
-                <ul className="mt-4 space-y-2">
-                  {bullets.map((bullet) => (
-                    <li key={bullet} className="flex items-start gap-2 text-sm text-zinc-400">
-                      <Zap className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${iconColor}`} />
-                      {bullet}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* Dashboard Quick Nav */}
-      <section id="dashboard-modules" className="scroll-mt-20 border-y border-white/5 bg-zinc-900/30 py-20">
+      {/* Quick Nav Strip */}
+      <section className="border-y border-white/5 bg-zinc-900/40 py-6">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-              Live Dashboard Modules
-            </h2>
-            <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-              Jump directly into production runtime panels — scan, discover, intercept, and immunize.
-            </p>
-          </div>
-
-          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {DASHBOARD_MODULES.map(({ title, description, href, icon: Icon, accent, border }) => (
+          <p className="mb-4 text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+            Live Dashboard Quick Nav
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {QUICK_NAV.map(({ label, href, chip }) => (
               <Link
                 key={href}
                 href={href}
-                className={`group flex flex-col rounded-2xl border border-white/10 bg-zinc-950/60 p-5 backdrop-blur-xl transition-all hover:bg-zinc-900/80 ${border} hover:shadow-lg hover:shadow-cyan-500/5`}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors sm:text-sm ${chip}`}
               >
-                <div className="flex items-center justify-between">
-                  <div className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-zinc-900/80 ${accent}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-zinc-600 transition-transform group-hover:translate-x-0.5 group-hover:text-cyan-400" />
-                </div>
-                <h3 className="mt-4 text-sm font-semibold text-zinc-100">{title}</h3>
-                <p className="mt-2 flex-1 text-xs leading-relaxed text-zinc-500">{description}</p>
-                <span className="mt-4 text-xs font-medium text-cyan-400/80 group-hover:text-cyan-300">
-                  Open module →
-                </span>
+                {label}
+                <ArrowRight className="h-3 w-3 opacity-60" />
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Complete Platform Modules */}
+      <section id="modules" className="scroll-mt-20 mx-auto max-w-7xl px-6 py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/5 px-3 py-1 text-xs font-medium text-violet-300">
+            <ScanSearch className="h-3.5 w-3.5" />
+            All Dashboard Modules
+          </div>
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
+            Complete Platform Modules
+          </h2>
+          <p className="mt-3 text-sm text-zinc-500 sm:text-base">
+            Every panel in the live dashboard — from scanner onboarding to trust hub reputation,
+            threat intel, and compliance.
+          </p>
+        </div>
+
+        <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {PLATFORM_MODULES.map(({ number, title, href, icon: Icon, border, accent, chip, bullets }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`group relative overflow-hidden rounded-2xl border ${border} bg-zinc-950/60 p-6 backdrop-blur-xl transition-all hover:scale-[1.01] hover:bg-zinc-900/70 hover:shadow-lg hover:shadow-emerald-500/5`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-zinc-900/80 ${accent}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${chip}`}>
+                  Module {number}
+                </span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-zinc-50">{title}</h3>
+              <ul className="mt-4 space-y-2">
+                {bullets.map((bullet) => (
+                  <li key={bullet} className="flex items-start gap-2 text-sm text-zinc-400">
+                    <Zap className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${accent}`} />
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+              <span className="mt-5 inline-flex items-center gap-1 text-xs font-medium text-emerald-400/80 group-hover:text-emerald-300">
+                Open module
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 
