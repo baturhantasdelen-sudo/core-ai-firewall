@@ -16,7 +16,8 @@
     "test:immune": "tsx --test test/immune-network.test.ts",
     "test:simulator": "tsx --test test/simulator.test.ts",
     "test:trust": "tsx --test test/advanced-trust.test.ts",
-    "test:all": "npm run test:validation && npm run test:reports && npm run test:remediation && npm run test:context && npm run test:agents && npm run test:actions && npm run test:immune && npm run test:simulator && npm run test:trust"
+    "test:full-stack": "tsx --test test/full-stack-trust.test.ts",
+    "test:all": "npm run test:validation && npm run test:reports && npm run test:remediation && npm run test:context && npm run test:agents && npm run test:actions && npm run test:immune && npm run test:simulator && npm run test:trust && npm run test:full-stack"
   },
   "dependencies": {
     "@octokit/auth-app": "^8.3.0",

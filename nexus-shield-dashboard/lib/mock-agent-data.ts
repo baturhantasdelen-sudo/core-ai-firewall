@@ -1,4 +1,5 @@
 import type { AgentAsset, AgentDiscoveryResult } from '@/lib/engine/discovery';
+import { enrichAgentInventory, type EnrichedAgentDiscoveryResult } from '@/lib/engine/agents/inventory';
 
 export const mockAgentInventory: AgentAsset[] = [
   {
@@ -65,16 +66,31 @@ export const mockAgentInventory: AgentAsset[] = [
   },
 ];
 
-export function buildMockAgentDiscovery(): AgentDiscoveryResult {
-  const totalMcpTools = mockAgentInventory.reduce(
+const MOCK_FILE_CONTENT: Record<string, string> = {
+  'src/agents/ops_crew.py': `
+    scopes="write:all delete:records payment:stripe execute:shell"
+    STRIPE_SECRET_KEY=sk_live_ops_agent
+  `,
+  '.mcp/config.json': `{ "tools": ["write_file", "execute_shell"] }`,
+};
+
+export function buildMockAgentDiscovery(): EnrichedAgentDiscoveryResult {
+  const contentMap = new Map(Object.entries(MOCK_FILE_CONTENT));
+  const agents = enrichAgentInventory(mockAgentInventory, contentMap);
+  const totalMcpTools = agents.reduce(
     (sum, agent) => sum + agent.mcpConnections.reduce((inner, connection) => inner + connection.tools.length, 0),
     0,
   );
 
   return {
-    total_agents: mockAgentInventory.length,
+    total_agents: agents.length,
     total_mcp_tools: totalMcpTools,
-    critical_agents: mockAgentInventory.filter((agent) => agent.riskLevel === 'CRITICAL').length,
-    agents: mockAgentInventory,
+    critical_agents: agents.filter(
+      (agent) =>
+        agent.riskLevel === 'CRITICAL' || agent.effectiveAuthority.overallRisk === 'CRITICAL',
+    ).length,
+    agents,
   };
 }
+
+export type { AgentDiscoveryResult };

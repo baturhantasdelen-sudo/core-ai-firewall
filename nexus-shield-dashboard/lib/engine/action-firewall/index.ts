@@ -2,17 +2,28 @@ import type { AgentCapability } from '@/lib/engine/discovery';
 import {
   checkImmuneNetworkSignatures,
   generateThreatSignature,
-  inferIntentTags,
   registerThreatSignature,
-} from '@/lib/engine/immune';
+} from '@/lib/engine/threat-intel/immune-network';
 import type { ActionEvidence } from '@/lib/engine/evidence';
 import { verifyActionEvidence } from '@/lib/engine/evidence';
 import {
   evaluateToolChain,
+  getAgentTrajectory,
   recordToolCall,
   resetTrajectory,
 } from './trajectory';
-import { getKillSwitchState, triggerKillSwitch } from './kill-switch';
+import {
+  getKillSwitchState,
+  getRevokedCapabilities,
+  isCapabilityRevoked,
+  revokeCapabilities,
+  triggerKillSwitch,
+} from './kill-switch';
+import {
+  calculateIntentDivergence,
+  inferIntentTags,
+  scoreIntentConsistency,
+} from './intent-engine';
 
 export type ActionDecision = 'ALLOW' | 'BLOCK' | 'HUMAN_APPROVAL_REQUIRED';
 
@@ -33,9 +44,11 @@ export interface ActionEvaluationResult {
   decision: ActionDecision;
   riskScore: number;
   intentMatchScore: number;
+  intentDivergencePercent?: number;
   violations: string[];
   killSwitchTriggered: boolean;
-  agentStatus?: 'ACTIVE' | 'FROZEN';
+  capabilitiesRevoked?: boolean;
+  agentStatus?: 'ACTIVE' | 'FROZEN' | 'READ_ONLY';
   latencyMs?: number;
 }
 
@@ -49,15 +62,7 @@ const TOOL_CAPABILITY_MAP: Array<{ pattern: RegExp; capability: AgentCapability 
   { pattern: /(?:api_call|http_request|fetch_url|rest_api|graphql)/i, capability: 'API_CALL' },
 ];
 
-const INTENT_KEYWORDS: Record<string, RegExp[]> = {
-  invoice: [/invoice/i, /billing/i, /receipt/i, /fatura/i],
-  read: [/read/i, /view/i, /check/i, /inspect/i, /lookup/i],
-  export: [/export/i, /download/i, /dump/i, /extract/i],
-  payment: [/pay/i, /transfer/i, /charge/i, /refund/i],
-  search: [/search/i, /find/i, /lookup/i],
-  execute: [/run/i, /execute/i, /deploy/i, /restart/i],
-  database: [/database/i, /sql/i, /query/i, /db/i, /record/i],
-};
+const REVOCABLE_SCOPES: AgentCapability[] = ['WRITE', 'EXECUTE', 'FINANCIAL', 'DB_QUERY'];
 
 function normalizeCapabilities(capabilities: string[]): Set<string> {
   return new Set(capabilities.map((capability) => capability.toUpperCase()));
@@ -74,9 +79,14 @@ function inferToolCapabilities(toolName: string, args: Record<string, unknown>):
 function validateCapabilities(
   required: AgentCapability[],
   granted: Set<string>,
+  agentId: string,
 ): string[] {
   const violations: string[] = [];
   for (const capability of required) {
+    if (isCapabilityRevoked(agentId, capability)) {
+      violations.push(`Capability revoked (read-only mode): ${capability}`);
+      continue;
+    }
     if (!granted.has(capability)) {
       violations.push(`Agent lacks required capability: ${capability}`);
     }
@@ -84,70 +94,22 @@ function validateCapabilities(
   return violations;
 }
 
-function scoreIntentConsistency(
-  userIntent: string,
-  toolCall: ToolCallInput,
-): { intentMatchScore: number; violations: string[]; riskBoost: number } {
-  const intent = userIntent.toLowerCase();
-  const tool = toolCall.name.toLowerCase();
-  const argsText = JSON.stringify(toolCall.args).toLowerCase();
-  const violations: string[] = [];
-  let riskBoost = 0;
-
-  const intentTags = Object.entries(INTENT_KEYWORDS)
-    .filter(([, patterns]) => patterns.some((pattern) => pattern.test(intent)))
-    .map(([tag]) => tag);
-
-  const toolTags = Object.entries(INTENT_KEYWORDS)
-    .filter(([, patterns]) => patterns.some((pattern) => pattern.test(`${tool} ${argsText}`)))
-    .map(([tag]) => tag);
-
-  const overlap = intentTags.filter((tag) => toolTags.includes(tag));
-  const intentMatchScore =
-    intentTags.length === 0
-      ? toolTags.length === 0
-        ? 75
-        : 45
-      : Math.round((overlap.length / intentTags.length) * 100);
-
-  const invoiceLike = /invoice|billing|receipt|fatura/i.test(intent);
-  const exportLike = /bulk_export|export_db|dump|download_all|sql_export/i.test(tool);
-  const paymentLike = /payment|transfer|stripe|charge|refund/i.test(tool);
-  const executeLike = /exec|shell|run_command|subprocess/i.test(tool);
-  const readLikeIntent = /check|view|inspect|lookup|read/i.test(intent);
-
-  if (invoiceLike && exportLike) {
-    violations.push('Intent-Action mismatch: invoice check intent vs bulk database export tool');
-    riskBoost += 35;
-  }
-
-  if (readLikeIntent && (exportLike || executeLike)) {
-    violations.push('Intent-Action mismatch: read/check intent vs destructive or export tool call');
-    riskBoost += 25;
-  }
-
-  if (invoiceLike && paymentLike && !/pay|charge|refund/i.test(intent)) {
-    violations.push('Intent-Action mismatch: invoice review intent vs financial mutation tool');
-    riskBoost += 30;
-  }
-
-  if (intentMatchScore < 35) {
-    violations.push(`Low intent-tool alignment score (${intentMatchScore}/100)`);
-    riskBoost += 20;
-  }
-
-  return { intentMatchScore, violations, riskBoost };
-}
-
 function computeRiskScore(
   capabilityViolations: string[],
   intentResult: { intentMatchScore: number; violations: string[]; riskBoost: number },
+  divergenceResult: { divergencePercent: number; shouldBlock: boolean },
   requiredCapabilities: AgentCapability[],
 ): number {
   let riskScore = 0;
 
   riskScore += capabilityViolations.length * 28;
   riskScore += intentResult.riskBoost;
+
+  if (divergenceResult.shouldBlock) {
+    riskScore += 30;
+  } else if (divergenceResult.divergencePercent > 50) {
+    riskScore += 15;
+  }
 
   if (requiredCapabilities.includes('FINANCIAL')) {
     riskScore += 15;
@@ -159,7 +121,7 @@ function computeRiskScore(
     riskScore += 18;
   }
 
-  if (intentResult.intentMatchScore >= 80 && capabilityViolations.length === 0) {
+  if (intentResult.intentMatchScore >= 80 && capabilityViolations.length === 0 && !divergenceResult.shouldBlock) {
     riskScore = Math.min(riskScore, 25);
   }
 
@@ -169,9 +131,12 @@ function computeRiskScore(
 function resolveDecision(
   riskScore: number,
   violations: string[],
-  frozen: boolean,
+  agentStatus: 'ACTIVE' | 'FROZEN' | 'READ_ONLY',
 ): ActionDecision {
-  if (frozen) return 'BLOCK';
+  if (agentStatus === 'FROZEN') return 'BLOCK';
+  if (violations.some((violation) => /Capability revoked/.test(violation))) {
+    return 'BLOCK';
+  }
   if (riskScore > 85) return 'BLOCK';
   if (riskScore > 60 || violations.length >= 2) return 'HUMAN_APPROVAL_REQUIRED';
   if (violations.length > 0) return 'HUMAN_APPROVAL_REQUIRED';
@@ -180,6 +145,10 @@ function resolveDecision(
 
 function shouldRegisterThreatSignature(riskScore: number, killSwitchTriggered: boolean): boolean {
   return riskScore > 75 || killSwitchTriggered;
+}
+
+function selectRevocableScopes(requiredCapabilities: AgentCapability[]): string[] {
+  return REVOCABLE_SCOPES.filter((scope) => requiredCapabilities.includes(scope));
 }
 
 export function evaluateAgentAction(input: EvaluateAgentActionInput): ActionEvaluationResult {
@@ -200,10 +169,16 @@ export function evaluateAgentAction(input: EvaluateAgentActionInput): ActionEval
     };
   }
 
-  const capabilityViolations = validateCapabilities(requiredCapabilities, granted);
+  const capabilityViolations = validateCapabilities(requiredCapabilities, granted, input.agentId);
   const intentResult = scoreIntentConsistency(input.userIntent, input.toolCall);
+  const trajectory = getAgentTrajectory(input.agentId);
+  const divergenceResult = calculateIntentDivergence(input.userIntent, [
+    ...trajectory.map((entry) => entry.toolName),
+    input.toolCall.name,
+  ]);
+
   const violatedCapabilities = requiredCapabilities.filter(
-    (capability) => !granted.has(capability),
+    (capability) => !granted.has(capability) || isCapabilityRevoked(input.agentId, capability),
   );
 
   const immuneMatch = checkImmuneNetworkSignatures({
@@ -215,11 +190,17 @@ export function evaluateAgentAction(input: EvaluateAgentActionInput): ActionEval
   const violations = [
     ...capabilityViolations,
     ...intentResult.violations,
+    ...(divergenceResult.shouldBlock && divergenceResult.violation ? [divergenceResult.violation] : []),
     ...(immuneMatch.violation ? [immuneMatch.violation] : []),
   ];
 
-  let riskScore =
-    computeRiskScore(capabilityViolations, intentResult, requiredCapabilities) + immuneMatch.riskBoost;
+  let riskScore = computeRiskScore(
+    capabilityViolations,
+    intentResult,
+    divergenceResult,
+    requiredCapabilities,
+  );
+  riskScore += immuneMatch.riskBoost;
 
   const chainEvaluation = evaluateToolChain({
     agentId: input.agentId,
@@ -249,15 +230,32 @@ export function evaluateAgentAction(input: EvaluateAgentActionInput): ActionEval
 
   recordToolCall(input.agentId, input.toolCall.name, riskScore);
 
-  const killSwitchTriggered = riskScore > 85 || chainEvaluation.shouldBlock;
+  let killSwitchTriggered = false;
+  let capabilitiesRevoked = false;
+  let agentStatus: 'ACTIVE' | 'FROZEN' | 'READ_ONLY' = killSwitchState.status;
 
-  if (killSwitchTriggered) {
+  const shouldFullFreeze = riskScore > 85 || chainEvaluation.shouldBlock;
+
+  if (shouldFullFreeze) {
     triggerKillSwitch(input.agentId, violations.join('; ') || 'Critical action firewall risk score exceeded');
+    killSwitchTriggered = true;
+    agentStatus = 'FROZEN';
+  } else if (divergenceResult.shouldBlock || (riskScore > 70 && riskScore <= 85)) {
+    const scopesToRevoke = selectRevocableScopes(requiredCapabilities);
+    if (scopesToRevoke.length > 0) {
+      revokeCapabilities(
+        input.agentId,
+        scopesToRevoke,
+        divergenceResult.violation ?? 'Intent-action divergence — read-only mode enforced',
+      );
+      capabilitiesRevoked = true;
+      agentStatus = 'READ_ONLY';
+    }
   }
 
   if (shouldRegisterThreatSignature(riskScore, killSwitchTriggered)) {
     const signature = generateThreatSignature({
-      toolSequence: [input.toolCall.name],
+      toolSequence: [...trajectory.map((entry) => entry.toolName), input.toolCall.name],
       intentAnomalyTags: inferIntentTags(input.userIntent),
       violatedCapabilities,
       riskScore,
@@ -269,17 +267,32 @@ export function evaluateAgentAction(input: EvaluateAgentActionInput): ActionEval
   }
 
   return {
-    decision: resolveDecision(riskScore, violations, false),
+    decision: resolveDecision(riskScore, violations, agentStatus),
     riskScore,
     intentMatchScore: intentResult.intentMatchScore,
+    intentDivergencePercent: divergenceResult.divergencePercent,
     violations,
     killSwitchTriggered,
-    agentStatus: killSwitchTriggered ? 'FROZEN' : 'ACTIVE',
+    capabilitiesRevoked,
+    agentStatus,
     latencyMs: performance.now() - started,
   };
 }
 
-export { triggerKillSwitch, getKillSwitchState, resetKillSwitchState } from './kill-switch';
+export {
+  triggerKillSwitch,
+  getKillSwitchState,
+  resetKillSwitchState,
+  revokeCapabilities,
+  getRevokedCapabilities,
+  listReadOnlyAgents,
+} from './kill-switch';
+export {
+  calculateIntentDivergence,
+  inferIntentTags,
+  scoreIntentConsistency,
+  INTENT_DIVERGENCE_THRESHOLD,
+} from './intent-engine';
 export {
   evaluateToolChain,
   recordToolCall,

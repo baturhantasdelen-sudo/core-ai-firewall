@@ -5,6 +5,7 @@ import {
   Bot,
   Copy,
   Crosshair,
+  Eye,
   FileText,
   KeyRound,
   Radar,
@@ -147,6 +148,54 @@ const QUICK_NAV = [
   { label: 'Settings', href: '/dashboard/settings', chip: 'border-white/10 bg-zinc-900/80 text-zinc-300 hover:border-white/20' },
 ] as const;
 
+const TRUST_LAYERS = [
+  {
+    phase: 'SEE',
+    title: 'Visibility, Discovery & Effective Authority',
+    subtitle: 'Katman 1',
+    href: '/dashboard/agents',
+    icon: Eye,
+    accent: 'text-violet-400',
+    border: 'border-violet-500/25',
+    chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200',
+    bullets: [
+      'Agent & MCP discovery across LangChain, CrewAI, OpenAI Assistants',
+      'Effective Authority matrix — API keys & OAuth scopes vs declared caps',
+      'Unrestricted Write/Delete & Financial Access risk badges',
+    ],
+  },
+  {
+    phase: 'CONTROL',
+    title: 'Action Firewall, Intent Divergence & Capability Revocation',
+    subtitle: 'Katman 2',
+    href: '/dashboard/actions',
+    icon: ShieldAlert,
+    accent: 'text-rose-400',
+    border: 'border-rose-500/25',
+    chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200',
+    bullets: [
+      'Intent vs. Action trajectory divergence scoring',
+      'INTENT_ACTION_DIVERGENCE block at >80% mismatch',
+      'revokeCapabilities() read-only mode instead of full kill switch',
+    ],
+  },
+  {
+    phase: 'TRUST',
+    title: 'Evidence Chain & Digital Immune System',
+    subtitle: 'Katman 3',
+    href: '/dashboard/trust-hub',
+    icon: ShieldCheck,
+    accent: 'text-cyan-400',
+    border: 'border-cyan-500/25',
+    chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200',
+    bullets: [
+      'ERP Transaction ID · DB Modification Hash · Log Diff verification',
+      'UNVERIFIED_ACTION flag for evidence-less critical ops',
+      'SAFE-compliant Zero-Knowledge immune signatures (#TS-xxxx)',
+    ],
+  },
+] as const;
+
 const NAV_BUTTONS = [
   { label: 'Setup Guide', icon: BookOpen, chip: 'border-white/10 bg-zinc-900/80 text-zinc-300' },
   { label: 'Agents', icon: Bot, chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200' },
@@ -222,22 +271,23 @@ export default function Home() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-4 py-1.5 text-xs font-medium text-emerald-300 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
-              Complete Runtime Security Platform
+              2026 AI Agent Trust &amp; Runtime Security
             </div>
 
             <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-              Nexus Shield —{' '}
+              THE RUNTIME SECURITY &amp;{' '}
               <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
-                AI Agent Trust &amp; Runtime Security Platform
+                TRUST LAYER FOR AI AGENTS
               </span>
             </h1>
 
             <p className="mt-5 text-lg font-medium text-emerald-200/90 sm:text-xl">
-              Give every AI agent an identity, a reputation, and a limit.
+              Discover every agent. Control every action. Verify every outcome.
             </p>
 
             <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-400 sm:text-lg">
-              Discover every agent. Control every action. Prove every critical execution.
+              SEE → CONTROL → TRUST — three runtime layers that give every autonomous agent an identity,
+              enforce intent-aligned actions, and prove critical executions with verifiable evidence.
             </p>
 
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -245,15 +295,16 @@ export default function Home() {
                 href="/dashboard"
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-7 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/25 transition-transform hover:scale-[1.02] hover:shadow-emerald-500/40 active:scale-[0.98]"
               >
-                Launch Live Dashboard
+                <ScanSearch className="h-4 w-4" />
+                Scan Your AI Environment
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
-                href="/dashboard/trust-hub"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500/25 bg-cyan-500/5 px-7 py-3.5 text-sm font-semibold text-cyan-100 backdrop-blur-md transition-colors hover:border-cyan-500/40 hover:bg-cyan-500/10"
+                href="/dashboard/simulator"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-500/25 bg-orange-500/5 px-7 py-3.5 text-sm font-semibold text-orange-100 backdrop-blur-md transition-colors hover:border-orange-500/40 hover:bg-orange-500/10"
               >
-                <ShieldCheck className="h-4 w-4" />
-                Explore Trust Hub
+                <Crosshair className="h-4 w-4" />
+                Simulate Agent Attack
               </Link>
             </div>
           </div>
@@ -290,6 +341,83 @@ export default function Home() {
               >
                 {label}
                 <ArrowRight className="h-3 w-3 opacity-60" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="trust-layers" className="scroll-mt-20 border-y border-white/5 bg-zinc-900/30 py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-3 py-1 text-xs font-medium text-cyan-300">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              SEE → CONTROL → TRUST
+            </div>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
+              Three-Layer Runtime Architecture
+            </h2>
+            <p className="mt-3 text-sm text-zinc-500 sm:text-base">
+              From discovery to enforcement to verification — each layer maps to live dashboard modules.
+            </p>
+          </div>
+
+          <div className="mt-10 hidden items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-zinc-600 sm:flex">
+            <span className="text-violet-400">SEE</span>
+            <ArrowRight className="h-4 w-4" />
+            <span className="text-rose-400">CONTROL</span>
+            <ArrowRight className="h-4 w-4" />
+            <span className="text-cyan-400">TRUST</span>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+            {TRUST_LAYERS.map(({ phase, title, subtitle, href, icon: Icon, accent, border, chip, bullets }) => (
+              <Link
+                key={phase}
+                href={href}
+                className={`group flex flex-col rounded-2xl border ${border} bg-zinc-950/60 p-6 backdrop-blur-xl transition-all hover:scale-[1.01] hover:bg-zinc-900/70 hover:shadow-lg hover:shadow-emerald-500/5`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-zinc-900/80 ${accent}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold tracking-wider ${chip}`}>
+                    {phase}
+                  </span>
+                </div>
+                <p className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">{subtitle}</p>
+                <h3 className="mt-1 text-lg font-semibold text-zinc-50">{title}</h3>
+                <ul className="mt-4 flex-1 space-y-2">
+                  {bullets.map((bullet) => (
+                    <li key={bullet} className="flex items-start gap-1.5 text-xs text-zinc-400">
+                      <Zap className={`mt-0.5 h-3 w-3 shrink-0 ${accent}`} />
+                      {bullet}
+                    </li>
+                  ))}
+                </ul>
+                <span className="mt-5 inline-flex items-center gap-1 text-xs font-medium text-emerald-400/80 group-hover:text-emerald-300">
+                  Open live dashboard
+                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+            {[
+              { label: 'Agent Inventory', href: '/dashboard/agents' },
+              { label: 'Action Firewall', href: '/dashboard/actions' },
+              { label: 'Threat Intel', href: '/dashboard/threat-intel' },
+              { label: 'Trust Hub', href: '/dashboard/trust-hub' },
+              { label: 'Red Team Simulator', href: '/dashboard/simulator' },
+            ].map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-zinc-900/60 px-3 py-1.5 text-xs text-zinc-300 transition hover:border-emerald-500/30 hover:text-emerald-300"
+              >
+                {label}
+                <ArrowRight className="h-3 w-3 opacity-50" />
               </Link>
             ))}
           </div>

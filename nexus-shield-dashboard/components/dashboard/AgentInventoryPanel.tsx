@@ -1,7 +1,13 @@
 'use client';
 
-import { Bot, Cpu, Network, ShieldAlert } from 'lucide-react';
-import type { AgentAsset, AgentDiscoveryResult, AgentRiskLevel } from '@/lib/engine/discovery';
+import { Bot, Cpu, KeyRound, Network, ShieldAlert, Trash2, Wallet } from 'lucide-react';
+import type { AgentRiskLevel } from '@/lib/engine/discovery';
+import {
+  enrichAgentInventory,
+  type EnrichedAgentAsset,
+  type EnrichedAgentDiscoveryResult,
+  type EffectiveAuthorityScope,
+} from '@/lib/engine/agents/inventory';
 
 function riskBadgeClass(level: AgentRiskLevel): string {
   switch (level) {
@@ -16,27 +22,58 @@ function riskBadgeClass(level: AgentRiskLevel): string {
   }
 }
 
+function authorityBadge(scope: EffectiveAuthorityScope): { label: string; className: string; icon: typeof KeyRound } {
+  switch (scope) {
+    case 'UNRESTRICTED_WRITE':
+      return { label: 'Unrestricted Write', className: 'border-orange-500/30 bg-orange-500/10 text-orange-200', icon: KeyRound };
+    case 'UNRESTRICTED_DELETE':
+      return { label: 'Unrestricted Delete', className: 'border-rose-500/40 bg-rose-500/15 text-rose-200', icon: Trash2 };
+    case 'FINANCIAL_ACCESS':
+      return { label: 'Financial Access', className: 'border-amber-500/30 bg-amber-500/10 text-amber-200', icon: Wallet };
+    case 'EXECUTE_SHELL':
+      return { label: 'Shell Execute', className: 'border-rose-500/30 bg-rose-500/10 text-rose-300', icon: ShieldAlert };
+    case 'DB_MUTATION':
+      return { label: 'DB Mutation', className: 'border-violet-500/30 bg-violet-500/10 text-violet-200', icon: Network };
+    default:
+      return { label: 'Read Only', className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200', icon: Bot };
+  }
+}
+
 interface AgentInventoryPanelProps {
-  discovery: AgentDiscoveryResult;
+  discovery: EnrichedAgentDiscoveryResult | import('@/lib/engine/discovery').AgentDiscoveryResult;
   compact?: boolean;
 }
 
+function normalizeDiscovery(
+  discovery: AgentInventoryPanelProps['discovery'],
+): EnrichedAgentDiscoveryResult {
+  const first = discovery.agents[0];
+  if (first && 'effectiveAuthority' in first) {
+    return discovery as EnrichedAgentDiscoveryResult;
+  }
+  return {
+    ...discovery,
+    agents: enrichAgentInventory(discovery.agents),
+  };
+}
+
 export function AgentInventoryPanel({ discovery, compact = false }: AgentInventoryPanelProps) {
+  const enrichedDiscovery = normalizeDiscovery(discovery);
   return (
     <div className="space-y-6">
       {!compact ? (
         <div className="grid gap-4 sm:grid-cols-3">
-          <MetricCard label="Total Agents" value={discovery.total_agents} icon={Bot} />
-          <MetricCard label="MCP Tools" value={discovery.total_mcp_tools} icon={Network} />
-          <MetricCard label="Critical Agents" value={discovery.critical_agents} icon={ShieldAlert} />
+          <MetricCard label="Total Agents" value={enrichedDiscovery.total_agents} icon={Bot} />
+          <MetricCard label="MCP Tools" value={enrichedDiscovery.total_mcp_tools} icon={Network} />
+          <MetricCard label="Critical Agents" value={enrichedDiscovery.critical_agents} icon={ShieldAlert} />
         </div>
       ) : null}
 
-      {discovery.agents.length === 0 ? (
+      {enrichedDiscovery.agents.length === 0 ? (
         <p className="text-sm text-zinc-500">No AI agents or MCP assets discovered in this scan.</p>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          {discovery.agents.map((agent) => (
+          {enrichedDiscovery.agents.map((agent) => (
             <AgentCard key={agent.id} agent={agent} compact={compact} />
           ))}
         </div>
@@ -65,7 +102,12 @@ function MetricCard({
   );
 }
 
-function AgentCard({ agent, compact }: { agent: AgentAsset; compact?: boolean }) {
+function AgentCard({ agent, compact }: { agent: EnrichedAgentAsset; compact?: boolean }) {
+  const { effectiveAuthority } = agent;
+  const displayRisk = effectiveAuthority.overallRisk;
+
+  const uniqueScopes = [...new Set(effectiveAuthority.effective.map((entry) => entry.scope))];
+
   return (
     <article className="rounded-2xl border border-white/10 bg-zinc-950/70 p-5">
       <div className="flex items-start justify-between gap-3">
@@ -79,13 +121,18 @@ function AgentCard({ agent, compact }: { agent: AgentAsset; compact?: boolean })
             {agent.line ? `:${agent.line}` : ''}
           </p>
         </div>
-        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${riskBadgeClass(agent.riskLevel)}`}>
-          {agent.riskLevel}
-        </span>
+        <div className="flex flex-col items-end gap-1.5">
+          <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${riskBadgeClass(agent.riskLevel)}`}>
+            Declared: {agent.riskLevel}
+          </span>
+          <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${riskBadgeClass(displayRisk)}`}>
+            Effective: {displayRisk}
+          </span>
+        </div>
       </div>
 
       <div className="mt-4">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Capabilities</p>
+        <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Declared Capabilities</p>
         <div className="mt-2 flex flex-wrap gap-2">
           {agent.capabilities.map((capability) => (
             <span
@@ -96,6 +143,42 @@ function AgentCard({ agent, compact }: { agent: AgentAsset; compact?: boolean })
             </span>
           ))}
         </div>
+      </div>
+
+      <div className="mt-4">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">Effective Authority</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {uniqueScopes.length === 0 ? (
+            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/5 px-2 py-1 text-[11px] text-emerald-300">
+              READ_ONLY — no elevated scopes detected
+            </span>
+          ) : (
+            uniqueScopes.map((scope) => {
+              const badge = authorityBadge(scope);
+              const Icon = badge.icon;
+              const entry = effectiveAuthority.effective.find((item) => item.scope === scope);
+              return (
+                <span
+                  key={`${agent.id}-${scope}`}
+                  title={entry?.detail ?? scope}
+                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium ${badge.className}`}
+                >
+                  <Icon className="h-3 w-3 shrink-0" />
+                  {badge.label}
+                </span>
+              );
+            })
+          )}
+        </div>
+        {(effectiveAuthority.hasFinancialAccess || effectiveAuthority.hasUnrestrictedDelete) && (
+          <p className="mt-2 text-[11px] text-rose-300/90">
+            {effectiveAuthority.hasFinancialAccess && effectiveAuthority.hasUnrestrictedWrite
+              ? '⚠ Combined financial + write authority detected via credentials or MCP tools'
+              : effectiveAuthority.hasUnrestrictedDelete
+                ? '⚠ Unrestricted delete scope detected — exceeds declared capabilities'
+                : '⚠ Financial access detected from API key or OAuth scope'}
+          </p>
+        )}
       </div>
 
       {!compact && agent.mcpConnections.length > 0 ? (
