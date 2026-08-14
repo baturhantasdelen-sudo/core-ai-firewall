@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Check, Copy, FileText, Settings } from 'lucide-react';
+import { BookOpen, Bot, Check, Copy, FileText, Settings } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { SetupGuideModal } from './SetupGuideModal';
 
@@ -67,6 +67,14 @@ export function DashboardHeader({ apiKey }: DashboardHeaderProps) {
             <BookOpen className="h-4 w-4" />
             Setup Guide
           </button>
+
+          <Link
+            href="/dashboard/agents"
+            className="inline-flex items-center gap-2 rounded-lg border border-violet-500/20 bg-violet-500/10 px-3 py-2 text-sm font-medium text-violet-200 transition-colors hover:border-violet-500/30 hover:bg-violet-500/20"
+          >
+            <Bot className="h-4 w-4" />
+            Agents
+          </Link>
 
           <Link
             href="/dashboard/compliance"

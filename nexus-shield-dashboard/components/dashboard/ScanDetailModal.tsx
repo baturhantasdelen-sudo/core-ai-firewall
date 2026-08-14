@@ -5,8 +5,10 @@ import { FileWarning, GitCommit, X, Zap } from 'lucide-react';
 import { DEFAULT_POLICY } from '@/lib/engine/policy';
 import { buildPreviewFromFinding } from '@/lib/engine/remediation';
 import type { DetectionMatch } from '@/lib/engine/types';
+import { buildMockAgentDiscovery } from '@/lib/mock-agent-data';
 import { ScanRecord } from '@/lib/mock-dashboard-data';
 import { AutoFixPreviewModal, type AutoFixPreviewData } from './AutoFixPreviewModal';
+import { AgentInventoryPanel } from './AgentInventoryPanel';
 import { FindingBadge, SecretValidationBadge, StatusBadge, SuppressedFindingBadge } from './badges';
 
 interface ScanDetailModalProps {
@@ -112,6 +114,12 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
   const activeFindings = scan.findings.filter((finding) => !finding.suppressed);
   const suppressedFindings = scan.findings.filter((finding) => finding.suppressed);
   const visibleFindings = showSuppressed ? scan.findings : activeFindings;
+  const agentDiscovery = scan.agentDiscovery ?? (scan.status === 'blocked' ? buildMockAgentDiscovery() : {
+    total_agents: 0,
+    total_mcp_tools: 0,
+    critical_agents: 0,
+    agents: [],
+  });
 
   return (
     <>
@@ -227,6 +235,15 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
               </ul>
             )}
           </div>
+
+          {agentDiscovery.total_agents > 0 ? (
+            <div className="border-t border-white/10 p-6">
+              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+                AI Agent Discovery
+              </h3>
+              <AgentInventoryPanel discovery={agentDiscovery} compact />
+            </div>
+          ) : null}
         </div>
       </div>
 

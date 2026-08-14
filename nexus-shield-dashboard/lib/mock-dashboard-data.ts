@@ -1,3 +1,5 @@
+import type { AgentDiscoveryResult } from '@/lib/engine/discovery';
+
 export type FindingType =
   | 'OpenAI API Key'
   | 'Anthropic API Key'
@@ -43,6 +45,7 @@ export interface ScanRecord {
   findings: ScanFinding[];
   status: ScanStatus;
   createdAt: string;
+  agentDiscovery?: AgentDiscoveryResult;
 }
 
 export const PII_FINDING_TYPES: readonly FindingType[] = ['TCKN', 'Credit Card', 'Email'];

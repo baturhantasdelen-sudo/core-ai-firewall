@@ -115,3 +115,13 @@ export function runDetectionEngineOnLines(
 }
 
 export { DEFAULT_POLICY };
+
+export { discoverAgents, discoverAgentsInFile, summarizeAgentDiscovery } from '@/lib/engine/discovery';
+export type {
+  AgentAsset,
+  AgentCapability,
+  AgentDiscoveryResult,
+  AgentFramework,
+  AgentRiskLevel,
+  McpConnection,
+} from '@/lib/engine/discovery';

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authenticateApiKey, extractApiKey } from '@/lib/auth/api-key';
-import { runDetectionEngine, runDetectionEngineOnLines } from '@/lib/engine';
+import { runDetectionEngine, runDetectionEngineOnLines, discoverAgents, summarizeAgentDiscovery } from '@/lib/engine';
 import { finalizeFindingsContext, partitionFindingsByContext } from '@/lib/engine/context';
 import { loadPolicyFromObject } from '@/lib/engine/policy';
 import { remediateFiles } from '@/lib/engine/remediation';
@@ -223,6 +223,7 @@ export async function POST(req: NextRequest) {
 
     const secretsCount = findings.filter((f) => f.category === 'secret').length;
     const piiCount = findings.filter((f) => f.category === 'pii').length;
+    const agentDiscovery = summarizeAgentDiscovery(discoverAgents(scannedFiles));
 
     if (format === 'sarif') {
       const sarif = findingsToSarif(contextualizedFindings, {
@@ -248,6 +249,7 @@ export async function POST(req: NextRequest) {
         scans_used_this_month: quota.used + 1,
         monthly_scan_limit: quota.limit,
         remaining: Math.max(0, quota.remaining - 1),
+        agent_discovery: agentDiscovery,
         ...(includeFixes
           ? {
               fixed_files: fixedFiles ?? [],
