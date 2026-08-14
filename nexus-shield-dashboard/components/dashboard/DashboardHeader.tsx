@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Bot, Check, Copy, FileText, Settings } from 'lucide-react';
+import { BookOpen, Bot, Check, Copy, FileText, Settings, ShieldAlert } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { SetupGuideModal } from './SetupGuideModal';
 
@@ -74,6 +74,14 @@ export function DashboardHeader({ apiKey }: DashboardHeaderProps) {
           >
             <Bot className="h-4 w-4" />
             Agents
+          </Link>
+
+          <Link
+            href="/dashboard/actions"
+            className="inline-flex items-center gap-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm font-medium text-rose-200 transition-colors hover:border-rose-500/30 hover:bg-rose-500/20"
+          >
+            <ShieldAlert className="h-4 w-4" />
+            Action Firewall
           </Link>
 
           <Link

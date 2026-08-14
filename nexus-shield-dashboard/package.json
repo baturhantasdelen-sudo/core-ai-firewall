@@ -11,7 +11,8 @@
     "test:reports": "tsx --test lib/reports/build-compliance-report.test.ts",
     "test:remediation": "tsx --test lib/engine/remediation/index.test.ts",
     "test:context": "tsx --test test/context-filtering.test.ts",
-    "test:agents": "tsx --test test/agent-discovery.test.ts"
+    "test:agents": "tsx --test test/agent-discovery.test.ts",
+    "test:actions": "tsx --test test/action-firewall.test.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "^8.3.0",

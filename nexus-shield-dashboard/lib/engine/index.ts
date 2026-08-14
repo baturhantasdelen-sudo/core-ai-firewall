@@ -125,3 +125,16 @@ export type {
   AgentRiskLevel,
   McpConnection,
 } from '@/lib/engine/discovery';
+
+export {
+  evaluateAgentAction,
+  triggerKillSwitch,
+  getKillSwitchState,
+  resetKillSwitchState,
+} from '@/lib/engine/action-firewall';
+export type {
+  ActionDecision,
+  ActionEvaluationResult,
+  EvaluateAgentActionInput,
+  ToolCallInput,
+} from '@/lib/engine/action-firewall';
