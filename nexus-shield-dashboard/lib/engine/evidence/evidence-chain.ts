@@ -77,7 +77,7 @@ function inferActionType(toolName: string): CriticalActionType {
   if (/stripe|payment|transfer|billing|financial|refund/.test(normalized)) {
     return 'FINANCIAL_MUTATION';
   }
-  if (/bulk_export|export_db|dump|sql_export/.test(normalized)) return 'BULK_EXPORT';
+  if (/bulk_export|export_db|export_customer|dump|sql_export/.test(normalized)) return 'BULK_EXPORT';
   if (/insert|update|delete|write_db|modify_db|sql_mutation/.test(normalized)) {
     return 'DB_MODIFICATION';
   }

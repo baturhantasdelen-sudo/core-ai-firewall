@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { href: '#dashboard', label: 'SOC Dashboard' },
   { href: '#trust-center', label: 'Trust Center' },
   { href: '#compliance', label: 'Compliance' },
-  { href: '#docs', label: 'API Docs' },
+  { href: '/docs', label: 'API Docs' },
 ] as const;
 
 const navLinkClass =

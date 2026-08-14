@@ -20,8 +20,9 @@
     "test:katman1-see": "tsx --test test/katman1-see.test.ts",
     "test:katman2-control": "tsx --test test/katman2-control.test.ts",
     "test:katman3-trust": "tsx --test test/katman3-trust.test.ts",
-    "test": "npm run test:katman3-trust",
-    "test:all": "npm run test:validation && npm run test:reports && npm run test:remediation && npm run test:context && npm run test:agents && npm run test:actions && npm run test:immune && npm run test:simulator && npm run test:trust && npm run test:full-stack && npm run test:katman1-see && npm run test:katman2-control && npm run test:katman3-trust"
+    "test:pitch-scenario": "tsx --test test/pitch-scenario.test.ts",
+    "test": "npm run test:katman3-trust && npm run test:pitch-scenario",
+    "test:all": "npm run test:validation && npm run test:reports && npm run test:remediation && npm run test:context && npm run test:agents && npm run test:actions && npm run test:immune && npm run test:simulator && npm run test:trust && npm run test:full-stack && npm run test:katman1-see && npm run test:katman2-control && npm run test:katman3-trust && npm run test:pitch-scenario"
   },
   "dependencies": {
     "@octokit/auth-app": "^8.3.0",

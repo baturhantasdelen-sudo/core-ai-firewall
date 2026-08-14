@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](packages/vscode-extension/LICENSE)
 [![Dashboard](https://img.shields.io/badge/Dashboard-LIVE-brightgreen)](https://nexus-shield-dashboard.vercel.app)
 [![CI/CD Pipeline](https://github.com/baturhantasdelen-sudo/core-ai-firewall/actions/workflows/deploy.yml/badge.svg)](https://github.com/baturhantasdelen-sudo/core-ai-firewall/actions/workflows/deploy.yml)
-[![Tests](https://img.shields.io/badge/Tests-47%2F47%20PASS-success)](nexus-shield-dashboard/package.json)
+[![Tests](https://img.shields.io/badge/Tests-All%20PASS-success)](nexus-shield-dashboard/package.json)
 [![Trust Hub](https://img.shields.io/badge/Trust%20Hub-7%2F7-success)](nexus-shield-dashboard/test/advanced-trust.test.ts)
 [![Node](https://img.shields.io/badge/Node-24+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -114,7 +114,27 @@ Built on top of the Action Firewall, three advanced trust layers power **Pillar 
 | **Compliance (KVKK/GDPR)** | [/dashboard/compliance](https://nexus-shield-dashboard.vercel.app/dashboard/compliance) | One-click PDF audit report |
 | **Settings** | [/dashboard/settings](https://nexus-shield-dashboard.vercel.app/dashboard/settings) | API key, billing, GitHub App configuration |
 
-The live dashboard header features **Telemetry Active** (real-time green signal), masked **API Key** badge, and one-click navigation to all 8 modules.
+The live dashboard header features **Telemetry Active** (real-time green signal), masked **API Key** badge, and one-click navigation to all modules including **API Docs**.
+
+**Interactive API Reference:** [/docs](https://nexus-shield-dashboard.vercel.app/docs) — cURL examples, JSON schemas, and Try-it-out for Action Firewall, Inter-Agent Trust, and E2E demo endpoints.
+
+---
+
+## E2E Investor Pitch Demo
+
+Run the full SEE → CONTROL → TRUST mitigation scenario (invoice intent → DB export → external upload) in one call:
+
+```bash
+curl -X POST https://nexus-shield-dashboard.vercel.app/api/v1/demo/run \
+  -H "x-api-key: nex_YOUR_KEY"
+```
+
+Or open the live UI: [/dashboard/simulator?pitch=1](https://nexus-shield-dashboard.vercel.app/dashboard/simulator?pitch=1)
+
+**Scenario flow:**
+1. Intent: *"Check August Invoice 8291 for Acme Corp"*
+2. Trajectory: `read_invoice` → `read_customer_database` → `export_customer_database` → `upload_external_api`
+3. Engine response: **96% intent divergence**, **READ_ONLY** capability revocation, **UNVERIFIED_ACTION** evidence flag, reputation **92 → 45**
 
 ---
 

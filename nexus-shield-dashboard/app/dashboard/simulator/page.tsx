@@ -2,17 +2,25 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowLeft, Crosshair } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { LiveIncidentMitigationPanel } from '@/components/dashboard/LiveIncidentMitigationPanel';
 import { RedTeamSimulatorPanel } from '@/components/dashboard/RedTeamSimulatorPanel';
 import { buildMockAgentDiscovery } from '@/lib/mock-agent-data';
 import { getAuthContext } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SimulatorPage() {
+export default async function SimulatorPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ pitch?: string }>;
+}) {
   const auth = await getAuthContext();
   if (!auth) {
     redirect('/login?next=/dashboard/simulator');
   }
+
+  const params = await searchParams;
+  const autoRunPitch = params.pitch === '1';
 
   const discovery = buildMockAgentDiscovery();
 
@@ -41,6 +49,11 @@ export default async function SimulatorPage() {
             </p>
           </div>
         </div>
+
+        <LiveIncidentMitigationPanel
+          apiKey={auth.org.api_key ?? 'nex_no_api_key_configured'}
+          autoRun={autoRunPitch}
+        />
 
         <RedTeamSimulatorPanel
           agents={discovery.agents}

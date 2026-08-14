@@ -21,6 +21,7 @@ import { PlaygroundSection } from '@/components/playground/PlaygroundSection';
 import { PricingSection } from '@/components/pricing/PricingSection';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingFooter } from '@/components/landing/LandingFooter';
+import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
 
 const PLATFORM_MODULES = [
   {
@@ -196,16 +197,7 @@ const TRUST_LAYERS = [
   },
 ] as const;
 
-const NAV_BUTTONS = [
-  { label: 'Setup Guide', icon: BookOpen, chip: 'border-white/10 bg-zinc-900/80 text-zinc-300' },
-  { label: 'Agents', icon: Bot, chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200' },
-  { label: 'Action Firewall', icon: ShieldAlert, chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200' },
-  { label: 'Threat Intel', icon: Radar, chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200' },
-  { label: 'Red Teaming', icon: Crosshair, chip: 'border-orange-500/20 bg-orange-500/10 text-orange-200' },
-  { label: 'Trust Hub', icon: ShieldCheck, chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200' },
-  { label: 'Compliance', icon: FileText, chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200' },
-  { label: 'Settings', icon: Settings, chip: 'border-white/10 bg-zinc-900/80 text-zinc-300' },
-] as const;
+const NAV_BUTTONS = DASHBOARD_NAV_ITEMS.filter((item) => item.label !== 'Setup Guide');
 
 function PlatformNavPreview() {
   return (
@@ -290,7 +282,7 @@ export default function Home() {
               enforce intent-aligned actions, and prove critical executions with verifiable evidence.
             </p>
 
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="/dashboard"
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-7 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/25 transition-transform hover:scale-[1.02] hover:shadow-emerald-500/40 active:scale-[0.98]"
@@ -300,11 +292,18 @@ export default function Home() {
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
-                href="/dashboard/simulator"
+                href="/dashboard/simulator?pitch=1"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-500/25 bg-orange-500/5 px-7 py-3.5 text-sm font-semibold text-orange-100 backdrop-blur-md transition-colors hover:border-orange-500/40 hover:bg-orange-500/10"
               >
                 <Crosshair className="h-4 w-4" />
-                Simulate Agent Attack
+                Run E2E Pitch Demo
+              </Link>
+              <Link
+                href="/docs"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-7 py-3.5 text-sm font-semibold text-zinc-200 backdrop-blur-md transition-colors hover:border-white/20 hover:bg-white/10"
+              >
+                <BookOpen className="h-4 w-4" />
+                API Docs
               </Link>
             </div>
           </div>
@@ -362,20 +361,20 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-10 hidden items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-zinc-600 sm:flex">
-            <span className="text-violet-400">SEE</span>
-            <ArrowRight className="h-4 w-4" />
-            <span className="text-rose-400">CONTROL</span>
-            <ArrowRight className="h-4 w-4" />
-            <span className="text-cyan-400">TRUST</span>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-zinc-600">
+            <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-400">SEE</span>
+            <ArrowRight className="hidden h-4 w-4 sm:block" />
+            <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-rose-400">CONTROL</span>
+            <ArrowRight className="hidden h-4 w-4 sm:block" />
+            <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-cyan-400">TRUST</span>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-stretch">
             {TRUST_LAYERS.map(({ phase, title, subtitle, href, icon: Icon, accent, border, chip, bullets }) => (
               <Link
                 key={phase}
                 href={href}
-                className={`group flex flex-col rounded-2xl border ${border} bg-zinc-950/60 p-6 backdrop-blur-xl transition-all hover:scale-[1.01] hover:bg-zinc-900/70 hover:shadow-lg hover:shadow-emerald-500/5`}
+                className={`group flex h-full min-h-[280px] flex-col rounded-2xl border ${border} bg-zinc-950/60 p-6 backdrop-blur-xl transition-all hover:scale-[1.01] hover:bg-zinc-900/70 hover:shadow-lg hover:shadow-emerald-500/5`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-zinc-900/80 ${accent}`}>
