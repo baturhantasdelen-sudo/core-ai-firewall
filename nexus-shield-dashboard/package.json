@@ -14,7 +14,8 @@
     "test:agents": "tsx --test test/agent-discovery.test.ts",
     "test:actions": "tsx --test test/action-firewall.test.ts",
     "test:immune": "tsx --test test/immune-network.test.ts",
-    "test:all": "npm run test:validation && npm run test:reports && npm run test:remediation && npm run test:context && npm run test:agents && npm run test:actions && npm run test:immune"
+    "test:simulator": "tsx --test test/simulator.test.ts",
+    "test:all": "npm run test:validation && npm run test:reports && npm run test:remediation && npm run test:context && npm run test:agents && npm run test:actions && npm run test:immune && npm run test:simulator"
   },
   "dependencies": {
     "@octokit/auth-app": "^8.3.0",

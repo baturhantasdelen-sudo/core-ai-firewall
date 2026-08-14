@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Bot, Check, Copy, FileText, Radar, Settings, ShieldAlert } from 'lucide-react';
+import { BookOpen, Bot, Check, Copy, Crosshair, FileText, Radar, Settings, ShieldAlert } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { SetupGuideModal } from './SetupGuideModal';
 
@@ -90,6 +90,14 @@ export function DashboardHeader({ apiKey }: DashboardHeaderProps) {
           >
             <Radar className="h-4 w-4" />
             Threat Intel
+          </Link>
+
+          <Link
+            href="/dashboard/simulator"
+            className="inline-flex items-center gap-2 rounded-lg border border-orange-500/20 bg-orange-500/10 px-3 py-2 text-sm font-medium text-orange-200 transition-colors hover:border-orange-500/30 hover:bg-orange-500/20"
+          >
+            <Crosshair className="h-4 w-4" />
+            Red Teaming
           </Link>
 
           <Link

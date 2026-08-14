@@ -148,3 +148,12 @@ export {
   resetThreatRegistry,
 } from '@/lib/engine/immune';
 export type { BehavioralThreatSignature, ThreatCategory, ThreatSeverity } from '@/lib/engine/immune';
+
+export { runRedTeamSimulation, findAgentForSimulation } from '@/lib/engine/simulator';
+export type {
+  AttackVector,
+  SimulationReport,
+  SimulationRiskRating,
+  SimulationVectorResult,
+  SimulationVectorStatus,
+} from '@/lib/engine/simulator';
