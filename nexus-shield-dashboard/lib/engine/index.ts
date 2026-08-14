@@ -157,3 +157,25 @@ export type {
   SimulationVectorResult,
   SimulationVectorStatus,
 } from '@/lib/engine/simulator';
+
+export { verifyActionEvidence } from '@/lib/engine/evidence';
+export type { ActionEvidence, EvidenceStatus, EvidenceVerificationResult } from '@/lib/engine/evidence';
+
+export { inspectMCPServer } from '@/lib/engine/mcp/guardrail';
+export type { McpGuardrailResult, McpServerInspectionInput } from '@/lib/engine/mcp/guardrail';
+
+export { scanAgentMemory } from '@/lib/engine/memory/poisoning';
+export type { AgentMemoryScanInput, MemoryPoisoningResult } from '@/lib/engine/memory/poisoning';
+
+export {
+  calculateReputationScore,
+  getAgentReputation,
+  listAgentReputations,
+  verifyInterAgentTrust,
+  resetReputationStore,
+} from '@/lib/engine/reputation';
+export type {
+  AgentIncident,
+  AgentReputationRecord,
+  InterAgentTrustResult,
+} from '@/lib/engine/reputation';

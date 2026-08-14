@@ -5,6 +5,13 @@ import {
   inferIntentTags,
   registerThreatSignature,
 } from '@/lib/engine/immune';
+import type { ActionEvidence } from '@/lib/engine/evidence';
+import { verifyActionEvidence } from '@/lib/engine/evidence';
+import {
+  evaluateToolChain,
+  recordToolCall,
+  resetTrajectory,
+} from './trajectory';
 import { getKillSwitchState, triggerKillSwitch } from './kill-switch';
 
 export type ActionDecision = 'ALLOW' | 'BLOCK' | 'HUMAN_APPROVAL_REQUIRED';
@@ -19,6 +26,7 @@ export interface EvaluateAgentActionInput {
   userIntent: string;
   toolCall: ToolCallInput;
   agentCapabilities: string[];
+  evidence?: ActionEvidence;
 }
 
 export interface ActionEvaluationResult {
@@ -212,9 +220,36 @@ export function evaluateAgentAction(input: EvaluateAgentActionInput): ActionEval
 
   let riskScore =
     computeRiskScore(capabilityViolations, intentResult, requiredCapabilities) + immuneMatch.riskBoost;
+
+  const chainEvaluation = evaluateToolChain({
+    agentId: input.agentId,
+    toolName: input.toolCall.name,
+    baseRiskScore: riskScore,
+  });
+
+  if (chainEvaluation.matched) {
+    riskScore = chainEvaluation.compoundedRiskScore;
+    if (chainEvaluation.violation) {
+      violations.push(chainEvaluation.violation);
+    }
+  }
+
+  const evidenceCheck = verifyActionEvidence({
+    actionType: 'GENERAL',
+    toolName: input.toolCall.name,
+    evidence: input.evidence,
+  });
+
+  if (!evidenceCheck.verified) {
+    violations.push(...evidenceCheck.violations);
+    riskScore = Math.min(100, riskScore + 18);
+  }
+
   riskScore = Math.min(100, riskScore);
 
-  const killSwitchTriggered = riskScore > 85;
+  recordToolCall(input.agentId, input.toolCall.name, riskScore);
+
+  const killSwitchTriggered = riskScore > 85 || chainEvaluation.shouldBlock;
 
   if (killSwitchTriggered) {
     triggerKillSwitch(input.agentId, violations.join('; ') || 'Critical action firewall risk score exceeded');
@@ -245,3 +280,10 @@ export function evaluateAgentAction(input: EvaluateAgentActionInput): ActionEval
 }
 
 export { triggerKillSwitch, getKillSwitchState, resetKillSwitchState } from './kill-switch';
+export {
+  evaluateToolChain,
+  recordToolCall,
+  getAgentTrajectory,
+  resetTrajectory,
+} from './trajectory';
+export type { TrajectoryEntry, ToolChainEvaluation } from './trajectory';
