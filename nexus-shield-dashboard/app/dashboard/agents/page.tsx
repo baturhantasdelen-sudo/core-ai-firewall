@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { ArrowLeft, Bot, Eye } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { AgentDiscoveryPanel } from '@/components/dashboard/AgentDiscoveryPanel';
+import { AuthorityGraphPanel } from '@/components/dashboard/AuthorityGraphPanel';
 import { AgentInventoryPanel } from '@/components/dashboard/AgentInventoryPanel';
 import { buildMockEnvironmentScan } from '@/lib/mock-agent-data';
 import { buildMockDiscoveryScan } from '@/lib/discovery';
@@ -49,6 +50,10 @@ export default async function AgentsPage() {
         </div>
 
         <AgentDiscoveryPanel initialScan={discoveryScan} />
+
+        <div className="border-t border-white/5 pt-8">
+          <AuthorityGraphPanel agents={environmentScan.agents} />
+        </div>
 
         <div className="border-t border-white/5 pt-8">
           <AgentInventoryPanel scan={environmentScan} />
