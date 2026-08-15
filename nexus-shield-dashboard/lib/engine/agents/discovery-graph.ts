@@ -187,7 +187,7 @@ export function buildEffectiveAuthorityGraph(
             : mapping.indirect === 'PAYMENT'
               ? cap === 'FINANCIAL'
               : mapping.indirect === 'DELETE'
-                ? cap === 'DELETE' || cap === 'WRITE'
+                ? cap === 'WRITE'
                 : mapping.indirect === 'EXECUTE'
                   ? cap === 'EXECUTE'
                   : mapping.indirect === 'WRITE'

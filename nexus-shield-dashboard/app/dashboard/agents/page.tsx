@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowLeft, Bot, Eye } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { AgentDiscoveryPanel } from '@/components/dashboard/AgentDiscoveryPanel';
 import { AgentInventoryPanel } from '@/components/dashboard/AgentInventoryPanel';
 import { buildMockEnvironmentScan } from '@/lib/mock-agent-data';
+import { buildMockDiscoveryScan } from '@/lib/discovery';
 import { getAuthContext } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +17,7 @@ export default async function AgentsPage() {
   }
 
   const environmentScan = buildMockEnvironmentScan();
+  const discoveryScan = buildMockDiscoveryScan();
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -45,7 +48,11 @@ export default async function AgentsPage() {
           </div>
         </div>
 
-        <AgentInventoryPanel scan={environmentScan} />
+        <AgentDiscoveryPanel initialScan={discoveryScan} />
+
+        <div className="border-t border-white/5 pt-8">
+          <AgentInventoryPanel scan={environmentScan} />
+        </div>
       </div>
     </div>
   );
