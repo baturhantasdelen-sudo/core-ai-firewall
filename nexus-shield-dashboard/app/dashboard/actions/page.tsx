@@ -4,6 +4,7 @@ import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { ActionFirewallPanel } from '@/components/dashboard/ActionFirewallPanel';
 import { ActionControlPanel } from '@/components/dashboard/ActionControlPanel';
+import { TrajectoryFirewallPanel } from '@/components/dashboard/TrajectoryFirewallPanel';
 import {
   getActionFirewallSummary,
   mockActionFirewallLogs,
@@ -55,6 +56,8 @@ export default async function ActionFirewallPage() {
             </p>
           </div>
         </div>
+
+        <TrajectoryFirewallPanel />
 
         <ActionControlPanel
           trajectoryLogs={mockTrajectoryControlLogs}
