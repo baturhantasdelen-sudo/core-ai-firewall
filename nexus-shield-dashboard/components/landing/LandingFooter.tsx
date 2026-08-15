@@ -1,4 +1,5 @@
 import { BrandLogo } from '@/components/brand/BrandLogo';
+import { ContactEmail } from '@/components/landing/ContactEmail';
 
 export function LandingFooter() {
   return (
@@ -10,16 +11,16 @@ export function LandingFooter() {
             © {new Date().getFullYear()} Nexus Shield. All rights reserved.
           </span>
         </div>
-        <div className="flex items-center gap-6">
-          <a href="#pricing" className="select-none cursor-pointer transition-colors hover:text-zinc-300">
-            Pricing
-          </a>
-          <a
-            href="mailto:demo@nexusshield.dev"
-            className="select-none cursor-pointer transition-colors hover:text-zinc-300"
-          >
-            Contact
-          </a>
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <ContactEmail variant="footer" />
+          <div className="flex items-center gap-6">
+            <a href="#pricing" className="select-none cursor-pointer transition-colors hover:text-zinc-300">
+              Pricing
+            </a>
+            <a href="#contact" className="select-none cursor-pointer transition-colors hover:text-zinc-300">
+              Contact
+            </a>
+          </div>
         </div>
       </div>
     </footer>

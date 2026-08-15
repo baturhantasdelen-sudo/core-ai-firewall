@@ -20,6 +20,7 @@ import { BrandLogo } from '@/components/brand/BrandLogo';
 import { PlaygroundSection } from '@/components/playground/PlaygroundSection';
 import { PricingSection } from '@/components/pricing/PricingSection';
 import { LandingNav } from '@/components/landing/LandingNav';
+import { ContactSection } from '@/components/landing/ContactSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
 
@@ -472,6 +473,7 @@ export default function Home() {
 
       <PlaygroundSection />
       <PricingSection />
+      <ContactSection />
       <LandingFooter />
     </div>
   );

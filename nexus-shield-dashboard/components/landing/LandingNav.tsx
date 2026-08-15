@@ -5,6 +5,7 @@ const NAV_LINKS = [
   { href: '#playground', label: 'Playground' },
   { href: '#features', label: 'Features' },
   { href: '#pricing', label: 'Pricing' },
+  { href: '#contact', label: 'Contact' },
   { href: '#dashboard', label: 'SOC Dashboard' },
   { href: '#trust-center', label: 'Trust Center' },
   { href: '#compliance', label: 'Compliance' },
