@@ -163,6 +163,13 @@ export type { ActionEvidence, EvidenceStatus, EvidenceVerificationResult, Eviden
 
 export { inspectMCPServer } from '@/lib/engine/mcp/guardrail';
 export type { McpGuardrailResult, McpServerInspectionInput } from '@/lib/engine/mcp/guardrail';
+export { evaluateMcpRuntimeAction } from '@/lib/engine/mcp/mcp-runtime';
+export type {
+  McpRuntimeDecision,
+  McpRuntimeEvaluation,
+  McpRuntimePayload,
+  McpControlDimension,
+} from '@/lib/engine/mcp/mcp-runtime';
 
 export { scanAgentMemory, scanAndProtectMemory, rollbackMemoryToLastTrustedState, getMemoryIntegrityScore, resetMemoryGuardState } from '@/lib/engine/memory/poisoning';
 export type { AgentMemoryScanInput, MemoryPoisoningResult, MemoryGuardResult, MemoryQuarantineEntry } from '@/lib/engine/memory/poisoning';

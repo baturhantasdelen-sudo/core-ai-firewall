@@ -256,6 +256,22 @@ export {
   formatEffectiveSummary,
 };
 
+export {
+  buildEffectiveAuthorityGraph,
+  calculateEffectiveAuthorityGraph,
+  registerAgentGraph,
+  hasIndirectCapabilityEscalation,
+  resetDiscoveryGraphCache,
+} from './discovery-graph';
+
+export type {
+  EffectiveAuthorityGraphResult,
+  GraphNode,
+  GraphEdge,
+  EffectiveRiskLevel,
+  IndirectCapabilityEntry,
+} from './discovery-graph';
+
 export type { EffectiveAuthorityReport, ElevatedRiskScope } from './effective-authority';
 
 export {

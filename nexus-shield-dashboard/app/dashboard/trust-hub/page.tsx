@@ -3,7 +3,9 @@ import { redirect } from 'next/navigation';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { TrustHubPanel } from '@/components/dashboard/TrustHubPanel';
+import { ProveTrustPanel } from '@/components/dashboard/ProveTrustPanel';
 import { buildTrustHubSnapshot } from '@/lib/mock-trust-hub-data';
+import { buildProveTrustSnapshot } from '@/lib/mock-prove-trust-data';
 import { getAuthContext } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +17,7 @@ export default async function TrustHubPage() {
   }
 
   const snapshot = buildTrustHubSnapshot();
+  const proveTrustSnapshot = buildProveTrustSnapshot();
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -31,16 +34,19 @@ export default async function TrustHubPage() {
           </Link>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-cyan-400" />
-            <h1 className="text-2xl font-semibold tracking-tight">Agent Trust Hub</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Agent Trust &amp; Prove Hub</h1>
             <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-cyan-200">
-              Katman 3 — TRUST
+              Katman 3 — PROVE &amp; TRUST
             </span>
           </div>
           <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-            Evidence Chain verification, Memory Integrity &amp; Poisoning quarantine, Agent Reputation
-            scoring, and Inter-Agent Trust delegation for advanced AI agent governance.
+            Evidential outcome verification with concrete proof bundles, dynamic real-time trust scoring
+            with instant restriction tiers, and collective zero-knowledge digital immune network
+            propagation across the Nexus Shield fleet.
           </p>
         </div>
+
+        <ProveTrustPanel snapshot={proveTrustSnapshot} />
 
         <TrustHubPanel snapshot={snapshot} />
       </div>

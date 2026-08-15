@@ -2,6 +2,8 @@
 
 import { Bot, Cpu, Globe, Network, Server, ShieldAlert, ShieldX, Wrench } from 'lucide-react';
 import type { AgentRiskLevel } from '@/lib/engine/discovery';
+import { EffectiveAuthorityGraphPanel } from '@/components/dashboard/EffectiveAuthorityGraphPanel';
+import { getMockFileContentForAgent } from '@/lib/mock-agent-data';
 import {
   enrichAgentInventory,
   formatDeclaredSummary,
@@ -280,6 +282,13 @@ function AgentCard({ agent, compact }: { agent: AgentInventoryRecord; compact?: 
             ))}
           </ul>
         </div>
+      ) : null}
+
+      {!compact ? (
+        <EffectiveAuthorityGraphPanel
+          agent={agent}
+          fileContent={getMockFileContentForAgent(agent.sourceFile)}
+        />
       ) : null}
     </article>
   );

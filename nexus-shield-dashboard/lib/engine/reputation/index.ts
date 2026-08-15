@@ -23,3 +23,18 @@ export {
   listInterAgentDelegationFlows,
   resetReputationStore,
 } from './reputation-network';
+
+export {
+  recalculateDynamicTrustScore,
+  getDynamicTrustScore,
+  getTrustScoreHistory,
+  isActionRestricted,
+  resetDynamicTrustScoreStore,
+} from './dynamic-trust-score';
+export type {
+  TrustTier,
+  TrustRestriction,
+  RecentViolation,
+  DynamicTrustScoreResult,
+  TrustScoreHistoryEntry,
+} from './dynamic-trust-score';

@@ -39,8 +39,8 @@ export default async function AgentsPage() {
               </span>
             </div>
             <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-              Effective Authority mapping — compare declared agent scopes against real permissions
-              inferred from API keys, OAuth tokens, database connection strings, and MCP tools.
+              Discovery Graph &amp; Effective Authority — map Agent → Tools → APIs → Databases → User
+              Scope, detect indirect capability escalation, and issue Just-In-Time credential tokens.
             </p>
           </div>
         </div>

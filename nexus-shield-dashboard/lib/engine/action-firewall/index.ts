@@ -12,6 +12,7 @@ import {
   recordToolCall,
   resetTrajectory,
 } from './trajectory';
+import { resetTrajectoryEngine } from './trajectory-engine';
 import {
   getKillSwitchState,
   resetKillSwitchState,
@@ -353,6 +354,7 @@ export function resetActionFirewallRuntime(agentId?: string): void {
   resetKillSwitchState(agentId);
   resetCapabilityRevocation(agentId);
   resetTrajectory(agentId);
+  resetTrajectoryEngine(agentId);
 }
 
 export {
@@ -389,3 +391,29 @@ export {
   resetTrajectory,
 } from './trajectory';
 export type { TrajectoryEntry, ToolChainEvaluation } from './trajectory';
+export {
+  evaluateTrajectory,
+  recordTrajectoryAction,
+  getTrajectoryWindow,
+  resetTrajectoryEngine,
+} from './trajectory-engine';
+export type {
+  TrajectoryAction,
+  TrajectoryEvaluationResult,
+  TrajectoryRiskLevel,
+} from './trajectory-engine';
+export {
+  createApprovalRequest,
+  approveRequest,
+  rejectRequest,
+  listPendingApprovals,
+  getApprovalRequest,
+  getDashboardNotifications,
+  resetHumanApprovalStore,
+} from './human-approval';
+export type {
+  ApprovalRequest,
+  ApprovalStatus,
+  ActionApprovalDetails,
+  DashboardNotification,
+} from './human-approval';

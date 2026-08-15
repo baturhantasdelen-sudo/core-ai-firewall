@@ -16,6 +16,20 @@ export {
   resetEvidenceChainStore,
 } from './evidence-chain';
 
+export {
+  verifyActionOutcome,
+  recordOutcomeVerification,
+  listOutcomeVerificationLogs,
+  resetEvidentialVerifierStore,
+} from './evidential-verifier';
+export type {
+  VerificationStatus,
+  ProofComponent,
+  ActionOutcomePayload,
+  EvidenceBundle,
+  OutcomeVerificationResult,
+} from './evidential-verifier';
+
 import {
   verifyActionEvidence as verifyChain,
   type ActionPayload,

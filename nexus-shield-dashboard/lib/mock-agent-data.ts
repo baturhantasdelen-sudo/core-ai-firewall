@@ -128,4 +128,8 @@ export function buildMockAgentDiscovery(): EnvironmentScanResult {
   return scanEnvironment({ agents: mockAgentInventory, fileContents: contentMap });
 }
 
+export function getMockFileContentForAgent(sourceFile: string): string | undefined {
+  return MOCK_FILE_CONTENT[sourceFile];
+}
+
 export type { AgentInventoryRecord, EnvironmentScanResult };
