@@ -4,6 +4,7 @@ import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { TrustHubPanel } from '@/components/dashboard/TrustHubPanel';
 import { ProveTrustPanel } from '@/components/dashboard/ProveTrustPanel';
+import { EvidencePanel } from '@/components/dashboard/EvidencePanel';
 import { buildTrustHubSnapshot } from '@/lib/mock-trust-hub-data';
 import { buildProveTrustSnapshot } from '@/lib/mock-prove-trust-data';
 import { getAuthContext } from '@/lib/auth/session';
@@ -45,6 +46,8 @@ export default async function TrustHubPage() {
             propagation across the Nexus Shield fleet.
           </p>
         </div>
+
+        <EvidencePanel />
 
         <ProveTrustPanel snapshot={proveTrustSnapshot} />
 
