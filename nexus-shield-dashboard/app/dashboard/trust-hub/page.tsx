@@ -6,6 +6,7 @@ import { TrustHubPanel } from '@/components/dashboard/TrustHubPanel';
 import { ProveTrustPanel } from '@/components/dashboard/ProveTrustPanel';
 import { EvidencePanel } from '@/components/dashboard/EvidencePanel';
 import { JitCredentialsPanel } from '@/components/dashboard/JitCredentialsPanel';
+import { MemorySecurityPanel } from '@/components/dashboard/MemorySecurityPanel';
 import { buildTrustHubSnapshot } from '@/lib/mock-trust-hub-data';
 import { buildProveTrustSnapshot } from '@/lib/mock-prove-trust-data';
 import { getAuthContext } from '@/lib/auth/session';
@@ -51,6 +52,8 @@ export default async function TrustHubPage() {
         <EvidencePanel />
 
         <JitCredentialsPanel />
+
+        <MemorySecurityPanel />
 
         <ProveTrustPanel snapshot={proveTrustSnapshot} />
 

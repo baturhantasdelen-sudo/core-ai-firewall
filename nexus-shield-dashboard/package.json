@@ -18,6 +18,7 @@
     "test:evidence": "tsx --test test/evidence-engine.test.ts",
     "test:intent-mcp": "tsx --test test/intent-mcp.test.ts",
     "test:jit-credentials": "tsx --test test/jit-credentials.test.ts",
+    "test:memory-security": "tsx --test test/memory-security.test.ts",
     "test:actions": "tsx --test test/action-firewall.test.ts",
     "test:immune": "tsx --test test/immune-network.test.ts",
     "test:simulator": "tsx --test test/simulator.test.ts",
