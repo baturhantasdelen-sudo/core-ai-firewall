@@ -42,6 +42,7 @@ from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel, Field
 
 from nexus_auth import api_key_store, auth_router
+from nexus_governance.routes import router as governance_router
 
 logger = logging.getLogger("NexusShieldFastAPI")
 
@@ -291,6 +292,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(auth_router)
+app.include_router(governance_router)
 
 # --- Landing page (register first — highest route priority) ---
 _INDEX_HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
