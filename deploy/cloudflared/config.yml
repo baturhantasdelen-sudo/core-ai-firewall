@@ -7,6 +7,11 @@
 tunnel: ${TUNNEL_ID}
 credentials-file: /etc/cloudflared/credentials.json
 
+# Allow cloudflared to auto-update; reconnect after transient network drops.
+no-autoupdate: false
+retries: 5
+grace-period: 30s
+
 ingress:
   - hostname: api.nexusshield.ai
     service: http://127.0.0.1:80

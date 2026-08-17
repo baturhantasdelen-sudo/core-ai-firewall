@@ -140,7 +140,7 @@ services:
     # Host network reaches localhost:80 where nginx-gateway publishes port 80.
     # Cloudflare Zero Trust Public Hostname must use http://127.0.0.1:80 as origin.
     network_mode: host
-    command: tunnel --no-autoupdate run
+    command: tunnel run --retries 5
     environment:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
     depends_on:

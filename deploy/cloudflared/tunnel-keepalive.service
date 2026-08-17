@@ -1,0 +1,24 @@
+[Unit]
+Description=Nexus Shield Cloudflare Tunnel Keepalive Watchdog
+After=docker.service network-online.target nexus-tunnel.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/nexus-core-firewall
+Environment=DEPLOY_PATH=/opt/nexus-core-firewall
+Environment=CLOUDFLARED_MODE=docker
+Environment=LOCAL_HEALTH_URL=http://127.0.0.1:80/healthz
+Environment=PUBLIC_HEALTH_URL=https://api.nexusshield.ai/healthz
+Environment=CHECK_INTERVAL_MS=15000
+Environment=RESTART_COOLDOWN_MS=30000
+Environment=MAX_CONSECUTIVE_FAILS=2
+ExecStart=/usr/bin/node /opt/nexus-core-firewall/scripts/tunnel-keepalive.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

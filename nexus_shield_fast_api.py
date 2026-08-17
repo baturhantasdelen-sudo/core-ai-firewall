@@ -409,6 +409,17 @@ async def healthz() -> dict[str, Any]:
     }
 
 
+@app.get("/api/v1/health")
+async def api_v1_health() -> dict[str, Any]:
+    """Tunnel + load-balancer health probe (200 OK, no API key)."""
+    return {
+        "status": "ok",
+        "service": "nexus-shield-fast-api",
+        "healthy": True,
+        "cache_size": await _redis_cache_size(),
+    }
+
+
 @app.websocket("/ws/analytics")
 async def websocket_analytics(websocket: WebSocket) -> None:
     await ws_manager.connect(websocket)

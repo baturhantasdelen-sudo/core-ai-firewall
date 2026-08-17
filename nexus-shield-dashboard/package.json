@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:tunnel": "concurrently -n dev,tunnel -c blue,green \"npm run dev\" \"cross-env LOCAL_HEALTH_URL=http://127.0.0.1:3000/api/health CLOUDFLARED_MODE=process node ../scripts/tunnel-keepalive.js\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -57,6 +58,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.5.4",
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "postcss": "^8.5.26",

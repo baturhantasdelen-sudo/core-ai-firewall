@@ -1,0 +1,17 @@
+{
+  "name": "core-ai-firewall",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nexus Shield — API firewall, tunnel keepalive, and dashboard monorepo root",
+  "scripts": {
+    "dev:tunnel": "concurrently -n dashboard,tunnel -c blue,green \"npm run dev --prefix nexus-shield-dashboard\" \"cross-env LOCAL_HEALTH_URL=http://127.0.0.1:3000/api/health CLOUDFLARED_MODE=process node scripts/tunnel-keepalive.js\"",
+    "tunnel:keepalive": "node scripts/tunnel-keepalive.js",
+    "tunnel:keepalive:prod": "cross-env CLOUDFLARED_MODE=docker LOCAL_HEALTH_URL=http://127.0.0.1:80/healthz PUBLIC_HEALTH_URL=https://api.nexusshield.ai/healthz node scripts/tunnel-keepalive.js",
+    "tunnel:setup": "bash scripts/setup-cloudflare-service.sh",
+    "tunnel:recover": "bash scripts/start-tunnel.sh"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3"
+  }
+}

@@ -1,0 +1,17 @@
+[Unit]
+Description=Nexus Shield Cloudflare Tunnel Recovery
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/nexus-core-firewall
+Environment=DEPLOY_PATH=/opt/nexus-core-firewall
+Environment=PUBLIC_URL=https://api.nexusshield.ai
+ExecStart=/bin/bash /opt/nexus-core-firewall/scripts/start-tunnel.sh
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

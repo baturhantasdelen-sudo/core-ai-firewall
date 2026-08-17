@@ -80,7 +80,7 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,scripts/fix-cloudflare-tunnel-origin.sh,scripts/post-deploy-healthcheck.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,Dockerfile.fast,nexus_shield_fast_api.py,nexus_auth.py,requirements-fast.txt"
+          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,deploy/cloudflared/nexus-tunnel.service,deploy/cloudflared/tunnel-keepalive.service,scripts/fix-cloudflare-tunnel-origin.sh,scripts/start-tunnel.sh,scripts/setup-cloudflare-service.sh,scripts/tunnel-keepalive.js,scripts/post-deploy-healthcheck.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,package.json,Dockerfile.fast,nexus_shield_fast_api.py,nexus_auth.py,requirements-fast.txt"
           target: /opt/nexus-core-firewall/
 
       - name: Deploy to Production Server via SSH
@@ -144,6 +144,15 @@ jobs:
             sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d --remove-orphans
             sudo docker compose --env-file .env -f docker-compose.prod.yml up -d nginx-gateway
             sudo bash scripts/post-deploy-healthcheck.sh
+            sudo bash scripts/start-tunnel.sh || sudo bash scripts/fix-cloudflare-tunnel-origin.sh
+            if command -v node >/dev/null 2>&1; then
+              sudo cp deploy/cloudflared/tunnel-keepalive.service /etc/systemd/system/tunnel-keepalive.service
+              sudo systemctl daemon-reload
+              sudo systemctl enable tunnel-keepalive.service
+              sudo systemctl restart tunnel-keepalive.service || echo "WARN: tunnel-keepalive service start skipped"
+            else
+              echo "WARN: node not installed — run scripts/setup-cloudflare-service.sh on server for keepalive watchdog"
+            fi
             curl -fsS http://127.0.0.1:80/ | grep -q 'sandbox-v3' || (echo "Landing page on :80 missing sandbox-v3 marker" && exit 1)
             curl -fsS http://127.0.0.1:80/ | grep -q '/api/sandbox' || (echo "Landing page on :80 missing /api/sandbox" && exit 1)
             curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY || (echo "Nginx gateway /healthz failed on :80" && exit 1)

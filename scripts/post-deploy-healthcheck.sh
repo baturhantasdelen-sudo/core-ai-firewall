@@ -18,8 +18,9 @@ docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'nginx-gateway|clou
 log "2/4 Fast API direct (:8080 /healthz)"
 curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY
 
-log "3/4 Nginx gateway (:80 /healthz)"
+log "3/4 Nginx gateway (:80 /healthz + /api/v1/health)"
 curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY
+curl -fsS http://127.0.0.1:80/api/v1/health | grep -q '"healthy":true'
 
 log "4/4 Landing page marker"
 curl -fsS http://127.0.0.1:80/ | grep -q '<title>'
