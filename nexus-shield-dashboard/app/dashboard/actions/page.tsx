@@ -5,6 +5,7 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { ActionFirewallPanel } from '@/components/dashboard/ActionFirewallPanel';
 import { ActionControlPanel } from '@/components/dashboard/ActionControlPanel';
 import { TrajectoryFirewallPanel } from '@/components/dashboard/TrajectoryFirewallPanel';
+import { IntentMcpPanel } from '@/components/dashboard/IntentMcpPanel';
 import {
   getActionFirewallSummary,
   mockActionFirewallLogs,
@@ -58,6 +59,8 @@ export default async function ActionFirewallPage() {
         </div>
 
         <TrajectoryFirewallPanel />
+
+        <IntentMcpPanel />
 
         <ActionControlPanel
           trajectoryLogs={mockTrajectoryControlLogs}
