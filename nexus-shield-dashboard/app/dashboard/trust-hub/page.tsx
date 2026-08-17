@@ -10,6 +10,7 @@ import { MemorySecurityPanel } from '@/components/dashboard/MemorySecurityPanel'
 import { RedTeamPanel } from '@/components/dashboard/RedTeamPanel';
 import { ReputationPanel } from '@/components/dashboard/ReputationPanel';
 import { MeshTrustPanel } from '@/components/dashboard/MeshTrustPanel';
+import { AuditCompliancePanel } from '@/components/dashboard/AuditCompliancePanel';
 import { buildTrustHubSnapshot } from '@/lib/mock-trust-hub-data';
 import { buildProveTrustSnapshot } from '@/lib/mock-prove-trust-data';
 import { getAuthContext } from '@/lib/auth/session';
@@ -63,6 +64,8 @@ export default async function TrustHubPage() {
         <ReputationPanel />
 
         <MeshTrustPanel />
+
+        <AuditCompliancePanel />
 
         <ProveTrustPanel snapshot={proveTrustSnapshot} />
 
