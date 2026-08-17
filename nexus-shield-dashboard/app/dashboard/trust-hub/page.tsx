@@ -8,6 +8,7 @@ import { EvidencePanel } from '@/components/dashboard/EvidencePanel';
 import { JitCredentialsPanel } from '@/components/dashboard/JitCredentialsPanel';
 import { MemorySecurityPanel } from '@/components/dashboard/MemorySecurityPanel';
 import { RedTeamPanel } from '@/components/dashboard/RedTeamPanel';
+import { ReputationPanel } from '@/components/dashboard/ReputationPanel';
 import { buildTrustHubSnapshot } from '@/lib/mock-trust-hub-data';
 import { buildProveTrustSnapshot } from '@/lib/mock-prove-trust-data';
 import { getAuthContext } from '@/lib/auth/session';
@@ -57,6 +58,8 @@ export default async function TrustHubPage() {
         <MemorySecurityPanel />
 
         <RedTeamPanel />
+
+        <ReputationPanel />
 
         <ProveTrustPanel snapshot={proveTrustSnapshot} />
 
