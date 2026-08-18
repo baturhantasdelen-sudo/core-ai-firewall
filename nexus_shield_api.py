@@ -55,6 +55,11 @@ WARMUP_SESSION_ID: Final[str] = "startup-warmup"
 API_KEY_HEADER: Final[str] = "X-API-Key"
 DEFAULT_NEXUS_API_KEY: Final[str] = "nexus_secret_key_123"
 NEXUS_API_KEY: Final[str] = os.getenv("NEXUS_API_KEY", DEFAULT_NEXUS_API_KEY)
+SKIP_STARTUP_WARMUP: Final[bool] = os.getenv("NEXUS_SKIP_STARTUP_WARMUP", "").lower() in {
+    "1",
+    "true",
+    "yes",
+}
 RATE_LIMIT_REQUESTS: Final[int] = int(os.getenv("RATE_LIMIT_REQUESTS", "60"))
 RATE_LIMIT_WINDOW_SECONDS: Final[int] = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
 
@@ -203,13 +208,16 @@ async def lifespan(app: FastAPI):
     app.state.guard_service = service
     _service = service
 
-    logger.info("Cold-Inference önleyici tam warm-up başlatılıyor...")
-    try:
-        await asyncio.to_thread(predict_pipeline, WARMUP_TEXT)
-        await asyncio.to_thread(validate_chat_pipeline, [WARMUP_TEXT])
-        logger.info("Warm-up başarıyla tamamlandı. Servis istek kabul etmeye hazır!")
-    except Exception as e:
-        logger.warning("Warm-up sırasında hata oluştu (kritik değil): %s", e)
+    if SKIP_STARTUP_WARMUP:
+        logger.info("Startup warm-up skipped (NEXUS_SKIP_STARTUP_WARMUP=1)")
+    else:
+        logger.info("Cold-Inference önleyici tam warm-up başlatılıyor...")
+        try:
+            await asyncio.to_thread(predict_pipeline, WARMUP_TEXT)
+            await asyncio.to_thread(validate_chat_pipeline, [WARMUP_TEXT])
+            logger.info("Warm-up başarıyla tamamlandı. Servis istek kabul etmeye hazır!")
+        except Exception as e:
+            logger.warning("Warm-up sırasında hata oluştu (kritik değil): %s", e)
 
     try:
         health = _verify_startup_ready()
@@ -374,6 +382,20 @@ async def health() -> dict[str, object]:
         "status": "ok",
         "service": SERVICE_NAME,
         "version": API_VERSION,
+        "ready": str(_service is not None),
+        "semantic_cache": cache_info,
+    }
+
+
+@app.get("/api/health")
+async def api_health() -> dict[str, object]:
+    """Unified domain health probe — api.nexusshield.ai/api/health (nginx -> :8000)."""
+    cache_info = _service.cache_stats() if _service else {}
+    return {
+        "status": "ok",
+        "service": SERVICE_NAME,
+        "version": API_VERSION,
+        "healthy": True,
         "ready": str(_service is not None),
         "semantic_cache": cache_info,
     }

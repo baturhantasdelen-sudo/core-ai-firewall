@@ -80,7 +80,7 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USER }}
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          source: "docker-compose.prod.yml,nginx.conf,index.html,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,deploy/cloudflared/nexus-tunnel.service,deploy/cloudflared/tunnel-keepalive.service,scripts/fix-cloudflare-tunnel-origin.sh,scripts/start-tunnel.sh,scripts/setup-cloudflare-service.sh,scripts/tunnel-keepalive.js,scripts/post-deploy-healthcheck.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,package.json,Dockerfile.fast,nexus_shield_fast_api.py,nexus_auth.py,requirements-fast.txt"
+          source: "docker-compose.prod.yml,nginx.conf,index.html,config/policies.json,deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,deploy/cloudflared/nexus-tunnel.service,deploy/cloudflared/tunnel-keepalive.service,scripts/fix-cloudflare-tunnel-origin.sh,scripts/start-tunnel.sh,scripts/setup-cloudflare-service.sh,scripts/setup-unified-api-domain.sh,scripts/tunnel-keepalive.js,scripts/post-deploy-healthcheck.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,package.json,Dockerfile.fast,nexus_shield_fast_api.py,nexus_auth.py,nexus_governance,requirements-fast.txt"
           target: /opt/nexus-core-firewall/
 
       - name: Deploy to Production Server via SSH

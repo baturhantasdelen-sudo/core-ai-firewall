@@ -2,7 +2,7 @@
 # Systemd kurulumu: /etc/cloudflared/config.yml
 #
 # KRITIK: Origin MUTLAKA Nginx Gateway olmali — ASLA :8000 (nexus_quantum_guard) degil.
-# Nginx :80 -> location = / index.html + /v1/shield -> Fast API :8080
+# Nginx :80 -> / = Vercel UI, /api/* = ML API :8000, /v1/shield = Fast API :8080
 
 tunnel: ${TUNNEL_ID}
 credentials-file: /etc/cloudflared/credentials.json
