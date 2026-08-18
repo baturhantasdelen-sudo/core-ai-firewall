@@ -76,43 +76,14 @@ metrics_data: dict[str, int | float] = {
 }
 
 
-class JSONFormatter(logging.Formatter):
-    """Structured JSON log satırları üretir."""
-
-    def format(self, record: logging.LogRecord) -> str:
-        log_obj: dict[str, object] = {
-            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "level": record.levelname,
-            "message": record.getMessage(),
-        }
-        extra_data = getattr(record, "extra_data", None)
-        if isinstance(extra_data, dict):
-            log_obj.update(extra_data)
-        return json.dumps(log_obj, ensure_ascii=False)
-
-
-def _configure_structured_logger() -> logging.Logger:
-    structured_logger = logging.getLogger("nexus_shield")
-    if not structured_logger.handlers:
-        handler = logging.StreamHandler()
-        handler.setFormatter(JSONFormatter())
-        structured_logger.addHandler(handler)
-        structured_logger.setLevel(logging.INFO)
-        structured_logger.propagate = False
-    return structured_logger
-
-
-structured_logger = _configure_structured_logger()
-
-
-def _client_ip(request: Request) -> str:
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    cf_ip = request.headers.get("CF-Connecting-IP")
-    if cf_ip:
-        return cf_ip
-    return request.client.host if request.client else "unknown"
+from nexus_observability import (
+    client_ip as _obs_client_ip,
+    health_payload,
+    log_request,
+    log_violation,
+    ml_logger as structured_logger,
+    ml_metrics,
+)
 
 
 class InMemoryRateLimiter:
@@ -262,14 +233,7 @@ async def monitor_requests(request: Request, call_next):
         elif 200 <= response.status_code < 300:
             metrics_data["passed_requests"] = int(metrics_data["passed_requests"]) + 1
 
-    log_payload = {
-        "method": request.method,
-        "path": request.url.path,
-        "status_code": response.status_code,
-        "latency_ms": round(process_time_ms, 2),
-        "client_ip": _client_ip(request),
-    }
-    structured_logger.info("API Request processed", extra={"extra_data": log_payload})
+    log_request(structured_logger, ml_metrics, request, response, process_time_ms)
     return response
 
 
@@ -378,27 +342,19 @@ async def healthz() -> HealthzResponse:
 @app.get("/health")
 async def health() -> dict[str, object]:
     cache_info = _service.cache_stats() if _service else {}
-    return {
-        "status": "ok",
-        "service": SERVICE_NAME,
-        "version": API_VERSION,
-        "ready": str(_service is not None),
-        "semantic_cache": cache_info,
-    }
+    cache_size = int(cache_info.get("size", 0))
+    payload = health_payload(cache_size=cache_size, service=SERVICE_NAME)
+    payload["version"] = API_VERSION
+    payload["ready"] = str(_service is not None)
+    return payload
 
 
 @app.get("/api/health")
 async def api_health() -> dict[str, object]:
     """Unified domain health probe — api.nexusshield.ai/api/health (nginx -> :8000)."""
     cache_info = _service.cache_stats() if _service else {}
-    return {
-        "status": "ok",
-        "service": SERVICE_NAME,
-        "version": API_VERSION,
-        "healthy": True,
-        "ready": str(_service is not None),
-        "semantic_cache": cache_info,
-    }
+    cache_size = int(cache_info.get("size", 0))
+    return health_payload(cache_size=cache_size, service=SERVICE_NAME)
 
 
 @app.get("/metrics/summary")
@@ -408,12 +364,14 @@ async def get_metrics_summary() -> dict[str, float | int]:
         total_requests = int(metrics_data["total_requests"])
         total_latency_ms = float(metrics_data["total_latency_ms"])
         avg_latency = total_latency_ms / total_requests if total_requests > 0 else 0.0
-        return {
+        summary = {
             "total_requests": total_requests,
             "blocked_attacks": int(metrics_data["blocked_attacks"]),
             "passed_requests": int(metrics_data["passed_requests"]),
             "avg_latency_ms": round(avg_latency, 2),
         }
+    summary.update(ml_metrics.summary())
+    return summary
 
 
 @app.post(
@@ -449,13 +407,16 @@ async def check_input(request: GuardRequest) -> CleanShieldResponse | JSONRespon
 
     if result.verdict.is_blocked:
         blocked_payload = result.to_blocked_payload()
-        logger.warning(
-            "ENGEL | session=%s | katman=%s | cache=%s | latency_us=%d | event=%s",
-            request.session_id,
-            blocked_payload.get("blocked_by"),
-            result.cache_match_mode or "pipeline",
-            result.latency_us,
-            result.verdict.event_id,
+        log_violation(
+            service="nexus-api-prod",
+            violation_type="PROMPT_INJECTION_BLOCKED",
+            matched_rule=str(blocked_payload.get("blocked_by", "ml_pipeline")),
+            evidence_snippet=request.user_input[:200],
+            method="POST",
+            path="/v1/shield",
+            client_ip="internal",
+            latency_ms=result.latency_us / 1000.0,
+            extra={"session_id": request.session_id, "event_id": result.verdict.event_id},
         )
         return JSONResponse(status_code=403, content=blocked_payload)
 
@@ -500,10 +461,16 @@ async def validate_chat_completions(request: Request) -> Response:
 
     if result.verdict.is_blocked:
         blocked_payload = result.to_blocked_payload()
-        logger.warning(
-            "NGINX GATEWAY ENGEL | session=%s | katman=%s",
-            session_id,
-            blocked_payload.get("blocked_by"),
+        log_violation(
+            service="nexus-api-prod",
+            violation_type="PROMPT_INJECTION_BLOCKED",
+            matched_rule=str(blocked_payload.get("blocked_by", "ml_pipeline")),
+            evidence_snippet=user_text[:200],
+            method="POST",
+            path="/v1/shield/validate-chat",
+            client_ip=_obs_client_ip(request),
+            latency_ms=result.latency_us / 1000.0,
+            extra={"session_id": session_id},
         )
         return JSONResponse(status_code=403, content=blocked_payload)
 

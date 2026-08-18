@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -15,6 +16,7 @@ from nexus_governance.nexus_agent_identity import (
 from nexus_governance.nexus_evidence_engine import EvidenceEngine
 from nexus_governance.nexus_mcp_proxy import MCPProxyInspector
 from nexus_governance.nexus_policy_engine import policy_manager
+from nexus_observability import log_violation
 
 logger = logging.getLogger("nexus.governance")
 
@@ -71,6 +73,22 @@ def _policy_block_response(
         dlp_violation,
         rate_limit_violation,
         evidence["evidence_id"],
+    )
+    log_violation(
+        service="nexus-shield-api-prod",
+        violation_type=reason if dlp_violation else "POLICY_BLOCK",
+        matched_rule=tool_name if dlp_violation else reason,
+        evidence_snippet=json.dumps(action_payload, sort_keys=True)[:200],
+        method="POST",
+        path="/v1/agent/action",
+        client_ip="internal",
+        extra={
+            "agent_id": agent_id,
+            "session_id": session_id,
+            "evidence_id": evidence["evidence_id"],
+            "dlp_violation": dlp_violation,
+            "rate_limit_violation": rate_limit_violation,
+        },
     )
     detail: dict[str, Any] = {
         "status": "BLOCKED",

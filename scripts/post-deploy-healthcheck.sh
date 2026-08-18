@@ -20,7 +20,7 @@ curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY
 
 log "3/5 Nginx gateway (:80 /healthz + /api/health + /api/v1/health)"
 curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY
-curl -fsS http://127.0.0.1:80/api/health | grep -qE 'HEALTHY|"status"'
+curl -fsS http://127.0.0.1:80/api/health | grep -q HEALTHY
 curl -fsS http://127.0.0.1:80/api/v1/health | grep -q '"healthy":true'
 
 log "4/5 ML API direct (container /healthz)"

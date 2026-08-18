@@ -32,7 +32,7 @@ RUN pip install --upgrade pip \
 RUN mkdir -p /app/.cache/huggingface /app/.cache/sentence-transformers \
     && python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')"
 
-COPY nexus_quantum_guard.py nexus_shield_api.py /build/
+COPY nexus_quantum_guard.py nexus_shield_api.py nexus_observability.py /build/
 RUN python -c "from nexus_quantum_guard import bake_reference_matrix; bake_reference_matrix()"
 
 # ---------------------------------------------------------------------------
@@ -64,7 +64,7 @@ RUN apt-get update \
 COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /app/.cache /app/.cache
 
-COPY nexus_quantum_guard.py nexus_shield_api.py ./
+COPY nexus_quantum_guard.py nexus_shield_api.py nexus_observability.py ./
 
 RUN chown -R nexus:nexus /app
 

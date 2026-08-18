@@ -43,6 +43,14 @@ from pydantic import BaseModel, Field
 
 from nexus_auth import api_key_store, auth_router
 from nexus_governance.routes import router as governance_router
+from nexus_observability import (
+    client_ip as _obs_client_ip,
+    fast_logger,
+    fast_metrics,
+    health_payload,
+    log_request,
+    log_violation,
+)
 
 logger = logging.getLogger("NexusShieldFastAPI")
 
@@ -294,6 +302,15 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(governance_router)
 
+
+@app.middleware("http")
+async def monitor_requests(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    latency_ms = (time.perf_counter() - start_time) * 1000.0
+    log_request(fast_logger, fast_metrics, request, response, latency_ms)
+    return response
+
 # --- Landing page (register first — highest route priority) ---
 _INDEX_HTML_PATH = os.path.join(os.path.dirname(__file__), "index.html")
 
@@ -384,12 +401,7 @@ sandbox_rate_limiter = SandboxRateLimiter()
 
 
 def _client_ip(request: Request) -> str:
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    if request.client:
-        return request.client.host
-    return "unknown"
+    return _obs_client_ip(request)
 
 
 async def _redis_cache_size() -> int:
@@ -405,21 +417,28 @@ async def _redis_cache_size() -> int:
 
 @app.get("/healthz")
 async def healthz() -> dict[str, Any]:
-    return {
-        "status": "HEALTHY",
-        "cache_size": await _redis_cache_size(),
-    }
+    cache_size = await _redis_cache_size()
+    return health_payload(cache_size=cache_size, service="nexus-shield-fast-api")
+
+
+@app.get("/api/health")
+async def api_health() -> dict[str, Any]:
+    cache_size = await _redis_cache_size()
+    return health_payload(cache_size=cache_size, service="nexus-shield-fast-api")
 
 
 @app.get("/api/v1/health")
 async def api_v1_health() -> dict[str, Any]:
     """Tunnel + load-balancer health probe (200 OK, no API key)."""
-    return {
-        "status": "ok",
-        "service": "nexus-shield-fast-api",
-        "healthy": True,
-        "cache_size": await _redis_cache_size(),
-    }
+    cache_size = await _redis_cache_size()
+    payload = health_payload(cache_size=cache_size, service="nexus-shield-fast-api")
+    payload["healthy"] = True
+    return payload
+
+
+@app.get("/metrics/summary")
+async def metrics_summary() -> dict[str, Any]:
+    return fast_metrics.summary()
 
 
 @app.websocket("/ws/analytics")
@@ -479,6 +498,17 @@ async def _execute_shield(
     # 1. Early Exit regex scan — always before PII, cache, or upstream LLM
     if quick_security_scan(payload.user_input):
         latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
+        log_violation(
+            service="nexus-shield-api-prod",
+            violation_type="PROMPT_INJECTION_BLOCKED",
+            matched_rule="Early Exit Regex",
+            evidence_snippet=payload.user_input[:200],
+            method="POST",
+            path="/v1/shield" if not playground else "/api/sandbox",
+            client_ip="internal",
+            latency_ms=latency_ms,
+            extra={"session_id": payload.session_id},
+        )
         await _emit_analytics(
             event_type="blocked",
             status_code=403,
