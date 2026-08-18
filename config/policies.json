@@ -1,0 +1,18 @@
+{
+  "policies": {
+    "agent-finance-01": {
+      "allowed_tools": ["read_invoice", "get_account_balance"],
+      "blocked_tools": [
+        "execute_unauthorized_command",
+        "delete_database",
+        "export_customer_pii"
+      ],
+      "rate_limit_per_min": 60
+    }
+  },
+  "default": {
+    "allowed_tools": [],
+    "blocked_tools": [],
+    "rate_limit_per_min": 120
+  }
+}

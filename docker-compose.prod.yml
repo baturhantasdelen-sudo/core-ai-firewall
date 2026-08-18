@@ -82,6 +82,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./index.html:/app/index.html:ro
+      - ./config:/app/config:ro
     networks:
       nexus_network:
         aliases:

@@ -8,6 +8,7 @@ from nexus_governance.nexus_agent_identity import (
 )
 from nexus_governance.nexus_evidence_engine import EvidenceEngine
 from nexus_governance.nexus_mcp_proxy import MCPProxyInspector
+from nexus_governance.nexus_policy_engine import PolicyManager, policy_manager
 
 __all__ = [
     "ActionFirewall",
@@ -16,5 +17,7 @@ __all__ = [
     "EnforcementDecision",
     "EvidenceEngine",
     "MCPProxyInspector",
+    "PolicyManager",
     "RiskLevel",
+    "policy_manager",
 ]

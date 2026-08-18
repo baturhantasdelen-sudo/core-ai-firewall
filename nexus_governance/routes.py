@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Header, HTTPException, Response
@@ -13,6 +14,9 @@ from nexus_governance.nexus_agent_identity import (
 )
 from nexus_governance.nexus_evidence_engine import EvidenceEngine
 from nexus_governance.nexus_mcp_proxy import MCPProxyInspector
+from nexus_governance.nexus_policy_engine import policy_manager
+
+logger = logging.getLogger("nexus.governance")
 
 router = APIRouter(tags=["Agent Governance"])
 
@@ -40,6 +44,47 @@ def _mock_agent_profile(agent_id: str) -> AgentProfile:
     )
 
 
+def _policy_block_response(
+    *,
+    agent_id: str,
+    session_id: str,
+    tool_name: str,
+    reason: str,
+    action_payload: dict[str, Any],
+    dlp_violation: bool = False,
+    rate_limit_violation: bool = False,
+) -> HTTPException:
+    evidence = policy_manager.build_block_evidence(
+        agent_id=agent_id,
+        session_id=session_id,
+        tool_name=tool_name,
+        decision="BLOCK",
+        reason=reason,
+        action_payload=action_payload,
+    )
+    logger.error(
+        "Agent action blocked agent=%s session=%s tool=%s reason=%s dlp=%s rate_limit=%s evidence=%s",
+        agent_id,
+        session_id,
+        tool_name,
+        reason,
+        dlp_violation,
+        rate_limit_violation,
+        evidence["evidence_id"],
+    )
+    detail: dict[str, Any] = {
+        "status": "BLOCKED",
+        "decision": "BLOCK",
+        "reason": reason,
+        "evidence": evidence,
+    }
+    if dlp_violation:
+        detail["dlp_violation"] = True
+    if rate_limit_violation:
+        detail["rate_limit_violation"] = True
+    return HTTPException(status_code=403, detail=detail)
+
+
 @router.post("/v1/agent/action")
 async def process_agent_action(
     request: AgentActionRequest,
@@ -47,6 +92,22 @@ async def process_agent_action(
     x_nexus_agent_id: str = Header(..., alias="X-Nexus-Agent-Id"),
     x_session_id: str = Header(..., alias="X-Session-Id"),
 ) -> dict[str, Any]:
+    policy_result = policy_manager.evaluate_tool(
+        agent_id=x_nexus_agent_id,
+        session_id=x_session_id,
+        tool_name=request.tool_name,
+    )
+    if not policy_result.allowed:
+        raise _policy_block_response(
+            agent_id=x_nexus_agent_id,
+            session_id=x_session_id,
+            tool_name=request.tool_name,
+            reason=policy_result.reason,
+            action_payload=request.arguments,
+            dlp_violation=policy_result.dlp_violation,
+            rate_limit_violation=policy_result.rate_limit_violation,
+        )
+
     profile = _mock_agent_profile(x_nexus_agent_id)
     authority_analysis = EffectiveAuthorityEngine.analyze_authority_risk(profile)
 
@@ -58,12 +119,22 @@ async def process_agent_action(
     )
 
     if decision == EnforcementDecision.BLOCK:
+        evidence = policy_manager.build_block_evidence(
+            agent_id=x_nexus_agent_id,
+            session_id=x_session_id,
+            tool_name=request.tool_name,
+            decision="BLOCK",
+            reason="Policy violation or anomalous behavior detected.",
+            action_payload=request.arguments,
+        )
         raise HTTPException(
             status_code=403,
             detail={
                 "status": "BLOCKED",
+                "decision": "BLOCK",
                 "reason": "Policy violation or anomalous behavior detected.",
                 "authority_flags": authority_analysis["risk_flags"],
+                "evidence": evidence,
             },
         )
 
@@ -104,6 +175,11 @@ async def process_agent_action(
         "result": execution_result,
         "evidence": evidence,
         "authority_analysis": authority_analysis,
+        "policy": {
+            "agent_id": x_nexus_agent_id,
+            "tool_name": request.tool_name,
+            "decision": policy_result.decision,
+        },
     }
 
 

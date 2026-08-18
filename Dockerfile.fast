@@ -23,6 +23,7 @@ RUN pip install --upgrade pip \
 COPY nexus_shield_fast_api.py .
 COPY nexus_auth.py .
 COPY nexus_governance ./nexus_governance
+COPY config ./config
 COPY index.html .
 
 RUN mkdir -p /app/data && chown -R nexus:nexus /app
