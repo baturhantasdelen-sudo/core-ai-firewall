@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { GovernanceModulesPanel } from '@/components/dashboard/GovernanceModulesPanel';
 import { TrustHubPanel } from '@/components/dashboard/TrustHubPanel';
 import { ProveTrustPanel } from '@/components/dashboard/ProveTrustPanel';
 import { EvidencePanel } from '@/components/dashboard/EvidencePanel';
@@ -66,6 +67,8 @@ export default async function TrustHubPage() {
         <MeshTrustPanel />
 
         <AuditCompliancePanel />
+
+        <GovernanceModulesPanel />
 
         <ProveTrustPanel snapshot={proveTrustSnapshot} />
 

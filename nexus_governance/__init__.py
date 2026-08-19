@@ -8,6 +8,8 @@ from nexus_governance.nexus_agent_identity import (
 )
 from nexus_governance.nexus_evidence_engine import EvidenceEngine
 from nexus_governance.nexus_mcp_proxy import MCPProxyInspector
+from nexus_governance.governance_framework import GovernanceFramework
+from nexus_governance.models import GovernanceStatusResponse, ModuleStatus, VerificationState
 from nexus_governance.nexus_policy_engine import PolicyManager, policy_manager
 
 __all__ = [
@@ -17,7 +19,11 @@ __all__ = [
     "EnforcementDecision",
     "EvidenceEngine",
     "MCPProxyInspector",
+    "GovernanceFramework",
+    "GovernanceStatusResponse",
+    "ModuleStatus",
     "PolicyManager",
     "RiskLevel",
+    "VerificationState",
     "policy_manager",
 ]

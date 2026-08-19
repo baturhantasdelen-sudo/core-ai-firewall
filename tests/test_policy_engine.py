@@ -120,7 +120,8 @@ def test_agent_action_endpoint_allows_read_invoice(client: TestClient) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "EXECUTED"
-    assert body["policy"]["decision"] == "ALLOW"
+    assert body["decision"] == "ALLOW"
+    assert body["governance"]["decision"] == "ALLOW"
 
 
 def test_policies_json_is_valid() -> None:
