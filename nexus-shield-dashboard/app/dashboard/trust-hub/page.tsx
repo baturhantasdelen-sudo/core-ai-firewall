@@ -3,7 +3,10 @@ import { redirect } from 'next/navigation';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { GovernanceModulesPanel } from '@/components/dashboard/GovernanceModulesPanel';
+import { LiveAuditTrailPanel } from '@/components/dashboard/LiveAuditTrailPanel';
+import { TrustHubAuditStream } from '@/components/dashboard/TrustHubAuditStream';
 import { TrustHubPanel } from '@/components/dashboard/TrustHubPanel';
+import { ProofCenterPanel } from '@/components/dashboard/ProofCenterPanel';
 import { ProveTrustPanel } from '@/components/dashboard/ProveTrustPanel';
 import { EvidencePanel } from '@/components/dashboard/EvidencePanel';
 import { JitCredentialsPanel } from '@/components/dashboard/JitCredentialsPanel';
@@ -14,6 +17,8 @@ import { MeshTrustPanel } from '@/components/dashboard/MeshTrustPanel';
 import { AuditCompliancePanel } from '@/components/dashboard/AuditCompliancePanel';
 import { buildTrustHubSnapshot } from '@/lib/mock-trust-hub-data';
 import { buildProveTrustSnapshot } from '@/lib/mock-prove-trust-data';
+import { fetchGovernanceStatus } from '@/lib/governance/status';
+import { fetchAuditTrail } from '@/lib/governance/audit-trail';
 import { getAuthContext } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +31,21 @@ export default async function TrustHubPage() {
 
   const snapshot = buildTrustHubSnapshot();
   const proveTrustSnapshot = buildProveTrustSnapshot();
+
+  let governanceStatus = null;
+  let governanceError: string | null = null;
+  let auditEntries: Awaited<ReturnType<typeof fetchAuditTrail>>['entries'] = [];
+  try {
+    governanceStatus = await fetchGovernanceStatus();
+  } catch (err) {
+    governanceError = err instanceof Error ? err.message : 'Governance status unavailable';
+  }
+  try {
+    const audit = await fetchAuditTrail(50);
+    auditEntries = audit.entries;
+  } catch {
+    auditEntries = [];
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -48,11 +68,16 @@ export default async function TrustHubPage() {
             </span>
           </div>
           <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-            Evidential outcome verification with concrete proof bundles, dynamic real-time trust scoring
-            with instant restriction tiers, and collective zero-knowledge digital immune network
-            propagation across the Nexus Shield fleet.
+            Live governance audit trail with cryptographic evidence verification, risk-flag visualization,
+            and human-in-the-loop approval tracking across the Nexus Shield agent fleet.
           </p>
         </div>
+
+        <TrustHubAuditStream />
+
+        <ProofCenterPanel />
+
+        <LiveAuditTrailPanel initialEntries={auditEntries} initialGovernance={governanceStatus} />
 
         <EvidencePanel />
 
@@ -68,7 +93,7 @@ export default async function TrustHubPage() {
 
         <AuditCompliancePanel />
 
-        <GovernanceModulesPanel />
+        <GovernanceModulesPanel initialData={governanceStatus} initialError={governanceError} />
 
         <ProveTrustPanel snapshot={proveTrustSnapshot} />
 
