@@ -10,6 +10,11 @@ set -euo pipefail
 DEPLOY_PATH="${DEPLOY_PATH:-/opt/nexus-core-firewall}"
 cd "$DEPLOY_PATH"
 
+DEPLOY_ML_IMAGE="${DEPLOY_ML_IMAGE:-0}"
+if [[ -f .env ]]; then
+  DEPLOY_ML_IMAGE="$(grep '^DEPLOY_ML_IMAGE=' .env 2>/dev/null | cut -d= -f2- || echo "${DEPLOY_ML_IMAGE}")"
+fi
+
 log() { echo "[healthcheck] $*"; }
 
 log "1/4 Container status"
@@ -23,8 +28,12 @@ curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY
 curl -fsS http://127.0.0.1:80/api/health | grep -q HEALTHY
 curl -fsS http://127.0.0.1:80/api/v1/health | grep -q '"healthy":true'
 
-log "4/5 ML API direct (container /healthz)"
-docker exec nexus-api-prod curl -fsS http://127.0.0.1:8000/healthz | grep -q HEALTHY
+if docker ps --format '{{.Names}}' | grep -q '^nexus-api-prod$'; then
+  log "4/5 ML API direct (container /healthz)"
+  docker exec nexus-api-prod curl -fsS http://127.0.0.1:8000/healthz | grep -q HEALTHY
+else
+  log "4/5 ML API skipped (lightweight deploy, DEPLOY_ML_IMAGE=${DEPLOY_ML_IMAGE})"
+fi
 
 log "5/5 Landing page marker"
 curl -fsS http://127.0.0.1:80/ | grep -q '<title>'

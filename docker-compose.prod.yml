@@ -2,7 +2,9 @@
 # HTTPS: Cloudflare Tunnel (cloudflared) -> nginx-gateway:80 -> FastAPI (/v1/shield, /api/sandbox) + Vercel (/)
 #
 # .env (GitHub Actions tarafindan yazilir):
-#   DOCKER_IMAGE=<user>/nexus-quantum-guard:<sha>
+#   DOCKER_FAST_IMAGE=nexus-shield-fast:local   (varsayilan: yerel build)
+#   DEPLOY_ML_IMAGE=0                             (1 = PyTorch ML imaji da cek/kur)
+#   DOCKER_IMAGE=<user>/nexus-quantum-guard:<sha> (yalniz DEPLOY_ML_IMAGE=1)
 #   NEXUS_API_KEY=<API_KEY_SECRET secret degerinden map edilir>
 #   CLOUDFLARE_TUNNEL_TOKEN=<opsiyonel>
 #   POSTHOG_API_KEY=<opsiyonel>
@@ -15,7 +17,8 @@ networks:
 
 services:
   nexus-api:
-    image: ${DOCKER_IMAGE:?DOCKER_IMAGE environment variable is required}
+    profiles: ["ml"]
+    image: ${DOCKER_IMAGE:-nexus-quantum-guard:local}
     container_name: nexus-api-prod
     hostname: nexus-api-prod
     environment:
@@ -65,6 +68,7 @@ services:
   # ⚡ Nexus Shield v2.0 Fast API — /v1/shield, /dashboard (landing also on :8080)
   nexus-shield-api:
     image: ${DOCKER_FAST_IMAGE:-nexus-shield-fast:local}
+    pull_policy: build
     build:
       context: .
       dockerfile: Dockerfile.fast
@@ -92,6 +96,10 @@ services:
       - ./data:/app/data
       - ./index.html:/app/index.html:ro
       - ./config:/app/config:ro
+      - ./nexus_governance:/app/nexus_governance:ro
+      - ./nexus_shield_fast_api.py:/app/nexus_shield_fast_api.py:ro
+      - ./nexus_observability.py:/app/nexus_observability.py:ro
+      - ./nexus_auth.py:/app/nexus_auth.py:ro
     networks:
       nexus_network:
         aliases:
@@ -121,8 +129,6 @@ services:
       - ./index.html:/usr/share/nginx/html/index.html:ro
       - /var/log/nginx:/var/log/nginx
     depends_on:
-      nexus-api:
-        condition: service_started
       nexus-shield-api:
         condition: service_healthy
     healthcheck:

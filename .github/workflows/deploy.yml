@@ -96,6 +96,7 @@ jobs:
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
           POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
           CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
+          DEPLOY_ML_IMAGE: ${{ vars.DEPLOY_ML_IMAGE || '0' }}
         with:
           host: ${{ secrets.PROD_SERVER_IP }}
           username: ${{ secrets.PROD_SERVER_USER }}
@@ -120,8 +121,10 @@ jobs:
               _prev_posthog=$(grep '^POSTHOG_API_KEY=' .env 2>/dev/null | cut -d= -f2- || true)
               _prev_cf_web=$(grep '^CLOUDFLARE_WEB_ANALYTICS_TOKEN=' .env 2>/dev/null | cut -d= -f2- || true)
             fi
+            DEPLOY_ML_IMAGE="${DEPLOY_ML_IMAGE:-0}"
             echo "DOCKER_IMAGE=${DOCKER_IMAGE}" > .env
-            echo "DOCKER_FAST_IMAGE=${DOCKER_FAST_IMAGE}" >> .env
+            echo "DOCKER_FAST_IMAGE=nexus-shield-fast:local" >> .env
+            echo "DEPLOY_ML_IMAGE=${DEPLOY_ML_IMAGE}" >> .env
             echo "NEXUS_API_KEY=${API_KEY_SECRET}" >> .env
             echo "RATE_LIMIT_REQUESTS=60" >> .env
             echo "RATE_LIMIT_WINDOW_SECONDS=60" >> .env
@@ -142,15 +145,28 @@ jobs:
             sudo chown 101:101 /var/log/nginx 2>/dev/null || true
             grep -q 'PLAYGROUND_SANDBOX_URL' index.html || (echo "index.html missing sandbox playground JS" && exit 1)
             echo "${DOCKER_PASSWORD}" | sudo docker login -u "${DOCKER_USERNAME}" --password-stdin
-            echo "==> Disk cleanup before image pull..."
+            echo "==> Disk cleanup before deploy..."
             sudo docker image prune -af || true
             sudo docker builder prune -af || true
             df -h / /var/lib/docker 2>/dev/null || df -h /
-            sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-shield-api || true
-            sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api || true
+            echo "==> Build lightweight Fast API locally (no PyTorch pull)..."
+            sudo docker compose --env-file .env -f docker-compose.prod.yml build nexus-shield-api
             docker rm -f cloudflared-prod 2>/dev/null || true
-            sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d --remove-orphans
-            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d nexus-api nexus-shield-api
+            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans nexus-shield-api nginx-gateway
+            if [[ "${DEPLOY_ML_IMAGE}" == "1" ]]; then
+              AVAIL_KB="$(df -Pk / | awk 'NR==2 {print $4}')"
+              MIN_ML_KB=$((5120 * 1024))
+              if [[ "${AVAIL_KB}" -ge "${MIN_ML_KB}" ]]; then
+                echo "==> DEPLOY_ML_IMAGE=1 — pulling PyTorch ML image..."
+                sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api || echo "WARN: ML image pull failed"
+                sudo docker compose --env-file .env -f docker-compose.prod.yml --profile ml up -d nexus-api
+              else
+                echo "WARN: Skipping ML image — need 5GiB free, have $(( AVAIL_KB / 1024 / 1024 ))GiB"
+              fi
+            else
+              echo "==> Lightweight deploy: nexus-quantum-guard (PyTorch) skipped"
+            fi
+            sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d cloudflared || true
             sudo docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
             sudo bash scripts/post-deploy-healthcheck.sh
             sudo bash scripts/start-tunnel.sh || sudo bash scripts/fix-cloudflare-tunnel-origin.sh
@@ -179,4 +195,4 @@ jobs:
               echo "WARN: CLOUDFLARE_WEB_ANALYTICS_TOKEN not set — add GitHub secret or run scripts/activate_cloudflare_analytics.sh"
             fi
             sudo docker image prune -f
-            echo "Deploy tamamlandi: ${DOCKER_IMAGE} + ${DOCKER_FAST_IMAGE}"
+            echo "Deploy tamamlandi: nexus-shield-fast:local (ML=${DEPLOY_ML_IMAGE})"
