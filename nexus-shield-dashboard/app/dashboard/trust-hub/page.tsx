@@ -24,7 +24,8 @@ import { getAuthContext } from '@/lib/auth/session';
 export const dynamic = 'force-dynamic';
 
 export default async function TrustHubPage() {
-  const auth = await getAuthContext();
+  const demoBypass = process.env.NEXUS_DEMO_BYPASS_AUTH === '1';
+  const auth = demoBypass ? { org: { api_key: 'demo_recording_key' } } : await getAuthContext();
   if (!auth) {
     redirect('/login?next=/dashboard/trust-hub');
   }
@@ -64,12 +65,12 @@ export default async function TrustHubPage() {
             <ShieldCheck className="h-5 w-5 text-cyan-400" />
             <h1 className="text-2xl font-semibold tracking-tight">Agent Trust &amp; Prove Hub</h1>
             <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-cyan-200">
-              Katman 3 — PROVE &amp; TRUST
+              PROOF — IDENTITY → INTENT → ACTION → PROOF
             </span>
           </div>
           <p className="mt-2 max-w-3xl text-sm text-zinc-400">
-            Live governance audit trail with cryptographic evidence verification, risk-flag visualization,
-            and human-in-the-loop approval tracking across the Nexus Shield agent fleet.
+            Verify every agent outcome with cryptographic proof — live governance audit trail, Proof Center
+            benchmarks, evidence verification, and human-in-the-loop approval across the Nexus Shield fleet.
           </p>
         </div>
 

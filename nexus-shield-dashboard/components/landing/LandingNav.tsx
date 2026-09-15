@@ -3,6 +3,7 @@ import { BrandLogo } from '@/components/brand/BrandLogo';
 
 const NAV_LINKS = [
   { href: '#playground', label: 'Playground' },
+  { href: '/proof-center', label: 'Proof Center' },
   { href: '#features', label: 'Features' },
   { href: '#pricing', label: 'Pricing' },
   { href: '#contact', label: 'Contact' },
@@ -22,11 +23,17 @@ export function LandingNav() {
         <BrandLogo size={36} />
 
         <div className="hidden items-center gap-6 text-sm text-zinc-400 xl:flex">
-          {NAV_LINKS.map(({ href, label }) => (
-            <a key={href} href={href} className={navLinkClass}>
-              {label}
-            </a>
-          ))}
+          {NAV_LINKS.map(({ href, label }) =>
+            href.startsWith('/') ? (
+              <Link key={href} href={href} className={navLinkClass}>
+                {label}
+              </Link>
+            ) : (
+              <a key={href} href={href} className={navLinkClass}>
+                {label}
+              </a>
+            ),
+          )}
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">

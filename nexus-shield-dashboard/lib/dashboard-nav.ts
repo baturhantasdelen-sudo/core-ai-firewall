@@ -51,6 +51,12 @@ export const DASHBOARD_NAV_ITEMS: DashboardNavItem[] = [
     chip: 'border-orange-500/20 bg-orange-500/10 text-orange-200 hover:border-orange-500/30 hover:bg-orange-500/20',
   },
   {
+    label: 'Proof Center',
+    href: '/proof-center',
+    icon: ShieldCheck,
+    chip: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200 hover:border-emerald-500/30 hover:bg-emerald-500/20',
+  },
+  {
     label: 'Trust Hub',
     href: '/dashboard/trust-hub',
     icon: ShieldCheck,

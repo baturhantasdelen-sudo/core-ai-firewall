@@ -133,6 +133,7 @@ export function ProofCenterPanel() {
           ) : null}
           <button
             type="button"
+            data-demo="run-benchmark"
             onClick={() => void handleRunBenchmark()}
             disabled={running}
             className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/20 disabled:opacity-60"
@@ -158,6 +159,7 @@ export function ProofCenterPanel() {
         ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div data-demo="proof-latency-card">
           <MetricCard
             label="Live Benchmark Latency"
             value={`Avg ${latency.avg_ms.toFixed(2)}ms | p95 ${latency.p95_ms.toFixed(2)}ms`}
@@ -169,12 +171,15 @@ export function ProofCenterPanel() {
                 : undefined
             }
           />
+          </div>
+          <div data-demo="proof-attack-card">
           <MetricCard
             label="Attack Benchmark"
             value={`${attack_benchmark.accuracy_pct.toFixed(1)}% Blocked`}
             detail={`${attack_benchmark.blocked}/${attack_benchmark.total} malicious attempts`}
             icon={ShieldCheck}
           />
+          </div>
           <MetricCard
             label="Intent Divergence Accuracy"
             value={`${intent_divergence.accuracy_pct.toFixed(1)}%`}

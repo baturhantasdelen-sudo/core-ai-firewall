@@ -5,8 +5,8 @@ import {
   Bot,
   Copy,
   Crosshair,
-  Eye,
   FileText,
+  Fingerprint,
   KeyRound,
   Radar,
   ScanSearch,
@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   ShieldAlert,
   Sparkles,
+  Target,
   Zap,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
@@ -22,6 +23,7 @@ import { PricingSection } from '@/components/pricing/PricingSection';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { ContactSection } from '@/components/landing/ContactSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
+import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
 import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
 
 const PLATFORM_MODULES = [
@@ -145,18 +147,19 @@ const QUICK_NAV = [
   { label: 'Action Firewall', href: '/dashboard/actions', chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200 hover:border-rose-500/40' },
   { label: 'Threat Intel', href: '/dashboard/threat-intel', chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200 hover:border-indigo-500/40' },
   { label: 'Red Teaming', href: '/dashboard/simulator', chip: 'border-orange-500/20 bg-orange-500/10 text-orange-200 hover:border-orange-500/40' },
+  { label: 'Proof Center', href: '/proof-center', chip: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200 hover:border-emerald-500/40' },
   { label: 'Trust Hub', href: '/dashboard/trust-hub', chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200 hover:border-cyan-500/40' },
   { label: 'Compliance', href: '/dashboard/compliance', chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200 hover:border-indigo-500/40' },
   { label: 'Settings', href: '/dashboard/settings', chip: 'border-white/10 bg-zinc-900/80 text-zinc-300 hover:border-white/20' },
 ] as const;
 
-const TRUST_LAYERS = [
+const INVESTMENT_THESIS_LAYERS = [
   {
-    phase: 'SEE',
-    title: 'Visibility, Discovery & Effective Authority',
-    subtitle: 'Katman 1',
+    phase: 'IDENTITY',
+    title: 'Agent Discovery & Effective Authority',
+    subtitle: 'Who is acting?',
     href: '/dashboard/agents',
-    icon: Eye,
+    icon: Fingerprint,
     accent: 'text-violet-400',
     border: 'border-violet-500/25',
     chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200',
@@ -167,33 +170,48 @@ const TRUST_LAYERS = [
     ],
   },
   {
-    phase: 'CONTROL',
-    title: 'Action Firewall, Intent Divergence & Capability Revocation',
-    subtitle: 'Katman 2',
+    phase: 'INTENT',
+    title: 'Intent Alignment & Trajectory Scoring',
+    subtitle: 'What did they mean?',
+    href: '/dashboard/actions',
+    icon: Target,
+    accent: 'text-amber-400',
+    border: 'border-amber-500/25',
+    chip: 'border-amber-500/20 bg-amber-500/10 text-amber-200',
+    bullets: [
+      'Intent vs. Action trajectory divergence scoring',
+      'INTENT_MISMATCH block at >80% misalignment',
+      'Human-in-the-loop approval for high-risk divergences',
+    ],
+  },
+  {
+    phase: 'ACTION',
+    title: 'Runtime Intercept & Capability Revocation',
+    subtitle: 'What are they doing?',
     href: '/dashboard/actions',
     icon: ShieldAlert,
     accent: 'text-rose-400',
     border: 'border-rose-500/25',
     chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200',
     bullets: [
-      'Intent vs. Action trajectory divergence scoring',
-      'INTENT_ACTION_DIVERGENCE block at >80% mismatch',
-      'revokeCapabilities() read-only mode instead of full kill switch',
+      'Sub-10ms tool call interception at runtime',
+      'Instant Kill Switch & revokeCapabilities() read-only mode',
+      'Privilege escalation & parameter hijack blocking',
     ],
   },
   {
-    phase: 'TRUST',
-    title: 'Evidence Chain & Digital Immune System',
-    subtitle: 'Katman 3',
-    href: '/dashboard/trust-hub',
+    phase: 'PROOF',
+    title: 'Cryptographic Evidence & Proof Center',
+    subtitle: 'Can you prove it?',
+    href: '/proof-center',
     icon: ShieldCheck,
     accent: 'text-cyan-400',
     border: 'border-cyan-500/25',
     chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200',
     bullets: [
-      'ERP Transaction ID · DB Modification Hash · Log Diff verification',
-      'UNVERIFIED_ACTION flag for evidence-less critical ops',
-      'SAFE-compliant Zero-Knowledge immune signatures (#TS-xxxx)',
+      'SHA-256 evidence chains for every blocked action',
+      'Public Proof Center with investor-grade benchmarks',
+      'Immutable audit ledger & Zero-Knowledge immune signatures',
     ],
   },
 ] as const;
@@ -275,12 +293,13 @@ export default function Home() {
             </h1>
 
             <p className="mt-5 text-lg font-medium text-emerald-200/90 sm:text-xl">
-              Discover every agent. Control every action. Verify every outcome.
+              Verify Every Agent Outcome with Cryptographic Proof.
             </p>
 
             <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-400 sm:text-lg">
-              SEE → CONTROL → TRUST — three runtime layers that give every autonomous agent an identity,
-              enforce intent-aligned actions, and prove critical executions with verifiable evidence.
+              IDENTITY → INTENT → ACTION → PROOF — the investment thesis for runtime agent governance:
+              discover who is acting, align intent, intercept every action, and prove outcomes with
+              immutable cryptographic evidence.
             </p>
 
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
@@ -347,31 +366,33 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="trust-layers" className="scroll-mt-20 border-y border-white/5 bg-zinc-900/30 py-20">
+      <section id="investment-thesis" className="scroll-mt-20 border-y border-white/5 bg-zinc-900/30 py-20">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-3 py-1 text-xs font-medium text-cyan-300">
               <ShieldCheck className="h-3.5 w-3.5" />
-              SEE → CONTROL → TRUST
+              IDENTITY → INTENT → ACTION → PROOF
             </div>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-              Three-Layer Runtime Architecture
+              Investment Thesis Architecture
             </h2>
             <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-              From discovery to enforcement to verification — each layer maps to live dashboard modules.
+              Four runtime pillars — from agent identity to cryptographic proof — each mapped to live dashboard modules.
             </p>
           </div>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-zinc-600">
-            <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-400">SEE</span>
+            <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-400">IDENTITY</span>
             <ArrowRight className="hidden h-4 w-4 sm:block" />
-            <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-rose-400">CONTROL</span>
+            <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-amber-400">INTENT</span>
             <ArrowRight className="hidden h-4 w-4 sm:block" />
-            <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-cyan-400">TRUST</span>
+            <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-rose-400">ACTION</span>
+            <ArrowRight className="hidden h-4 w-4 sm:block" />
+            <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-cyan-400">PROOF</span>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-stretch">
-            {TRUST_LAYERS.map(({ phase, title, subtitle, href, icon: Icon, accent, border, chip, bullets }) => (
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:items-stretch xl:grid-cols-4">
+            {INVESTMENT_THESIS_LAYERS.map(({ phase, title, subtitle, href, icon: Icon, accent, border, chip, bullets }) => (
               <Link
                 key={phase}
                 href={href}
@@ -407,7 +428,7 @@ export default function Home() {
             {[
               { label: 'Agent Inventory', href: '/dashboard/agents' },
               { label: 'Action Firewall', href: '/dashboard/actions' },
-              { label: 'Threat Intel', href: '/dashboard/threat-intel' },
+              { label: 'Proof Center', href: '/proof-center' },
               { label: 'Trust Hub', href: '/dashboard/trust-hub' },
               { label: 'Red Team Simulator', href: '/dashboard/simulator' },
             ].map(({ label, href }) => (
@@ -472,6 +493,7 @@ export default function Home() {
       </section>
 
       <PlaygroundSection />
+      <PublicProofCenterSection />
       <PricingSection />
       <ContactSection />
       <LandingFooter />

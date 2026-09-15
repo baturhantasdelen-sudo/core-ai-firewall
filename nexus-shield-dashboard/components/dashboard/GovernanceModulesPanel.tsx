@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Activity, RefreshCw, ShieldCheck } from 'lucide-react';
 import {
   countVerifiedModules,
@@ -12,17 +12,22 @@ import {
   type ModuleStatus,
 } from '@/lib/governance/status';
 
-function badgeTone(module: ModuleStatus): string {
-  if (module.status === 'VERIFIED' && module.active) {
+interface GovernanceModulesPanelProps {
+  initialData: GovernanceStatusResponse | null;
+  initialError?: string | null;
+}
+
+function badgeTone(moduleStatus: ModuleStatus): string {
+  if (moduleStatus.status === 'VERIFIED' && moduleStatus.active) {
     return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
   }
   return 'border-rose-500/30 bg-rose-500/10 text-rose-300';
 }
 
-export function GovernanceModulesPanel() {
-  const [data, setData] = useState<GovernanceStatusResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+export function GovernanceModulesPanel({ initialData, initialError = null }: GovernanceModulesPanelProps) {
+  const [data, setData] = useState<GovernanceStatusResponse | null>(initialData);
+  const [error, setError] = useState<string | null>(initialError);
+  const [loading, setLoading] = useState(false);
 
   async function loadStatus() {
     setLoading(true);
@@ -37,10 +42,6 @@ export function GovernanceModulesPanel() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    void loadStatus();
-  }, []);
 
   const verifiedCount = data ? countVerifiedModules(data.modules) : 0;
   const totalModules = GOVERNANCE_MODULE_ORDER.length;
@@ -80,21 +81,21 @@ export function GovernanceModulesPanel() {
       ) : (
         <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {GOVERNANCE_MODULE_ORDER.map((key) => {
-            const module = data?.modules[key];
+            const moduleStatus = data?.modules[key];
             const label = GOVERNANCE_MODULE_LABELS[key] ?? key;
-            const statusLabel = module
-              ? moduleVerificationLabel(module.status)
+            const statusLabel = moduleStatus
+              ? moduleVerificationLabel(moduleStatus.status)
               : '🔴 Doğrulanamadı';
 
             return (
               <article
                 key={key}
-                className={`rounded-xl border p-4 ${module ? badgeTone(module) : 'border-rose-500/30 bg-rose-500/10 text-rose-300'}`}
+                className={`rounded-xl border p-4 ${moduleStatus ? badgeTone(moduleStatus) : 'border-rose-500/30 bg-rose-500/10 text-rose-300'}`}
               >
                 <p className="text-sm font-medium">{label}</p>
                 <p className="mt-2 text-xs font-semibold">{statusLabel}</p>
-                {module?.message ? (
-                  <p className="mt-2 text-[10px] opacity-80">{module.message}</p>
+                {moduleStatus?.message ? (
+                  <p className="mt-2 text-[10px] opacity-80">{moduleStatus.message}</p>
                 ) : null}
               </article>
             );
