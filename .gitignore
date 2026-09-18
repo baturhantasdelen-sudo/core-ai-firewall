@@ -15,6 +15,12 @@ ENV/
 # Locust / Testing
 .locust/
 *.log
+
+# Temporary build artifacts & archives
+*.tgz
+tmp/
+.tmp/
+tmp-*
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/

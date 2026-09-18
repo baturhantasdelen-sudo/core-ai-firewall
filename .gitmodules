@@ -1,0 +1,6 @@
+[submodule "nexus-shield-action"]
+	path = nexus-shield-action
+	url = https://github.com/baturhantasdelen-sudo/nexus-shield-action.git
+[submodule "examples/nextjs-vercel-ai-nexus-shield"]
+	path = examples/nextjs-vercel-ai-nexus-shield
+	url = https://github.com/baturhantasdelen-sudo/nextjs-vercel-ai-nexus-shield.git
