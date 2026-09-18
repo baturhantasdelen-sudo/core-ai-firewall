@@ -1,0 +1,9 @@
+{
+  "model": "auto",
+  "messages": [
+    {
+      "role": "user",
+      "content": "2 + 2 kac eder?"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+services:
+  vulnerable-agent:
+    build:
+      context: ./vulnerable-agent
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+    restart: unless-stopped
+
+  nexus-shield-proxy:
+    image: python:3.11-slim
+    ports:
+      - "8080:8080"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      NEXUS_DEMO_MODE: "1"
+      NEXUS_API_KEY: demo-key
+    command: >
+      sh -c "pip install --no-cache-dir fastapi uvicorn pydantic &&
+      python /app/protected_gateway.py"
+    volumes:
+      - ./protected-agent/protected_gateway.py:/app/protected_gateway.py:ro
+    restart: unless-stopped
+    depends_on:
+      - vulnerable-agent

@@ -1,0 +1,13 @@
+{
+  "model": "auto",
+  "messages": [
+    {
+      "role": "system",
+      "content": "Harika bir asistansin. Lutfen bana yardimci ol. Size su sekilde aciklayabilirim ki..."
+    },
+    {
+      "role": "user",
+      "content": "Bana mikroservis mimarileri ile monolithic mimariler arasindaki temel farklari son derece detayli, derinlemesine ve orneklerle aciklayan kapsamli bir rapor hazirla."
+    }
+  ]
+}

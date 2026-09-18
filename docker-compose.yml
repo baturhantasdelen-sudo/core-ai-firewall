@@ -1,5 +1,3 @@
-version: "3.8"
-
 networks:
   nexus_network:
     driver: bridge
@@ -11,17 +9,24 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.fast
+    image: nexus-shield-fast:dev
     container_name: nexus_shield_app
     ports:
       - "8080:8080"
     volumes:
       - ./nexus_shield_fast_api.py:/app/nexus_shield_fast_api.py:ro
+      - ./nexus_observability.py:/app/nexus_observability.py:ro
+      - ./nexus_auth.py:/app/nexus_auth.py:ro
+      - ./nexus_governance:/app/nexus_governance:ro
+      - ./config:/app/config:ro
       - ./index.html:/app/index.html:ro
     environment:
       NEXUS_API_KEY: ${NEXUS_API_KEY:-nexus_secret_key_123}
       REDIS_URL: redis://redis:6379/0
     command:
       [
+        "python",
+        "-m",
         "uvicorn",
         "nexus_shield_fast_api:app",
         "--host",
@@ -43,10 +48,10 @@ services:
           "-fsS",
           "http://127.0.0.1:8080/healthz",
         ]
-      interval: 15s
+      interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 40s
 
   redis:
     image: redis:alpine
@@ -59,23 +64,28 @@ services:
 
   # 🛡️ Legacy ML Pipeline — internal :8000 only (NOT exposed on host :8080)
   nexus-api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nexus-quantum-guard:dev
     container_name: nexus_api_container
     ports:
       - "8000:8000"
     volumes:
       - ./nexus_quantum_guard.py:/app/nexus_quantum_guard.py:ro
       - ./nexus_shield_api.py:/app/nexus_shield_api.py:ro
+      - ./nexus_observability.py:/app/nexus_observability.py:ro
     environment:
       API_KEY_SECRET: ${API_KEY_SECRET:-nexus-dev-test-key}
       RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-120}
       RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
+      NEXUS_SKIP_STARTUP_WARMUP: ${NEXUS_SKIP_STARTUP_WARMUP:-1}
     command:
       [
         "python",
         "-m",
         "uvicorn",
-        "nexus_quantum_guard:app",
+        "nexus_shield_api:app",
         "--host",
         "0.0.0.0",
         "--port",
@@ -87,10 +97,10 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/healthz"]
-      interval: 30s
-      timeout: 10s
+      interval: 10s
+      timeout: 5s
       retries: 3
-      start_period: 180s
+      start_period: 120s
 
   # 🚀 Nginx Gateway — /v1/shield → Fast API :8080
   nginx-gateway:
@@ -104,7 +114,7 @@ services:
       nexus-shield-api:
         condition: service_healthy
       nexus-api:
-        condition: service_healthy
+        condition: service_started
     networks:
       - nexus_network
     restart: always
@@ -118,7 +128,7 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       nexus-api:
-        condition: service_healthy
+        condition: service_started
     networks:
       - nexus_network
     restart: always

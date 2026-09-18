@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 
 const NAV_LINKS = [
+  { href: '/scan', label: 'Free Scan' },
+  { href: '#attack-simulator', label: 'Attack Simulator' },
   { href: '#playground', label: 'Playground' },
   { href: '/proof-center', label: 'Proof Center' },
   { href: '#features', label: 'Features' },
@@ -43,13 +45,13 @@ export function LandingNav() {
           >
             Go to App
           </Link>
-          <a
-            href="#playground"
-            className="inline-flex select-none cursor-pointer items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-500/20 transition-transform hover:scale-[1.02] sm:px-4"
+          <Link
+            href="/scan"
+            className="inline-flex select-none cursor-pointer items-center justify-center rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 px-3 py-2 text-sm font-semibold text-zinc-950 shadow-md shadow-emerald-500/20 transition-transform hover:scale-[1.02] sm:px-4"
           >
-            <span className="hidden sm:inline">Start Free Trial (50 Free Scans)</span>
-            <span className="sm:hidden">Free Trial</span>
-          </a>
+            <span className="hidden sm:inline">Free AI Agent Security Scan</span>
+            <span className="sm:hidden">Free Scan</span>
+          </Link>
         </div>
       </nav>
     </header>

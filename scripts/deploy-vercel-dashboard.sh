@@ -24,7 +24,11 @@ log() { echo "[vercel-deploy] $*"; }
 
 [[ -d "$DASHBOARD" ]] || { log "ERROR: dashboard dir not found"; exit 1; }
 
-if ! command -v vercel >/dev/null 2>&1; then
+if command -v vercel >/dev/null 2>&1; then
+  VERCEL_CMD=(vercel)
+elif command -v npx >/dev/null 2>&1; then
+  VERCEL_CMD=(npx vercel)
+else
   log "ERROR: vercel CLI not installed (npm i -g vercel)"
   exit 1
 fi
@@ -32,10 +36,10 @@ fi
 cd "$DASHBOARD"
 
 log "Production env check (remote)"
-vercel env ls production 2>/dev/null | grep -E 'NEXT_PUBLIC_API_URL|NEXUS_SHIELD_API_URL|NEXT_PUBLIC_APP_URL' || \
+"${VERCEL_CMD[@]}" env ls production 2>/dev/null | grep -E 'NEXT_PUBLIC_API_URL|NEXUS_SHIELD_API_URL|NEXT_PUBLIC_APP_URL' || \
   log "WARN: set NEXT_PUBLIC_API_URL and NEXUS_SHIELD_API_URL=https://api.nexusshield.ai in Vercel"
 
 log "Deploying to Vercel production..."
-vercel deploy --prod --yes
+"${VERCEL_CMD[@]}" deploy --prod --yes
 
 log "Done. Verify: https://nexus-shield-dashboard.vercel.app"

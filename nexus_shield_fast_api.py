@@ -42,7 +42,8 @@ from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel, Field
 
 from nexus_auth import api_key_store, auth_router
-from nexus_governance.routes import router as governance_router
+from nexus_governance.routes import agent_router, router as governance_router
+from nexus_governance.redis_store import GovernanceRedisStore
 from nexus_observability import (
     client_ip as _obs_client_ip,
     fast_logger,
@@ -285,22 +286,34 @@ async def lifespan(app: FastAPI):
 
         _redis_client = redis.from_url(REDIS_URL, decode_responses=True)
         await _redis_client.ping()
+        await GovernanceRedisStore.init(REDIS_URL)
         logger.info("Redis bağlantısı hazır: %s", REDIS_URL)
     except Exception as exc:
         _redis_client = None
+        await GovernanceRedisStore.init(REDIS_URL)
         logger.warning("Redis kullanılamıyor, cache devre dışı: %s", exc)
     yield
+    await GovernanceRedisStore.close()
     if _redis_client is not None:
         await _redis_client.aclose()
         _redis_client = None
 
 
 app = FastAPI(
-    title="Nexus Shield High-Performance Guardrail API v2.0",
+    title="Nexus Quantum Guard - Enterprise AI Firewall",
+    description=(
+        "Defense-in-Depth prompt injection scanning and AI Agent Governance microservice. "
+        "Includes Trajectory Engine, Intent Engine, and Human-in-the-Loop enforcement."
+    ),
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
     lifespan=lifespan,
 )
 app.include_router(auth_router)
 app.include_router(governance_router)
+app.include_router(agent_router)
 
 
 @app.middleware("http")

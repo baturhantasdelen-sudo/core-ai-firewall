@@ -1,55 +1,55 @@
-import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { updateSession } from '@/lib/supabase/middleware';
+
+function safeRedirectPath(path: string | null): string | null {
+  if (!path || !path.startsWith('/') || path.startsWith('//')) {
+    return null;
+  }
+  if (path.startsWith('/login')) {
+    return null;
+  }
+  return path;
+}
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  try {
+    const { response, user } = await updateSession(request);
+    const { pathname } = request.nextUrl;
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (
+      process.env.NEXUS_DEMO_BYPASS_AUTH === '1' &&
+      pathname.startsWith('/dashboard')
+    ) {
+      return response;
+    }
 
-  if (!url || !anonKey) {
-    return supabaseResponse;
+    if (pathname.startsWith('/dashboard') && !user) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = '/login';
+      loginUrl.searchParams.set('next', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    if (pathname === '/login' && user) {
+      const next = safeRedirectPath(request.nextUrl.searchParams.get('next'));
+      const destination = next ?? '/dashboard';
+      return NextResponse.redirect(new URL(destination, request.url));
+    }
+
+    return response;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn('[middleware] Passing through after error:', message);
+    return NextResponse.next({ request });
   }
-
-  const supabase = createServerClient(url, anonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => {
-          request.cookies.set(name, value);
-        });
-        supabaseResponse = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) => {
-          supabaseResponse.cookies.set(name, value, options);
-        });
-      },
-    },
-  });
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
-
-  if (pathname.startsWith('/dashboard') && !user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
-    loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  if (pathname === '/login' && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
-  return supabaseResponse;
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    /*
+     * Run auth middleware only on app pages — skip static assets, Next internals,
+     * and API routes (webhooks/health must not block on Supabase).
+     */
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?|map)$).*)',
   ],
 };

@@ -1,0 +1,9 @@
+{
+  "model": "gpt-4o-mini",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Merhaba, benim e-postam ahmet@example.com ve telefonum 05321234567. Bana yardimci olur musun?"
+    }
+  ]
+}

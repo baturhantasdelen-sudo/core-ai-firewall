@@ -15,8 +15,9 @@ Mimari (Defense-in-Depth — Savunma Derinliği, Düşük Gecikme):
   Katman 0.75 → Segment Intent Analyzer   (cümle bazlı vektör + aksiyon nesnesi)
   Katman 1 → Çok Dilli Vektör Koruması      (paraphrase-multilingual, kosinüs)
   Katman 2 → Adli JSON Raporlama            (ai_firewall_audit.log)
-  API      → ThreadSafeGuardService         (FastAPI /v1/shield mikroservis köprüsü)
-  Metrics  → NEXUS_* Prometheus metrikleri  (nexus_* scrape uç noktası /metrics)
+  Core     → ThreadSafeGuardService         (ML pipeline — bu modül)
+  API      → nexus_shield_api.py            (FastAPI: uvicorn nexus_shield_api:app)
+  Metrics  → NEXUS_* Prometheus metrikleri  (/metrics — nexus_shield_api üzerinden)
 """
 
 from __future__ import annotations
@@ -1490,6 +1491,7 @@ class SemanticVectorGuard:
             MODEL_NAME,
             local_files_only=True,
         )
+        logger.info("SentenceTransformer yüklendi, referans matrisi hazırlanıyor...")
 
         self._references: list[AttackReference] = list(ATTACK_REFERENCE_DB)
         patterns = [ref.pattern for ref in self._references]
@@ -2854,8 +2856,7 @@ class ShieldApiResult:
 # PROMETHEUS İZLEME — Küresel Metrik Nesneleri
 # =============================================================================
 
-from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
-from fastapi import Response
+from prometheus_client import Counter, Histogram
 
 NEXUS_REQUESTS = Counter("nexus_requests_total", "Alınan toplam istek sayısı")
 NEXUS_BLOCKS = Counter(
@@ -3055,12 +3056,3 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-
-# FastAPI mikroservis uygulaması — uvicorn nexus_quantum_guard:app
-from nexus_shield_api import app  # noqa: E402, F401
-
-
-@app.get("/metrics")
-def metrics() -> Response:
-    """Prometheus scrape uç noktası — nexus_* metrikleri."""
-    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)

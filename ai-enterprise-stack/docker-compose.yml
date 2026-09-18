@@ -1,0 +1,40 @@
+services:
+  ai-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-enterprise-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      DEFAULT_MODEL: ${DEFAULT_MODEL:-gpt-4o-mini}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
+      TELEMETRY_DB_PATH: /app/data/telemetry.db
+      STREAMLIT_ENABLED: ${STREAMLIT_ENABLED:-true}  # single-port in Docker; use false for split local dev
+      STREAMLIT_PORT: ${STREAMLIT_PORT:-8501}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      NEXUS_INJECTION_BLOCK: ${NEXUS_INJECTION_BLOCK:-true}
+      RESONET_SIMPLE_CHAR_THRESHOLD: ${RESONET_SIMPLE_CHAR_THRESHOLD:-100}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s

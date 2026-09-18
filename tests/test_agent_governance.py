@@ -71,10 +71,11 @@ def test_agent_action_endpoint_executes_with_evidence(client: TestClient) -> Non
     )
     assert response.status_code == 200
     body = response.json()
-    assert body["status"] == "EXECUTED"
-    assert body["decision"] == "ALLOW"
-    assert "payload_hash" in body["evidence"]
-    assert response.headers.get("X-Nexus-Evidence-Hash") == body["evidence"]["payload_hash"]
+    assert body["status"] == "PENDING_APPROVAL"
+    assert body["decision"] == "REQUIRES_HUMAN_APPROVAL"
+    assert body["requires_human_approval"] is True
+    assert body["result"]["status"] == "WAITING_FOR_APPROVAL"
+    assert "POTENTIAL_DATA_EXFILTRATION_RISK" in body["authority_analysis"]["risk_flags"]
 
 
 def test_mcp_inspect_blocks_policy_violation(client: TestClient) -> None:

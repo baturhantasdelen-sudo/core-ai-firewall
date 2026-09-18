@@ -119,9 +119,11 @@ def test_agent_action_endpoint_allows_read_invoice(client: TestClient) -> None:
     )
     assert response.status_code == 200
     body = response.json()
-    assert body["status"] == "EXECUTED"
-    assert body["decision"] == "ALLOW"
-    assert body["governance"]["decision"] == "ALLOW"
+    assert body["status"] == "PENDING_APPROVAL"
+    assert body["decision"] == "REQUIRES_HUMAN_APPROVAL"
+    assert body["requires_human_approval"] is True
+    assert body["result"]["status"] == "WAITING_FOR_APPROVAL"
+    assert body["policy"]["decision"] == "REQUIRES_HUMAN_APPROVAL"
 
 
 def test_policies_json_is_valid() -> None:

@@ -1,7 +1,7 @@
-# Nexus Shield — High-Performance Guardrail API (pattern + optional Redis)
+# Nexus Shield — Fast guardrail API (single-stage)
 # syntax=docker/dockerfile:1
 
-FROM python:3.11-slim-bookworm
+FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -12,13 +12,15 @@ WORKDIR /app
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/* \
     && groupadd --system --gid 1000 nexus \
-    && useradd --system --uid 1000 --gid nexus --home-dir /app --shell /usr/sbin/nologin nexus
+    && useradd --system --uid 1000 --gid nexus --home-dir /app --shell /usr/sbin/nologin nexus \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY requirements-fast.txt .
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements-fast.txt
+COPY requirements-fast.txt requirements.txt
+RUN --mount=type=tmpfs,target=/tmp \
+    pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /root/.cache /tmp/*
 
 COPY nexus_shield_fast_api.py .
 COPY nexus_observability.py .
@@ -27,12 +29,16 @@ COPY nexus_governance ./nexus_governance
 COPY config ./config
 COPY index.html .
 
-RUN mkdir -p /app/data && chown -R nexus:nexus /app
+RUN python -m compileall -q nexus_governance \
+    && python -c "from nexus_governance.routes import router; import fastapi, uvicorn, redis" \
+    && mkdir -p /app/data \
+    && chown -R nexus:nexus /app
+
 USER nexus
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=10s --timeout=5s --start-period=40s --retries=3 \
     CMD curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY || exit 1
 
-CMD ["uvicorn", "nexus_shield_fast_api:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["python", "-m", "uvicorn", "nexus_shield_fast_api:app", "--host", "0.0.0.0", "--port", "8080"]

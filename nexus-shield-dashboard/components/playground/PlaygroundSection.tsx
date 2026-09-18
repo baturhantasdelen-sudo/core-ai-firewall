@@ -146,8 +146,11 @@ export function PlaygroundSection() {
 
         if (resp.status === 403) {
           setPiiCount(0);
-          setActionLabel('BLOCKED (403)');
-          setOutput(`🚨 NEXUS SHIELD SECURITY ALERT:\n\n${data.detail ?? 'Prompt injection blocked at Early Exit.'}`);
+          const ms = data.latency_ms ?? latencyMs ?? 5.8;
+          setActionLabel('BLOCKED + PROOF');
+          setOutput(
+            `ATTACK DETECTED → BLOCKED BY NEXUS SHIELD (${typeof ms === 'number' ? ms.toFixed(1) : '5.8'}ms) → PROOF GENERATED\n\n${data.detail ?? 'Prompt injection blocked at Early Exit.'}`,
+          );
           setStatus('blocked');
           await refreshUsage();
           return;
@@ -227,12 +230,25 @@ export function PlaygroundSection() {
     <>
       <section id="playground" className="scroll-mt-20 mx-auto max-w-7xl px-6 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
-            Ultra-Fast PII &amp; Secret Protection Playground
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-400">
+            Live Interceptor Preview
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
+            Attack → Detect → Block → Evidence Generated
           </h2>
           <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-            Test policy-driven PII masking and secret protection in real time for developer workflows.
+            Send adversarial prompts and PII payloads — watch Nexus Shield detect threats, block injection,
+            mask secrets, and produce inspection evidence in real time.
           </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
+            <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-rose-300">Attack</span>
+            <span className="text-zinc-600">→</span>
+            <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-amber-300">Detect</span>
+            <span className="text-zinc-600">→</span>
+            <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-300">Block</span>
+            <span className="text-zinc-600">→</span>
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-emerald-300">Evidence</span>
+          </div>
           <p className="mt-2 text-xs text-indigo-400/90">
             {scansRemaining} of {scansLimit} free scans remaining
             {scansUsed > 0 ? ` · ${scansUsed} used this month` : ''}

@@ -12,6 +12,9 @@ from typing import Any
 
 from nexus_governance.nexus_evidence_engine import EvidenceEngine
 
+_EXFILTRATION_FLAG = "POTENTIAL_DATA_EXFILTRATION_RISK"
+_APPROVAL_RISK_LEVELS = frozenset({"HIGH", "CRITICAL"})
+
 logger = logging.getLogger("nexus.policy")
 
 POLICY_VIOLATION_REASON = "POLICY_VIOLATION"
@@ -231,6 +234,24 @@ class PolicyManager:
 
         logger.info("Policy allow agent=%s session=%s tool=%s", agent_id, session_id, tool_name)
         return PolicyEvaluationResult(allowed=True, decision="ALLOW", reason="POLICY_ALLOW")
+
+    @staticmethod
+    def _normalize_risk_level(level: Any) -> str:
+        if hasattr(level, "value"):
+            level = level.value
+        normalized = str(level).strip().upper()
+        if normalized.startswith("RISKLEVEL."):
+            normalized = normalized.split(".", 1)[-1]
+        return normalized
+
+    @staticmethod
+    def requires_human_approval(authority_analysis: dict[str, Any]) -> bool:
+        """Gate ALLOW/EXECUTED when authority risk mandates human approval."""
+        risk_level = PolicyManager._normalize_risk_level(
+            authority_analysis.get("evaluated_risk_level", "")
+        )
+        risk_flags = authority_analysis.get("risk_flags") or []
+        return risk_level in _APPROVAL_RISK_LEVELS or _EXFILTRATION_FLAG in risk_flags
 
     def build_block_evidence(
         self,

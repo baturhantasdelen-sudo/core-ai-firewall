@@ -1,0 +1,16 @@
+fastapi>=0.115.0,<1.0.0
+uvicorn[standard]>=0.32.0,<1.0.0
+httpx>=0.27.0,<1.0.0
+pydantic>=2.9.0,<3.0.0
+pydantic-settings>=2.6.0,<3.0.0
+streamlit>=1.40.0,<2.0.0
+plotly>=5.24.0,<6.0.0
+pandas>=2.2.0,<3.0.0
+aiosqlite>=0.20.0,<1.0.0
+websockets>=13.0,<16.0
+codecarbon>=2.3.0,<3.0.0
+locust>=2.31.0,<3.0.0
+openai>=1.50.0,<2.0.0
+
+# Optional: enable with RESONET_USE_LLMLINGUA=true (pulls torch/transformers)
+llmlingua>=0.2.2,<1.0.0

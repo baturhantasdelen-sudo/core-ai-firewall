@@ -1,0 +1,19 @@
+{
+  "timestamp_utc": "2026-09-14T19:22:11Z",
+  "base_url": "http://127.0.0.1:8080",
+  "latency_ms": {
+    "samples": 3,
+    "avg": 2034.6,
+    "p95": 2046.41,
+    "errors": 3
+  },
+  "attack_benchmark": {
+    "samples": 2,
+    "blocked": 0,
+    "pending_approval": 0,
+    "rejected": 0,
+    "allowed": 0,
+    "errors": 2,
+    "intent_divergence_accuracy_pct": 0.0
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "nexus-shield-demos",
+  "private": true,
+  "scripts": {
+    "install:browsers": "playwright install chromium",
+    "demo1": "tsx scripts/demo1_performance.ts",
+    "demo2": "tsx scripts/demo2_evidence_hitl.ts",
+    "demos": "npm run demo1 && npm run demo2",
+    "postinstall": "playwright install chromium || true"
+  },
+  "devDependencies": {
+    "playwright": "^1.51.0",
+    "tsx": "^4.23.12",
+    "typescript": "^5"
+  }
+}

@@ -12,7 +12,7 @@ Bu belge GCP VM üzerinde Docker Compose ile production deploy adımlarını öz
 
 - **cloudflared** `network_mode: host` ile çalışır; tunnel origin **http://127.0.0.1:80** olmalı (asla `:8000` değil).
 
-- **nexus-api** konteyneri `nexus_quantum_guard:app` (FastAPI) çalıştırır.
+- **nexus-api** konteyneri `nexus_shield_api:app` (FastAPI) çalıştırır; ML çekirdeği `nexus_quantum_guard` modülündedir.
 - Model warm-up startup sırasında otomatik yapılır.
 - `/healthz` API Key gerektirmez (K8s/load balancer probe).
 

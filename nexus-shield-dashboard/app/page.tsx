@@ -21,6 +21,7 @@ import { BrandLogo } from '@/components/brand/BrandLogo';
 import { PlaygroundSection } from '@/components/playground/PlaygroundSection';
 import { PricingSection } from '@/components/pricing/PricingSection';
 import { LandingNav } from '@/components/landing/LandingNav';
+import { AttackSimulatorCard } from '@/components/landing/AttackSimulatorCard';
 import { ContactSection } from '@/components/landing/ContactSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
@@ -304,20 +305,20 @@ export default function Home() {
 
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
               <Link
-                href="/dashboard"
+                href="/scan"
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-7 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/25 transition-transform hover:scale-[1.02] hover:shadow-emerald-500/40 active:scale-[0.98]"
               >
-                <ScanSearch className="h-4 w-4" />
-                Scan Your AI Environment
+                <ShieldCheck className="h-4 w-4" />
+                SECURE MY AI AGENT
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
-              <Link
-                href="/dashboard/simulator?pitch=1"
+              <a
+                href="#attack-simulator"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-500/25 bg-orange-500/5 px-7 py-3.5 text-sm font-semibold text-orange-100 backdrop-blur-md transition-colors hover:border-orange-500/40 hover:bg-orange-500/10"
               >
                 <Crosshair className="h-4 w-4" />
-                Run E2E Pitch Demo
-              </Link>
+                ATTACK MY AGENT
+              </a>
               <Link
                 href="/docs"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-7 py-3.5 text-sm font-semibold text-zinc-200 backdrop-blur-md transition-colors hover:border-white/20 hover:bg-white/10"
@@ -345,6 +346,24 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <section className="border-y border-emerald-500/10 bg-gradient-to-r from-emerald-950/30 via-zinc-900/50 to-cyan-950/20 py-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-3 px-6">
+          <ScanSearch className="h-4 w-4 text-emerald-400" />
+          <p className="text-sm font-medium text-zinc-300">
+            Free AI Agent Security Scan — endpoint, MCP config, or GitHub repo
+          </p>
+          <Link
+            href="/scan"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/15 px-4 py-2 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/30 transition hover:bg-emerald-500/25"
+          >
+            Start Free Scan
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+      </section>
+
+      <AttackSimulatorCard />
 
       <section className="border-y border-white/5 bg-zinc-900/40 py-6">
         <div className="mx-auto max-w-7xl px-6">

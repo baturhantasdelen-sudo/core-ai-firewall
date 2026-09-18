@@ -1,8 +1,4 @@
 # Nexus Shield Fast API + Redis — local / load-test stack
-# Usage: ./scripts/start-fast-stack.sh  OR  .\scripts\start-fast-stack.ps1
-# Dashboard: http://localhost:8080/dashboard
-
-version: "3.8"
 
 services:
   redis:
@@ -24,8 +20,8 @@ services:
       - ./nexus_shield_fast_api.py:/app/nexus_shield_fast_api.py:ro
       - ./index.html:/app/index.html:ro
     environment:
-      - NEXUS_API_KEY=${NEXUS_API_KEY:-nexus_secret_key_123}
-      - REDIS_URL=redis://redis:6379/0
+      NEXUS_API_KEY: ${NEXUS_API_KEY:-nexus_secret_key_123}
+      REDIS_URL: redis://redis:6379/0
     command:
       [
         "uvicorn",

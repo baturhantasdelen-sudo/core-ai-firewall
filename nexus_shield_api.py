@@ -35,6 +35,7 @@ from typing import Annotated, Any, Final
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import BaseModel, Field
 
 from nexus_quantum_guard import (
@@ -341,12 +342,23 @@ async def healthz() -> HealthzResponse:
 
 @app.get("/health")
 async def health() -> dict[str, object]:
-    cache_info = _service.cache_stats() if _service else {}
-    cache_size = int(cache_info.get("size", 0))
-    payload = health_payload(cache_size=cache_size, service=SERVICE_NAME)
-    payload["version"] = API_VERSION
-    payload["ready"] = str(_service is not None)
-    return payload
+    if _service is None:
+        return {
+            "status": "unhealthy",
+            "service": SERVICE_NAME,
+            "version": API_VERSION,
+            "ready": False,
+            "semantic_cache": {},
+        }
+
+    cache_info = _service.cache_stats()
+    return {
+        "status": "ok",
+        "service": SERVICE_NAME,
+        "version": API_VERSION,
+        "ready": True,
+        "semantic_cache": cache_info,
+    }
 
 
 @app.get("/api/health")
@@ -372,6 +384,15 @@ async def get_metrics_summary() -> dict[str, float | int]:
         }
     summary.update(ml_metrics.summary())
     return summary
+
+
+@app.get("/metrics")
+def metrics() -> Response:
+    """Prometheus scrape uç noktası — nexus_* metrikleri."""
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST,
+    )
 
 
 @app.post(
