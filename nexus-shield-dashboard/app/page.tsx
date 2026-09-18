@@ -281,9 +281,14 @@ export default function Home() {
 
         <div className="relative mx-auto max-w-6xl px-6 py-16 sm:py-24">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-4 py-1.5 text-xs font-medium text-emerald-300 backdrop-blur-sm">
-              <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
-              2026 AI Agent Trust &amp; Runtime Security
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-4 py-1.5 text-xs font-medium text-emerald-300 backdrop-blur-sm">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+                2026 AI Agent Trust &amp; Runtime Security
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/5 px-4 py-1.5 text-xs font-medium text-orange-200 backdrop-blur-sm">
+                Attack → Prove → Install → Protect
+              </div>
             </div>
 
             <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl lg:leading-[1.08]">

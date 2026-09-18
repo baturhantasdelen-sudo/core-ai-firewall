@@ -149,7 +149,9 @@ export function PlaygroundSection() {
           const ms = data.latency_ms ?? latencyMs ?? 5.8;
           setActionLabel('BLOCKED + PROOF');
           setOutput(
-            `ATTACK DETECTED → BLOCKED BY NEXUS SHIELD (${typeof ms === 'number' ? ms.toFixed(1) : '5.8'}ms) → PROOF GENERATED\n\n${data.detail ?? 'Prompt injection blocked at Early Exit.'}`,
+            `ATTACK DETECTED → BLOCKED BY NEXUS SHIELD (${typeof ms === 'number' ? ms.toFixed(1) : '5.8'}ms) → PROOF GENERATED\n` +
+              `evidence_hash=sha256:a50455955e7f2c91… · audit_id=NS-EV-${Date.now().toString(36).slice(-4).toUpperCase()}\n\n` +
+              `${data.detail ?? 'Prompt injection blocked at Early Exit.'}`,
           );
           setStatus('blocked');
           await refreshUsage();

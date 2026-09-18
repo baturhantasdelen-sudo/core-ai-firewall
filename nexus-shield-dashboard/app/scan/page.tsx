@@ -44,6 +44,21 @@ export default function ScanPage() {
           <FreeAgentScanPanel />
         </div>
 
+        <div className="mt-8 rounded-xl border border-white/10 bg-zinc-900/40 p-5 text-center">
+          <p className="text-sm text-zinc-400">
+            Want a hands-on demo? Run the{' '}
+            <a
+              href="https://github.com/baturhantasdelen-sudo/core-ai-firewall/tree/main/nexus-shield-demo"
+              className="font-semibold text-emerald-400 hover:text-emerald-300"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              nexus-shield-demo
+            </a>{' '}
+            quickstart — vulnerable vs protected agent in 60 seconds.
+          </p>
+        </div>
+
         <div className="mt-12 grid gap-4 sm:grid-cols-3">
           {[
             {
