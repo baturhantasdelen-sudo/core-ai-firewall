@@ -67,7 +67,7 @@ export function AttackSimulatorCard() {
   }, [payloadIndex, runSimulation]);
 
   return (
-    <section id="attack-simulator" className="scroll-mt-24 mx-auto max-w-7xl px-6 py-16">
+    <section id="attack-simulator" data-demo="attack-simulator" className="scroll-mt-24 mx-auto max-w-7xl px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-orange-400">
           Interactive Attack Simulator
@@ -120,6 +120,7 @@ export function AttackSimulatorCard() {
             return (
               <div
                 key={item.id}
+                data-demo={item.id === 'evidence' ? 'attack-evidence-step' : undefined}
                 className={`rounded-xl border p-4 transition-all ${
                   active ? item.tone : 'border-white/5 bg-zinc-950/40 text-zinc-600'
                 }`}

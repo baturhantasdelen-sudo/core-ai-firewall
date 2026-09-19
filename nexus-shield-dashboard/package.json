@@ -37,7 +37,10 @@
     "test:revised-katman3-trust": "tsx --test test/revised-katman3-trust.test.ts",
     "test:pitch-scenario": "tsx --test test/pitch-scenario.test.ts",
     "test": "npm run test:katman1-see && npm run test:revised-katman1-see && npm run test:katman2-control && npm run test:revised-katman2-control && npm run test:katman3-trust && npm run test:revised-katman3-trust",
-    "test:all": "npm run test:validation && npm run test:reports && npm run test:remediation && npm run test:context && npm run test:agents && npm run test:actions && npm run test:immune && npm run test:simulator && npm run test:trust && npm run test:full-stack && npm run test:katman1-see && npm run test:revised-katman1-see && npm run test:katman2-control && npm run test:revised-katman2-control && npm run test:katman3-trust && npm run test:revised-katman3-trust && npm run test:pitch-scenario"
+    "test:scanner": "tsx --test test/scanner.test.ts",
+    "test:all": "npm run test:validation && npm run test:reports && npm run test:remediation && npm run test:context && npm run test:agents && npm run test:actions && npm run test:immune && npm run test:simulator && npm run test:trust && npm run test:full-stack && npm run test:katman1-see && npm run test:revised-katman1-see && npm run test:katman2-control && npm run test:revised-katman2-control && npm run test:katman3-trust && npm run test:revised-katman3-trust && npm run test:pitch-scenario",
+    "record:browsers": "playwright install chromium",
+    "record:demo": "tsx scripts/demo-record.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "^8.3.0",
@@ -62,6 +65,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "playwright": "^1.63.0",
     "postcss": "^8.5.26",
     "tailwindcss": "^3.4.19",
     "tsx": "^4.23.12",

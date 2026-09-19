@@ -373,7 +373,10 @@ export function PlaygroundSection() {
                 <div className="mb-1 text-xs font-semibold text-zinc-500">
                   Sanitized Prompt Forwarded to LLM:
                 </div>
-                <div className="h-36 overflow-y-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-zinc-950 p-4 font-mono text-sm text-zinc-300">
+                <div
+                  data-demo="playground-output"
+                  className="h-36 overflow-y-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-zinc-950 p-4 font-mono text-sm text-zinc-300"
+                >
                   {output}
                 </div>
 

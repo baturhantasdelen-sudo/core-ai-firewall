@@ -24,9 +24,13 @@ export function getStripe(): Stripe {
   return cachedClient;
 }
 
-export const PRO_PLAN_MONTHLY_USD = 59;
-export const PRO_PLAN_ANNUAL_MONTHLY_USD = 49;
+export const PRO_PLAN_MONTHLY_USD = 89;
+export const PRO_PLAN_ANNUAL_MONTHLY_USD = 74;
 export const PRO_PLAN_ANNUAL_USD = PRO_PLAN_ANNUAL_MONTHLY_USD * 12;
+
+export const TEAM_PLAN_MONTHLY_USD = 399;
+export const TEAM_PLAN_ANNUAL_MONTHLY_USD = 329;
+export const TEAM_PLAN_ANNUAL_USD = TEAM_PLAN_ANNUAL_MONTHLY_USD * 12;
 
 /** @deprecated Use PRO_PLAN_MONTHLY_USD */
 export const PRO_PLAN_PRICE_USD = PRO_PLAN_MONTHLY_USD;

@@ -1,6 +1,14 @@
 import type Stripe from 'stripe';
-import { getStripe, PRO_PLAN_ANNUAL_USD, PRO_PLAN_MONTHLY_USD } from '@/lib/stripe';
+import {
+  getStripe,
+  PRO_PLAN_ANNUAL_USD,
+  PRO_PLAN_MONTHLY_USD,
+  TEAM_PLAN_ANNUAL_USD,
+  TEAM_PLAN_MONTHLY_USD,
+} from '@/lib/stripe';
 import type { BillingInterval } from '@/config/pricing';
+
+export type CheckoutPlan = 'pro' | 'team';
 
 export interface CreateCheckoutSessionInput {
   orgId: string;
@@ -8,13 +16,14 @@ export interface CreateCheckoutSessionInput {
   customerId?: string | null;
   billingInterval: BillingInterval;
   appUrl: string;
+  plan?: CheckoutPlan;
 }
 
 export async function createProCheckoutSession(
   input: CreateCheckoutSessionInput,
 ): Promise<Stripe.Checkout.Session> {
   const stripe = getStripe();
-  const { orgId, userId, customerId, billingInterval, appUrl } = input;
+  const { orgId, userId, customerId, billingInterval, appUrl, plan = 'pro' } = input;
 
   const organizationId = orgId?.trim();
   const authUserId = userId?.trim();
@@ -27,12 +36,18 @@ export async function createProCheckoutSession(
     throw new Error('User ID is required for Stripe checkout');
   }
 
-  const monthlyPriceId =
-    process.env.STRIPE_PRO_MONTHLY_PRICE_ID?.trim() ??
-    process.env.STRIPE_PRO_PRICE_ID?.trim();
-  const yearlyPriceId = process.env.STRIPE_PRO_YEARLY_PRICE_ID?.trim();
+  const isTeam = plan === 'team';
+  const monthlyPriceId = isTeam
+    ? process.env.STRIPE_TEAM_MONTHLY_PRICE_ID?.trim()
+    : (process.env.STRIPE_PRO_MONTHLY_PRICE_ID?.trim() ??
+      process.env.STRIPE_PRO_PRICE_ID?.trim());
+  const yearlyPriceId = isTeam
+    ? process.env.STRIPE_TEAM_YEARLY_PRICE_ID?.trim()
+    : process.env.STRIPE_PRO_YEARLY_PRICE_ID?.trim();
 
   const priceId = billingInterval === 'year' ? yearlyPriceId : monthlyPriceId;
+  const monthlyUsd = isTeam ? TEAM_PLAN_MONTHLY_USD : PRO_PLAN_MONTHLY_USD;
+  const annualUsd = isTeam ? TEAM_PLAN_ANNUAL_USD : PRO_PLAN_ANNUAL_USD;
 
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = priceId
     ? [{ price: priceId, quantity: 1 }]
@@ -42,12 +57,12 @@ export async function createProCheckoutSession(
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Nexus Shield Pro',
-              description:
-                '500K API requests/mo, SCA & secret scanning, GitHub Checks, prompt injection firewall.',
+              name: isTeam ? 'Nexus Shield Team' : 'Nexus Shield Pro',
+              description: isTeam
+                ? '25 agents, 1M tool calls/mo, HITL approval, custom MCP proxy, Slack/Teams alerts.'
+                : '5 agents, 100K tool calls/mo, sub-10ms intercept, SHA-256 evidence chain.',
             },
-            unit_amount:
-              billingInterval === 'year' ? PRO_PLAN_ANNUAL_USD * 100 : PRO_PLAN_MONTHLY_USD * 100,
+            unit_amount: billingInterval === 'year' ? annualUsd * 100 : monthlyUsd * 100,
             recurring: { interval: billingInterval },
           },
         },
@@ -58,7 +73,7 @@ export async function createProCheckoutSession(
     user_id: authUserId,
     org_id: organizationId,
     billing_interval: billingInterval,
-    plan: 'pro',
+    plan,
   };
 
   console.log('[Stripe Checkout] Creating subscription session', {
@@ -83,10 +98,10 @@ export async function createProCheckoutSession(
         organization_id: organizationId,
         user_id: authUserId,
         org_id: organizationId,
-        plan: 'pro',
+        plan,
       },
     },
     success_url: `${appUrl}/dashboard?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${appUrl}/#pricing?payment=cancelled`,
+    cancel_url: `${appUrl}/pricing?payment=cancelled`,
   });
 }

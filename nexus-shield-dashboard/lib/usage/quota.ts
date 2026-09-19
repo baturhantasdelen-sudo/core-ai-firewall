@@ -9,6 +9,30 @@ import { getAuthContext } from '@/lib/auth/session';
 export const VISITOR_COOKIE = 'nexus_visitor_id';
 export const SANDBOX_TIMEOUT_MS = 10_000;
 
+function isDemoRecordingMode(): boolean {
+  return (
+    process.env.NEXUS_DEMO_BYPASS_AUTH === '1' ||
+    process.env.NEXUS_DEMO_RECORDING === '1'
+  );
+}
+
+function isSupabaseConfigured(): boolean {
+  return Boolean(
+    process.env.SUPABASE_SERVICE_ROLE_KEY &&
+      (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL),
+  );
+}
+
+function demoUsageSnapshot(): UsageSnapshot {
+  return {
+    used: 0,
+    limit: PLAN_SCAN_LIMITS.free,
+    remaining: PLAN_SCAN_LIMITS.free,
+    plan: 'free',
+    allowed: true,
+  };
+}
+
 export interface UsageSnapshot {
   used: number;
   limit: number;
@@ -25,6 +49,10 @@ function resolveLimit(org: OrgRecord | null): number {
 }
 
 async function countMonthlyUsage(orgId: string | null, visitorId: string | null): Promise<number> {
+  if (isDemoRecordingMode() || !isSupabaseConfigured()) {
+    return 0;
+  }
+
   const supabase = getSupabaseAdmin();
   const since = startOfCurrentMonthIso();
 
@@ -69,6 +97,10 @@ export async function getUsageSnapshot(
   org: OrgRecord | null,
   visitorId: string | null,
 ): Promise<UsageSnapshot> {
+  if (isDemoRecordingMode() || !isSupabaseConfigured()) {
+    return demoUsageSnapshot();
+  }
+
   const plan = org ? derivePlanId(org.stripe_subscription_status) : 'free';
   const limit = resolveLimit(org);
   const used = await countMonthlyUsage(org?.id ?? null, visitorId);
@@ -104,6 +136,10 @@ export async function recordSandboxUsage(params: {
   status: 'passed' | 'blocked';
   latencyMs: number;
 }): Promise<void> {
+  if (isDemoRecordingMode() || !isSupabaseConfigured()) {
+    return;
+  }
+
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.from('usage_events').insert({
     org_id: params.orgId,

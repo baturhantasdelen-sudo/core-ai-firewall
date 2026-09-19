@@ -20,6 +20,12 @@
 # production
 /build
 
+# demo recordings
+/videos/*.webm
+/videos/*.mp4
+/videos/*.gif
+/scripts/.demo-terminal.html
+
 # misc
 .DS_Store
 *.pem

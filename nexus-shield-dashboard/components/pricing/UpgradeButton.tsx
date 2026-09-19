@@ -9,12 +9,14 @@ interface UpgradeButtonProps {
   billingInterval: BillingInterval;
   label?: string;
   className?: string;
+  plan?: 'pro' | 'team';
 }
 
 export function UpgradeButton({
   billingInterval,
   label = 'Upgrade to Pro',
   className = '',
+  plan = 'pro',
 }: UpgradeButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,13 +29,13 @@ export function UpgradeButton({
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ billing_interval: billingInterval }),
+        body: JSON.stringify({ billing_interval: billingInterval, plan }),
       });
 
       const data = (await response.json()) as { url?: string; error?: string };
 
       if (response.status === 401) {
-        window.location.href = `/login?next=${encodeURIComponent('/#pricing')}`;
+        window.location.href = `/login?next=${encodeURIComponent('/pricing')}`;
         return;
       }
 

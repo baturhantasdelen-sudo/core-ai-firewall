@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Download,
+  FileText,
   FolderGit2,
   Globe,
   Loader2,
@@ -15,6 +16,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import type { AgentSecurityReport, FindingSeverity, ScanInputType } from '@/lib/scanner';
+import { agentSecurityPdfFilename } from '@/lib/reports/agent-security-audit-shared';
 
 const INPUT_TABS: Array<{ id: ScanInputType; label: string; icon: typeof Globe; placeholder: string }> = [
   {
@@ -62,6 +64,7 @@ export function FreeAgentScanPanel() {
   const [target, setTarget] = useState('');
   const [mcpConfig, setMcpConfig] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<AgentSecurityReport | null>(null);
 
@@ -104,7 +107,7 @@ export function FreeAgentScanPanel() {
     }
   }, [inputType, target, mcpConfig]);
 
-  const downloadReport = () => {
+  const downloadJsonReport = () => {
     if (!report) return;
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -115,14 +118,67 @@ export function FreeAgentScanPanel() {
     URL.revokeObjectURL(url);
   };
 
+  const downloadPdfReport = async () => {
+    if (!report) return;
+    setPdfLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/scan/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(report),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { detail?: string; error?: string };
+        setError(data.detail ?? data.error ?? 'PDF generation failed.');
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = agentSecurityPdfFilename(report);
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'PDF download failed.');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  const buildShareLink = () => {
+    if (!report) return window.location.href;
+    const params = new URLSearchParams({
+      score: String(report.score),
+      grade: report.grade,
+      target: report.target.slice(0, 120),
+    });
+    return `${window.location.origin}/scan?${params.toString()}`;
+  };
+
   const shareReport = async () => {
     if (!report) return;
-    const text = `AI Agent Security Score: ${report.score}/100 (${report.grade}) — scanned with Nexus Shield`;
-    if (navigator.share) {
-      await navigator.share({ title: 'Nexus Shield Agent Security Report', text, url: window.location.href });
-    } else {
-      await navigator.clipboard.writeText(text);
+    const shareUrl = buildShareLink();
+    const text = `Nexus Shield AI Agent Security Report — Score ${report.score}/100 (Grade ${report.grade}). Download the full PDF audit at ${shareUrl}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Nexus Shield Security Audit Report',
+          text,
+          url: shareUrl,
+        });
+        return;
+      }
+    } catch {
+      // fall through to clipboard + PDF
     }
+
+    await navigator.clipboard.writeText(`${text}`);
+    await downloadPdfReport();
   };
 
   return (
@@ -197,6 +253,7 @@ export function FreeAgentScanPanel() {
 
           <button
             type="button"
+            data-demo="scan-run-btn"
             onClick={() => void runScan()}
             disabled={loading}
             className="inline-flex w-full select-none cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/25 transition hover:scale-[1.01] disabled:opacity-60 sm:w-auto sm:px-8"
@@ -208,7 +265,7 @@ export function FreeAgentScanPanel() {
       </div>
 
       {report ? (
-        <div className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60">
+        <div className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60" data-demo="scan-report">
           <div className="border-b border-white/10 bg-zinc-900/80 p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -218,7 +275,7 @@ export function FreeAgentScanPanel() {
                 <h2 className="mt-2 text-2xl font-semibold text-zinc-50">Agent Security Score</h2>
                 <p className="mt-1 font-mono text-xs text-zinc-500">{report.target}</p>
               </div>
-              <div className="text-right">
+              <div className="text-right" data-demo="scan-score">
                 <div className={`text-5xl font-bold tabular-nums ${scoreColor(report.score)}`}>
                   {report.score}
                   <span className="text-2xl text-zinc-500">/100</span>
@@ -295,23 +352,40 @@ export function FreeAgentScanPanel() {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={downloadReport}
-                className="inline-flex select-none cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-xs font-medium text-zinc-200 hover:border-white/20"
+                data-demo="download-pdf-btn"
+                onClick={() => void downloadPdfReport()}
+                disabled={pdfLoading}
+                className="inline-flex select-none cursor-pointer items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-zinc-950 shadow-lg shadow-emerald-500/20 transition hover:scale-[1.02] disabled:opacity-60"
               >
-                <Download className="h-3.5 w-3.5" />
-                Download JSON Report
+                {pdfLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <FileText className="h-4 w-4" />
+                )}
+                Download PDF Report
               </button>
               <button
                 type="button"
+                data-demo="share-report-btn"
                 onClick={() => void shareReport()}
-                className="inline-flex select-none cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-xs font-medium text-zinc-200 hover:border-white/20"
+                disabled={pdfLoading}
+                className="inline-flex select-none cursor-pointer items-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-200 hover:border-cyan-500/40"
               >
                 <Share2 className="h-3.5 w-3.5" />
-                Share Score
+                Share Report
+              </button>
+              <button
+                type="button"
+                onClick={downloadJsonReport}
+                className="inline-flex select-none cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-xs font-medium text-zinc-200 hover:border-white/20"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Download JSON
               </button>
             </div>
             <Link
               href="/docs"
+              data-demo="scan-sdk-cta"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:scale-[1.02]"
             >
               <ShieldCheck className="h-4 w-4" />

@@ -3,11 +3,13 @@ import { BrandLogo } from '@/components/brand/BrandLogo';
 
 const NAV_LINKS = [
   { href: '/scan', label: 'Free Scan' },
+  { href: '/challenge', label: 'Challenge' },
   { href: '#attack-simulator', label: 'Attack Simulator' },
   { href: '#playground', label: 'Playground' },
   { href: '/proof-center', label: 'Proof Center' },
   { href: '#features', label: 'Features' },
-  { href: '#pricing', label: 'Pricing' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/investor', label: 'Investor' },
   { href: '#contact', label: 'Contact' },
   { href: '#dashboard', label: 'SOC Dashboard' },
   { href: '#trust-center', label: 'Trust Center' },

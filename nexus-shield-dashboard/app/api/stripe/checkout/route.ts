@@ -11,6 +11,7 @@ export const runtime = 'nodejs';
 const checkoutRequestSchema = z.object({
   org_id: z.string().uuid().optional(),
   billing_interval: z.enum(['month', 'year']).default('month'),
+  plan: z.enum(['pro', 'team']).default('pro'),
 });
 
 export async function POST(req: NextRequest) {
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { billing_interval: billingInterval } = parsed.data;
+    const { billing_interval: billingInterval, plan } = parsed.data;
     const orgId = auth.org.id;
 
     if (parsed.data.org_id && parsed.data.org_id !== orgId) {
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest) {
       customerId: org.stripe_customer_id,
       billingInterval: billingInterval as BillingInterval,
       appUrl: getSiteUrl(req.nextUrl.origin),
+      plan,
     });
 
     return NextResponse.json({ url: session.url, session_id: session.id }, { status: 200 });

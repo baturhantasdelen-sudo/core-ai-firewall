@@ -41,7 +41,7 @@ export function BillingToggle({ interval, onChange }: BillingToggleProps) {
           isAnnual ? 'text-emerald-400 opacity-100' : 'text-zinc-500 opacity-70'
         }`}
       >
-        Save 17% with annual billing — Pro from $49/mo
+        Save 17% with annual billing — Pro from $74/mo
       </p>
     </div>
   );
