@@ -20,6 +20,9 @@
 # production
 /build
 
+# research pipeline temp clones
+/temp_targets/
+
 # demo recordings
 /videos/*.webm
 /videos/*.mp4

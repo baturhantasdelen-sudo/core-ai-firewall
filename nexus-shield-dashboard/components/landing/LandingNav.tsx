@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: '#features', label: 'Features' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/investor', label: 'Investor' },
+  { href: '/reports/state-of-agent-security-2026', label: 'Research 2026' },
   { href: '#contact', label: 'Contact' },
   { href: '#dashboard', label: 'SOC Dashboard' },
   { href: '#trust-center', label: 'Trust Center' },
