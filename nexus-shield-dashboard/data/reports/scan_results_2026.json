@@ -1,0 +1,3117 @@
+{
+  "reportId": "state-of-agent-security-2026",
+  "title": "State of AI Agent Security 2026",
+  "generatedAt": "2026-09-19T20:01:46.324Z",
+  "targetCount": 50,
+  "results": [
+    {
+      "id": "langchain",
+      "slug": "langchain-ai/langchain",
+      "name": "langchain-ai/langchain",
+      "category": "framework",
+      "github": "langchain-ai/langchain",
+      "githubUrl": "https://github.com/langchain-ai/langchain",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "bf933d673291a6890d0d842c890f1a9f40da8694f425196b4fa83f759c75ecb1",
+      "scannedAt": "2026-09-19T20:00:45.910Z",
+      "latencyMs": 251,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/langchain-ai/langchain",
+        "scannedAt": "2026-09-19T20:00:45.910Z",
+        "latencyMs": 251,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "langchainjs",
+      "slug": "langchain-ai/langchainjs",
+      "name": "langchain-ai/langchainjs",
+      "category": "framework",
+      "github": "langchain-ai/langchainjs",
+      "githubUrl": "https://github.com/langchain-ai/langchainjs",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "9ef2c6c7688e216f7f5ce75ae3550eb5c1852da444e6e794f4738244017a6243",
+      "scannedAt": "2026-09-19T20:00:45.931Z",
+      "latencyMs": 271,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/langchain-ai/langchainjs",
+        "scannedAt": "2026-09-19T20:00:45.931Z",
+        "latencyMs": 271,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "crewai",
+      "slug": "crewAIInc/crewAI",
+      "name": "crewAIInc/crewAI",
+      "category": "framework",
+      "github": "crewAIInc/crewAI",
+      "githubUrl": "https://github.com/crewAIInc/crewAI",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "184e46374e17eb2e2263aaccffd30654bb4e8ddc0f7d9a64dce93a1efb7c58bc",
+      "scannedAt": "2026-09-19T20:00:45.904Z",
+      "latencyMs": 246,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/crewAIInc/crewAI",
+        "scannedAt": "2026-09-19T20:00:45.904Z",
+        "latencyMs": 246,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "autogpt",
+      "slug": "Significant-Gravitas/AutoGPT",
+      "name": "Significant-Gravitas/AutoGPT",
+      "category": "framework",
+      "github": "Significant-Gravitas/AutoGPT",
+      "githubUrl": "https://github.com/Significant-Gravitas/AutoGPT",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "ca1b3f46e3b87785a88e2516a42683d2e47e8182568595fab200559ad02aecd7",
+      "scannedAt": "2026-09-19T20:00:46.016Z",
+      "latencyMs": 262,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/Significant-Gravitas/AutoGPT",
+        "scannedAt": "2026-09-19T20:00:46.016Z",
+        "latencyMs": 262,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "llama-index",
+      "slug": "run-llama/llama_index",
+      "name": "run-llama/llama_index",
+      "category": "framework",
+      "github": "run-llama/llama_index",
+      "githubUrl": "https://github.com/run-llama/llama_index",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "8160270d945ce23bdceec8c12c93d9bf4e3124a02a16f3d8108b841510abadba",
+      "scannedAt": "2026-09-19T20:00:51.263Z",
+      "latencyMs": 305,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/run-llama/llama_index",
+        "scannedAt": "2026-09-19T20:00:51.263Z",
+        "latencyMs": 305,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "autogen",
+      "slug": "microsoft/autogen",
+      "name": "microsoft/autogen",
+      "category": "framework",
+      "github": "microsoft/autogen",
+      "githubUrl": "https://github.com/microsoft/autogen",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "591a13c54b4927b63a0e368e74d7f5c7f27faf0ab59be5b9f47242b28a592785",
+      "scannedAt": "2026-09-19T20:00:51.374Z",
+      "latencyMs": 337,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/microsoft/autogen",
+        "scannedAt": "2026-09-19T20:00:51.374Z",
+        "latencyMs": 337,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "phidata",
+      "slug": "agno-agi/agno",
+      "name": "agno-agi/agno",
+      "category": "framework",
+      "github": "agno-agi/agno",
+      "githubUrl": "https://github.com/agno-agi/agno",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "3da2318af90ea72df50fe23b2c241964265b8c97f521b470c6efe09986f4a76d",
+      "scannedAt": "2026-09-19T20:00:51.211Z",
+      "latencyMs": 346,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/agno-agi/agno",
+        "scannedAt": "2026-09-19T20:00:51.211Z",
+        "latencyMs": 346,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "astro-cli",
+      "slug": "astronomer/astro-cli",
+      "name": "astronomer/astro-cli",
+      "category": "framework",
+      "github": "astronomer/astro-cli",
+      "githubUrl": "https://github.com/astronomer/astro-cli",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "4fcb1d29fd17dfcb062242431f0bbcebb2df4e94d100a8645d75be9e1ef9892c",
+      "scannedAt": "2026-09-19T20:00:51.372Z",
+      "latencyMs": 336,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/astronomer/astro-cli",
+        "scannedAt": "2026-09-19T20:00:51.372Z",
+        "latencyMs": 336,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "superagent",
+      "slug": "superagent-ai/superagent",
+      "name": "superagent-ai/superagent",
+      "category": "framework",
+      "github": "superagent-ai/superagent",
+      "githubUrl": "https://github.com/superagent-ai/superagent",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "a101e361f174ad5f636c88d885a1f110866527f4e69ccb552b459e5e39dc8c77",
+      "scannedAt": "2026-09-19T20:00:55.745Z",
+      "latencyMs": 267,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/superagent-ai/superagent",
+        "scannedAt": "2026-09-19T20:00:55.745Z",
+        "latencyMs": 267,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "e2b",
+      "slug": "e2b-dev/E2B",
+      "name": "e2b-dev/E2B",
+      "category": "framework",
+      "github": "e2b-dev/E2B",
+      "githubUrl": "https://github.com/e2b-dev/E2B",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "d90987515542df987a7ab8b3d0da36337ec7e8f125c32111ba803802e55e9365",
+      "scannedAt": "2026-09-19T20:00:55.792Z",
+      "latencyMs": 254,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/e2b-dev/E2B",
+        "scannedAt": "2026-09-19T20:00:55.792Z",
+        "latencyMs": 254,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "agentgpt",
+      "slug": "reworkd/AgentGPT",
+      "name": "reworkd/AgentGPT",
+      "category": "framework",
+      "github": "reworkd/AgentGPT",
+      "githubUrl": "https://github.com/reworkd/AgentGPT",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "f6a770aa4989b085b852f1b539c783d3f4291952a3e52f581a003aefb40428fd",
+      "scannedAt": "2026-09-19T20:00:55.787Z",
+      "latencyMs": 230,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/reworkd/AgentGPT",
+        "scannedAt": "2026-09-19T20:00:55.787Z",
+        "latencyMs": 230,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "babyagi",
+      "slug": "yoheinakajima/babyagi",
+      "name": "yoheinakajima/babyagi",
+      "category": "framework",
+      "github": "yoheinakajima/babyagi",
+      "githubUrl": "https://github.com/yoheinakajima/babyagi",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "3f950c1e8962f98fc2a08eb7a6b6382f16f7dc9da44d14246907ab8c118ec923",
+      "scannedAt": "2026-09-19T20:00:55.821Z",
+      "latencyMs": 263,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/yoheinakajima/babyagi",
+        "scannedAt": "2026-09-19T20:00:55.821Z",
+        "latencyMs": 263,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "composio",
+      "slug": "ComposioHQ/composio",
+      "name": "ComposioHQ/composio",
+      "category": "framework",
+      "github": "ComposioHQ/composio",
+      "githubUrl": "https://github.com/ComposioHQ/composio",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "820aa2cfb9b08f0be7242f0567395b6782c4c369b34efe73685377edc3afd6a3",
+      "scannedAt": "2026-09-19T20:01:01.414Z",
+      "latencyMs": 411,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/ComposioHQ/composio",
+        "scannedAt": "2026-09-19T20:01:01.414Z",
+        "latencyMs": 411,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "smol-developer",
+      "slug": "smol-ai/developer",
+      "name": "smol-ai/developer",
+      "category": "framework",
+      "github": "smol-ai/developer",
+      "githubUrl": "https://github.com/smol-ai/developer",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "bc980c6bd56b327aa419d97a22b3f5e81bfb0e9451482aac456b2260eeb35f9c",
+      "scannedAt": "2026-09-19T20:01:01.080Z",
+      "latencyMs": 402,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/smol-ai/developer",
+        "scannedAt": "2026-09-19T20:01:01.080Z",
+        "latencyMs": 402,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "chatdev",
+      "slug": "OpenBMB/ChatDev",
+      "name": "OpenBMB/ChatDev",
+      "category": "framework",
+      "github": "OpenBMB/ChatDev",
+      "githubUrl": "https://github.com/OpenBMB/ChatDev",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "2b2f337aedfa61eef703eb540397fe3aaecf2d23f76088c6c6ef1e6f7d76f4a7",
+      "scannedAt": "2026-09-19T20:01:01.079Z",
+      "latencyMs": 402,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/OpenBMB/ChatDev",
+        "scannedAt": "2026-09-19T20:01:01.079Z",
+        "latencyMs": 402,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "shoggoth",
+      "slug": "ShoggothAI/shoggoth",
+      "name": "ShoggothAI/shoggoth",
+      "category": "framework",
+      "github": "ShoggothAI/shoggoth",
+      "githubUrl": "https://github.com/ShoggothAI/shoggoth",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "742be2629ecdc7e3931b111e8962a0dc35f161924cb83f12d0ffc2dfba5f9e66",
+      "scannedAt": "2026-09-19T20:01:01.159Z",
+      "latencyMs": 320,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/ShoggothAI/shoggoth",
+        "scannedAt": "2026-09-19T20:01:01.159Z",
+        "latencyMs": 320,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "agent-template-assaf",
+      "slug": "assafmo/agent-template",
+      "name": "assafmo/agent-template",
+      "category": "framework",
+      "github": "assafmo/agent-template",
+      "githubUrl": "https://github.com/assafmo/agent-template",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "199dbf4fe95a5d0084221ee9a49c56fe1660faf7a6a98a992220bb633d4dc8c5",
+      "scannedAt": "2026-09-19T20:01:05.755Z",
+      "latencyMs": 303,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/assafmo/agent-template",
+        "scannedAt": "2026-09-19T20:01:05.755Z",
+        "latencyMs": 303,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "agent-template-langchain",
+      "slug": "langchain-ai/agent-protocol-toolkit",
+      "name": "langchain-ai/agent-protocol-toolkit",
+      "category": "framework",
+      "github": "langchain-ai/agent-protocol-toolkit",
+      "githubUrl": "https://github.com/langchain-ai/agent-protocol-toolkit",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "8f55fad172040edb0ccabbe153239e28dc6960ff1541a3aeb2fc0efad14baa70",
+      "scannedAt": "2026-09-19T20:01:05.658Z",
+      "latencyMs": 281,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/langchain-ai/agent-protocol-toolkit",
+        "scannedAt": "2026-09-19T20:01:05.658Z",
+        "latencyMs": 281,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "crewai-examples",
+      "slug": "crewAIInc/crewAI-examples",
+      "name": "crewAIInc/crewAI-examples",
+      "category": "framework",
+      "github": "crewAIInc/crewAI-examples",
+      "githubUrl": "https://github.com/crewAIInc/crewAI-examples",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "cd63396f508a168ff08b670147f3d3cf11df4543c94882d1260e1a20f7fc45f0",
+      "scannedAt": "2026-09-19T20:01:05.783Z",
+      "latencyMs": 292,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/crewAIInc/crewAI-examples",
+        "scannedAt": "2026-09-19T20:01:05.783Z",
+        "latencyMs": 292,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "llama-agents",
+      "slug": "run-llama/llama_index",
+      "name": "run-llama/llama_index",
+      "category": "framework",
+      "github": "run-llama/llama_index",
+      "githubUrl": "https://github.com/run-llama/llama_index",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "8be93d114c06df73e96929b14b1a154c7d316fd4375d335c5f4389e55f38c84f",
+      "scannedAt": "2026-09-19T20:01:05.999Z",
+      "latencyMs": 347,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/run-llama/llama_index",
+        "scannedAt": "2026-09-19T20:01:05.999Z",
+        "latencyMs": 347,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "dify",
+      "slug": "langgenius/dify",
+      "name": "langgenius/dify",
+      "category": "framework",
+      "github": "langgenius/dify",
+      "githubUrl": "https://github.com/langgenius/dify",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "c5e3b491e6e76b38780608741a1fe090622f54f2e6e089db4d73f0c56c717528",
+      "scannedAt": "2026-09-19T20:01:10.143Z",
+      "latencyMs": 239,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/langgenius/dify",
+        "scannedAt": "2026-09-19T20:01:10.143Z",
+        "latencyMs": 239,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "flowise",
+      "slug": "FlowiseAI/Flowise",
+      "name": "FlowiseAI/Flowise",
+      "category": "framework",
+      "github": "FlowiseAI/Flowise",
+      "githubUrl": "https://github.com/FlowiseAI/Flowise",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "5f1b1e70f0d39792015aa99b1d8c00668396ed0be61db066d84d8716c376c173",
+      "scannedAt": "2026-09-19T20:01:10.309Z",
+      "latencyMs": 252,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/FlowiseAI/Flowise",
+        "scannedAt": "2026-09-19T20:01:10.309Z",
+        "latencyMs": 252,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "activepieces",
+      "slug": "activepieces/activepieces",
+      "name": "activepieces/activepieces",
+      "category": "framework",
+      "github": "activepieces/activepieces",
+      "githubUrl": "https://github.com/activepieces/activepieces",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "0d96fed6b5f12e6ed540c8c6b71bde519e585089a5496c940f1d1e04b9c5ca5b",
+      "scannedAt": "2026-09-19T20:01:10.176Z",
+      "latencyMs": 269,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/activepieces/activepieces",
+        "scannedAt": "2026-09-19T20:01:10.176Z",
+        "latencyMs": 269,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "n8n",
+      "slug": "n8n-io/n8n",
+      "name": "n8n-io/n8n",
+      "category": "framework",
+      "github": "n8n-io/n8n",
+      "githubUrl": "https://github.com/n8n-io/n8n",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "abb96eabd574918263031ed69fba2f55d28356b5d6f8fca8a7f597b92a06e998",
+      "scannedAt": "2026-09-19T20:01:10.470Z",
+      "latencyMs": 264,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/n8n-io/n8n",
+        "scannedAt": "2026-09-19T20:01:10.470Z",
+        "latencyMs": 264,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "swarms",
+      "slug": "kyegomez/swarms",
+      "name": "kyegomez/swarms",
+      "category": "framework",
+      "github": "kyegomez/swarms",
+      "githubUrl": "https://github.com/kyegomez/swarms",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "386361f61d2f1ecb48e636fc63f5f5633232eba18fa663e1723bc20e27bc3db4",
+      "scannedAt": "2026-09-19T20:01:14.694Z",
+      "latencyMs": 260,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/kyegomez/swarms",
+        "scannedAt": "2026-09-19T20:01:14.694Z",
+        "latencyMs": 260,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-servers-root",
+      "slug": "modelcontextprotocol/servers",
+      "name": "modelcontextprotocol/servers",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "6a203aa2fba044688a20b440401ac12e27eee8915581d2f81cb25843524f3cd0",
+      "scannedAt": "2026-09-19T20:01:14.720Z",
+      "latencyMs": 265,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers",
+        "scannedAt": "2026-09-19T20:01:14.720Z",
+        "latencyMs": 265,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "awesome-mcp",
+      "slug": "punkpeye/awesome-mcp-servers",
+      "name": "punkpeye/awesome-mcp-servers",
+      "category": "mcp",
+      "github": "punkpeye/awesome-mcp-servers",
+      "githubUrl": "https://github.com/punkpeye/awesome-mcp-servers",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "ad8fd0611b28518040f2d8f43b640e788586defb49527c947e78070141f3c255",
+      "scannedAt": "2026-09-19T20:01:15.236Z",
+      "latencyMs": 238,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/punkpeye/awesome-mcp-servers",
+        "scannedAt": "2026-09-19T20:01:15.236Z",
+        "latencyMs": 238,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-postgres",
+      "slug": "mcp-servers/postgres",
+      "name": "mcp-servers/postgres",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "DB Write"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "d53d2cf7c8fdcb19dd6d761016c35ac24440c3383c7164d5f717f257451b08bd",
+      "scannedAt": "2026-09-19T20:01:15.736Z",
+      "latencyMs": 242,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+        "scannedAt": "2026-09-19T20:01:15.736Z",
+        "latencyMs": 242,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-sqlite",
+      "slug": "mcp-servers/sqlite",
+      "name": "mcp-servers/sqlite",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "DB Write"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "6092f6065ed9bdc7e845f3b7b8fed30701b1fb85839ea56fb4328d986ece826c",
+      "scannedAt": "2026-09-19T20:01:19.617Z",
+      "latencyMs": 246,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite",
+        "scannedAt": "2026-09-19T20:01:19.617Z",
+        "latencyMs": 246,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-gdrive",
+      "slug": "mcp-servers/gdrive",
+      "name": "mcp-servers/gdrive",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "3e3355f0f8f6a49bd18a1d679a04d46a16825a5a98d7bfdbcf4f6d81680dd8bd",
+      "scannedAt": "2026-09-19T20:01:19.551Z",
+      "latencyMs": 245,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive",
+        "scannedAt": "2026-09-19T20:01:19.551Z",
+        "latencyMs": 245,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-slack",
+      "slug": "mcp-servers/slack",
+      "name": "mcp-servers/slack",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/slack",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "2e17092783ab063950fef0ed9a5b4d45697baa402bd7afe8f8dce6fec4febc52",
+      "scannedAt": "2026-09-19T20:01:20.179Z",
+      "latencyMs": 250,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/slack",
+        "scannedAt": "2026-09-19T20:01:20.179Z",
+        "latencyMs": 250,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-github",
+      "slug": "mcp-servers/github",
+      "name": "mcp-servers/github",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "c78a8f30771aa5163c6fcd2882eb28ac805e931cf621b6aaadf2481107140938",
+      "scannedAt": "2026-09-19T20:01:20.579Z",
+      "latencyMs": 253,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+        "scannedAt": "2026-09-19T20:01:20.579Z",
+        "latencyMs": 253,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-puppeteer",
+      "slug": "mcp-servers/puppeteer",
+      "name": "mcp-servers/puppeteer",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "eb4e1b5de0980dadc9669f4658a2d0bb59401e7464012f19b1a4c39a7a4d2e47",
+      "scannedAt": "2026-09-19T20:01:24.498Z",
+      "latencyMs": 249,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer",
+        "scannedAt": "2026-09-19T20:01:24.498Z",
+        "latencyMs": 249,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-fetch",
+      "slug": "mcp-servers/fetch",
+      "name": "mcp-servers/fetch",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "6b60e509d97a366c8b4075a6f356aa7f1b72493bcfdce82562ba1fd2fd274bb1",
+      "scannedAt": "2026-09-19T20:01:24.534Z",
+      "latencyMs": 253,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+        "scannedAt": "2026-09-19T20:01:24.534Z",
+        "latencyMs": 253,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-memory",
+      "slug": "mcp-servers/memory",
+      "name": "mcp-servers/memory",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "bd3e5f2a762f08a5017cefd8dc3939d1e2932bf035b16a912914aa657c6ce877",
+      "scannedAt": "2026-09-19T20:01:25.249Z",
+      "latencyMs": 243,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
+        "scannedAt": "2026-09-19T20:01:25.249Z",
+        "latencyMs": 243,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-brave-search",
+      "slug": "mcp-servers/brave-search",
+      "name": "mcp-servers/brave-search",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "2ed999e2c83f372e1269a32df67106b093eb539b593d70ea1868e194d48fe6dd",
+      "scannedAt": "2026-09-19T20:01:25.494Z",
+      "latencyMs": 257,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search",
+        "scannedAt": "2026-09-19T20:01:25.494Z",
+        "latencyMs": 257,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-git",
+      "slug": "mcp-servers/git",
+      "name": "mcp-servers/git",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "2111acca7836feefb745939b2f3b48b05b0b9e3cf2df812a2a5e337d35f08773",
+      "scannedAt": "2026-09-19T20:01:29.521Z",
+      "latencyMs": 259,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+        "scannedAt": "2026-09-19T20:01:29.521Z",
+        "latencyMs": 259,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-evernote",
+      "slug": "mcp-servers/evernote",
+      "name": "mcp-servers/evernote",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/evernote",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "2ddefd191161b5899baf255959c1c98c04c3ecc85ae1ddcffc04aeedabac78fb",
+      "scannedAt": "2026-09-19T20:01:29.567Z",
+      "latencyMs": 273,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/evernote",
+        "scannedAt": "2026-09-19T20:01:29.567Z",
+        "latencyMs": 273,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-sentry",
+      "slug": "mcp-servers/sentry",
+      "name": "mcp-servers/sentry",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/sentry",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "72a2e645a3d7afb53ff79a907781165e8d974ed021fe1e92cabdec9ca08cb9f4",
+      "scannedAt": "2026-09-19T20:01:30.208Z",
+      "latencyMs": 241,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/sentry",
+        "scannedAt": "2026-09-19T20:01:30.208Z",
+        "latencyMs": 241,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-zendesk",
+      "slug": "mcp-servers/zendesk",
+      "name": "mcp-servers/zendesk",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/zendesk",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "0033f9efb2d7d34dfd4ffb8e352e3e06d51dd45e625bea758d910403f6fb11d1",
+      "scannedAt": "2026-09-19T20:01:30.425Z",
+      "latencyMs": 257,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/zendesk",
+        "scannedAt": "2026-09-19T20:01:30.425Z",
+        "latencyMs": 257,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-linear",
+      "slug": "mcp-servers/linear",
+      "name": "mcp-servers/linear",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/linear",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "7cf48b24b31f020720dbf1b55ce6c25aecc7c76aed6b7d0c291c40c1a4fc3512",
+      "scannedAt": "2026-09-19T20:01:34.579Z",
+      "latencyMs": 246,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/linear",
+        "scannedAt": "2026-09-19T20:01:34.579Z",
+        "latencyMs": 246,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-notion",
+      "slug": "mcp-servers/notion",
+      "name": "mcp-servers/notion",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/notion",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "6187874408f42a44e2313ddad43d314d68b50a174b1c2201b7e622f08e713342",
+      "scannedAt": "2026-09-19T20:01:34.923Z",
+      "latencyMs": 460,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/notion",
+        "scannedAt": "2026-09-19T20:01:34.923Z",
+        "latencyMs": 460,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-stripe",
+      "slug": "mcp-servers/stripe",
+      "name": "mcp-servers/stripe",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/stripe",
+      "securityScore": 45,
+      "grade": "D",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "14e223c2cb2c173a114073b93b9eb9b547a650ea73f7bfe1d00f04a58a189a51",
+      "scannedAt": "2026-09-19T20:01:35.896Z",
+      "latencyMs": 232,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 3,
+      "report": {
+        "score": 45,
+        "grade": "D",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/stripe",
+        "scannedAt": "2026-09-19T20:01:35.896Z",
+        "latencyMs": 232,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          },
+          {
+            "title": "Financial transfer capability exposed",
+            "severity": "high",
+            "category": "tool_misuse",
+            "description": "Dangerous capability \"\\b(transfer|payout|stripe|wire|payment)\\b\" exposed without runtime interception.",
+            "recommendation": "Wrap tool registry with Nexus Shield SDK and require signed action approvals.",
+            "id": "NS-F003",
+            "sdkFix": "nexus.shield({ intentVerification: true, evidenceChain: true })"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 2,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 3,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-redis",
+      "slug": "mcp-servers/redis",
+      "name": "mcp-servers/redis",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/redis",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "DB Write"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "cd0cb44cfeb715f060428e1ebd09a215f4742509274748dcd8a454634f79cadf",
+      "scannedAt": "2026-09-19T20:01:36.129Z",
+      "latencyMs": 237,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/redis",
+        "scannedAt": "2026-09-19T20:01:36.129Z",
+        "latencyMs": 237,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-aws-s3",
+      "slug": "mcp-servers/aws-kb-retrieval",
+      "name": "mcp-servers/aws-kb-retrieval",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/aws-kb-retrieval",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "ba4ab016b334be16ae1cfe51ae80a270ac85a916d2692b8787ad957d60ea225a",
+      "scannedAt": "2026-09-19T20:01:40.552Z",
+      "latencyMs": 339,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/aws-kb-retrieval",
+        "scannedAt": "2026-09-19T20:01:40.552Z",
+        "latencyMs": 339,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-elasticsearch",
+      "slug": "mcp-servers/elasticsearch",
+      "name": "mcp-servers/elasticsearch",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/elasticsearch",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "f79e338fe3da7f31a33712c2474031282ca5da4a0600599304109a97b572734b",
+      "scannedAt": "2026-09-19T20:01:40.887Z",
+      "latencyMs": 331,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/elasticsearch",
+        "scannedAt": "2026-09-19T20:01:40.887Z",
+        "latencyMs": 331,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-docker",
+      "slug": "mcp-servers/docker",
+      "name": "mcp-servers/docker",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/docker",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Shell Exec"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "55cc503ec9f19a5b2bea8238c670d09579ac773f55b8a5c335432c27f90ccfbb",
+      "scannedAt": "2026-09-19T20:01:41.709Z",
+      "latencyMs": 253,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/docker",
+        "scannedAt": "2026-09-19T20:01:41.709Z",
+        "latencyMs": 253,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-kubernetes",
+      "slug": "mcp-servers/kubernetes",
+      "name": "mcp-servers/kubernetes",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/kubernetes",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Shell Exec"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "2350975ba6d16908ec503fe0667ae9beb3c91d48a6fa1f34073ae55fd2eb97d4",
+      "scannedAt": "2026-09-19T20:01:42.035Z",
+      "latencyMs": 258,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/kubernetes",
+        "scannedAt": "2026-09-19T20:01:42.035Z",
+        "latencyMs": 258,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-mongodb",
+      "slug": "mcp-servers/mongodb",
+      "name": "mcp-servers/mongodb",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/mongodb",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "DB Write"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "bdbad4643ac1526a9e70753a6996de87a15aed394cf5bb3d982c4920058b1fdc",
+      "scannedAt": "2026-09-19T20:01:46.057Z",
+      "latencyMs": 267,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/mongodb",
+        "scannedAt": "2026-09-19T20:01:46.057Z",
+        "latencyMs": 267,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    },
+    {
+      "id": "mcp-jira",
+      "slug": "mcp-servers/jira",
+      "name": "mcp-servers/jira",
+      "category": "mcp",
+      "github": "modelcontextprotocol/servers",
+      "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/jira",
+      "securityScore": 60,
+      "grade": "C",
+      "parameterValidationStatus": "Missing",
+      "privilegeLevel": [
+        "Read-Only (inferred)"
+      ],
+      "intentDivergenceRisk": "High",
+      "auditTrailCapability": "Absent",
+      "auditHash": "3a18aa86403661942e0215db1f31030787e9601ba767a875c9175fe8226ee119",
+      "scannedAt": "2026-09-19T20:01:46.324Z",
+      "latencyMs": 252,
+      "fetchStatus": "error",
+      "fetchError": "Unable to fetch repository contents via GitHub API",
+      "findingsCount": 2,
+      "report": {
+        "score": 60,
+        "grade": "C",
+        "inputType": "github",
+        "target": "https://github.com/modelcontextprotocol/servers/tree/main/src/jira",
+        "scannedAt": "2026-09-19T20:01:46.324Z",
+        "latencyMs": 252,
+        "findings": [
+          {
+            "title": "Missing Intent-Action Verification",
+            "severity": "critical",
+            "category": "intent_verification",
+            "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
+            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
+            "id": "NS-F001"
+          },
+          {
+            "title": "Lack of Cryptographic Evidence Chain",
+            "severity": "high",
+            "category": "evidence_chain",
+            "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
+            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
+            "id": "NS-F002"
+          }
+        ],
+        "summary": {
+          "critical": 1,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "attackSurface": {
+          "toolsDetected": 0,
+          "unsignedActions": 2,
+          "evidenceChainPresent": false,
+          "intentVerificationPresent": false
+        }
+      }
+    }
+  ]
+}

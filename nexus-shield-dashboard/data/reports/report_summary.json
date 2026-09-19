@@ -1,0 +1,48 @@
+{
+  "reportId": "state-of-agent-security-2026",
+  "title": "State of AI Agent Security 2026",
+  "generatedAt": "2026-09-19T20:01:46.324Z",
+  "targetCount": 50,
+  "frameworksScanned": 25,
+  "mcpServersScanned": 25,
+  "lackingParameterValidationPct": 100,
+  "excessiveMcpPermissionsPct": 24,
+  "intentDivergenceVulnerablePct": 100,
+  "avgSecurityScoreFrameworks": 60,
+  "avgSecurityScoreMcp": 59.4,
+  "avgSecurityScoreOverall": 59.7,
+  "auditTrailAbsentPct": 100,
+  "verificationHash": "be61e3d001f31c2dfa52fa4a43b802882c0ab67c90868a58755c4af8e14dea9a",
+  "keyMetricCards": [
+    {
+      "label": "Lack Parameter Validation",
+      "value": "100%",
+      "detail": "50 of 50 targets missing or weak schema enforcement"
+    },
+    {
+      "label": "Excessive MCP Permissions",
+      "value": "24%",
+      "detail": "6 MCP servers expose write/delete or shell capabilities"
+    },
+    {
+      "label": "Intent Divergence Risk",
+      "value": "100%",
+      "detail": "50 setups vulnerable to intent/action mismatch attacks"
+    },
+    {
+      "label": "Missing Audit Trail",
+      "value": "100%",
+      "detail": "50 targets lack cryptographic evidence chain configuration"
+    },
+    {
+      "label": "Avg Score — Frameworks",
+      "value": "60",
+      "detail": "Mean security score across agent frameworks & templates"
+    },
+    {
+      "label": "Avg Score — MCP Servers",
+      "value": "59.4",
+      "detail": "Mean security score across MCP server implementations"
+    }
+  ]
+}
