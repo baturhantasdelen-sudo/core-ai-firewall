@@ -34,7 +34,7 @@ export const APP_DOC_ROUTES = {
 } as const;
 
 /** Open-source agent runtime security benchmark harness. */
-export const BENCHMARK_GITHUB_URL = 'https://github.com/nexusshield/harness';
+export const BENCHMARK_GITHUB_URL = 'https://github.com/baturhantasdelen-sudo/harness';
 
 function normalizeOrigin(url: string): string {
   return url.replace(/\/$/, '');
