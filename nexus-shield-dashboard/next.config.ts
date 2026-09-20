@@ -18,16 +18,6 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,
   },
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'www.nexusshield.ai' }],
-        destination: 'https://nexusshield.ai/:path*',
-        permanent: true,
-      },
-    ];
-  },
   async headers() {
     return [
       {

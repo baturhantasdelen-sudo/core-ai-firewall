@@ -85,7 +85,7 @@ NEXT_PUBLIC_APP_URL=https://nexus-shield-dashboard.vercel.app
 Resolve-DnsName nexusshield.ai -Type A
 Resolve-DnsName www.nexusshield.ai -Type CNAME
 curl.exe -I https://nexusshield.ai/docs/benchmark
-curl.exe -I https://www.nexusshield.ai/docs/benchmark   # should 308 → apex
+curl.exe -I https://www.nexusshield.ai/docs/benchmark   # should redirect via Vercel domain settings
 ```
 
 Expected after fix:
@@ -99,5 +99,5 @@ Expected after fix:
 ## Codebase safeguards (already applied)
 
 - `lib/site.ts` — `DEPLOYMENT_FALLBACK_URL` when apex DNS is missing; blocks API subdomain for doc links
-- `vercel.json` — `www` → apex 301 redirect (active once www DNS exists)
-- `next.config.ts` — no external redirects; cache headers only
+- Host redirects (`www` ↔ apex) — configure in **Vercel → Domains** only (not in `vercel.json` / `next.config.ts`)
+- `next.config.ts` / `vercel.json` — cache and security headers only

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 /** Canonical marketing origin once DNS is configured at Cloudflare. */
 export const PRIMARY_SITE_URL = 'https://nexusshield.ai';
 
-/** Alternate canonical host (redirects to apex via vercel.json). */
+/** Alternate canonical host (redirect handled by Vercel domain settings). */
 export const WWW_SITE_URL = 'https://www.nexusshield.ai';
 
 /**
