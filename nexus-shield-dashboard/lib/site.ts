@@ -33,8 +33,8 @@ export const APP_DOC_ROUTES = {
   sdk: '/docs#sdk',
 } as const;
 
-export const BENCHMARK_GITHUB_URL =
-  'https://github.com/nexus-shield/agent-security-benchmark';
+/** Public harness repo pending; org page is the verified fallback (no 404). */
+export const BENCHMARK_GITHUB_URL = 'https://github.com/nexusshield';
 
 function normalizeOrigin(url: string): string {
   return url.replace(/\/$/, '');
