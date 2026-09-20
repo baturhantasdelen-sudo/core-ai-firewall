@@ -1,0 +1,268 @@
+{
+  "batchId": "unified-responsible-disclosure-2026",
+  "generatedAt": "2026-09-20T10:54:07.582Z",
+  "targetCount": 15,
+  "verticals": {
+    "yc-ai-saas": 5,
+    "fintech-mcp": 5,
+    "enterprise-tr": 5
+  },
+  "results": [
+    {
+      "organizationName": "AgentGPT (Reworkd)",
+      "vertical": "yc-ai-saas",
+      "verticalLabel": "YC AI SaaS",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/agentgpt-security-advisory-2026.pdf",
+      "evidenceHash": "ccf9c010605bde479deacb81c831ee1de4334e68894250095ab287b86d275b96",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for AgentGPT (Reworkd) (SHA-256: ccf9c010605bde47…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of AgentGPT (Reworkd)'s agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — AgentGPT (Reworkd) AI Agent Güvenlik Danışmanlığı (SHA-256: ccf9c010605bde47…)\n\nSayın CISO / CTO,\n\nNexus Shield, AgentGPT (Reworkd) agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on AgentGPT (Reworkd) (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — AgentGPT (Reworkd) için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "CrewAI",
+      "vertical": "yc-ai-saas",
+      "verticalLabel": "YC AI SaaS",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/crewai-security-advisory-2026.pdf",
+      "evidenceHash": "a7732e9a92cd3e403fd9f852b91ca3ac9ffd852012947c333e44176142f7491c",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for CrewAI (SHA-256: a7732e9a92cd3e40…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of CrewAI's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — CrewAI AI Agent Güvenlik Danışmanlığı (SHA-256: a7732e9a92cd3e40…)\n\nSayın CISO / CTO,\n\nNexus Shield, CrewAI agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on CrewAI (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — CrewAI için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Dify AI",
+      "vertical": "yc-ai-saas",
+      "verticalLabel": "YC AI SaaS",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/dify-ai-security-advisory-2026.pdf",
+      "evidenceHash": "f01fa878d91e412b1b8892b6865a42801db07247c7d5b40ba6874d2905f3db1b",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Dify AI (SHA-256: f01fa878d91e412b…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Dify AI's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Dify AI AI Agent Güvenlik Danışmanlığı (SHA-256: f01fa878d91e412b…)\n\nSayın CISO / CTO,\n\nNexus Shield, Dify AI agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Dify AI (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Dify AI için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Flowise AI",
+      "vertical": "yc-ai-saas",
+      "verticalLabel": "YC AI SaaS",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/flowise-security-advisory-2026.pdf",
+      "evidenceHash": "7873436b236dc2fcf0777273dc8d6fc7cfae5a3528d7d7eb0b3cc0e48d3dec60",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Flowise AI (SHA-256: 7873436b236dc2fc…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Flowise AI's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Flowise AI AI Agent Güvenlik Danışmanlığı (SHA-256: 7873436b236dc2fc…)\n\nSayın CISO / CTO,\n\nNexus Shield, Flowise AI agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Flowise AI (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Flowise AI için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Superagent",
+      "vertical": "yc-ai-saas",
+      "verticalLabel": "YC AI SaaS",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/superagent-security-advisory-2026.pdf",
+      "evidenceHash": "8205f39882ae8da8e2d318f3d7c375e8eef7721d9df4df9ffdf01b8bfb5f3fe0",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Superagent (SHA-256: 8205f39882ae8da8…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Superagent's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Superagent AI Agent Güvenlik Danışmanlığı (SHA-256: 8205f39882ae8da8…)\n\nSayın CISO / CTO,\n\nNexus Shield, Superagent agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Superagent (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Superagent için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Stripe MCP Server",
+      "vertical": "fintech-mcp",
+      "verticalLabel": "FinTech & Open Banking MCP",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/stripe-mcp-security-advisory-2026.pdf",
+      "evidenceHash": "295f612bb42539f10e7ae49ec01bb1586dac262aad50d49599d23b942d8950e2",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Stripe MCP Server (SHA-256: 295f612bb42539f1…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Stripe MCP Server's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Stripe MCP Server AI Agent Güvenlik Danışmanlığı (SHA-256: 295f612bb42539f1…)\n\nSayın CISO / CTO,\n\nNexus Shield, Stripe MCP Server agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Stripe MCP Server (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Stripe MCP Server için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Composio (FinTech Integrations)",
+      "vertical": "fintech-mcp",
+      "verticalLabel": "FinTech & Open Banking MCP",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/composio-fintech-security-advisory-2026.pdf",
+      "evidenceHash": "3df62c97796459b5849e474dc2495785796a41080dcf4f5631e6c318b6fcf4b7",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Composio (FinTech Integrations) (SHA-256: 3df62c97796459b5…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Composio (FinTech Integrations)'s agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Composio (FinTech Integrations) AI Agent Güvenlik Danışmanlığı (SHA-256: 3df62c97796459b5…)\n\nSayın CISO / CTO,\n\nNexus Shield, Composio (FinTech Integrations) agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Composio (FinTech Integrations) (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Composio (FinTech Integrations) için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "n8n Open Banking Workflows",
+      "vertical": "fintech-mcp",
+      "verticalLabel": "FinTech & Open Banking MCP",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/n8n-open-banking-security-advisory-2026.pdf",
+      "evidenceHash": "cff9a383d99287a2b1001d50383584e548c79fdd65d145b1eee4bde80152238a",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for n8n Open Banking Workflows (SHA-256: cff9a383d99287a2…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of n8n Open Banking Workflows's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — n8n Open Banking Workflows AI Agent Güvenlik Danışmanlığı (SHA-256: cff9a383d99287a2…)\n\nSayın CISO / CTO,\n\nNexus Shield, n8n Open Banking Workflows agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on n8n Open Banking Workflows (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — n8n Open Banking Workflows için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Activepieces Finance MCP",
+      "vertical": "fintech-mcp",
+      "verticalLabel": "FinTech & Open Banking MCP",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/activepieces-finance-security-advisory-2026.pdf",
+      "evidenceHash": "ae5a27bb15619a2202d9c6e15112f7087f850e9ab60a8c75db682693a1132ecd",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Activepieces Finance MCP (SHA-256: ae5a27bb15619a22…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Activepieces Finance MCP's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Activepieces Finance MCP AI Agent Güvenlik Danışmanlığı (SHA-256: ae5a27bb15619a22…)\n\nSayın CISO / CTO,\n\nNexus Shield, Activepieces Finance MCP agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Activepieces Finance MCP (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Activepieces Finance MCP için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Plaid Banking MCP Proxy",
+      "vertical": "fintech-mcp",
+      "verticalLabel": "FinTech & Open Banking MCP",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/plaid-mcp-proxy-security-advisory-2026.pdf",
+      "evidenceHash": "01ea4c20d8514dc36eaa22fdc3063b02acf82158144a337b458035e7a1cb462d",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Plaid Banking MCP Proxy (SHA-256: 01ea4c20d8514dc3…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Plaid Banking MCP Proxy's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Plaid Banking MCP Proxy AI Agent Güvenlik Danışmanlığı (SHA-256: 01ea4c20d8514dc3…)\n\nSayın CISO / CTO,\n\nNexus Shield, Plaid Banking MCP Proxy agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Plaid Banking MCP Proxy (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Plaid Banking MCP Proxy için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Logo Yazılım",
+      "vertical": "enterprise-tr",
+      "verticalLabel": "Enterprise TR Tech",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/logo-yazilim-security-advisory-2026.pdf",
+      "evidenceHash": "a36665d568a28cfba21066960e9c1aed1a28dc967ca5da4e02a6e6a109708b02",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Logo Yazılım (SHA-256: a36665d568a28cfb…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Logo Yazılım's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Logo Yazılım AI Agent Güvenlik Danışmanlığı (SHA-256: a36665d568a28cfb…)\n\nSayın CISO / CTO,\n\nNexus Shield, Logo Yazılım agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Logo Yazılım (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Logo Yazılım için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "KoçSistem",
+      "vertical": "enterprise-tr",
+      "verticalLabel": "Enterprise TR Tech",
+      "securityScore": 45,
+      "grade": "D",
+      "pdfPath": "/reports/advisories/kocsistem-security-advisory-2026.pdf",
+      "evidenceHash": "a2a0b05f7982b766bb861292d856495ebd421915140731407912510741b1f9cc",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for KoçSistem (SHA-256: a2a0b05f7982b766…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of KoçSistem's agent/MCP surface.\nScore: 45/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — KoçSistem AI Agent Güvenlik Danışmanlığı (SHA-256: a2a0b05f7982b766…)\n\nSayın CISO / CTO,\n\nNexus Shield, KoçSistem agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 45/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on KoçSistem (45/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — KoçSistem için pasif AI agent güvenlik taraması yaptık (45/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "SabancıDx",
+      "vertical": "enterprise-tr",
+      "verticalLabel": "Enterprise TR Tech",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/sabancidx-security-advisory-2026.pdf",
+      "evidenceHash": "9e446b138d60148bb5baa54abaaed12c8555bae44f385ae8fa9352de91b185c7",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for SabancıDx (SHA-256: 9e446b138d60148b…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of SabancıDx's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — SabancıDx AI Agent Güvenlik Danışmanlığı (SHA-256: 9e446b138d60148b…)\n\nSayın CISO / CTO,\n\nNexus Shield, SabancıDx agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on SabancıDx (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — SabancıDx için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Eczacıbaşı Bilişim",
+      "vertical": "enterprise-tr",
+      "verticalLabel": "Enterprise TR Tech",
+      "securityScore": 45,
+      "grade": "D",
+      "pdfPath": "/reports/advisories/eczacibasi-bilisim-security-advisory-2026.pdf",
+      "evidenceHash": "e4999989402d3b7e0cd4e3f4982d5244b3d7b355261d0a410292c4e1a2f8953a",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Eczacıbaşı Bilişim (SHA-256: e4999989402d3b7e…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Eczacıbaşı Bilişim's agent/MCP surface.\nScore: 45/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Eczacıbaşı Bilişim AI Agent Güvenlik Danışmanlığı (SHA-256: e4999989402d3b7e…)\n\nSayın CISO / CTO,\n\nNexus Shield, Eczacıbaşı Bilişim agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 45/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Eczacıbaşı Bilişim (45/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Eczacıbaşı Bilişim için pasif AI agent güvenlik taraması yaptık (45/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    },
+    {
+      "organizationName": "Turkcell Dijital Servisler",
+      "vertical": "enterprise-tr",
+      "verticalLabel": "Enterprise TR Tech",
+      "securityScore": 60,
+      "grade": "C",
+      "pdfPath": "/reports/advisories/turkcell-digital-security-advisory-2026.pdf",
+      "evidenceHash": "e6ff941578f760e8730a1636d1db4cdb6f5af9697e97cc92a706c6be15d52580",
+      "parameterHijackingRisk": "High",
+      "intentDivergenceScore": 85,
+      "outreach": {
+        "emailEn": "Subject: Confidential — AI Agent Security Advisory for Turkcell Dijital Servisler (SHA-256: e6ff941578f760e8…)\n\nDear CISO / CTO,\n\nNexus Shield completed a passive security assessment of Turkcell Dijital Servisler's agent/MCP surface.\nScore: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.\n\nWe have prepared a confidential advisory PDF with verifiable SHA-256 evidence\nand sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.\n\nBest regards,\nNexus Shield Security Research\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "emailTr": "Konu: Gizli — Turkcell Dijital Servisler AI Agent Güvenlik Danışmanlığı (SHA-256: e6ff941578f760e8…)\n\nSayın CISO / CTO,\n\nNexus Shield, Turkcell Dijital Servisler agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.\nSkor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.\n\nDoğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını\niçeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.\n\nSaygılarımızla,\nNexus Shield Güvenlik Araştırması\nhttps://nexusshield.ai/reports/state-of-agent-security-2026",
+        "linkedinEn": "Hi — we ran a passive AI agent security scan on Turkcell Dijital Servisler (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?",
+        "linkedinTr": "Merhaba — Turkcell Dijital Servisler için pasif AI agent güvenlik taraması yaptık (60/100). Unvalidated parameter execution — function-call schema not enforced tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır. Sorumlu açıklama kapsamında paylaşabilir miyim?"
+      }
+    }
+  ],
+  "verificationHash": "4006a9c8a4c417681de8f5cdac69a7bac937fd3aab99d622286d0ece5d781fc9"
+}

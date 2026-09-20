@@ -44,7 +44,8 @@
     "research:scan": "tsx scripts/run_agent_security_scan.ts",
     "research:aggregate": "tsx scripts/aggregate_report_stats.ts",
     "research:pipeline": "npm run research:scan && npm run research:aggregate",
-    "test:research": "tsx --test test/research-aggregate.test.ts"
+    "test:research": "tsx --test test/research-aggregate.test.ts",
+    "disclosure:run-all": "tsx scripts/run_unified_responsible_disclosure.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "^8.3.0",
