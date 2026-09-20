@@ -23,6 +23,9 @@
 # research pipeline temp clones
 /temp_targets/
 
+# generated disclosure PDF advisories (reproducible via npm run disclosure:run-all)
+/public/reports/advisories/*.pdf
+
 # demo recordings
 /videos/*.webm
 /videos/*.mp4
