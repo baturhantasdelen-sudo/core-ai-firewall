@@ -1,13 +1,26 @@
 import type { Metadata } from 'next';
 
-/** Primary marketing / dashboard web origin — never the API subdomain. */
-export const DEFAULT_SITE_URL = 'https://nexusshield.ai';
+/** Canonical marketing origin once DNS is configured at Cloudflare. */
+export const PRIMARY_SITE_URL = 'https://nexusshield.ai';
+
+/** Alternate canonical host (redirects to apex via vercel.json). */
+export const WWW_SITE_URL = 'https://www.nexusshield.ai';
+
+/**
+ * Live Vercel deployment — use until apex/www DNS records exist.
+ * Verified: https://nexus-shield-dashboard.vercel.app/docs/benchmark → 200 OK
+ */
+export const DEPLOYMENT_FALLBACK_URL = 'https://nexus-shield-dashboard.vercel.app';
+
+/** @deprecated Use PRIMARY_SITE_URL */
+export const DEFAULT_SITE_URL = PRIMARY_SITE_URL;
 
 const ALLOWED_ORIGINS = [
-  'https://nexusshield.ai',
-  'https://www.nexusshield.ai',
+  PRIMARY_SITE_URL,
+  WWW_SITE_URL,
   'https://app.nexusshield.ai',
   'https://api.nexusshield.ai',
+  DEPLOYMENT_FALLBACK_URL,
   'https://nexus-shield-dashboard.vercel.app',
   'http://localhost:3000',
   'http://localhost:3001',
@@ -27,6 +40,10 @@ function normalizeOrigin(url: string): string {
   return url.replace(/\/$/, '');
 }
 
+function originFromHost(host: string): string {
+  return normalizeOrigin(`https://${host.split(':')[0]}`);
+}
+
 /** True when hostname is the Shield API host — not valid for marketing/docs links. */
 export function isApiSubdomainOrigin(url: string): boolean {
   try {
@@ -37,25 +54,50 @@ export function isApiSubdomainOrigin(url: string): boolean {
   }
 }
 
+function isLocalOrigin(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Resolve the public web app origin (dashboard/marketing).
- * Falls back to DEFAULT_SITE_URL if NEXT_PUBLIC_APP_URL points at the API subdomain.
+ *
+ * Priority:
+ * 1. NEXT_PUBLIC_APP_URL (unless API subdomain)
+ * 2. Request/fallback origin (when the browser reached a valid host)
+ * 3. VERCEL_PROJECT_PRODUCTION_URL / VERCEL_URL (runtime on Vercel)
+ * 4. DEPLOYMENT_FALLBACK_URL (known-good until apex DNS is configured)
  */
 export function getSiteUrl(fallbackOrigin?: string): string {
   const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
   if (configured) {
     const normalized = normalizeOrigin(configured);
-    if (isApiSubdomainOrigin(normalized)) return DEFAULT_SITE_URL;
+    if (isApiSubdomainOrigin(normalized)) return DEPLOYMENT_FALLBACK_URL;
     return normalized;
   }
 
   if (fallbackOrigin) {
     const normalized = normalizeOrigin(fallbackOrigin);
-    if (isApiSubdomainOrigin(normalized)) return DEFAULT_SITE_URL;
+    if (isApiSubdomainOrigin(normalized)) return DEPLOYMENT_FALLBACK_URL;
+    if (isLocalOrigin(normalized)) return normalized;
     return normalized;
   }
 
-  return DEFAULT_SITE_URL;
+  const vercelProduction = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (vercelProduction) {
+    return originFromHost(vercelProduction);
+  }
+
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    return originFromHost(vercelUrl);
+  }
+
+  return DEPLOYMENT_FALLBACK_URL;
 }
 
 /** Relative app path — use for Next.js Link `href` values. */

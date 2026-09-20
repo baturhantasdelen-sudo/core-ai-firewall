@@ -44,7 +44,9 @@ function Read-DotEnv([string]$Path) {
 }
 
 $envMap = Read-DotEnv ".env.local"
+# Interim origin until apex DNS (A/CNAME) is configured at Cloudflare — see docs/dns-cloudflare-setup.md
 $envMap["NEXT_PUBLIC_APP_URL"] = "https://nexus-shield-dashboard.vercel.app"
+$envMap["NEXT_PUBLIC_REPORT_API_URL"] = "https://nexus-shield-dashboard.vercel.app"
 
 foreach ($key in $keys) {
   if (-not $envMap.ContainsKey($key) -or [string]::IsNullOrWhiteSpace($envMap[$key])) {
@@ -60,4 +62,7 @@ foreach ($key in $keys) {
 Write-Host "Setting NEXT_PUBLIC_APP_URL..."
 Invoke-Vercel @("env", "add", "NEXT_PUBLIC_APP_URL", "production", "--value", "https://nexus-shield-dashboard.vercel.app", "--force", "--yes")
 Write-Host "OK: NEXT_PUBLIC_APP_URL"
-Write-Host "Done."
+Write-Host "Setting NEXT_PUBLIC_REPORT_API_URL..."
+Invoke-Vercel @("env", "add", "NEXT_PUBLIC_REPORT_API_URL", "production", "--value", "https://nexus-shield-dashboard.vercel.app", "--force", "--yes")
+Write-Host "OK: NEXT_PUBLIC_REPORT_API_URL"
+Write-Host "Done. After Cloudflare DNS is live, set NEXT_PUBLIC_APP_URL=https://nexusshield.ai in Vercel."
