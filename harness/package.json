@@ -1,0 +1,35 @@
+{
+  "name": "@nexusshield/harness",
+  "version": "0.1.0",
+  "description": "Open-source agent runtime security benchmark harness for MCP tool chains and LLM agents",
+  "license": "Apache-2.0",
+  "type": "module",
+  "private": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "harness": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "scenarios",
+    "python",
+    "fixtures",
+    "LICENSE",
+    "README.md",
+    ".env.example"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js run",
+    "harness": "tsx src/cli.ts run",
+    "harness:http": "tsx src/cli.ts run --adapter http",
+    "test": "npm run build && node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -1,0 +1,2 @@
+# Optional — stdlib-only runner works without dependencies.
+# requests>=2.31.0

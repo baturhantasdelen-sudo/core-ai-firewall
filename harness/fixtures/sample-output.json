@@ -1,0 +1,15 @@
+{
+  "adapter": "local-heuristic",
+  "target": "offline-local-heuristic",
+  "scenarioCount": 17,
+  "blockedCount": 17,
+  "blockRatePct": 100,
+  "baselineComparison": {
+    "proofCenterBlockRatePct": 99.3,
+    "yourBlockRatePct": 100,
+    "deltaPct": 0.7,
+    "meetsBaseline": true,
+    "agentsTested": 127,
+    "toolCallsAnalyzed": 48291
+  }
+}

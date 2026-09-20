@@ -1,0 +1,132 @@
+# Nexus Shield Harness
+
+Open-source benchmark harness for evaluating **AI agent runtime security** against MCP tool chains, prompt injection, intent divergence, and multi-step trajectory attacks.
+
+This repository contains **only** the public scenario runner, scoring utilities, and HTTP adapters. It does **not** include proprietary Nexus Shield SaaS dashboard code, private API routes, database schemas, or production backend logic.
+
+> **Enterprise runtime protection:** Need sub-10ms edge enforcement, HITL governance, audit evidence, and the full Proof Center dashboard? Visit **[https://nexusshield.ai](https://nexusshield.ai)**.
+
+## Quick start
+
+```bash
+git clone https://github.com/nexusshield/harness.git
+cd harness
+cp .env.example .env
+npm install
+npm run harness
+```
+
+Offline heuristic evaluation (no live agent required):
+
+```bash
+npm run harness
+# or
+npm run harness -- --json-out results/local-run.json
+```
+
+Evaluate against a local agent gateway or MCP runtime:
+
+```bash
+export HARNESS_BASE_URL=http://127.0.0.1:8080
+export HARNESS_API_KEY=your_local_eval_token_here
+npm run harness:http
+```
+
+Python HTTP latency + attack benchmark (stdlib-only):
+
+```bash
+python python/run_benchmark.py --base-url http://127.0.0.1:8080 --json-out results/http-benchmark.json
+```
+
+## What this harness measures
+
+| Metric | Description |
+|---|---|
+| **Block rate** | % of attack scenarios blocked (`BLOCK`, `REJECTED`, `REQUIRE_APPROVAL`) |
+| **Latency p50 / p95** | Per-scenario evaluation time (ms) |
+| **Evidence hash** | SHA-256 digest per scenario outcome for reproducibility |
+| **Baseline delta** | Comparison vs official Nexus Shield Proof Center baseline |
+
+## Proof Center baseline mapping
+
+Official public Proof Center baseline (marketing + live benchmark methodology):
+
+| Baseline | Value |
+|---|---|
+| Agents tested | 127 |
+| Tool calls analyzed | 48,291 |
+| Block rate | **99.3%** |
+
+After each run, the CLI prints:
+
+- Your block rate vs **99.3%**
+- Whether you **meet baseline**
+- Latency percentiles
+
+Example output:
+
+```text
+--- Proof Center Baseline ---
+Official block rate: 99.3% (127 agents, 48,291 tool calls)
+Your block rate:     100% (+0.7 vs baseline)
+Meets baseline:      YES
+```
+
+## Scenario corpus
+
+Starter scenarios live in `scenarios/index.json` (17 core vectors across prompt injection, jailbreak, MCP poisoning, intent divergence, trajectory violations, and destructive actions). The corpus is designed to expand toward the full 500+ MCP attack matrix referenced in Nexus Shield Proof Center methodology.
+
+Categories include:
+
+- `PROMPT_INJECTION`, `JAILBREAK`, `INDIRECT_INJECTION`
+- `TOOL_MISUSE`, `TOOL_ABUSE`, `PRIVILEGE_ESCALATION`
+- `MCP_POISONING`, `INTENT_MISMATCH`, `TRAJECTORY_VIOLATION`
+- `DESTRUCTIVE_ACTION`, `DATA_EXFILTRATION`, `SYSTEM_PROMPT_LEAKAGE`
+
+## Adapters
+
+| Adapter | Flag | Use case |
+|---|---|---|
+| `local-heuristic` | `--adapter local` (default) | Offline regex/heuristic scoring — no network |
+| `http-agent-action` | `--adapter http` | POST to `HARNESS_BASE_URL/v1/agent/action` |
+
+Implement a custom adapter by satisfying the `GuardAdapter` interface in `src/types.ts`.
+
+## Repository boundary (OSS vs proprietary)
+
+| In this repo (public) | Stays private (Nexus Shield platform) |
+|---|---|
+| Scenario definitions & runner | Dashboard UI & SaaS billing |
+| Scoring & evidence hashing | Production action-firewall engine |
+| HTTP benchmark CLI | Supabase schemas & user auth |
+| Local heuristic evaluator | Private API routes & disclosure pipeline |
+
+## Environment variables
+
+See `.env.example`. **Never commit real secrets.**
+
+| Variable | Purpose |
+|---|---|
+| `HARNESS_BASE_URL` | Agent runtime base URL (default `http://127.0.0.1:8080`) |
+| `HARNESS_API_KEY` | Optional bearer token for local gateway |
+| `HARNESS_AGENT_ID` | Synthetic agent ID header for scenario runs |
+
+## Development
+
+```bash
+npm run build
+npm test
+npm run harness -- --limit 5
+```
+
+## License
+
+Apache License 2.0 — see [LICENSE](./LICENSE).
+
+## Contributing
+
+Pull requests welcome for new scenarios, adapters, and reproducibility fixtures. Please do not include proprietary endpoints, credentials, or internal Nexus Shield platform code.
+
+---
+
+**Need production-grade runtime enforcement?** → [https://nexusshield.ai](https://nexusshield.ai)
