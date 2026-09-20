@@ -21,7 +21,7 @@ import { BrandLogo } from '@/components/brand/BrandLogo';
 import { PlaygroundSection } from '@/components/playground/PlaygroundSection';
 import { PricingSection } from '@/components/pricing/PricingSection';
 import { LandingNav } from '@/components/landing/LandingNav';
-import { AttackSimulatorCard } from '@/components/landing/AttackSimulatorCard';
+import { AttackDemo } from '@/components/landing/AttackDemo';
 import { ContactSection } from '@/components/landing/ContactSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
@@ -281,32 +281,40 @@ export default function Home() {
 
         <div className="relative mx-auto max-w-6xl px-6 py-16 sm:py-24">
           <div className="text-center">
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-4 py-1.5 text-xs font-medium text-emerald-300 backdrop-blur-sm">
-                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
-                2026 AI Agent Trust &amp; Runtime Security
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/5 px-4 py-1.5 text-xs font-medium text-orange-200 backdrop-blur-sm">
-                Attack → Prove → Install → Protect
-              </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/5 px-4 py-1.5 text-xs font-semibold tracking-widest text-cyan-200 backdrop-blur-sm">
+              <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+              IDENTITY → INTENT → ACTION → PROOF
             </div>
 
             <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-              THE RUNTIME SECURITY &amp;{' '}
-              <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
-                TRUST LAYER FOR AI AGENTS
-              </span>
+              THE RUNTIME CONTROL &amp; TRUST LAYER FOR AI AGENTS
             </h1>
 
-            <p className="mt-5 text-lg font-medium text-emerald-200/90 sm:text-xl">
-              Verify Every Agent Outcome with Cryptographic Proof.
+            <p className="mx-auto mt-5 max-w-2xl text-lg text-zinc-300 sm:text-xl">
+              Control what autonomous agents can do in real-time. Cryptographically prove what they
+              actually did.
             </p>
 
-            <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-400 sm:text-lg">
-              IDENTITY → INTENT → ACTION → PROOF — the investment thesis for runtime agent governance:
-              discover who is acting, align intent, intercept every action, and prove outcomes with
-              immutable cryptographic evidence.
-            </p>
+            <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-white/10 bg-zinc-900/40 p-5 text-left backdrop-blur-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+                Built-in Protocol Guardrails
+              </p>
+              <ul className="mt-3 grid gap-2 sm:grid-cols-3">
+                {[
+                  { label: 'PII Scanning', detail: 'Runtime masking & exfiltration blocks' },
+                  { label: 'Jailbreak Defense', detail: 'LeetSpeak & instruction override detection' },
+                  { label: 'Prompt Injection', detail: 'System prompt boundary enforcement' },
+                ].map(({ label, detail }) => (
+                  <li
+                    key={label}
+                    className="rounded-xl border border-white/5 bg-zinc-950/60 px-3 py-2.5"
+                  >
+                    <p className="text-xs font-semibold text-emerald-300">{label}</p>
+                    <p className="mt-0.5 text-[11px] text-zinc-500">{detail}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
               <Link
@@ -368,7 +376,7 @@ export default function Home() {
         </div>
       </section>
 
-      <AttackSimulatorCard />
+      <AttackDemo />
 
       <section className="border-y border-white/5 bg-zinc-900/40 py-6">
         <div className="mx-auto max-w-7xl px-6">

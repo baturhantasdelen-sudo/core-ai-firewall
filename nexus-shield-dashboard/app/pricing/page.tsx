@@ -4,9 +4,9 @@ import { BrandLogo } from '@/components/brand/BrandLogo';
 import { PricingSection } from '@/components/pricing/PricingSection';
 
 export const metadata = {
-  title: 'Pricing | Nexus Shield — Usage & Action Based Plans',
+  title: 'Pricing | Nexus Shield — Agent-Centric Runtime Security',
   description:
-    'Developer, Pro, Team, and Enterprise pricing for AI agent security — tool call limits, SHA-256 evidence chains, HITL approval, and on-prem deployment.',
+    'Agent-centric B2B pricing — Developer sandbox, Team/Startup ($299/mo), and Enterprise control plane with SHA-256 evidence vaults and native sidecars.',
 };
 
 export default function PricingPage() {
@@ -29,7 +29,7 @@ export default function PricingPage() {
         <div className="mx-auto max-w-6xl px-6 pt-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/5 px-4 py-1.5 text-xs font-medium text-indigo-300">
             <Sparkles className="h-3.5 w-3.5" />
-            Module 4 — Usage & Action Based Pricing
+            Agent-Centric B2B Tiering
           </div>
         </div>
         <PricingSection standalone />

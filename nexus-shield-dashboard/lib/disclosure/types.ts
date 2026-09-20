@@ -16,6 +16,10 @@ export interface DisclosureTarget {
   referenceUrl: string;
   github?: string;
   contentPath?: string;
+  /** Generic security inbox for responsible disclosure outreach */
+  outreachEmail?: string;
+  /** Named CISO / security lead when a direct contact is known */
+  cisoEmail?: string;
 }
 
 export interface DisclosureVulnerabilityMetrics {
@@ -59,6 +63,8 @@ export interface OutboundDisclosureRow {
   evidenceHash: string;
   parameterHijackingRisk: string;
   intentDivergenceScore: number;
+  outreachEmail?: string;
+  cisoEmail?: string;
   outreach: OutreachDrafts;
 }
 

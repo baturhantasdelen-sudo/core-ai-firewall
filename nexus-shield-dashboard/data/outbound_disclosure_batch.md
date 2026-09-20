@@ -1,25 +1,25 @@
 # Unified Responsible Disclosure — Outbound Matrix
 
-Generated: 2026-09-20T10:54:07.582Z
-Targets: 15 · Verification hash: `4006a9c8a4c417681de8f5cd…`
+Generated: 2026-09-20T12:40:14.919Z
+Targets: 15 · Verification hash: `a3a3897301d9c52f0697a229…`
 
 | Organization | Vertical | Score | Grade | PDF | Evidence Hash |
 |---|---|---:|---|---|---|
-| AgentGPT (Reworkd) | YC AI SaaS | 60 | C | [PDF](/reports/advisories/agentgpt-security-advisory-2026.pdf) | `ccf9c010605b…` |
-| CrewAI | YC AI SaaS | 60 | C | [PDF](/reports/advisories/crewai-security-advisory-2026.pdf) | `a7732e9a92cd…` |
-| Dify AI | YC AI SaaS | 60 | C | [PDF](/reports/advisories/dify-ai-security-advisory-2026.pdf) | `f01fa878d91e…` |
-| Flowise AI | YC AI SaaS | 60 | C | [PDF](/reports/advisories/flowise-security-advisory-2026.pdf) | `7873436b236d…` |
-| Superagent | YC AI SaaS | 60 | C | [PDF](/reports/advisories/superagent-security-advisory-2026.pdf) | `8205f39882ae…` |
-| Stripe MCP Server | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/stripe-mcp-security-advisory-2026.pdf) | `295f612bb425…` |
-| Composio (FinTech Integrations) | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/composio-fintech-security-advisory-2026.pdf) | `3df62c977964…` |
-| n8n Open Banking Workflows | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/n8n-open-banking-security-advisory-2026.pdf) | `cff9a383d992…` |
-| Activepieces Finance MCP | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/activepieces-finance-security-advisory-2026.pdf) | `ae5a27bb1561…` |
-| Plaid Banking MCP Proxy | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/plaid-mcp-proxy-security-advisory-2026.pdf) | `01ea4c20d851…` |
-| Logo Yazılım | Enterprise TR Tech | 60 | C | [PDF](/reports/advisories/logo-yazilim-security-advisory-2026.pdf) | `a36665d568a2…` |
-| KoçSistem | Enterprise TR Tech | 45 | D | [PDF](/reports/advisories/kocsistem-security-advisory-2026.pdf) | `a2a0b05f7982…` |
-| SabancıDx | Enterprise TR Tech | 60 | C | [PDF](/reports/advisories/sabancidx-security-advisory-2026.pdf) | `9e446b138d60…` |
-| Eczacıbaşı Bilişim | Enterprise TR Tech | 45 | D | [PDF](/reports/advisories/eczacibasi-bilisim-security-advisory-2026.pdf) | `e4999989402d…` |
-| Turkcell Dijital Servisler | Enterprise TR Tech | 60 | C | [PDF](/reports/advisories/turkcell-digital-security-advisory-2026.pdf) | `e6ff941578f7…` |
+| AgentGPT (Reworkd) | YC AI SaaS | 60 | C | [PDF](/reports/advisories/agentgpt-security-advisory-2026.pdf) | `d9b54ae76de9…` |
+| CrewAI | YC AI SaaS | 60 | C | [PDF](/reports/advisories/crewai-security-advisory-2026.pdf) | `1cd278a1ae0a…` |
+| Dify AI | YC AI SaaS | 60 | C | [PDF](/reports/advisories/dify-ai-security-advisory-2026.pdf) | `e4be2c2613ad…` |
+| Flowise AI | YC AI SaaS | 60 | C | [PDF](/reports/advisories/flowise-security-advisory-2026.pdf) | `396eb048ff2c…` |
+| Superagent | YC AI SaaS | 60 | C | [PDF](/reports/advisories/superagent-security-advisory-2026.pdf) | `d3cc53d93dff…` |
+| Stripe MCP Server | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/stripe-mcp-security-advisory-2026.pdf) | `2b4a28de264b…` |
+| Composio (FinTech Integrations) | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/composio-fintech-security-advisory-2026.pdf) | `f8f939d582f1…` |
+| n8n Open Banking Workflows | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/n8n-open-banking-security-advisory-2026.pdf) | `75ff8d4e3c35…` |
+| Activepieces Finance MCP | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/activepieces-finance-security-advisory-2026.pdf) | `c1d50caf71f9…` |
+| Plaid Banking MCP Proxy | FinTech & Open Banking MCP | 60 | C | [PDF](/reports/advisories/plaid-mcp-proxy-security-advisory-2026.pdf) | `165db31f7fbe…` |
+| Logo Yazılım | Enterprise TR Tech | 60 | C | [PDF](/reports/advisories/logo-yazilim-security-advisory-2026.pdf) | `ecd56eafb0dc…` |
+| KoçSistem | Enterprise TR Tech | 45 | D | [PDF](/reports/advisories/kocsistem-security-advisory-2026.pdf) | `72d8e8961645…` |
+| SabancıDx | Enterprise TR Tech | 60 | C | [PDF](/reports/advisories/sabancidx-security-advisory-2026.pdf) | `b1df6194aa06…` |
+| Eczacıbaşı Bilişim | Enterprise TR Tech | 45 | D | [PDF](/reports/advisories/eczacibasi-bilisim-security-advisory-2026.pdf) | `1f1b14206da8…` |
+| Turkcell Dijital Servisler | Enterprise TR Tech | 60 | C | [PDF](/reports/advisories/turkcell-digital-security-advisory-2026.pdf) | `ef5afbcacfe9…` |
 
 ## Outreach Drafts
 
@@ -28,7 +28,7 @@ Targets: 15 · Verification hash: `4006a9c8a4c417681de8f5cd…`
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for AgentGPT (Reworkd) (SHA-256: ccf9c010605bde47…)
+Subject: Confidential — AI Agent Security Advisory for AgentGPT (Reworkd) (SHA-256: d9b54ae76de90891…)
 
 Dear CISO / CTO,
 
@@ -46,7 +46,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — AgentGPT (Reworkd) AI Agent Güvenlik Danışmanlığı (SHA-256: ccf9c010605bde47…)
+Konu: Gizli — AgentGPT (Reworkd) AI Agent Güvenlik Danışmanlığı (SHA-256: d9b54ae76de90891…)
 
 Sayın CISO / CTO,
 
@@ -76,7 +76,7 @@ Merhaba — AgentGPT (Reworkd) için pasif AI agent güvenlik taraması yaptık 
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for CrewAI (SHA-256: a7732e9a92cd3e40…)
+Subject: Confidential — AI Agent Security Advisory for CrewAI (SHA-256: 1cd278a1ae0a8c9e…)
 
 Dear CISO / CTO,
 
@@ -94,7 +94,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — CrewAI AI Agent Güvenlik Danışmanlığı (SHA-256: a7732e9a92cd3e40…)
+Konu: Gizli — CrewAI AI Agent Güvenlik Danışmanlığı (SHA-256: 1cd278a1ae0a8c9e…)
 
 Sayın CISO / CTO,
 
@@ -124,7 +124,7 @@ Merhaba — CrewAI için pasif AI agent güvenlik taraması yaptık (60/100). Un
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Dify AI (SHA-256: f01fa878d91e412b…)
+Subject: Confidential — AI Agent Security Advisory for Dify AI (SHA-256: e4be2c2613ad3847…)
 
 Dear CISO / CTO,
 
@@ -142,7 +142,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Dify AI AI Agent Güvenlik Danışmanlığı (SHA-256: f01fa878d91e412b…)
+Konu: Gizli — Dify AI AI Agent Güvenlik Danışmanlığı (SHA-256: e4be2c2613ad3847…)
 
 Sayın CISO / CTO,
 
@@ -172,7 +172,7 @@ Merhaba — Dify AI için pasif AI agent güvenlik taraması yaptık (60/100). U
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Flowise AI (SHA-256: 7873436b236dc2fc…)
+Subject: Confidential — AI Agent Security Advisory for Flowise AI (SHA-256: 396eb048ff2c4ca8…)
 
 Dear CISO / CTO,
 
@@ -190,7 +190,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Flowise AI AI Agent Güvenlik Danışmanlığı (SHA-256: 7873436b236dc2fc…)
+Konu: Gizli — Flowise AI AI Agent Güvenlik Danışmanlığı (SHA-256: 396eb048ff2c4ca8…)
 
 Sayın CISO / CTO,
 
@@ -220,7 +220,7 @@ Merhaba — Flowise AI için pasif AI agent güvenlik taraması yaptık (60/100)
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Superagent (SHA-256: 8205f39882ae8da8…)
+Subject: Confidential — AI Agent Security Advisory for Superagent (SHA-256: d3cc53d93dff9f81…)
 
 Dear CISO / CTO,
 
@@ -238,7 +238,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Superagent AI Agent Güvenlik Danışmanlığı (SHA-256: 8205f39882ae8da8…)
+Konu: Gizli — Superagent AI Agent Güvenlik Danışmanlığı (SHA-256: d3cc53d93dff9f81…)
 
 Sayın CISO / CTO,
 
@@ -268,7 +268,7 @@ Merhaba — Superagent için pasif AI agent güvenlik taraması yaptık (60/100)
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Stripe MCP Server (SHA-256: 295f612bb42539f1…)
+Subject: Confidential — AI Agent Security Advisory for Stripe MCP Server (SHA-256: 2b4a28de264b337e…)
 
 Dear CISO / CTO,
 
@@ -286,7 +286,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Stripe MCP Server AI Agent Güvenlik Danışmanlığı (SHA-256: 295f612bb42539f1…)
+Konu: Gizli — Stripe MCP Server AI Agent Güvenlik Danışmanlığı (SHA-256: 2b4a28de264b337e…)
 
 Sayın CISO / CTO,
 
@@ -316,7 +316,7 @@ Merhaba — Stripe MCP Server için pasif AI agent güvenlik taraması yaptık (
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Composio (FinTech Integrations) (SHA-256: 3df62c97796459b5…)
+Subject: Confidential — AI Agent Security Advisory for Composio (FinTech Integrations) (SHA-256: f8f939d582f199f2…)
 
 Dear CISO / CTO,
 
@@ -334,7 +334,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Composio (FinTech Integrations) AI Agent Güvenlik Danışmanlığı (SHA-256: 3df62c97796459b5…)
+Konu: Gizli — Composio (FinTech Integrations) AI Agent Güvenlik Danışmanlığı (SHA-256: f8f939d582f199f2…)
 
 Sayın CISO / CTO,
 
@@ -364,7 +364,7 @@ Merhaba — Composio (FinTech Integrations) için pasif AI agent güvenlik taram
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for n8n Open Banking Workflows (SHA-256: cff9a383d99287a2…)
+Subject: Confidential — AI Agent Security Advisory for n8n Open Banking Workflows (SHA-256: 75ff8d4e3c3563a7…)
 
 Dear CISO / CTO,
 
@@ -382,7 +382,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — n8n Open Banking Workflows AI Agent Güvenlik Danışmanlığı (SHA-256: cff9a383d99287a2…)
+Konu: Gizli — n8n Open Banking Workflows AI Agent Güvenlik Danışmanlığı (SHA-256: 75ff8d4e3c3563a7…)
 
 Sayın CISO / CTO,
 
@@ -412,7 +412,7 @@ Merhaba — n8n Open Banking Workflows için pasif AI agent güvenlik taraması 
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Activepieces Finance MCP (SHA-256: ae5a27bb15619a22…)
+Subject: Confidential — AI Agent Security Advisory for Activepieces Finance MCP (SHA-256: c1d50caf71f98096…)
 
 Dear CISO / CTO,
 
@@ -430,7 +430,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Activepieces Finance MCP AI Agent Güvenlik Danışmanlığı (SHA-256: ae5a27bb15619a22…)
+Konu: Gizli — Activepieces Finance MCP AI Agent Güvenlik Danışmanlığı (SHA-256: c1d50caf71f98096…)
 
 Sayın CISO / CTO,
 
@@ -460,7 +460,7 @@ Merhaba — Activepieces Finance MCP için pasif AI agent güvenlik taraması ya
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Plaid Banking MCP Proxy (SHA-256: 01ea4c20d8514dc3…)
+Subject: Confidential — AI Agent Security Advisory for Plaid Banking MCP Proxy (SHA-256: 165db31f7fbeb4ca…)
 
 Dear CISO / CTO,
 
@@ -478,7 +478,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Plaid Banking MCP Proxy AI Agent Güvenlik Danışmanlığı (SHA-256: 01ea4c20d8514dc3…)
+Konu: Gizli — Plaid Banking MCP Proxy AI Agent Güvenlik Danışmanlığı (SHA-256: 165db31f7fbeb4ca…)
 
 Sayın CISO / CTO,
 
@@ -508,7 +508,7 @@ Merhaba — Plaid Banking MCP Proxy için pasif AI agent güvenlik taraması yap
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Logo Yazılım (SHA-256: a36665d568a28cfb…)
+Subject: Confidential — AI Agent Security Advisory for Logo Yazılım (SHA-256: ecd56eafb0dc0a5e…)
 
 Dear CISO / CTO,
 
@@ -526,7 +526,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Logo Yazılım AI Agent Güvenlik Danışmanlığı (SHA-256: a36665d568a28cfb…)
+Konu: Gizli — Logo Yazılım AI Agent Güvenlik Danışmanlığı (SHA-256: ecd56eafb0dc0a5e…)
 
 Sayın CISO / CTO,
 
@@ -556,7 +556,7 @@ Merhaba — Logo Yazılım için pasif AI agent güvenlik taraması yaptık (60/
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for KoçSistem (SHA-256: a2a0b05f7982b766…)
+Subject: Confidential — AI Agent Security Advisory for KoçSistem (SHA-256: 72d8e89616455066…)
 
 Dear CISO / CTO,
 
@@ -574,7 +574,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — KoçSistem AI Agent Güvenlik Danışmanlığı (SHA-256: a2a0b05f7982b766…)
+Konu: Gizli — KoçSistem AI Agent Güvenlik Danışmanlığı (SHA-256: 72d8e89616455066…)
 
 Sayın CISO / CTO,
 
@@ -604,7 +604,7 @@ Merhaba — KoçSistem için pasif AI agent güvenlik taraması yaptık (45/100)
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for SabancıDx (SHA-256: 9e446b138d60148b…)
+Subject: Confidential — AI Agent Security Advisory for SabancıDx (SHA-256: b1df6194aa062cea…)
 
 Dear CISO / CTO,
 
@@ -622,7 +622,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — SabancıDx AI Agent Güvenlik Danışmanlığı (SHA-256: 9e446b138d60148b…)
+Konu: Gizli — SabancıDx AI Agent Güvenlik Danışmanlığı (SHA-256: b1df6194aa062cea…)
 
 Sayın CISO / CTO,
 
@@ -652,7 +652,7 @@ Merhaba — SabancıDx için pasif AI agent güvenlik taraması yaptık (60/100)
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Eczacıbaşı Bilişim (SHA-256: e4999989402d3b7e…)
+Subject: Confidential — AI Agent Security Advisory for Eczacıbaşı Bilişim (SHA-256: 1f1b14206da80293…)
 
 Dear CISO / CTO,
 
@@ -670,7 +670,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Eczacıbaşı Bilişim AI Agent Güvenlik Danışmanlığı (SHA-256: e4999989402d3b7e…)
+Konu: Gizli — Eczacıbaşı Bilişim AI Agent Güvenlik Danışmanlığı (SHA-256: 1f1b14206da80293…)
 
 Sayın CISO / CTO,
 
@@ -700,7 +700,7 @@ Merhaba — Eczacıbaşı Bilişim için pasif AI agent güvenlik taraması yapt
 **Email (EN)**
 
 ```
-Subject: Confidential — AI Agent Security Advisory for Turkcell Dijital Servisler (SHA-256: e6ff941578f760e8…)
+Subject: Confidential — AI Agent Security Advisory for Turkcell Dijital Servisler (SHA-256: ef5afbcacfe9ffae…)
 
 Dear CISO / CTO,
 
@@ -718,7 +718,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 **Email (TR)**
 
 ```
-Konu: Gizli — Turkcell Dijital Servisler AI Agent Güvenlik Danışmanlığı (SHA-256: e6ff941578f760e8…)
+Konu: Gizli — Turkcell Dijital Servisler AI Agent Güvenlik Danışmanlığı (SHA-256: ef5afbcacfe9ffae…)
 
 Sayın CISO / CTO,
 

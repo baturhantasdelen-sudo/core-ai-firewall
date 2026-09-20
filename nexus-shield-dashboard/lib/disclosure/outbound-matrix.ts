@@ -74,6 +74,8 @@ export function toOutboundRow(result: DisclosureScanResult): OutboundDisclosureR
     evidenceHash: result.metrics.evidenceSha256Hash,
     parameterHijackingRisk: result.metrics.parameterHijackingRisk,
     intentDivergenceScore: result.metrics.intentDivergenceScore,
+    outreachEmail: result.target.outreachEmail,
+    cisoEmail: result.target.cisoEmail,
     outreach: buildOutreachDrafts(result),
   };
 }

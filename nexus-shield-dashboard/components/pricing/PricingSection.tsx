@@ -37,14 +37,14 @@ export function PricingSection({ standalone = false }: PricingSectionProps) {
         <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/80 px-3 py-1 text-xs font-medium text-zinc-400">
             <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-            Usage & Action Based Pricing
+            Agent-Centric B2B Tiering
           </div>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl lg:text-5xl">
-            Simple pricing for AI agent security
+            Pricing for AI agent runtime security
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm text-zinc-400 sm:text-base">
-            Pay for agents and tool calls — from indie developers to enterprise SOC deployments
-            with SHA-256 evidence chains and human-in-the-loop approval.
+            Protect agents by count and intercepted tool calls — from sandbox engineers to enterprise
+            FinTech control planes with cryptographic proof vaults.
           </p>
 
           <div className="mt-10">
@@ -52,10 +52,9 @@ export function PricingSection({ standalone = false }: PricingSectionProps) {
           </div>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
           {PRICING_TIERS.map((tier) => {
             const isEnterprise = tier.id === 'enterprise';
-            const isPro = tier.id === 'pro';
             const isTeam = tier.id === 'team';
             const isDeveloper = tier.id === 'developer';
             const price = displayPrice(tier, interval);
@@ -84,6 +83,7 @@ export function PricingSection({ standalone = false }: PricingSectionProps) {
                   >
                     {tier.name}
                   </h2>
+                  <p className="mt-1 text-xs font-medium text-zinc-500">{tier.target}</p>
                   <div className="mt-4 flex items-baseline gap-1">
                     <span className="text-4xl font-semibold tracking-tight text-zinc-100">
                       {price}
@@ -97,6 +97,9 @@ export function PricingSection({ standalone = false }: PricingSectionProps) {
                       Billed annually at ${yearlyTotal.toLocaleString('en-US')}/yr
                     </p>
                   ) : null}
+                  <p className="mt-3 rounded-lg border border-white/5 bg-zinc-950/50 px-3 py-2 font-mono text-xs text-cyan-300/90">
+                    {tier.metrics}
+                  </p>
                   <p className="mt-3 text-sm text-zinc-500">{tier.description}</p>
                 </div>
 
@@ -122,19 +125,6 @@ export function PricingSection({ standalone = false }: PricingSectionProps) {
                       >
                         {tier.cta}
                       </Link>
-                      <Link
-                        href={SDK_DOCS_URL}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/15"
-                      >
-                        <Code2 className="h-4 w-4" />
-                        Fix with SDK
-                      </Link>
-                    </>
-                  ) : null}
-
-                  {isPro ? (
-                    <>
-                      <UpgradeButton billingInterval={interval} label={tier.cta} plan="pro" />
                       <Link
                         href={SDK_DOCS_URL}
                         className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/15"
@@ -184,8 +174,7 @@ export function PricingSection({ standalone = false }: PricingSectionProps) {
         </div>
 
         <p className="mt-10 text-center text-xs text-zinc-600">
-          All plans include HTTPS, webhook signing, and org isolation. Prices in USD. Taxes may
-          apply.
+          All plans include HTTPS, webhook signing, and org isolation. Prices in USD. Taxes may apply.
         </p>
       </div>
     </section>

@@ -1,0 +1,122 @@
+[
+  {
+    "organizationName": "AgentGPT (Reworkd)",
+    "intendedRecipient": "security@agpt.co",
+    "recipient": "security@agpt.co",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-dac8-7509-b6c7-02379f86b9e1",
+    "status": "sent"
+  },
+  {
+    "organizationName": "CrewAI",
+    "intendedRecipient": "security@crewai.com",
+    "recipient": "security@crewai.com",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-dbfd-715c-9d7d-8b80c8669011",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Dify AI",
+    "intendedRecipient": "security@dify.ai",
+    "recipient": "security@dify.ai",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-dd0d-720b-9b11-e2cb59a682b3",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Flowise AI",
+    "intendedRecipient": "security@flowiseai.com",
+    "recipient": "security@flowiseai.com",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-de0a-72fb-aad4-395ef23fd7ee",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Superagent",
+    "intendedRecipient": "security@superagent.sh",
+    "recipient": "security@superagent.sh",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-df18-7418-80f0-829305b65b91",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Stripe MCP Server",
+    "intendedRecipient": "security@stripe.com",
+    "recipient": "security@stripe.com",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-e025-77e6-b44d-94f467314c10",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Composio (FinTech Integrations)",
+    "intendedRecipient": "security@composio.dev",
+    "recipient": "security@composio.dev",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-e11b-7209-b14f-439431df13c0",
+    "status": "sent"
+  },
+  {
+    "organizationName": "n8n Open Banking Workflows",
+    "intendedRecipient": "security@n8n.io",
+    "recipient": "security@n8n.io",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-e245-76af-934f-793ce0d869de",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Activepieces Finance MCP",
+    "intendedRecipient": "security@activepieces.com",
+    "recipient": "security@activepieces.com",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-e34f-745f-a131-af910007ec20",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Plaid Banking MCP Proxy",
+    "intendedRecipient": "security@plaid.com",
+    "recipient": "security@plaid.com",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-e582-72ad-a357-10e3bbc22f40",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Logo Yazılım",
+    "intendedRecipient": "guvenlik@logo.com.tr",
+    "recipient": "guvenlik@logo.com.tr",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-e689-7763-a7ac-32fa78b43b7a",
+    "status": "sent"
+  },
+  {
+    "organizationName": "KoçSistem",
+    "intendedRecipient": "security@kocsistem.com.tr",
+    "recipient": "security@kocsistem.com.tr",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-e798-705b-996d-3e7aca2d45e0",
+    "status": "sent"
+  },
+  {
+    "organizationName": "SabancıDx",
+    "intendedRecipient": "security@sabancidx.com",
+    "recipient": "security@sabancidx.com",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-e8fb-739d-bbe9-f69133313f19",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Eczacıbaşı Bilişim",
+    "intendedRecipient": "omer.erdem@eczacibasi.com.tr",
+    "recipient": "omer.erdem@eczacibasi.com.tr",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-ea01-749a-9463-1b4a0ef8033f",
+    "status": "sent"
+  },
+  {
+    "organizationName": "Turkcell Dijital Servisler",
+    "intendedRecipient": "guvenlik@turkcell.com.tr",
+    "recipient": "guvenlik@turkcell.com.tr",
+    "routedViaOverride": false,
+    "messageId": "01a0bed4-eb13-752b-b4cf-e9eb11a01b6f",
+    "status": "sent"
+  }
+]

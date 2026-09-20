@@ -1,8 +1,11 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
   Activity,
+  ArrowRight,
+  ExternalLink,
   Gauge,
   Loader2,
   ShieldCheck,
@@ -10,6 +13,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
+import { BENCHMARK_GITHUB_URL, BENCHMARK_METHODOLOGY_URL } from '@/config/pricing';
 import { fetchPublicProofCenter } from '@/lib/public-proof-center';
 import type { PublicProofCenterView } from '@/types/public-proof-center';
 import { PUBLIC_PROOF_DEFAULTS } from '@/types/public-proof-center';
@@ -83,6 +87,28 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
           <p className="mt-3 text-sm text-zinc-400 sm:text-base">
             Investor-grade, verifiable runtime metrics — agent safety, accuracy, sub-10ms intercept latency,
             and cryptographically signed evidence chains.
+          </p>
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href={BENCHMARK_METHODOLOGY_URL}
+              className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-2.5 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/15"
+            >
+              Read Methodology &amp; Benchmark Paper
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a
+              href={BENCHMARK_GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 transition hover:text-zinc-300"
+            >
+              Open-source harness on GitHub
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
+          <p className="mt-4 text-xs leading-relaxed text-zinc-600">
+            *Tested across 500+ MCP attack scenarios &amp; multi-agent execution graphs. Open-source
+            benchmark harness available on GitHub.
           </p>
         </div>
 

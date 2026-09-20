@@ -1,6 +1,12 @@
 import type { DisclosureTarget } from '@/lib/disclosure/types';
 
-/** 15 organizations — 5 per vertical for unified responsible disclosure batch */
+/**
+ * 15 organizations — 5 per vertical for unified responsible disclosure batch.
+ *
+ * `outreachEmail` — published or standard security/CISO contact per organization.
+ * Production test safety: set DISCLOSURE_OUTBOUND_RECIPIENT in .env.local to route
+ * ALL batch emails to a single inbox before removing the override for live outreach.
+ */
 export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
   // YC AI SaaS (5)
   {
@@ -12,6 +18,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/reworkd/AgentGPT',
     referenceUrl: 'https://github.com/reworkd/AgentGPT',
     github: 'reworkd/AgentGPT',
+    outreachEmail: 'security@agpt.co',
   },
   {
     id: 'crewai',
@@ -22,6 +29,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/crewAIInc/crewAI',
     referenceUrl: 'https://github.com/crewAIInc/crewAI',
     github: 'crewAIInc/crewAI',
+    outreachEmail: 'security@crewai.com',
   },
   {
     id: 'dify',
@@ -32,6 +40,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/langgenius/dify',
     referenceUrl: 'https://github.com/langgenius/dify',
     github: 'langgenius/dify',
+    outreachEmail: 'security@dify.ai',
   },
   {
     id: 'flowise',
@@ -42,6 +51,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/FlowiseAI/Flowise',
     referenceUrl: 'https://github.com/FlowiseAI/Flowise',
     github: 'FlowiseAI/Flowise',
+    outreachEmail: 'security@flowiseai.com',
   },
   {
     id: 'superagent',
@@ -52,6 +62,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/superagent-ai/superagent',
     referenceUrl: 'https://github.com/superagent-ai/superagent',
     github: 'superagent-ai/superagent',
+    outreachEmail: 'security@superagent.sh',
   },
 
   // FinTech & Open Banking MCP (5)
@@ -65,6 +76,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     referenceUrl: 'https://github.com/modelcontextprotocol/servers',
     github: 'modelcontextprotocol/servers',
     contentPath: 'src/stripe',
+    outreachEmail: 'security@stripe.com',
   },
   {
     id: 'composio-fintech',
@@ -75,6 +87,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/ComposioHQ/composio',
     referenceUrl: 'https://github.com/ComposioHQ/composio',
     github: 'ComposioHQ/composio',
+    outreachEmail: 'security@composio.dev',
   },
   {
     id: 'n8n-banking',
@@ -85,6 +98,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/n8n-io/n8n',
     referenceUrl: 'https://github.com/n8n-io/n8n',
     github: 'n8n-io/n8n',
+    outreachEmail: 'security@n8n.io',
   },
   {
     id: 'activepieces-finance',
@@ -95,6 +109,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/activepieces/activepieces',
     referenceUrl: 'https://github.com/activepieces/activepieces',
     github: 'activepieces/activepieces',
+    outreachEmail: 'security@activepieces.com',
   },
   {
     id: 'plaid-mcp-proxy',
@@ -112,6 +127,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
       },
     }),
     referenceUrl: 'https://plaid.com/docs/api/',
+    outreachEmail: 'security@plaid.com',
   },
 
   // Enterprise TR Tech (5)
@@ -124,6 +140,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/logo-yazilim',
     referenceUrl: 'https://www.logo.com.tr',
     github: 'logo-yazilim',
+    outreachEmail: 'guvenlik@logo.com.tr',
   },
   {
     id: 'kocsistem',
@@ -133,6 +150,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanKind: 'endpoint',
     scanSurface: 'https://www.kocsistem.com.tr',
     referenceUrl: 'https://www.kocsistem.com.tr',
+    outreachEmail: 'security@kocsistem.com.tr',
   },
   {
     id: 'sabancidx',
@@ -142,6 +160,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanKind: 'endpoint',
     scanSurface: 'https://www.sabancidx.com',
     referenceUrl: 'https://www.sabancidx.com',
+    outreachEmail: 'security@sabancidx.com',
   },
   {
     id: 'eczacibasi-bilisim',
@@ -151,6 +170,7 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanKind: 'endpoint',
     scanSurface: 'https://www.eczacibasi.com.tr',
     referenceUrl: 'https://www.eczacibasi.com.tr',
+    outreachEmail: 'omer.erdem@eczacibasi.com.tr',
   },
   {
     id: 'turkcell-digital',
@@ -161,5 +181,9 @@ export const DISCLOSURE_TARGETS: DisclosureTarget[] = [
     scanSurface: 'https://github.com/Turkcell',
     referenceUrl: 'https://www.turkcell.com.tr',
     github: 'Turkcell',
+    outreachEmail: 'guvenlik@turkcell.com.tr',
   },
 ];
+
+/** Alias used by outbound matrix / dispatcher docs */
+export const TARGET_COMPANIES = DISCLOSURE_TARGETS;

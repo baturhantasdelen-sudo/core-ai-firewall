@@ -26,9 +26,9 @@ export function isAllowedOrigin(origin: string | null): boolean {
 
 export function buildSiteMetadata(origin?: string): Metadata {
   const siteUrl = getSiteUrl(origin);
-  const title = 'Nexus Shield — AI PII Firewall, Prompt Injection Guard & DevSecOps';
+  const title = 'Nexus Shield — AI Agent Runtime Security & Control Plane';
   const description =
-    'Production-ready AI security SaaS: live PII masking, sub-10ms guardrails, KVKK/GDPR compliance, Stripe billing, and CI/CD secret scanning.';
+    'The runtime control & trust layer for autonomous AI agents. Real-time Identity → Intent → Action → Proof enforcement with sub-10ms edge validation.';
 
   return {
     metadataBase: new URL(siteUrl),
