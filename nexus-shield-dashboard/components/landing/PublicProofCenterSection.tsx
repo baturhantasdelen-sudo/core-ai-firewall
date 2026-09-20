@@ -13,7 +13,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
-import { BENCHMARK_GITHUB_URL, BENCHMARK_METHODOLOGY_URL } from '@/config/pricing';
+import { APP_DOC_ROUTES, BENCHMARK_GITHUB_URL } from '@/lib/site';
 import { fetchPublicProofCenter } from '@/lib/public-proof-center';
 import type { PublicProofCenterView } from '@/types/public-proof-center';
 import { PUBLIC_PROOF_DEFAULTS } from '@/types/public-proof-center';
@@ -90,7 +90,7 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href={BENCHMARK_METHODOLOGY_URL}
+              href={APP_DOC_ROUTES.benchmark}
               className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-2.5 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/15"
             >
               Read Methodology &amp; Benchmark Paper

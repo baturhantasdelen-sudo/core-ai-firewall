@@ -1,3 +1,5 @@
+import { APP_DOC_ROUTES, BENCHMARK_GITHUB_URL } from '@/lib/site';
+
 export const PRO_PLAN_MONTHLY_USD = 89;
 export const PRO_PLAN_ANNUAL_MONTHLY_USD = 74;
 export const TEAM_PLAN_MONTHLY_USD = 299;
@@ -84,12 +86,13 @@ export const ENTERPRISE_DEMO_URL =
 
 export const ENTERPRISE_SALES_EMAIL = 'mailto:security@nexusshield.ai?subject=Nexus%20Shield%20Enterprise';
 
-export const SDK_DOCS_URL = '/docs#sdk';
+/** @deprecated Prefer APP_DOC_ROUTES.sdk from lib/site */
+export const SDK_DOCS_URL = APP_DOC_ROUTES.sdk;
 
-export const BENCHMARK_METHODOLOGY_URL = '/docs/benchmark';
+/** @deprecated Prefer APP_DOC_ROUTES.benchmark from lib/site */
+export const BENCHMARK_METHODOLOGY_URL = APP_DOC_ROUTES.benchmark;
 
-export const BENCHMARK_GITHUB_URL =
-  'https://github.com/nexus-shield/agent-security-benchmark';
+export { BENCHMARK_GITHUB_URL };
 
 export function formatPrice(amount: number): string {
   return amount.toLocaleString('en-US', {

@@ -2,8 +2,9 @@
 
 import { useCallback, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Check, Copy, Play, Terminal } from 'lucide-react';
+import { ArrowLeft, Check, Copy, FileText, Play, Terminal } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
+import { APP_DOC_ROUTES } from '@/lib/site';
 
 interface ApiEndpointDoc {
   id: string;
@@ -259,6 +260,13 @@ export default function ApiDocsPage() {
           >
             <Terminal className="h-4 w-4" />
             Live Demo
+          </Link>
+          <Link
+            href={APP_DOC_ROUTES.benchmark}
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-cyan-500/25 bg-cyan-500/10 px-3 py-2 text-sm text-cyan-200"
+          >
+            <FileText className="h-4 w-4" />
+            Benchmark Methodology
           </Link>
         </div>
 

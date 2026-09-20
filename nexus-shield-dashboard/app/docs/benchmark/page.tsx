@@ -1,14 +1,21 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, FileText } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
+import {
+  APP_DOC_ROUTES,
+  BENCHMARK_GITHUB_URL,
+  getAbsoluteAppUrl,
+} from '@/lib/site';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Benchmark Methodology | Nexus Shield',
   description:
     'Open methodology for Nexus Shield agent runtime security benchmarks — 500+ MCP attack scenarios, multi-agent execution graphs, and reproducible harness.',
+  alternates: {
+    canonical: getAbsoluteAppUrl(APP_DOC_ROUTES.benchmark),
+  },
 };
-
-const GITHUB_BENCHMARK_URL = 'https://github.com/nexus-shield/agent-security-benchmark';
 
 export default function BenchmarkMethodologyPage() {
   return (
@@ -17,7 +24,7 @@ export default function BenchmarkMethodologyPage() {
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-6 py-4">
           <BrandLogo size={32} />
           <Link
-            href="/docs"
+            href={APP_DOC_ROUTES.docs}
             className="inline-flex items-center gap-1.5 text-sm text-zinc-400 transition hover:text-zinc-200"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -59,7 +66,7 @@ export default function BenchmarkMethodologyPage() {
         </div>
 
         <a
-          href={GITHUB_BENCHMARK_URL}
+          href={BENCHMARK_GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-8 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500/90 to-emerald-500/90 px-6 py-3 text-sm font-semibold text-zinc-950 transition hover:scale-[1.01]"
