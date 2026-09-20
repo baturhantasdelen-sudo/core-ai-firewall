@@ -16,9 +16,16 @@ Get-ChildItem $HarnessRoot -Force | Where-Object { $exclude -notcontains $_.Name
 
 Set-Location $TempDir
 if (-not (Test-Path .git)) { git init | Out-Null }
+git config user.name "Nexus Shield"
+git config user.email "opensource@nexusshield.ai"
 git add .
-git commit -m "feat: initial open-source agent security benchmark harness" 2>$null
-if ($LASTEXITCODE -ne 0) { Write-Host "Nothing new to commit (or first commit already exists)." }
+git commit -m "feat: initial open-source agent security benchmark harness"
+if ($LASTEXITCODE -ne 0) { throw "git commit failed in publish temp repo" }
+
+$activeLogin = gh api user --jq .login
+if ($activeLogin -ne "nexusshield") {
+  throw "gh is logged in as '$activeLogin'. Run: gh auth login  (select the nexusshield account), then re-run this script."
+}
 
 Write-Host "Creating public repo nexusshield/harness ..."
 gh repo create nexusshield/harness --public --source=. --remote=origin --push --description "Open-source agent runtime security benchmark harness for MCP tool chains and LLM agents"
