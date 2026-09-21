@@ -18,7 +18,6 @@ try:
     from rich.panel import Panel
     from rich.text import Text
 
-    console = Console()
     HAS_RICH = True
 except ImportError:
     HAS_RICH = False
@@ -32,16 +31,28 @@ except ImportError:
     HAS_COLORAMA = False
 
 
+def _configure_stdout() -> None:
+    reconfigure = getattr(sys.stdout, "reconfigure", None)
+    if callable(reconfigure):
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
+            pass
+
+
 def _supports_unicode() -> bool:
     encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+    sample = "─🛡⚠✓▸…"  # box drawing + symbols used in the demo
     try:
-        "─🛡⚠✓▸".encode(encoding)
+        sample.encode(encoding)
         return True
     except (UnicodeEncodeError, LookupError):
         return False
 
 
+_configure_stdout()
 USE_UNICODE = _supports_unicode()
+console = Console(legacy_windows=False, force_terminal=True) if HAS_RICH else None
 BOX_TL = "┌" if USE_UNICODE else "+"
 BOX_TR = "┐" if USE_UNICODE else "+"
 BOX_BL = "└" if USE_UNICODE else "+"
@@ -60,7 +71,7 @@ def sleep(seconds: float, speed: str) -> None:
 
 
 def emit(line: str = "", *, style: str = "default", pause: float = 0.0, speed: str = "normal") -> None:
-    if HAS_RICH:
+    if HAS_RICH and console is not None:
         styles = {
             "default": "white",
             "dim": "dim white",
@@ -122,12 +133,13 @@ def run_demo(speed: str = "normal") -> None:
     emit("   policy:  INTENT_ACTION_DIVERGENCE + SQL_EXFIL_PATTERN", style="emerald", pause=0.4, speed=speed)
     emit("", speed=speed)
 
-    if HAS_RICH:
+    if HAS_RICH and console is not None:
+        evidence_hash = "sha256:832c8ef6…705f" if USE_UNICODE else "sha256:832c8ef6...705f"
         panel = Panel(
             Text.from_markup(
                 "[green]status[/] BLOCKED\n"
                 "[green]tool[/] @modelcontextprotocol/server-postgres\n"
-                "[green]evidence[/] sha256:832c8ef6…705f\n"
+                f"[green]evidence[/] {evidence_hash}\n"
                 "[green]proof[/] https://nexusshield.ai/docs/benchmark"
             ),
             title="Security Log",
