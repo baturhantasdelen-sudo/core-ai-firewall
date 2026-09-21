@@ -291,6 +291,12 @@ def test_landing_page_serves_index_html(shield_client: TestClient | httpx.Client
     assert "/api/sandbox" in response.text
 
 
+def test_docs_benchmark_redirects_to_marketing_site(shield_client: TestClient | httpx.Client) -> None:
+    response = shield_client.get("/docs/benchmark", follow_redirects=False)
+    assert response.status_code == 301
+    assert response.headers["location"] == "https://nexusshield.ai/docs/benchmark"
+
+
 @pytest.mark.integration
 def test_healthz_live_endpoint(shield_client: TestClient | httpx.Client) -> None:
     if not BASE_URL:

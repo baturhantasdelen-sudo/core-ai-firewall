@@ -38,7 +38,7 @@ from dataclasses import dataclass, field
 from typing import Any, Final
 
 from fastapi import FastAPI, Header, HTTPException, Request, WebSocket, WebSocketDisconnect, status
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from pydantic import BaseModel, Field
 
 from nexus_auth import api_key_store, auth_router
@@ -342,6 +342,13 @@ def _load_landing_html() -> str:
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def landing_page() -> HTMLResponse:
     return HTMLResponse(content=_load_landing_html(), media_type="text/html; charset=utf-8")
+
+
+@app.get("/docs/benchmark", include_in_schema=False)
+@app.get("/docs/benchmark/", include_in_schema=False)
+async def redirect_docs_benchmark() -> RedirectResponse:
+    """api.nexusshield.ai/docs/benchmark → marketing benchmark methodology page."""
+    return RedirectResponse(url="https://nexusshield.ai/docs/benchmark", status_code=301)
 
 
 @app.get("/analytics-config.js", include_in_schema=False)
