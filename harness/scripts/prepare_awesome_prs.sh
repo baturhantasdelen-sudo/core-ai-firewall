@@ -25,7 +25,7 @@ fi
 MCP_ENTRY="$(extract_markdown_entry "$MCP_TEMPLATE" | sed '/^$/d' | head -n 1)"
 LLM_ENTRY="$(extract_markdown_entry "$LLM_TEMPLATE" | sed '/^$/d' | head -n 1)"
 MCP_TITLE="docs: add Nexus Shield MCP Security Harness to Security & Testing"
-LLM_TITLE="docs: add MCP-SEC-SCORE harness to Benchmarks & Evaluation"
+LLM_TITLE="docs: add MCP-SEC-SCORE harness to Benchmark"
 
 MCP_BODY_FILE="$(mktemp)"
 LLM_BODY_FILE="$(mktemp)"
@@ -96,19 +96,19 @@ gh pr create --repo wong2/awesome-mcp-servers \\
   --body-file "$MCP_BODY_FILE"
 EOF
 
-print_section "awesome-llm-security — markdown entry (Benchmarks & Evaluation)"
+print_section "awesome-llm-security — markdown entry (Benchmark)"
 echo "$LLM_ENTRY"
 
-print_section "awesome-llm-security — gh commands (applied-ai/awesome-llm-security)"
+print_section "awesome-llm-security — gh commands (corca-ai/awesome-llm-security)"
 cat <<EOF
-gh repo fork applied-ai/awesome-llm-security --clone --remote
+gh repo fork corca-ai/awesome-llm-security --clone --remote
 git -C awesome-llm-security checkout -b add-nexus-shield-mcp-sec-score
-# Add under **Benchmarks & Evaluation** in README.md:
+# Add under **Benchmark** in README.md:
 # $LLM_ENTRY
 git -C awesome-llm-security add README.md
 git -C awesome-llm-security commit -m "$LLM_TITLE"
 git -C awesome-llm-security push -u origin add-nexus-shield-mcp-sec-score
-gh pr create --repo applied-ai/awesome-llm-security \\
+gh pr create --repo corca-ai/awesome-llm-security \\
   --head "\$(gh api user --jq .login):add-nexus-shield-mcp-sec-score" \\
   --title "$LLM_TITLE" \\
   --body-file "$LLM_BODY_FILE"

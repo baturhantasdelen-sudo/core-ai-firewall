@@ -1,8 +1,8 @@
 # PR — awesome-llm-security
 
-Submit to: https://github.com/applied-ai/awesome-llm-security
+Submit to: https://github.com/corca-ai/awesome-llm-security
 
-**Suggested section:** Benchmarks & Evaluation
+**Suggested section:** Benchmark
 
 ## Entry (copy-paste)
 
@@ -13,7 +13,7 @@ Submit to: https://github.com/applied-ai/awesome-llm-security
 ## PR title suggestion
 
 ```
-docs: add MCP-SEC-SCORE harness to Benchmarks & Evaluation
+docs: add MCP-SEC-SCORE harness to Benchmark
 ```
 
 ## PR body template
