@@ -299,10 +299,16 @@ export default function Home() {
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </a>
               <Link
-                href="/docs/benchmark"
+                href="/scorecard"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-7 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/25 transition-transform hover:scale-[1.02]"
               >
                 <ShieldCheck className="h-4 w-4" />
+                2026 Agent Scorecard
+              </Link>
+              <Link
+                href="/docs/benchmark"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-7 py-3.5 text-sm font-semibold text-emerald-200 backdrop-blur-md transition hover:bg-emerald-500/20"
+              >
                 Reproduce MCP-SEC-SCORE
               </Link>
               <Link

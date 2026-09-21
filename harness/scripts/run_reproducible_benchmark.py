@@ -5,6 +5,7 @@ Reproducible MCP-SEC-SCORE benchmark runner.
 Usage:
     python scripts/run_reproducible_benchmark.py
     python scripts/run_reproducible_benchmark.py --eval-mcp --output results/mcp_leaderboard.json
+    python scripts/run_reproducible_benchmark.py --eval-scorecard
 """
 
 from __future__ import annotations
@@ -39,7 +40,12 @@ def main() -> int:
     parser.add_argument(
         "--eval-mcp",
         action="store_true",
-        help="Run MCP hijack scenario evaluation (default when no other flags)",
+        help="Run MCP hijack scenario evaluation",
+    )
+    parser.add_argument(
+        "--eval-scorecard",
+        action="store_true",
+        help="Run 2026 Shadow AI Agent & indirect injection scorecard",
     )
     parser.add_argument(
         "--output",
@@ -48,8 +54,13 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    if not args.eval_mcp and len(sys.argv) == 1:
+    if not args.eval_mcp and not args.eval_scorecard and len(sys.argv) == 1:
         args.eval_mcp = True
+
+    if args.eval_scorecard:
+        cmd = [sys.executable, str(ROOT / "scripts" / "eval_scorecard.py"), "--output", "results/scorecard_2026.json"]
+        print(f"Running: {' '.join(cmd)}")
+        return subprocess.call(cmd, cwd=ROOT)
 
     if args.eval_mcp:
         rc = run_mcp_eval(ROOT / args.output)

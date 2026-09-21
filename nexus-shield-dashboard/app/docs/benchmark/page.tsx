@@ -80,12 +80,21 @@ export default function BenchmarkMethodologyPage() {
               External researchers can reproduce MCP-SEC-SCORE locally — no Nexus Shield account required:
             </p>
             <pre className="mt-3 overflow-x-auto rounded-lg border border-white/10 bg-black/40 p-4 text-xs text-emerald-300">
-              {`docker run --rm nexusshield/harness:latest --eval-mcp
+              {`docker run --rm ghcr.io/baturhantasdelen-sudo/harness:latest --eval-mcp
+
+# 2026 Shadow AI scorecard (Top-10 frameworks):
+docker run --rm ghcr.io/baturhantasdelen-sudo/harness:latest --eval-scorecard
 
 # or from source:
 git clone ${BENCHMARK_GITHUB_URL}
 cd harness && python scripts/run_reproducible_benchmark.py --eval-mcp`}
             </pre>
+            <p className="mt-4 text-sm text-zinc-400">
+              Full interactive matrix:{' '}
+              <Link href="/scorecard" className="text-cyan-400 hover:underline">
+                2026 Enterprise AI Agent Security Scorecard
+              </Link>
+            </p>
             <p className="mt-3 text-sm text-zinc-500">
               Listed on{' '}
               <a href="https://github.com/corca-ai/awesome-llm-security" className="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">

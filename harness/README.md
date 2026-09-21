@@ -50,10 +50,22 @@ Reproduce Proof Center metrics locally (no Nexus Shield account required):
 
 ```bash
 # Docker (recommended)
-docker run --rm nexusshield/harness:latest --eval-mcp
+docker run --rm ghcr.io/baturhantasdelen-sudo/harness:latest --eval-mcp
 
 # or from source
 python scripts/run_reproducible_benchmark.py --eval-mcp
+```
+
+### 2026 Shadow AI Agent Scorecard
+
+Enterprise scorecard for top-10 agent frameworks vs. indirect injection, tool abuse, and delegation risks:
+
+```bash
+docker run --rm ghcr.io/baturhantasdelen-sudo/harness:latest --eval-scorecard
+
+# or from source
+python scripts/run_reproducible_benchmark.py --eval-scorecard
+python scripts/eval_scorecard.py --output results/scorecard_2026.json
 ```
 
 Evidence bundle chain per evaluation: **Agent Identity → Requested Intent → Tool Call → Before State Hash → After State Hash → Cryptographic Evidence Bundle**.

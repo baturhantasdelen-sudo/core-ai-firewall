@@ -30,6 +30,7 @@ const ALLOWED_ORIGINS = [
 export const APP_DOC_ROUTES = {
   docs: '/docs',
   benchmark: '/docs/benchmark',
+  scorecard: '/scorecard',
   sdk: '/docs#sdk',
 } as const;
 
