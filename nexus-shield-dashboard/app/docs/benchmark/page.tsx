@@ -52,19 +52,50 @@ export default function BenchmarkMethodologyPage() {
 
         <div className="mt-10 space-y-6 rounded-2xl border border-white/10 bg-zinc-900/50 p-6">
           <section>
+            <h2 className="text-lg font-semibold text-zinc-100">Evidence Bundle Chain</h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              Every evaluated action produces a reproducible cryptographic evidence bundle:
+            </p>
+            <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-zinc-400">
+              <li>Agent Identity — who initiated the runtime session</li>
+              <li>Requested Intent — declared user or planner objective</li>
+              <li>Tool Call — MCP JSON-RPC method, tool name, and arguments</li>
+              <li>Before State Hash — SHA-256 digest of pre-action system state</li>
+              <li>After State Hash — post-action digest (or UNVERIFIED if blocked)</li>
+              <li>Cryptographic Evidence Bundle — signed, downloadable JSON for audit</li>
+            </ol>
+          </section>
+          <section>
             <h2 className="text-lg font-semibold text-zinc-100">Coverage</h2>
             <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-zinc-400">
-              <li>500+ MCP attack scenarios across FinTech, SaaS, and enterprise tool chains</li>
-              <li>Multi-agent execution graphs with trajectory divergence scoring</li>
-              <li>Sub-10ms runtime intercept latency measurement (p50 / p95 / p99)</li>
-              <li>SHA-256 evidence bundle generation for every blocked action</li>
+              <li>500+ MCP attack scenarios — indirect injection, cross-tool exfil, privilege escalation</li>
+              <li>MCP-SEC-SCORE (0–100) composite grade with letter bands A+ through F</li>
+              <li>Sub-10ms runtime intercept latency (p50 / p95 / p99)</li>
+              <li>UNVERIFIED_ACTION detection when evidence chain breaks</li>
             </ul>
           </section>
           <section>
             <h2 className="text-lg font-semibold text-zinc-100">Reproducibility</h2>
             <p className="mt-3 text-sm text-zinc-400">
-              Clone the benchmark harness, run against your agent stack, and compare block rates with our
-              published Proof Center defaults (127 agents, 48,291 tool calls, 99.3% block rate).
+              External researchers can reproduce MCP-SEC-SCORE locally — no Nexus Shield account required:
+            </p>
+            <pre className="mt-3 overflow-x-auto rounded-lg border border-white/10 bg-black/40 p-4 text-xs text-emerald-300">
+              {`docker run --rm nexusshield/harness:latest --eval-mcp
+
+# or from source:
+git clone ${BENCHMARK_GITHUB_URL}
+cd harness && python scripts/run_reproducible_benchmark.py --eval-mcp`}
+            </pre>
+            <p className="mt-3 text-sm text-zinc-500">
+              Listed on{' '}
+              <a href="https://github.com/corca-ai/awesome-llm-security" className="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">
+                corca-ai/awesome-llm-security
+              </a>{' '}
+              and submitted to{' '}
+              <a href="https://mcpservers.org/submit" className="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">
+                mcpservers.org
+              </a>
+              .
             </p>
           </section>
         </div>

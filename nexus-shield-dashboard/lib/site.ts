@@ -117,9 +117,9 @@ export function isAllowedOrigin(origin: string | null): boolean {
 
 export function buildSiteMetadata(origin?: string): Metadata {
   const siteUrl = getSiteUrl(origin);
-  const title = 'Nexus Shield — AI Agent Runtime Security & Control Plane';
+  const title = 'Nexus Shield — AI Agent Runtime Control & Trust Layer';
   const description =
-    'The runtime control & trust layer for autonomous AI agents. Real-time Identity → Intent → Action → Proof enforcement with sub-10ms edge validation.';
+    'Discover every agent. Control every action. Verify every outcome. Nexus Shield intercepts unauthorized agent actions, evaluates intent divergence, and creates verifiable cryptographic evidence.';
 
   return {
     metadataBase: new URL(siteUrl),

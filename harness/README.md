@@ -44,7 +44,19 @@ Python HTTP latency + attack benchmark (stdlib-only):
 python python/run_benchmark.py --base-url http://127.0.0.1:8080 --json-out results/http-benchmark.json
 ```
 
-### MCP Tool-Hijack Security Leaderboard
+### Reproducible MCP-SEC-SCORE Benchmark
+
+Reproduce Proof Center metrics locally (no Nexus Shield account required):
+
+```bash
+# Docker (recommended)
+docker run --rm nexusshield/harness:latest --eval-mcp
+
+# or from source
+python scripts/run_reproducible_benchmark.py --eval-mcp
+```
+
+Evidence bundle chain per evaluation: **Agent Identity → Requested Intent → Tool Call → Before State Hash → After State Hash → Cryptographic Evidence Bundle**.
 
 Test MCP servers against indirect prompt injection, cross-tool exfiltration, and privilege escalation:
 
@@ -54,6 +66,8 @@ docker compose -f docker/mcp-sandbox/docker-compose.yml up -d
 
 python -m runners.mcp_runner --scenarios scenarios/mcp_hijack/ --output results/mcp_leaderboard.json
 ```
+
+Community listings: [corca-ai/awesome-llm-security](https://github.com/corca-ai/awesome-llm-security) · [mcpservers.org/submit](https://mcpservers.org/submit)
 
 See [scenarios/mcp_hijack/README.md](./scenarios/mcp_hijack/README.md) for scenario details and scoring.
 
