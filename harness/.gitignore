@@ -9,3 +9,5 @@ __pycache__/
 coverage/
 results/*
 !results/.gitkeep
+.tools/
+docs/assets/demo.cast
