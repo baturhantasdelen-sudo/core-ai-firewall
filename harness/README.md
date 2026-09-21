@@ -6,6 +6,8 @@ Open-source benchmark harness for evaluating **AI agent runtime security** again
 
 **Quick demo:** `pip install rich && python scripts/demo_terminal_sim.py`
 
+**Record hero GIF:** `bash scripts/render_gif.sh` (requires [VHS](https://github.com/charmbracelet/vhs) + ffmpeg)
+
 This repository contains **only** the public scenario runner, scoring utilities, and HTTP adapters. It does **not** include proprietary Nexus Shield SaaS dashboard code, private API routes, database schemas, or production backend logic.
 
 > **Enterprise runtime protection:** Need sub-10ms edge enforcement, HITL governance, audit evidence, and the full Proof Center dashboard? Visit **[https://nexusshield.ai](https://nexusshield.ai)**.
