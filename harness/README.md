@@ -1,6 +1,10 @@
 # Nexus Shield Harness
 
+![MCP Tool-Hijack Security Demo](docs/assets/mcp-shield-demo.gif)
+
 Open-source benchmark harness for evaluating **AI agent runtime security** against MCP tool chains, prompt injection, intent divergence, and multi-step trajectory attacks.
+
+**Quick demo:** `pip install rich && python scripts/demo_terminal_sim.py`
 
 This repository contains **only** the public scenario runner, scoring utilities, and HTTP adapters. It does **not** include proprietary Nexus Shield SaaS dashboard code, private API routes, database schemas, or production backend logic.
 
@@ -50,6 +54,14 @@ python -m runners.mcp_runner --scenarios scenarios/mcp_hijack/ --output results/
 ```
 
 See [scenarios/mcp_hijack/README.md](./scenarios/mcp_hijack/README.md) for scenario details and scoring.
+
+Generate MCP-Sec Verified badges for adapter READMEs:
+
+```bash
+python -m runners.badge_generator --input results/mcp_leaderboard.json
+```
+
+Record the terminal demo as a GIF: [docs/DEMO_GIF_GUIDE.md](./docs/DEMO_GIF_GUIDE.md)
 
 ## What this harness measures
 

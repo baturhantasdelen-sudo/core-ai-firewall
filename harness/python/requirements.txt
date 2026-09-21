@@ -1,2 +1,4 @@
-# Optional — stdlib-only runner works without dependencies.
+# Optional — stdlib-only runners work without dependencies.
 # requests>=2.31.0
+rich>=13.7.0
+colorama>=0.4.6

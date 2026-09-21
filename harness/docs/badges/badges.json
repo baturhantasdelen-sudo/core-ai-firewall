@@ -1,0 +1,47 @@
+{
+  "overall": "[![MCP-Sec Verified Grade A](https://img.shields.io/badge/MCP--SEC--SCORE-96.1%20%7C%20Grade%20A-brightgreen?style=flat-square&logo=shield)](https://nexusshield.ai/docs/benchmark)",
+  "overall_url": "https://img.shields.io/badge/MCP-SEC-SCORE-96.1%2520%257C%2520Grade%2520A-brightgreen?style=flat-square&logo=shield",
+  "adapters": [
+    {
+      "adapter": "Fetch",
+      "scenario_id": "mcp-hijack-fetch-ssrf",
+      "grade": "A+",
+      "score": "97.0",
+      "markdown": "[![MCP-Sec Fetch 97.0%20%7C%20A+](https://img.shields.io/badge/MCP-Sec%20Fetch-97.0%2520%257C%2520A%2B-brightgreen?style=flat-square&logo=shield)](https://nexusshield.ai/docs/benchmark)",
+      "url": "https://img.shields.io/badge/MCP-Sec%20Fetch-97.0%20%7C%20A%2B-brightgreen?style=flat-square&logo=shield"
+    },
+    {
+      "adapter": "Postgres",
+      "scenario_id": "mcp-hijack-postgres-exfil",
+      "grade": "A+",
+      "score": "97.0",
+      "markdown": "[![MCP-Sec Postgres 97.0%20%7C%20A+](https://img.shields.io/badge/MCP-Sec%20Postgres-97.0%2520%257C%2520A%2B-brightgreen?style=flat-square&logo=shield)](https://nexusshield.ai/docs/benchmark)",
+      "url": "https://img.shields.io/badge/MCP-Sec%20Postgres-97.0%20%7C%20A%2B-brightgreen?style=flat-square&logo=shield"
+    },
+    {
+      "adapter": "Slack+GitHub",
+      "scenario_id": "mcp-hijack-slack-github-leak",
+      "grade": "A+",
+      "score": "97.0",
+      "markdown": "[![MCP-Sec Slack+GitHub 97.0%20%7C%20A+](https://img.shields.io/badge/MCP-Sec%20Slack%2BGitHub-97.0%2520%257C%2520A%2B-brightgreen?style=flat-square&logo=shield)](https://nexusshield.ai/docs/benchmark)",
+      "url": "https://img.shields.io/badge/MCP-Sec%20Slack%2BGitHub-97.0%20%7C%20A%2B-brightgreen?style=flat-square&logo=shield"
+    },
+    {
+      "adapter": "FileSystem",
+      "scenario_id": "mcp-hijack-filesystem-traversal",
+      "grade": "A",
+      "score": "95.5",
+      "markdown": "[![MCP-Sec FileSystem 95.5%20%7C%20A](https://img.shields.io/badge/MCP-Sec%20FileSystem-95.5%2520%257C%2520A-brightgreen?style=flat-square&logo=shield)](https://nexusshield.ai/docs/benchmark)",
+      "url": "https://img.shields.io/badge/MCP-Sec%20FileSystem-95.5%20%7C%20A-brightgreen?style=flat-square&logo=shield"
+    },
+    {
+      "adapter": "GitHub",
+      "scenario_id": "mcp-hijack-github-pr-poison",
+      "grade": "A",
+      "score": "94.0",
+      "markdown": "[![MCP-Sec GitHub 94.0%20%7C%20A](https://img.shields.io/badge/MCP-Sec%20GitHub-94.0%2520%257C%2520A-brightgreen?style=flat-square&logo=shield)](https://nexusshield.ai/docs/benchmark)",
+      "url": "https://img.shields.io/badge/MCP-Sec%20GitHub-94.0%20%7C%20A-brightgreen?style=flat-square&logo=shield"
+    }
+  ],
+  "proof_url": "https://nexusshield.ai/docs/benchmark"
+}
