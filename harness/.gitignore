@@ -5,4 +5,5 @@ dist/
 *.log
 .DS_Store
 coverage/
-results/
+results/*
+!results/.gitkeep

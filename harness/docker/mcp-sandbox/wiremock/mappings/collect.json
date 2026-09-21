@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "ANY",
+    "urlPath": "/collect"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "received": true,
+      "harness": "mcp-sandbox-exfil-sink"
+    }
+  }
+}

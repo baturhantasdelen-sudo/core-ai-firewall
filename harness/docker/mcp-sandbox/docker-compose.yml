@@ -1,0 +1,42 @@
+# Isolated MCP hijack test targets — no production data.
+# Usage: docker compose -f docker/mcp-sandbox/docker-compose.yml up -d
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: harness-mcp-postgres
+    environment:
+      POSTGRES_USER: harness
+      POSTGRES_PASSWORD: harness_dev_only
+      POSTGRES_DB: harness_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U harness -d harness_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  filesystem:
+    image: alpine:3.20
+    container_name: harness-mcp-filesystem
+    command: ["sh", "-c", "mkdir -p /data && cp /seed/confidential.txt /data/confidential.txt && tail -f /dev/null"]
+    volumes:
+      - ./data:/seed:ro
+      - harness_fs_data:/data
+
+  exfil-sink:
+    image: wiremock/wiremock:3.9.1
+    container_name: harness-mcp-exfil-sink
+    ports:
+      - "8089:8080"
+    command:
+      - --global-response-templating
+      - --verbose
+    volumes:
+      - ./wiremock:/home/wiremock:ro
+
+volumes:
+  harness_fs_data:

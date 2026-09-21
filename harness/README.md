@@ -38,6 +38,19 @@ Python HTTP latency + attack benchmark (stdlib-only):
 python python/run_benchmark.py --base-url http://127.0.0.1:8080 --json-out results/http-benchmark.json
 ```
 
+### MCP Tool-Hijack Security Leaderboard
+
+Test MCP servers against indirect prompt injection, cross-tool exfiltration, and privilege escalation:
+
+```bash
+# Optional: start isolated sandbox (Postgres, filesystem, exfil sink)
+docker compose -f docker/mcp-sandbox/docker-compose.yml up -d
+
+python -m runners.mcp_runner --scenarios scenarios/mcp_hijack/ --output results/mcp_leaderboard.json
+```
+
+See [scenarios/mcp_hijack/README.md](./scenarios/mcp_hijack/README.md) for scenario details and scoring.
+
 ## What this harness measures
 
 | Metric | Description |
