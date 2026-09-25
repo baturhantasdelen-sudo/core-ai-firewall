@@ -55,7 +55,7 @@ export function LoginForm() {
   return (
     <div className="mx-auto w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900/70 p-8 backdrop-blur-sm">
       <div className="mb-8 flex justify-center">
-        <BrandLogo size={44} />
+        <BrandLogo imageClassName="h-16 w-auto sm:h-[4.5rem]" />
       </div>
       <h1 className="select-none text-center text-2xl font-semibold text-zinc-100">Sign in to Nexus Shield</h1>
       <p className="mt-2 select-none text-center text-sm text-zinc-500">

@@ -39,6 +39,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: '/images/nexusshield-logo.png',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
         source: '/:path(.*\\.png)',
         headers: [
           {

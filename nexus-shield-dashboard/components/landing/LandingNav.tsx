@@ -124,7 +124,7 @@ export function LandingNav() {
     <header className="sticky top-0 z-50 border-b border-white/5 bg-zinc-950/80 backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         {/* Brand */}
-        <BrandLogo size={36} />
+        <BrandLogo size={40} />
 
         {/* Desktop — growth drivers + dropdowns */}
         <div className="hidden items-center gap-4 lg:flex xl:gap-5">
@@ -195,6 +195,7 @@ export function LandingNav() {
       {mobileOpen ? (
         <div className="border-t border-white/5 bg-zinc-950/95 backdrop-blur-md lg:hidden">
           <div className="mx-auto max-w-7xl space-y-6 px-4 py-5 sm:px-6">
+            <BrandLogo size={36} className="mb-1" />
             <div>
               <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
                 Growth Drivers

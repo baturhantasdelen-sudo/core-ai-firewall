@@ -35,6 +35,7 @@ These edge directives terminate HTTP→HTTPS redirects at Cloudflare and reduce 
 (http.request.uri.path starts_with "/_next/static/") or
 (http.request.uri.path eq "/favicon.ico") or
 (http.request.uri.path eq "/logo.png") or
+(http.request.uri.path eq "/images/nexusshield-logo.png") or
 (http.request.uri.path matches ".*\\.(png|svg|jpg|jpeg|webp|ico|woff2)$")
 ```
 
@@ -59,7 +60,7 @@ resource "cloudflare_ruleset" "nexus_static_cache" {
 
   rules {
     action = "set_cache_settings"
-    expression = "(http.request.uri.path starts_with \"/_next/static/\") or (http.request.uri.path eq \"/favicon.ico\") or (http.request.uri.path eq \"/logo.png\") or (http.request.uri.path matches \".*\\\\.(png|svg|jpg|jpeg|webp|ico|woff2)$\")"
+    expression = "(http.request.uri.path starts_with \"/_next/static/\") or (http.request.uri.path eq \"/favicon.ico\") or (http.request.uri.path eq \"/logo.png\") or (http.request.uri.path eq \"/images/nexusshield-logo.png\") or (http.request.uri.path matches \".*\\\\.(png|svg|jpg|jpeg|webp|ico|woff2)$\")"
     action_parameters {
       cache = true
       edge_ttl {

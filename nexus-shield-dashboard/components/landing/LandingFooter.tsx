@@ -6,7 +6,7 @@ export function LandingFooter() {
     <footer className="border-t border-white/5">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 text-xs text-zinc-500 sm:flex-row">
         <div className="flex select-none items-center gap-3">
-          <BrandLogo size={28} showText={false} />
+          <BrandLogo imageClassName="h-10 w-auto" />
           <span className="select-none">
             © {new Date().getFullYear()} Nexus Shield. All rights reserved.
           </span>

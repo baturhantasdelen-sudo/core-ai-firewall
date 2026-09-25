@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_description">NexusShield Banking Guard isolates banking and SMS apps from AI overlays and clipboard leaks.</string>
+</resources>

@@ -48,7 +48,7 @@ export function DashboardHeader({ apiKey }: DashboardHeaderProps) {
     <>
       <header className="overflow-hidden">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-          <BrandLogo size={32} />
+          <BrandLogo size={36} />
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <h1 className="min-w-0 select-none text-xl font-semibold tracking-tight text-zinc-100 sm:text-2xl">
               Nexus Shield Dashboard
