@@ -46,3 +46,9 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Fastlane / store credentials (never commit)
+**/fastlane/play-store-credentials.json
+**/fastlane/keys/
+**/fastlane/report.xml
+**/fastlane/test_output/

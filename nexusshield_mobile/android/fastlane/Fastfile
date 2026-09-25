@@ -1,0 +1,27 @@
+default_platform(:android)
+
+platform :android do
+  desc "Upload release App Bundle to Google Play (supply)"
+  lane :deploy do
+    android_root = File.expand_path("..", __dir__)
+    aab_path = File.expand_path(
+      "../build/app/outputs/bundle/release/app-release.aab",
+      android_root
+    )
+
+    UI.user_error!("AAB not found at #{aab_path}. Run flutter build appbundle --release first.") unless File.exist?(aab_path)
+
+    track = ENV.fetch("GOOGLE_PLAY_TRACK", "internal")
+
+    supply(
+      package_name: "com.nexusshield.guard",
+      track: track,
+      aab: aab_path,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end

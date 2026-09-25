@@ -1,0 +1,7 @@
+package_name("com.nexusshield.guard")
+
+json_key_file(
+  ENV.fetch("GOOGLE_PLAY_JSON_KEY_PATH") do
+    File.expand_path("play-store-credentials.json", __dir__)
+  end
+)

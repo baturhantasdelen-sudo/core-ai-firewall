@@ -44,6 +44,17 @@ Output: `build/app/outputs/bundle/release/app-release.aab`
 
 If `key.properties` / env vars are missing, Gradle falls back to the debug keystore so local `--release` still compiles. Play uploads **must** use the upload keystore.
 
+### Fastlane (Google Play upload)
+
+From `nexusshield_mobile/android/` after a release AAB exists:
+
+```bash
+bundle install
+export GOOGLE_PLAY_JSON_KEY_PATH=/path/to/play-service-account.json
+export GOOGLE_PLAY_TRACK=internal   # or alpha
+bundle exec fastlane deploy
+```
+
 ## iOS App Store / TestFlight (IPA)
 
 On macOS with a valid Apple Development/Distribution team selected in Xcode:
@@ -56,6 +67,29 @@ flutter build ipa --release
 Archive: `build/ios/ipa/*.ipa`
 
 Open `ios/Runner.xcworkspace` → Runner target → Signing & Capabilities → Team, then Product → Archive for Transporter / App Store Connect if you prefer Xcode.
+
+### Fastlane (TestFlight upload)
+
+From `nexusshield_mobile/ios/` after a release IPA exists:
+
+```bash
+bundle install
+export APP_STORE_CONNECT_API_KEY_KEY_ID=...
+export APP_STORE_CONNECT_API_KEY_ISSUER_ID=...
+export APP_STORE_CONNECT_API_KEY_PATH=/path/to/AuthKey_XXXXXX.p8
+export FASTLANE_APPLE_ID=your@apple.id
+export FASTLANE_TEAM_ID=...
+bundle exec fastlane beta
+```
+
+### CI secrets (tag `v*` → `.github/workflows/publish.yml`)
+
+| Secret | Platform |
+|--------|----------|
+| `GOOGLE_PLAY_JSON_KEY_CONTENT` | Android Play service account JSON (full file) |
+| `ANDROID_KEYSTORE_*` | Release signing for AAB |
+| `APP_STORE_CONNECT_API_KEY_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY_KEY` | TestFlight upload (.p8 contents) |
+| `FASTLANE_APPLE_ID`, `FASTLANE_TEAM_ID`, `FASTLANE_ITC_TEAM_ID` | Optional Appfile hints |
 
 Privacy strings in `ios/Runner/Info.plist`:
 

@@ -56,6 +56,31 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Set up Ruby for Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: nexusshield_mobile/android
+
+      - name: Install Fastlane (Android)
+        working-directory: nexusshield_mobile/android
+        run: bundle install
+
+      - name: Configure Google Play service account
+        working-directory: nexusshield_mobile/android
+        env:
+          GOOGLE_PLAY_JSON_KEY_CONTENT: ${{ secrets.GOOGLE_PLAY_JSON_KEY_CONTENT }}
+        run: |
+          printf '%s\n' "$GOOGLE_PLAY_JSON_KEY_CONTENT" > fastlane/play-store-credentials.json
+
+      - name: Deploy to Google Play (Fastlane supply)
+        working-directory: nexusshield_mobile/android
+        env:
+          GOOGLE_PLAY_JSON_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/android/fastlane/play-store-credentials.json
+          GOOGLE_PLAY_TRACK: internal
+        run: bundle exec fastlane deploy
+
   build-ios:
     name: iOS IPA (App Store / TestFlight)
     runs-on: macos-latest
@@ -87,3 +112,33 @@ jobs:
           path: nexusshield_mobile/build/ios/ipa/*.ipa
           if-no-files-found: error
           retention-days: 30
+
+      - name: Set up Ruby for Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: nexusshield_mobile/ios
+
+      - name: Install Fastlane (iOS)
+        working-directory: nexusshield_mobile/ios
+        run: bundle install
+
+      - name: Configure App Store Connect API key
+        working-directory: nexusshield_mobile/ios
+        env:
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+        run: |
+          mkdir -p fastlane/keys
+          printf '%s\n' "$APP_STORE_CONNECT_API_KEY_KEY" > fastlane/keys/AuthKey.p8
+
+      - name: Deploy to TestFlight (Fastlane pilot)
+        working-directory: nexusshield_mobile/ios
+        env:
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/ios/fastlane/keys/AuthKey.p8
+          FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
+          FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
+          FASTLANE_ITC_TEAM_ID: ${{ secrets.FASTLANE_ITC_TEAM_ID }}
+        run: bundle exec fastlane beta
