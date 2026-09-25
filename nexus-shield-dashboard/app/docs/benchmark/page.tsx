@@ -95,6 +95,17 @@ cd harness && python scripts/run_reproducible_benchmark.py --eval-mcp`}
               <Link href="/scorecard" className="text-cyan-400 hover:underline">
                 2026 Enterprise AI Agent Security Scorecard
               </Link>
+              . GRC export:{' '}
+              <code className="text-emerald-300">GET /api/v1/compliance/evidence</code> — see{' '}
+              <a
+                href="https://github.com/baturhantasdelen-sudo/core-ai-firewall/blob/main/docs/COMPLIANCE_READINESS.md"
+                className="text-cyan-400 hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Compliance Readiness Guide
+              </a>
+              .
             </p>
             <p className="mt-3 text-sm text-zinc-500">
               Listed on{' '}

@@ -68,6 +68,16 @@ python scripts/run_reproducible_benchmark.py --eval-scorecard
 python scripts/eval_scorecard.py --output results/scorecard_2026.json
 ```
 
+### Compliance evidence export (SOC 2 / ISO 27001 helpers)
+
+```bash
+python -m runners.compliance_exporter --output-dir results/compliance
+# or
+python scripts/run_reproducible_benchmark.py --export-compliance
+```
+
+Produces `compliance_evidence_bundle.json` plus CSV control/scenario exports for Vanta, Drata, or Secureframe ingestion. See [docs/COMPLIANCE_READINESS.md](../docs/COMPLIANCE_READINESS.md).
+
 Evidence bundle chain per evaluation: **Agent Identity → Requested Intent → Tool Call → Before State Hash → After State Hash → Cryptographic Evidence Bundle**.
 
 **OWASP alignment:** Leaderboard JSON (`results/mcp_leaderboard.json`) includes `owasp_genai_top_10` and `owasp_agentic` tags per scenario (see [SECURITY.md](./SECURITY.md)). **On-device privacy:** harness runs locally with `external_cloud_proxy: false` metadata for air-gapped reproducibility.

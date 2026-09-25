@@ -6,6 +6,7 @@ Usage:
     python scripts/run_reproducible_benchmark.py
     python scripts/run_reproducible_benchmark.py --eval-mcp --output results/mcp_leaderboard.json
     python scripts/run_reproducible_benchmark.py --eval-scorecard
+    python scripts/run_reproducible_benchmark.py --export-compliance
 """
 
 from __future__ import annotations
@@ -48,6 +49,11 @@ def main() -> int:
         help="Run 2026 Shadow AI Agent & indirect injection scorecard",
     )
     parser.add_argument(
+        "--export-compliance",
+        action="store_true",
+        help="Export SOC 2 / ISO oriented compliance evidence bundle (JSON + CSV)",
+    )
+    parser.add_argument(
         "--output",
         default="results/mcp_leaderboard.json",
         help="JSON output path for leaderboard results",
@@ -59,6 +65,19 @@ def main() -> int:
 
     if args.eval_scorecard:
         cmd = [sys.executable, str(ROOT / "scripts" / "eval_scorecard.py"), "--output", "results/scorecard_2026.json"]
+        print(f"Running: {' '.join(cmd)}")
+        return subprocess.call(cmd, cwd=ROOT)
+
+    if args.export_compliance:
+        cmd = [
+            sys.executable,
+            "-m",
+            "runners.compliance_exporter",
+            "--leaderboard",
+            str(ROOT / args.output),
+            "--output-dir",
+            str(ROOT / "results" / "compliance"),
+        ]
         print(f"Running: {' '.join(cmd)}")
         return subprocess.call(cmd, cwd=ROOT)
 

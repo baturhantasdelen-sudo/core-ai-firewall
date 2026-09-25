@@ -31,6 +31,12 @@ Harness JSON exports (`mcp_leaderboard.json`, `scorecard_2026.json`) include `ow
 
 Report security issues privately via GitHub Security Advisories on this repository or contact **security@nexusshield.ai** (replace with your operational address). Do not open public issues for exploitable findings.
 
+## Compliance automation
+
+- **Exporter:** `python -m runners.compliance_exporter` (harness)
+- **GRC API:** `GET /api/v1/compliance/evidence` (JSON or `?format=csv`)
+- **Guide:** [docs/COMPLIANCE_READINESS.md](./docs/COMPLIANCE_READINESS.md)
+
 ## Reproducible verification
 
 ```bash

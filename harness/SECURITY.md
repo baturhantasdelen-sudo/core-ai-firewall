@@ -20,6 +20,14 @@ Mapping logic lives in `runners/owasp_mapping.py`.
 
 The harness simulates MCP JSON-RPC locally. It does **not** exfiltrate scenario payloads to Nexus Shield cloud services. This supports reproducible audits in restricted environments.
 
+## Compliance export
+
+```bash
+python -m runners.compliance_exporter --output-dir results/compliance
+```
+
+See monorepo [docs/COMPLIANCE_READINESS.md](../docs/COMPLIANCE_READINESS.md).
+
 ## References
 
 - [OWASP AI Agent Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html)
