@@ -108,7 +108,7 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
           </div>
           <p className="mt-4 text-xs leading-relaxed text-zinc-600">
             *Tested across 500+ MCP attack scenarios &amp; multi-agent execution graphs. Open-source
-            benchmark harness available on GitHub.
+            benchmark harness available on GitHub — OWASP GenAI / Agentic tags on every scenario.
           </p>
         </div>
 

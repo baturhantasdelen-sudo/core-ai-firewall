@@ -1,4 +1,20 @@
+import type { OwaspThreatClassification } from '@/types/owasp';
+
 export type McpHarnessGrade = 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
+
+export interface McpLeaderboardRuntimePrivacy {
+  inspection_model: string;
+  external_cloud_proxy: boolean;
+  data_residency: string;
+  suitable_for: string[];
+  description: string;
+}
+
+export interface McpLeaderboardStandardsAlignment {
+  frameworks: string[];
+  references: Array<{ title: string; url: string }>;
+  compliance_note: string;
+}
 
 export interface McpLeaderboardScenario {
   scenario_id: string;
@@ -12,6 +28,7 @@ export interface McpLeaderboardScenario {
   latency_ms: number;
   violations: string[];
   evidence_hash: string;
+  owasp?: OwaspThreatClassification;
   tool_calls?: Array<{
     method: string;
     tool: string;
@@ -32,6 +49,7 @@ export interface McpLeaderboardEntry {
   latency_ms: number;
   evidence_hash: string;
   violations: string[];
+  owasp?: OwaspThreatClassification;
 }
 
 export interface McpLeaderboardRaw {
@@ -39,6 +57,8 @@ export interface McpLeaderboardRaw {
   version: string;
   timestamp_utc: string;
   source: string;
+  standards_alignment?: McpLeaderboardStandardsAlignment;
+  runtime_privacy?: McpLeaderboardRuntimePrivacy;
   mcp_sec_score: number;
   grade: McpHarnessGrade;
   scenario_count: number;

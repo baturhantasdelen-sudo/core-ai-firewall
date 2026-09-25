@@ -39,6 +39,14 @@ const SAMPLE_EVIDENCE_BUNDLE = {
     capabilityAction: 'REVOKED → READ_ONLY fallback',
     evidenceStatus: 'VERIFIED',
     reputationImpact: { before: 92, after: 45, metric: 'MCP-SEC-SCORE' },
+    owasp: {
+      owasp_genai_top_10: ['LLM01:2025 Prompt Injection', 'LLM06:2025 Excessive Agency'],
+      owasp_agentic: ['ASI-01: Agent Goal / Parameter Hijacking', 'ASI-02: Cross-Tool Data Leakage'],
+    },
+    runtimePrivacy: {
+      inspectionModel: 'on_device_sub_millisecond_token_inspection',
+      externalCloudProxy: false,
+    },
   },
   verify: {
     differentiator: 'Legacy gateways log prompts. Nexus Shield verifies actions.',
@@ -218,6 +226,14 @@ export function AttackDemo() {
                 label: 'MCP-SEC-SCORE',
                 value: phase === 'done' || phase === 'evidence' ? '92 → 45' : '—',
                 tone: 'text-violet-300',
+              },
+              {
+                label: 'OWASP',
+                value:
+                  phase === 'idle' || phase === 'intent' || phase === 'attack'
+                    ? '—'
+                    : 'LLM01 · ASI-01 · ASI-02',
+                tone: 'text-violet-200',
               },
             ].map(({ label, value, tone }) => (
               <div

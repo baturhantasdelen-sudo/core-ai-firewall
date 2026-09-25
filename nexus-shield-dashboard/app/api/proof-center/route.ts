@@ -25,6 +25,13 @@ export async function GET() {
         attack_benchmark: { blocked: 50, total: 50, accuracy_pct: 100.0 },
         intent_divergence: { accuracy_pct: 100.0 },
         false_positive_rate: 0.0,
+        standards_alignment: {
+          frameworks: ['OWASP GenAI Top 10', 'OWASP Agentic AI Threats & Mitigations'],
+        },
+        runtime_privacy: {
+          inspection_model: 'on_device_sub_millisecond_token_inspection',
+          external_cloud_proxy: false,
+        },
       },
       { status: 200 },
     );

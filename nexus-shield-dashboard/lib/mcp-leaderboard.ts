@@ -6,6 +6,11 @@ import type {
   McpLeaderboardView,
 } from '@/types/mcp-leaderboard';
 import fallbackData from '@/data/mcp_leaderboard.json';
+import {
+  classifyOwaspThreat,
+  OWASP_STANDARDS_ALIGNMENT,
+  RUNTIME_PRIVACY_METADATA,
+} from '@/lib/owasp/threat-mapping';
 
 const ADAPTER_META: Record<
   string,
@@ -85,17 +90,47 @@ function buildAdapters(scenarios: McpLeaderboardScenario[]): McpLeaderboardAdapt
   });
 }
 
-export function normalizeMcpLeaderboard(raw: McpLeaderboardRaw): McpLeaderboardView {
+function enrichScenario(scenario: McpLeaderboardScenario): McpLeaderboardScenario {
+  if (scenario.owasp) return scenario;
   return {
-    mcp_sec_score: raw.mcp_sec_score,
-    grade: raw.grade,
-    scenarios_evaluated: raw.scenario_count,
-    blocked_rate: raw.block_rate_pct,
-    blocked_count: raw.blocked_count,
-    timestamp_utc: raw.timestamp_utc,
-    meets_baseline: raw.baseline_comparison.meets_baseline,
-    adapters: buildAdapters(raw.scenarios),
-    raw,
+    ...scenario,
+    owasp: classifyOwaspThreat(scenario.category, scenario.violations),
+  };
+}
+
+export function enrichMcpLeaderboardRaw(raw: McpLeaderboardRaw): McpLeaderboardRaw {
+  return {
+    ...raw,
+    version: raw.version ?? '0.2.0',
+    standards_alignment: raw.standards_alignment ?? {
+      frameworks: [...OWASP_STANDARDS_ALIGNMENT.frameworks],
+      references: [...OWASP_STANDARDS_ALIGNMENT.references],
+      compliance_note: OWASP_STANDARDS_ALIGNMENT.compliance_note,
+    },
+    runtime_privacy: raw.runtime_privacy ?? {
+      ...RUNTIME_PRIVACY_METADATA,
+      suitable_for: [...RUNTIME_PRIVACY_METADATA.suitable_for],
+    },
+    scenarios: raw.scenarios.map(enrichScenario),
+    leaderboard: raw.leaderboard.map((entry) => ({
+      ...entry,
+      owasp: entry.owasp ?? classifyOwaspThreat(entry.category, entry.violations),
+    })),
+  };
+}
+
+export function normalizeMcpLeaderboard(raw: McpLeaderboardRaw): McpLeaderboardView {
+  const enriched = enrichMcpLeaderboardRaw(raw);
+  return {
+    mcp_sec_score: enriched.mcp_sec_score,
+    grade: enriched.grade,
+    scenarios_evaluated: enriched.scenario_count,
+    blocked_rate: enriched.block_rate_pct,
+    blocked_count: enriched.blocked_count,
+    timestamp_utc: enriched.timestamp_utc,
+    meets_baseline: enriched.baseline_comparison.meets_baseline,
+    adapters: buildAdapters(enriched.scenarios),
+    raw: enriched,
   };
 }
 

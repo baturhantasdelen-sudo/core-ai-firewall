@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authenticateApiKey, extractApiKey } from '@/lib/auth/api-key';
 import { evaluateAgentAction } from '@/lib/engine/action-firewall';
+import {
+  classifyOwaspThreat,
+  inferThreatCategory,
+  OWASP_STANDARDS_ALIGNMENT,
+  RUNTIME_PRIVACY_METADATA,
+} from '@/lib/owasp/threat-mapping';
 
 export const runtime = 'nodejs';
 
@@ -56,6 +62,8 @@ export async function POST(req: NextRequest) {
     const statusCode =
       result.decision === 'BLOCK' ? 403 : result.decision === 'HUMAN_APPROVAL_REQUIRED' ? 202 : 200;
 
+    const threatCategory = inferThreatCategory(result.violations, tool_call.name);
+
     return NextResponse.json(
       {
         success: result.decision !== 'BLOCK',
@@ -68,6 +76,9 @@ export async function POST(req: NextRequest) {
         violations: result.violations,
         kill_switch_triggered: result.killSwitchTriggered,
         latency_ms: Math.round((result.latencyMs ?? 0) * 100) / 100,
+        owasp_classification: classifyOwaspThreat(threatCategory, result.violations),
+        standards_alignment: OWASP_STANDARDS_ALIGNMENT,
+        runtime_privacy: RUNTIME_PRIVACY_METADATA,
       },
       { status: statusCode },
     );

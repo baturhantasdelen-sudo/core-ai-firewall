@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, FileText } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
+import { OwaspComplianceSection } from '@/components/benchmark/OwaspComplianceSection';
 import { MCPLeaderboardSection } from '@/components/benchmark/MCPLeaderboardSection';
 import { getMcpLeaderboardFallback } from '@/lib/mcp-leaderboard';
 import {
@@ -109,6 +110,7 @@ cd harness && python scripts/run_reproducible_benchmark.py --eval-mcp`}
           </section>
         </div>
 
+        <OwaspComplianceSection />
         <MCPLeaderboardSection initialData={leaderboardData} />
 
         <a

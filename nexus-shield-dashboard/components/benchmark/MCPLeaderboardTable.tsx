@@ -17,6 +17,7 @@ import {
   getMcpLeaderboardFallback,
   gradeAccentClass,
 } from '@/lib/mcp-leaderboard';
+import { OwaspTagList } from '@/components/benchmark/OwaspComplianceSection';
 import { APP_DOC_ROUTES, getAbsoluteAppUrl } from '@/lib/site';
 import type { McpHarnessGrade, McpLeaderboardAdapter, McpLeaderboardView } from '@/types/mcp-leaderboard';
 
@@ -114,6 +115,12 @@ function AdapterRow({
                   <pre className="mt-3 overflow-x-auto rounded-lg bg-zinc-950 p-3 text-xs text-zinc-400">
                     {JSON.stringify(scenario.tool_calls?.[0] ?? {}, null, 2)}
                   </pre>
+                  {scenario.owasp ? (
+                    <OwaspTagList
+                      genai={scenario.owasp.owasp_genai_top_10}
+                      agentic={scenario.owasp.owasp_agentic}
+                    />
+                  ) : null}
                   <p className="mt-2 font-mono text-[10px] text-zinc-600">
                     evidence: {scenario.evidence_hash.slice(0, 16)}…
                   </p>
