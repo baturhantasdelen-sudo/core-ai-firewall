@@ -130,7 +130,9 @@ def run_demo(speed: str = "normal") -> None:
     emit(f"{SHIELD} Nexus Shield Interceptor - runtime DPI engaged", style="shield", pause=0.35, speed=speed)
     emit("   latency: 12ms", style="emerald", pause=0.25, speed=speed)
     emit("   verdict: BLOCKED", style="emerald", pause=0.25, speed=speed)
-    emit("   policy:  INTENT_ACTION_DIVERGENCE + SQL_EXFIL_PATTERN", style="emerald", pause=0.4, speed=speed)
+    emit("   policy:  INTENT_ACTION_DIVERGENCE + SQL_EXFIL_PATTERN", style="emerald", pause=0.25, speed=speed)
+    emit("   owasp:   LLM01 Prompt Injection · ASI-01 Goal Hijacking · ASI-02 Cross-Tool Leakage", style="emerald", pause=0.25, speed=speed)
+    emit("   privacy: on-device token inspection (no external cloud proxy)", style="emerald", pause=0.4, speed=speed)
     emit("", speed=speed)
 
     if HAS_RICH and console is not None:

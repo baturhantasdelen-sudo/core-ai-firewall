@@ -27,11 +27,16 @@ It is an **end-to-end Runtime Security, Collective Immunity, and Agent Trust pla
 |---|---|
 | Static regex on commits | **Runtime tool interception** (sub-10ms) |
 | One-repo secret scans | **Cross-agent asset & MCP discovery** |
-| Block bad prompts | **Intent vs. Action consistency engine** |
+| Block bad prompts | **Intent vs. Action consistency engine** + **OWASP GenAI / Agentic threat tags** |
 | Local-only findings | **Collective Behavioral Immune Network** (#TS-xxxx) |
 | No delegation trust | **Inter-Agent Trust Protocol** + Reputation scoring |
 
 Every blocked attack feeds anonymized threat signatures back into the network — and the **Agent Trust Hub** proves critical executions with verifiable evidence chains.
+
+### OWASP standards & on-device privacy
+
+- **OWASP GenAI Top 10** and **OWASP Agentic AI Threats & Mitigations** classification tags on harness JSON, `/docs/benchmark`, and `/api/v1/action/evaluate` responses (e.g. LLM01 Prompt Injection, ASI-01 Goal Hijacking).
+- **Sub-millisecond on-device token inspection** — runtime policy without mandatory external cloud proxy (restricted / public sector / critical infrastructure friendly). See [SECURITY.md](./SECURITY.md).
 
 ---
 

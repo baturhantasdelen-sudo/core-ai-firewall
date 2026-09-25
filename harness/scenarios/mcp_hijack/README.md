@@ -59,6 +59,8 @@ python -m runners.mcp_runner \
 - Per-scenario verdict (`BLOCKED` / `HIJACKED`)
 - SHA-256 evidence hashes
 - `proof_center` block compatible with Nexus Shield Proof Center schema
+- **`owasp`** per scenario — mapped to OWASP GenAI Top 10 (e.g. LLM01) and Agentic AI threats (e.g. ASI-01, ASI-02)
+- **`standards_alignment`** and **`runtime_privacy`** (on-device inspection, no external cloud proxy)
 
 ## Scoring
 

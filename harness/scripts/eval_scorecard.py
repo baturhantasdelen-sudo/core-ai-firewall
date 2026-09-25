@@ -12,11 +12,17 @@ from __future__ import annotations
 import argparse
 import json
 import statistics
+import sys
 import time
 from pathlib import Path
 from typing import Any, Literal
 
 ROOT = Path(__file__).resolve().parents[1]
+
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from runners.owasp_mapping import classify_threat, runtime_privacy_payload, standards_alignment_payload
 
 VectorId = Literal[
     "indirect_injection",
@@ -26,6 +32,13 @@ VectorId = Literal[
 ]
 
 OotbStatus = Literal["FAIL", "PARTIAL"]
+
+VECTOR_OWASP_CATEGORY: dict[str, str] = {
+    "indirect_injection": "INDIRECT_PROMPT_INJECTION",
+    "tool_abuse": "CROSS_TOOL_EXFILTRATION",
+    "unsanitized_tool_args": "PRIVILEGE_ESCALATION",
+    "inter_agent_delegation": "MCP_HIJACK",
+}
 
 VECTORS: list[dict[str, str]] = [
     {
@@ -178,6 +191,10 @@ def build_scorecard() -> dict[str, Any]:
                     "intent_divergence_with_shield": 0.03,
                     "capability_revocation": "READ_ONLY",
                     "evidence_id": f"{EVIDENCE_PREFIX}-{slug}-{vid}",
+                    "owasp": classify_threat(
+                        category=VECTOR_OWASP_CATEGORY[vid],  # type: ignore
+                        violations=[vec["example"]],
+                    ),
                 }
             )
 
@@ -210,6 +227,8 @@ def build_scorecard() -> dict[str, Any]:
             "scenarios_per_vector": 125,
             "evidence_standard": EVIDENCE_PREFIX,
         },
+        "standards_alignment": standards_alignment_payload(),
+        "runtime_privacy": runtime_privacy_payload(),
         "headline_stats": {
             "enterprises_shadow_ai_default_pct": 80,
             "agents_vulnerable_indirect_hijack_pct": 86,

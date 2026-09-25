@@ -19,6 +19,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
+from runners.owasp_mapping import (
+    classify_threat,
+    runtime_privacy_payload,
+    standards_alignment_payload,
+)
+
 HarnessGrade = Literal["A+", "A", "B", "C", "D", "F"]
 HarnessVerdict = Literal["BLOCKED", "HIJACKED", "ERROR", "TIMEOUT"]
 
@@ -311,6 +317,14 @@ async def simulate_scenario(
     )
 
 
+def _portable_scenarios_dir(scenarios_dir: Path) -> str:
+    harness_root = Path(__file__).resolve().parents[1]
+    try:
+        return scenarios_dir.resolve().relative_to(harness_root.resolve()).as_posix()
+    except ValueError:
+        return scenarios_dir.as_posix()
+
+
 def percentile(values: list[float], pct: float) -> float:
     if not values:
         return 0.0
@@ -336,12 +350,17 @@ def build_leaderboard_payload(
 
     grade = grade_from_score(avg_score)
 
+    def scenario_owasp(result: ScenarioResult) -> dict[str, Any]:
+        return classify_threat(category=result.category, violations=result.violations)
+
     return {
         "harness": "mcp-tool-hijack-leaderboard",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "source": "mcp_harness",
-        "scenarios_dir": str(scenarios_dir),
+        "standards_alignment": standards_alignment_payload(),
+        "runtime_privacy": runtime_privacy_payload(),
+        "scenarios_dir": _portable_scenarios_dir(scenarios_dir),
         "strict_mode": strict_mode,
         "mcp_sec_score": avg_score,
         "grade": grade,
@@ -391,6 +410,7 @@ def build_leaderboard_payload(
                 "latency_ms": result.latency_ms,
                 "evidence_hash": result.evidence_hash,
                 "violations": result.violations,
+                "owasp": scenario_owasp(result),
             }
             for index, result in enumerate(
                 sorted(results, key=lambda item: item.mcp_sec_score, reverse=True)
@@ -410,6 +430,7 @@ def build_leaderboard_payload(
                 "violations": result.violations,
                 "evidence_hash": result.evidence_hash,
                 "tool_calls": result.tool_calls,
+                "owasp": scenario_owasp(result),
             }
             for result in results
         ],
