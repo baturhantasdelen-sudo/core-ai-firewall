@@ -36,7 +36,7 @@ Nexus Shield completed a passive security assessment of AgentGPT (Reworkd)'s age
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -53,7 +53,7 @@ Sayın CISO / CTO,
 Nexus Shield, AgentGPT (Reworkd) agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -63,7 +63,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on AgentGPT (Reworkd) (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on AgentGPT (Reworkd) (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -84,7 +84,7 @@ Nexus Shield completed a passive security assessment of CrewAI's agent/MCP surfa
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -101,7 +101,7 @@ Sayın CISO / CTO,
 Nexus Shield, CrewAI agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -111,7 +111,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on CrewAI (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on CrewAI (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -132,7 +132,7 @@ Nexus Shield completed a passive security assessment of Dify AI's agent/MCP surf
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -149,7 +149,7 @@ Sayın CISO / CTO,
 Nexus Shield, Dify AI agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -159,7 +159,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Dify AI (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Dify AI (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -180,7 +180,7 @@ Nexus Shield completed a passive security assessment of Flowise AI's agent/MCP s
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -197,7 +197,7 @@ Sayın CISO / CTO,
 Nexus Shield, Flowise AI agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -207,7 +207,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Flowise AI (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Flowise AI (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -228,7 +228,7 @@ Nexus Shield completed a passive security assessment of Superagent's agent/MCP s
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -245,7 +245,7 @@ Sayın CISO / CTO,
 Nexus Shield, Superagent agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -255,7 +255,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Superagent (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Superagent (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -276,7 +276,7 @@ Nexus Shield completed a passive security assessment of Stripe MCP Server's agen
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -293,7 +293,7 @@ Sayın CISO / CTO,
 Nexus Shield, Stripe MCP Server agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -303,7 +303,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Stripe MCP Server (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Stripe MCP Server (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -324,7 +324,7 @@ Nexus Shield completed a passive security assessment of Composio (FinTech Integr
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -341,7 +341,7 @@ Sayın CISO / CTO,
 Nexus Shield, Composio (FinTech Integrations) agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -351,7 +351,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Composio (FinTech Integrations) (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Composio (FinTech Integrations) (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -372,7 +372,7 @@ Nexus Shield completed a passive security assessment of n8n Open Banking Workflo
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -389,7 +389,7 @@ Sayın CISO / CTO,
 Nexus Shield, n8n Open Banking Workflows agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -399,7 +399,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on n8n Open Banking Workflows (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on n8n Open Banking Workflows (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -420,7 +420,7 @@ Nexus Shield completed a passive security assessment of Activepieces Finance MCP
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -437,7 +437,7 @@ Sayın CISO / CTO,
 Nexus Shield, Activepieces Finance MCP agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -447,7 +447,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Activepieces Finance MCP (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Activepieces Finance MCP (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -468,7 +468,7 @@ Nexus Shield completed a passive security assessment of Plaid Banking MCP Proxy'
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -485,7 +485,7 @@ Sayın CISO / CTO,
 Nexus Shield, Plaid Banking MCP Proxy agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -495,7 +495,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Plaid Banking MCP Proxy (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Plaid Banking MCP Proxy (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -516,7 +516,7 @@ Nexus Shield completed a passive security assessment of Logo Yazılım's agent/M
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -533,7 +533,7 @@ Sayın CISO / CTO,
 Nexus Shield, Logo Yazılım agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -543,7 +543,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Logo Yazılım (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Logo Yazılım (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -564,7 +564,7 @@ Nexus Shield completed a passive security assessment of KoçSistem's agent/MCP s
 Score: 45/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -581,7 +581,7 @@ Sayın CISO / CTO,
 Nexus Shield, KoçSistem agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 45/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -591,7 +591,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on KoçSistem (45/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on KoçSistem (45/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -612,7 +612,7 @@ Nexus Shield completed a passive security assessment of SabancıDx's agent/MCP s
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -629,7 +629,7 @@ Sayın CISO / CTO,
 Nexus Shield, SabancıDx agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -639,7 +639,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on SabancıDx (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on SabancıDx (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -660,7 +660,7 @@ Nexus Shield completed a passive security assessment of Eczacıbaşı Bilişim's
 Score: 45/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -677,7 +677,7 @@ Sayın CISO / CTO,
 Nexus Shield, Eczacıbaşı Bilişim agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 45/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -687,7 +687,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Eczacıbaşı Bilişim (45/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Eczacıbaşı Bilişim (45/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 
@@ -708,7 +708,7 @@ Nexus Shield completed a passive security assessment of Turkcell Dijital Servisl
 Score: 60/100. Key finding: Unvalidated parameter execution — function-call schema not enforced.
 
 We have prepared a confidential advisory PDF with verifiable SHA-256 evidence
-and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.
+and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.
 
 Best regards,
 Nexus Shield Security Research
@@ -725,7 +725,7 @@ Sayın CISO / CTO,
 Nexus Shield, Turkcell Dijital Servisler agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.
 Skor: 60/100. Temel bulgu: Unvalidated parameter execution — function-call schema not enforced.
 
-Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını
+Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt, Policy Enforcement ve GRC Evidence Bundle adımlarını
 içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.
 
 Saygılarımızla,
@@ -735,7 +735,7 @@ https://nexusshield.ai/reports/state-of-agent-security-2026
 
 **LinkedIn (EN)**
 
-Hi — we ran a passive AI agent security scan on Turkcell Dijital Servisler (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with edge mitigation steps. Open to responsible disclosure — can I send the PDF?
+Hi — we ran a passive AI agent security scan on Turkcell Dijital Servisler (60/100). Found Unvalidated parameter execution — function-call schema not enforced. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps. Open to responsible disclosure — can I send the PDF?
 
 **LinkedIn (TR)**
 

@@ -53,12 +53,12 @@ function buildVulnerabilities(
 }
 
 const MITIGATION_STEPS = [
-  'Deploy Nexus Shield edge gateway in front of agent tool-call endpoints (sub-10ms intercept).',
-  'Enforce JSON Schema / Zod validation on every MCP tool parameter before execution.',
-  'Enable Action Firewall intent verification: NexusShield.evaluateAction({ userIntent, toolCall }).',
-  'Attach SHA-256 evidence chain to all blocked and approved actions for audit readiness.',
+  'Deploy Runtime Action Governance on agent tool-call paths (POST /api/v1/actions/verify).',
+  'Issue Universal Action Receipts for every allow, block, READ_ONLY, and REQUIRE_APPROVAL decision.',
+  'Enforce JSON Schema / Zod validation on every MCP tool parameter before Policy Enforcement.',
+  'Export GRC Evidence Bundles with cryptographic verification hashes for audit readiness.',
   'Scope MCP servers with least-privilege manifests — deny shell exec and bulk export by default.',
-  'Route production traffic through HITL approval for financial and destructive tool chains.',
+  'Route elevated-risk chains through REQUIRE_APPROVAL (human-in-the-loop) before execution.',
 ];
 
 function toResearchTarget(target: DisclosureTarget): ResearchTarget {

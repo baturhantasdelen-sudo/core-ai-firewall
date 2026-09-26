@@ -25,7 +25,7 @@ function mockResult(org: string, vertical: 'yc-ai-saas' | 'fintech-mcp' | 'enter
       evidenceSha256Hash: 'a'.repeat(64),
     },
     vulnerabilities: ['Unvalidated parameter execution'],
-    mitigationSteps: ['Deploy edge gateway'],
+    mitigationSteps: ['Deploy Runtime Action Governance'],
     scannedAt: new Date().toISOString(),
     latencyMs: 10,
     fetchStatus: 'ok',

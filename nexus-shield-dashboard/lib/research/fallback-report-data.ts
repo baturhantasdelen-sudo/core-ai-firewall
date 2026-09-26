@@ -55,7 +55,7 @@ const sampleFinding = {
   severity: 'critical' as const,
   category: 'intent_verification' as const,
   description: 'No intent verification layer detected.',
-  recommendation: 'Enable Nexus Shield Action Firewall.',
+  recommendation: 'Enable Runtime Action Governance with Policy Enforcement and Universal Action Receipts.',
   sdkFix: 'NexusShield.evaluateAction({ userIntent, toolCall })',
   id: 'NS-F001',
 };

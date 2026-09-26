@@ -148,7 +148,7 @@ function analyzeTextSurface(text: string, findings: SecurityFinding[], seen: Set
       description:
         'No intent verification, trajectory guard, or action consistency layer detected in configuration.',
       recommendation:
-        'Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.',
+        'Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.',
       sdkFix: 'NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })',
     });
   }

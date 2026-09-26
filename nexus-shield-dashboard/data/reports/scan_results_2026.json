@@ -38,7 +38,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -100,7 +100,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -162,7 +162,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -224,7 +224,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -286,7 +286,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -348,7 +348,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -410,7 +410,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -472,7 +472,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -534,7 +534,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -596,7 +596,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -658,7 +658,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -720,7 +720,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -782,7 +782,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -844,7 +844,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -906,7 +906,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -968,7 +968,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1030,7 +1030,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1092,7 +1092,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1154,7 +1154,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1216,7 +1216,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1278,7 +1278,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1340,7 +1340,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1402,7 +1402,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1464,7 +1464,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1526,7 +1526,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1588,7 +1588,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1650,7 +1650,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1712,7 +1712,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1774,7 +1774,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1836,7 +1836,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1898,7 +1898,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -1960,7 +1960,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2022,7 +2022,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2084,7 +2084,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2146,7 +2146,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2208,7 +2208,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2270,7 +2270,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2332,7 +2332,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2394,7 +2394,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2456,7 +2456,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2518,7 +2518,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2580,7 +2580,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2642,7 +2642,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2713,7 +2713,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2775,7 +2775,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2837,7 +2837,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2899,7 +2899,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -2961,7 +2961,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -3023,7 +3023,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },
@@ -3085,7 +3085,7 @@
             "severity": "critical",
             "category": "intent_verification",
             "description": "No intent verification, trajectory guard, or action consistency layer detected in configuration.",
-            "recommendation": "Enable Nexus Shield Action Firewall to align user intent with every tool invocation before execution.",
+            "recommendation": "Enable Runtime Action Governance with Policy Enforcement, Universal Action Receipts, and Cryptographic Verification on every tool invocation.",
             "sdkFix": "NexusShield.evaluateAction({ userIntent, toolCall, agentCapabilities })",
             "id": "NS-F001"
           },

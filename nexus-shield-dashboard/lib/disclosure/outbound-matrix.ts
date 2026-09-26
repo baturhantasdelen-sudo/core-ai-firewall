@@ -29,7 +29,7 @@ export function buildOutreachDrafts(result: DisclosureScanResult): OutreachDraft
       `Score: ${score}/100. Key finding: ${topFinding}.`,
       '',
       `We have prepared a confidential advisory PDF with verifiable SHA-256 evidence`,
-      `and sub-10ms edge gateway mitigation steps. Happy to share under responsible disclosure.`,
+      `and Runtime Action Governance mitigation steps (Universal Action Receipts, Policy Enforcement, and GRC Evidence Bundles). Happy to share under responsible disclosure.`,
       '',
       `Best regards,`,
       `Nexus Shield Security Research`,
@@ -43,7 +43,8 @@ export function buildOutreachDrafts(result: DisclosureScanResult): OutreachDraft
       `Nexus Shield, ${org} agent/MCP yüzeyinde pasif güvenlik değerlendirmesi tamamladı.`,
       `Skor: ${score}/100. Temel bulgu: ${topFinding}.`,
       '',
-      `Doğrulanabilir SHA-256 kanıt zinciri ve sub-10ms edge gateway azaltma adımlarını`,
+      `Doğrulanabilir SHA-256 kanıt zinciri ile Runtime Action Governance, Universal Action Receipt,`,
+      `Policy Enforcement ve GRC Evidence Bundle adımlarını`,
       `içeren gizli bir danışmanlık PDF'i hazırladık. Sorumlu açıklama kapsamında paylaşmaya hazırız.`,
       '',
       `Saygılarımızla,`,
@@ -52,12 +53,12 @@ export function buildOutreachDrafts(result: DisclosureScanResult): OutreachDraft
     ].join('\n'),
     linkedinEn: [
       `Hi — we ran a passive AI agent security scan on ${org} (${score}/100).`,
-      `Found ${topFinding}. We have a SHA-256 sealed advisory with edge mitigation steps.`,
+      `Found ${topFinding}. We have a SHA-256 sealed advisory with Runtime Action Governance and Cryptographic Verification steps.`,
       `Open to responsible disclosure — can I send the PDF?`,
     ].join(' '),
     linkedinTr: [
       `Merhaba — ${org} için pasif AI agent güvenlik taraması yaptık (${score}/100).`,
-      `${topFinding} tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz hazır.`,
+      `${topFinding} tespit edildi. SHA-256 mühürlü danışmanlık PDF'imiz (Runtime Action Governance, Cryptographic Verification) hazır.`,
       `Sorumlu açıklama kapsamında paylaşabilir miyim?`,
     ].join(' '),
   };
