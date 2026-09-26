@@ -143,8 +143,21 @@ python scripts/generate_trojan_outreach_batch.py
 # → results/trojan_outreach/outreach_batch_50.json + .md (human approval required)
 
 # Phased dispatch: 5×10 targets, dry-run by default (use --send + RESEND_API_KEY after approval)
-python scripts/dispatch_outreach_campaign.py --skip-set-confirm
-python scripts/dispatch_outreach_campaign.py --set 1 --send  # requires TROJAN_CAMPAIGN_RECIPIENT or outreach_email per target
+python scripts/dispatch_outreach_campaign.py --set 1
+
+# Live Resend (verified sender info@nexusshield.ai) — one set at a time, human gate between sets
+# PowerShell: load secrets from dashboard env (never commit .env.local)
+Get-Content nexus-shield-dashboard\.env.local | ForEach-Object {
+  if ($_ -match '^\s*([^#=]+)=(.*)$') { Set-Item -Path "env:$($matches[1].Trim())" -Value $matches[2].Trim().Trim('"') }
+}
+$env:OUTBOUND_FROM_EMAIL = 'Nexus Shield Security <info@nexusshield.ai>'
+# Option A — route all 10 in set to your inbox while copy is reviewed:
+# $env:TROJAN_CAMPAIGN_RECIPIENT = 'security@nexusshield.ai'
+# Option B — per-company map (copy scripts/trojan_outreach_recipients.example.json → trojan_outreach_recipients.json)
+python scripts/dispatch_outreach_campaign.py --set 1 --send
+# After reviewing dispatch_log.json, repeat --set 2 --send … through --set 5 --send
+# Full auto-run with YES prompts between sets (omit --set):
+python scripts/dispatch_outreach_campaign.py --send
 ```
 
 ```bash

@@ -1,0 +1,5 @@
+{
+  "_comment": "Copy to trojan_outreach_recipients.json (gitignored). Keys = company_name from outreach_batch_50.json",
+  "Ramp": "security@example.com",
+  "Brex": "security@example.com"
+}

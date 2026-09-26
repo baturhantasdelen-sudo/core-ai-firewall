@@ -27,6 +27,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BATCH = ROOT / "results" / "trojan_outreach" / "outreach_batch_50.json"
 DEFAULT_LOG = ROOT / "results" / "trojan_outreach" / "dispatch_log.json"
+DEFAULT_RECIPIENTS = Path(__file__).resolve().parent / "trojan_outreach_recipients.json"
+VERIFIED_FROM = "Nexus Shield Security <info@nexusshield.ai>"
 
 POSITIONING = "Agent Action Governance & Verification"
 RUNTIME_BENCHMARK = "P99 runtime intercept: 6.1ms (Nexus benchmark harness)"
@@ -66,19 +68,48 @@ def playground_url(base: str, evidence_hash: str) -> str:
     return f"{base}{sep}evidence={evidence_hash}"
 
 
-def resolve_recipient(row: dict[str, Any]) -> tuple[str | None, str | None, bool]:
+def load_recipient_map(path: Path | None) -> dict[str, str]:
+    if not path or not path.is_file():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        str(k): str(v).strip()
+        for k, v in data.items()
+        if not str(k).startswith("_") and v
+    }
+
+
+def resolve_recipient(
+    row: dict[str, Any],
+    recipient_map: dict[str, str],
+) -> tuple[str | None, str | None, bool]:
     """Returns (recipient, intended_label, routed_via_override)."""
     target = row.get("target") or {}
-    intended = (target.get("outreach_email") or "").strip() or None
+    company = target.get("company_name") or ""
+    intended = (target.get("outreach_email") or "").strip() or recipient_map.get(company) or None
     override = (
         os.environ.get("TROJAN_CAMPAIGN_RECIPIENT", "").strip()
         or os.environ.get("DISCLOSURE_OUTBOUND_RECIPIENT", "").strip()
         or None
     )
     if override:
-        label = intended or target.get("contact_name") or target.get("company_name")
+        label = intended or target.get("contact_name") or company
         return override, label, True
     return intended, intended, False
+
+
+def preflight_recipients(rows: list[dict[str, Any]], recipient_map: dict[str, str]) -> list[str]:
+    missing: list[str] = []
+    override = os.environ.get("TROJAN_CAMPAIGN_RECIPIENT") or os.environ.get("DISCLOSURE_OUTBOUND_RECIPIENT")
+    if override:
+        return missing
+    for row in rows:
+        target = row.get("target") or {}
+        company = target.get("company_name") or "unknown"
+        email = (target.get("outreach_email") or "").strip() or recipient_map.get(company)
+        if not email:
+            missing.append(company)
+    return missing
 
 
 def build_message(row: dict[str, Any], *, verify_base: str, playground_base: str) -> dict[str, str]:
@@ -206,22 +237,25 @@ def dispatch_one(
     verify_base: str,
     playground_base: str,
     from_email: str,
+    recipient_map: dict[str, str],
 ) -> dict[str, Any]:
     company = row["target"]["company_name"]
-    recipient, intended, routed = resolve_recipient(row)
+    recipient, intended, routed = resolve_recipient(row, recipient_map)
     message = build_message(row, verify_base=verify_base, playground_base=playground_base)
+    evidence_hash = row.get("evidence_bundle_sha256") or row["universal_action_receipt"]["evidence_bundle_hash"]
+    receipt_id = row["universal_action_receipt"]["receipt_id"]
 
     record: dict[str, Any] = {
         "company_name": company,
         "intended_recipient": intended,
         "recipient": recipient,
         "routed_via_override": routed,
+        "from_email": from_email,
         "subject": message["subject"],
-        "verification_url": verification_url(
-            verify_base,
-            row["evidence_bundle_sha256"],
-            row["universal_action_receipt"]["receipt_id"],
-        ),
+        "receipt_id": receipt_id,
+        "evidence_bundle_sha256": evidence_hash,
+        "governance_decision": row["simulation"]["governance_decision"],
+        "verification_url": verification_url(verify_base, evidence_hash, receipt_id),
         "timestamp_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "mode": "dry_run" if dry_run else "send",
     }
@@ -314,7 +348,17 @@ def main() -> int:
         ),
         help="Security Engines & Verification Playground URL",
     )
-    parser.add_argument("--from-email", default=os.environ.get("OUTBOUND_FROM_EMAIL", "Nexus Shield Security <info@nexusshield.ai>"))
+    parser.add_argument(
+        "--from-email",
+        default=os.environ.get("OUTBOUND_FROM_EMAIL", VERIFIED_FROM),
+        help="Resend verified sender (default: info@nexusshield.ai)",
+    )
+    parser.add_argument(
+        "--recipients-file",
+        type=Path,
+        default=None,
+        help="JSON map company_name -> corporate email (auto-loads scripts/trojan_outreach_recipients.json if present)",
+    )
     parser.add_argument("--set", type=int, choices=range(1, SET_COUNT + 1), help="Dispatch only this set (1-5)")
     parser.add_argument("--send", action="store_true", help="Actually send email (default: dry-run)")
     parser.add_argument("--skip-set-confirm", action="store_true", help="Do not pause for confirmation between sets")
@@ -322,12 +366,22 @@ def main() -> int:
     args = parser.parse_args()
 
     dry_run = not args.send
+    recipients_path = args.recipients_file
+    if recipients_path is None and DEFAULT_RECIPIENTS.is_file():
+        recipients_path = DEFAULT_RECIPIENTS
+    recipient_map = load_recipient_map(recipients_path.resolve() if recipients_path else None)
+
     print(SAFETY_NOTICE)
     print(f"Mode: {'DRY-RUN (logging only)' if dry_run else 'LIVE SEND via Resend/SMTP'}")
+    print(f"From: {args.from_email}")
+    if recipients_path:
+        print(f"Recipients map: {recipients_path} ({len(recipient_map)} entries)")
     if not dry_run:
         override = os.environ.get("TROJAN_CAMPAIGN_RECIPIENT") or os.environ.get("DISCLOSURE_OUTBOUND_RECIPIENT")
         if override:
             print(f"Recipient override active: {override}")
+        if not os.environ.get("RESEND_API_KEY", "").strip() and not os.environ.get("SMTP_HOST", "").strip():
+            raise SystemExit("LIVE SEND requires RESEND_API_KEY (recommended) or SMTP_HOST.")
 
     batch = load_batch(args.batch_file.resolve())
     sets = chunk_sets(batch["targets"])
@@ -343,7 +397,19 @@ def main() -> int:
         end = start + len(rows) - 1
         print(f"\n--- Dispatching Set {set_num}/{SET_COUNT}: companies {start}-{end} ---")
 
+        if not dry_run:
+            missing = preflight_recipients(rows, recipient_map)
+            if missing:
+                raise SystemExit(
+                    "Missing outreach_email for: "
+                    + ", ".join(missing[:5])
+                    + (f" (+{len(missing) - 5} more)" if len(missing) > 5 else "")
+                    + ". Add scripts/trojan_outreach_recipients.json or set TROJAN_CAMPAIGN_RECIPIENT."
+                )
+
         set_log: dict[str, Any] = {
+            "from_email": args.from_email,
+            "provider": "resend" if os.environ.get("RESEND_API_KEY") else "smtp",
             "set": set_num,
             "companies_range": [start, end],
             "dry_run": dry_run,
@@ -360,6 +426,7 @@ def main() -> int:
                 verify_base=args.verify_base_url,
                 playground_base=args.playground_url,
                 from_email=args.from_email,
+                recipient_map=recipient_map,
             )
             set_log["results"].append(result)
             status = result["status"]
