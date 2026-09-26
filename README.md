@@ -136,6 +136,13 @@ Live simulated event ticker streams blocked attacks, proof-badge issuance, and f
 
 Open-source **Trojan Horse** demo — compare a vulnerable agent (no guardrails) against a Nexus Shield protected proxy side-by-side:
 
+**Offline outreach review batch (50 targets, no auto-send):**
+
+```bash
+python scripts/generate_trojan_outreach_batch.py
+# → results/trojan_outreach/outreach_batch_50.json + .md (human approval required)
+```
+
 ```bash
 git clone https://github.com/baturhantasdelen-sudo/core-ai-firewall
 cd nexus-shield-demo
