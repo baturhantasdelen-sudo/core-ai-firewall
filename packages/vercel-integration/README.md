@@ -1,5 +1,7 @@
 # Nexus Shield · Vercel Integration
 
+Deploys **Security Engine** env wiring (PII guardrails) for Vercel projects. Nexus Shield’s **primary platform** is **Agent Action Governance & Verification** — see the [live dashboard](https://nexus-shield-dashboard.vercel.app) for Universal Action Receipts and `/api/v1/actions/verify`.
+
 Vercel Marketplace microservice for OAuth installation and automatic Nexus Shield environment variable injection.
 
 ## Architecture

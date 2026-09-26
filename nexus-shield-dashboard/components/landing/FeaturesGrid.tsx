@@ -12,7 +12,7 @@ const FEATURES: Feature[] = [
   {
     icon: Zap,
     accent: 'bg-amber-500/10 text-amber-400',
-    title: 'Sub-10ms Latency',
+    title: 'P99 6.1ms Intercept',
     description:
       'Early-exit regex and semantic guardrails inspect prompts in single-digit milliseconds — no queue, no build-step slowdown.',
   },

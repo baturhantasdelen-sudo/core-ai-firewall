@@ -40,7 +40,7 @@ export function StateOfAgentSecurity2026Report({ scan, summary, pdfDownloadUrl }
       <section className="text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-4 py-1.5 text-xs font-medium text-emerald-300">
           <ShieldCheck className="h-3.5 w-3.5" />
-          Sub-10ms Certified · 99.3% Detection Rate · SHA-256 Audit Sealed
+          P99 6.1ms (harness) · 99.3% Detection Rate · SHA-256 Audit Sealed
         </div>
         <h1 className="mt-6 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-5xl">
           State of AI Agent Security 2026
@@ -155,7 +155,7 @@ export function StateOfAgentSecurity2026Report({ scan, summary, pdfDownloadUrl }
       <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6">
         <div className="flex items-center gap-2 text-sm font-semibold text-zinc-200">
           <Gauge className="h-4 w-4 text-cyan-400" />
-          Methodology — Sub-10ms Edge Inspection Model
+          Methodology — On-Device Action Verification Model
         </div>
         <div className="mt-4 space-y-3 text-sm text-zinc-500">
           <p>
@@ -176,7 +176,7 @@ export function StateOfAgentSecurity2026Report({ scan, summary, pdfDownloadUrl }
         </div>
         <div className="mt-5 inline-flex items-center gap-2 rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-xs text-violet-200">
           <Fingerprint className="h-3.5 w-3.5" />
-          Average intercept latency: 5.87ms · Sub-10ms Certified
+          P99 runtime intercept: 6.1ms (Nexus benchmark harness)
         </div>
       </section>
     </div>

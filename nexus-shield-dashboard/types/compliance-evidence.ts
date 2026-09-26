@@ -8,6 +8,8 @@ export interface ComplianceControlRow {
   collected_at_utc: string;
 }
 
+import type { UniversalActionReceipt } from '@/types/action-receipt';
+
 export interface ComplianceEvidenceBundle {
   bundle_id: string;
   bundle_version: string;
@@ -56,6 +58,7 @@ export interface ComplianceEvidenceBundle {
     }>;
   };
   automated_controls: ComplianceControlRow[];
+  universal_action_receipts?: UniversalActionReceipt[];
   integrity: { sha256: string };
   integrations?: Record<string, unknown>;
 }

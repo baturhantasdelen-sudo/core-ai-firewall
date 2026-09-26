@@ -1,6 +1,6 @@
-# Nexus Shield VS Code Extension
+# Nexus Shield VS Code Extension (Security Engine)
 
-Real-time PII and secret scanning in your IDE using the Nexus Shield policy engine.
+Nexus Shield’s **primary platform** is **Agent Action Governance & Verification** ([dashboard](https://nexus-shield-dashboard.vercel.app)). This extension is a **Security Engine**: real-time PII and secret scanning in your IDE using the Nexus Shield policy engine.
 
 ## Commands
 

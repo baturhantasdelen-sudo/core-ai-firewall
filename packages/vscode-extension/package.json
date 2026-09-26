@@ -1,7 +1,7 @@
 {
   "name": "nexus-shield-vscode",
   "displayName": "Nexus Shield",
-  "description": "Real-time PII & Secret scanning in your IDE with sub-10ms policy engine.",
+  "description": "Security Engine: real-time PII & secret scanning in your IDE. Primary platform: Agent Action Governance & Verification.",
   "version": "0.1.0",
   "publisher": "nexus-shield",
   "license": "MIT",

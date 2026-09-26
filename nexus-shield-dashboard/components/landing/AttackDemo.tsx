@@ -158,7 +158,7 @@ export function AttackDemo() {
           No Login · No API Keys · Instant Sandbox
         </p>
         <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-          Simulate an MCP Hijack — Blocked in &lt;12ms
+          Simulate an MCP Hijack — blocked (P99 runtime intercept: 6.1ms)
         </h2>
         <p className="mt-3 text-sm text-zinc-500 sm:text-base">
           One click runs a live FinanceBot scenario: authorized invoice lookup vs unauthorized database

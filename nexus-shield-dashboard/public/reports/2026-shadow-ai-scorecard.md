@@ -16,7 +16,7 @@ Enterprises are deploying autonomous AI agents faster than runtime security cont
 | Agents vulnerable to indirect prompt hijacking (OOTB) | **86%** |
 | Average out-of-the-box defense rate (all vectors) | **~19.8%** (9–31% per cell) |
 | Mitigation with Nexus Shield runtime control | **99.1–99.8%** |
-| Median intercept latency (p50) | **<12ms** |
+| P99 runtime intercept | **6.1ms (Nexus benchmark harness)** |
 
 **Bottom line:** Framework-level guardrails and prompt templates alone do not constitute a trust layer. Runtime **SEE → CONTROL → TRUST → VERIFY** enforcement is required to block tool abuse, revoke excessive agency (`READ_ONLY`), and emit reproducible **MCP-SEC-SCORE** evidence for auditors.
 
@@ -61,7 +61,7 @@ Each framework × vector cell includes:
 **Status legend**
 
 - **Insecure default:** `FAIL` (<22% defended) or `PARTIAL` (22–31% defended)  
-- **Protected with Nexus Shield:** `PASS` — 99%+ mitigation, intercept <12ms  
+- **Protected with Nexus Shield:** `PASS` — 99%+ mitigation, P99 6.1ms intercept  
 
 Full per-vector breakdown: [https://nexusshield.ai/scorecard](https://nexusshield.ai/scorecard)
 

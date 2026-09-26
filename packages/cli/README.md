@@ -1,6 +1,6 @@
-# Nexus Shield CLI
+# Nexus Shield CLI (Security Engine)
 
-Local OpenAI-compatible proxy with sub-10ms in-RAM PII redaction. Point your app at `http://127.0.0.1:8080/v1` and keep sending requests to Ollama, OpenAI, or LiteLLM — Nexus Shield sanitizes prompts before they leave your machine.
+**Agent Action Governance & Verification** is Nexus Shield’s primary platform ([dashboard](https://nexus-shield-dashboard.vercel.app)). This CLI is a **Security Engine**: a local OpenAI-compatible proxy with in-RAM PII redaction. Point your app at `http://127.0.0.1:8080/v1` and keep sending requests to Ollama, OpenAI, or LiteLLM — prompts are sanitized before they leave your machine.
 
 ## Point your application to the local proxy
 

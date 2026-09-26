@@ -1,12 +1,12 @@
-# Nexus Shield — AI Agent Trust & Runtime Security Platform
+# Nexus Shield — Agent Action Governance & Verification
 
-> **Give every AI agent an identity, a reputation, and a limit.**
+> **Agents can act. Nexus decides whether they should — and produces cryptographic proof of what happened.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](packages/vscode-extension/LICENSE)
 [![Dashboard](https://img.shields.io/badge/Dashboard-LIVE-brightgreen)](https://nexus-shield-dashboard.vercel.app)
 [![CI/CD Pipeline](https://github.com/baturhantasdelen-sudo/core-ai-firewall/actions/workflows/deploy.yml/badge.svg)](https://github.com/baturhantasdelen-sudo/core-ai-firewall/actions/workflows/deploy.yml)
 [![Tests](https://img.shields.io/badge/Tests-All%20PASS-success)](nexus-shield-dashboard/package.json)
-[![Sub--10ms Certified](https://img.shields.io/badge/Sub--10ms-Certified-22c55e)](https://nexus-shield-dashboard.vercel.app/investor)
+[![P99 intercept 6.1ms](https://img.shields.io/badge/P99%20intercept-6.1ms-22c55e)](https://nexus-shield-dashboard.vercel.app/investor)
 [![Detection Rate](https://img.shields.io/badge/Detection-99.3%25-blue)](https://nexus-shield-dashboard.vercel.app/investor)
 [![SHA--256 Audit Sealed](https://img.shields.io/badge/SHA--256-Audit%20Sealed-violet)](https://nexus-shield-dashboard.vercel.app/scan)
 [![Trust Hub](https://img.shields.io/badge/Trust%20Hub-7%2F7-success)](nexus-shield-dashboard/test/advanced-trust.test.ts)
@@ -19,13 +19,13 @@
 
 ## Why Nexus Shield?
 
-Nexus Shield is **not** a classic secret scanner or a standalone prompt-injection detector.
+Nexus Shield is the **Agent Action Governance & Verification** layer for enterprise agent fleets — Universal Action Receipts, adaptive degradation (`READ_ONLY`, `REQUIRE_APPROVAL`), and cryptographic proof of what happened at runtime.
 
-It is an **end-to-end Runtime Security, Collective Immunity, and Agent Trust platform** built for the Agentic AI era — where autonomous agents call tools, traverse MCP servers, escalate privileges, chain low-risk actions into high-risk exfiltration, and act on user intent in milliseconds.
+**Primary metric:** P99 runtime intercept: 6.1ms (Nexus benchmark harness). Prompt/PII engines remain available as **secondary Security Engines**, not the core product story.
 
 | Legacy tools | Nexus Shield |
 |---|---|
-| Static regex on commits | **Runtime tool interception** (sub-10ms) |
+| Static regex on commits | **Runtime tool interception** (P99 6.1ms — Nexus benchmark harness) |
 | One-repo secret scans | **Cross-agent asset & MCP discovery** |
 | Block bad prompts | **Intent vs. Action consistency engine** + **OWASP GenAI / Agentic threat tags** |
 | Local-only findings | **Collective Behavioral Immune Network** (#TS-xxxx) |
@@ -48,7 +48,7 @@ Public growth funnel routes on the live dashboard — no login required for core
 |---|---|---|
 | **Free Agent & MCP Security Scanner** | [/scan](https://nexus-shield-dashboard.vercel.app/scan) | Dynamic analysis for OpenAI, LangChain, and MCP server endpoints |
 | **Gamified Challenge Engine** | [/challenge](https://nexus-shield-dashboard.vercel.app/challenge) | 7-level agent security sandbox with proof badges |
-| **Interactive Attack Simulator** | [/#attack-simulator](https://nexus-shield-dashboard.vercel.app/#attack-simulator) | Sub-10ms tool-call interception demo |
+| **Interactive Attack Simulator** | [/#attack-simulator](https://nexus-shield-dashboard.vercel.app/#attack-simulator) | P99 runtime intercept tool-call governance demo |
 | **Usage & Action Pricing** | [/pricing](https://nexus-shield-dashboard.vercel.app/pricing) | Developer, Pro, Team, and Enterprise tiers |
 | **Investor Growth Dashboard** | [/investor](https://nexus-shield-dashboard.vercel.app/investor) | Fleet metrics, latency, and blocked-action telemetry |
 | **Public Proof Center** | [/proof-center](https://nexus-shield-dashboard.vercel.app/proof-center) | SHA-256 evidence ledger and verifiable audit artifacts |
@@ -91,7 +91,7 @@ curl -X POST https://nexus-shield-dashboard.vercel.app/api/challenge/evaluate \
 
 ### Interactive Attack Simulator (`#attack-simulator`)
 
-Landing-page demo showing **real-time Sub-10ms tool-call interception**:
+Landing-page demo showing **real-time agent action governance** (P99 runtime intercept: 6.1ms — Nexus benchmark harness):
 
 - Live **INTENT_MISMATCH** detection when declared intent diverges from tool action.
 - **SHA-256 hash generation** on every blocked trajectory.
@@ -102,7 +102,7 @@ Landing-page demo showing **real-time Sub-10ms tool-call interception**:
 | Tier | Price | Highlights |
 |---|---|---|
 | **Developer** | $0/mo | 1 Agent · 5,000 Tool Calls/mo · Basic Intent Detection · Community Support |
-| **Pro** | $89/mo | 5 Agents · 100K Tool Calls/mo · Sub-10ms Intercept · SHA-256 Evidence Chain · Public Proof Badge |
+| **Pro** | $89/mo | 5 Agents · 100K Tool Calls/mo · P99 6.1ms Intercept · SHA-256 Evidence Chain · Public Proof Badge |
 | **Team** | $399/mo | 25 Agents · 1M Tool Calls/mo · HITL Approval · Custom MCP Proxy · Slack/Teams Alerts |
 | **Enterprise** | Custom | Unlimited Agents · On-Prem / Private Cloud · Dedicated SOC Dashboard · 99.99% SLA |
 
@@ -125,7 +125,7 @@ Real-time growth metrics dashboard for investors and enterprise evaluators:
 | Developers Installed (npm / pip / docker) | **1,840+** |
 | Analyzed Tool Calls | **4.21M+** |
 | Blocked Dangerous Actions | **286,000+** |
-| Average Intercept Latency | **5.87 ms** — Sub-10ms Certified |
+| P99 Runtime Intercept | **6.1 ms** (Nexus benchmark harness) |
 | Detection Success Rate | **99.3%** |
 
 Live simulated event ticker streams blocked attacks, proof-badge issuance, and fleet latency telemetry.
@@ -184,7 +184,7 @@ Full demo guide: **[nexus-shield-demo/README.md](nexus-shield-demo/README.md)**
 ║  → /dashboard/agents                                                         ║
 ║                                                                              ║
 ║  Pillar 3 — ACTION FIREWALL & REAL-TIME KILL SWITCH                          ║
-║  • Intent vs. Action · Sub-10ms interception · Agent session freeze            ║
+║  • Intent vs. Action · P99 6.1ms intercept · Agent session freeze              ║
 ║  → /dashboard/actions                                                        ║
 ║                                                                              ║
 ║  Pillar 4 — COLLECTIVE BEHAVIORAL IMMUNE NETWORK                              ║
@@ -344,6 +344,19 @@ curl -X POST https://nexus-shield-dashboard.vercel.app/api/v1/action/evaluate \
 | `200` | `ALLOW` | Tool call permitted |
 | `202` | `HUMAN_APPROVAL_REQUIRED` | Elevated risk — human gate required |
 | `403` | `BLOCK` | Denied — kill switch may freeze agent |
+
+Governance decisions also include **`READ_ONLY`** and **`REQUIRE_APPROVAL`** (adaptive degradation). For a signed **Universal Action Receipt** and `evidence_bundle_hash`, use the Verification API:
+
+```bash
+curl -X POST https://nexus-shield-dashboard.vercel.app/api/v1/actions/verify \
+  -H "x-api-key: nex_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent": { "id": "crewai-finance-agent-1", "identity_verified": true },
+    "intent": "Invoice Check for customer #4421",
+    "proposed_action": { "tool": "read_invoice", "params": { "customer_id": "4421" } }
+  }'
+```
 
 ### Pillar 4 — Collective Immune Registry
 
@@ -511,7 +524,7 @@ npm run dev
 
 ### VS Code / Cursor Extension
 
-Real-time PII & secret diagnostics with Quick Fix masking — sub-10ms local engine.
+Real-time PII & secret diagnostics with Quick Fix masking — **Security Engine** (complements Agent Action Governance).
 
 Full guide: **[VSCODE_EXTENSION.md](VSCODE_EXTENSION.md)**
 

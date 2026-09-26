@@ -8,7 +8,7 @@ version = "0.1.0"
 authors = [
   { name = "Nexus Shield Team", email = "dev@nexusshield.ai" },
 ]
-description = "Local OpenAI-compatible PII guardrail proxy for Ollama, OpenAI, and LiteLLM."
+description = "Security Engine: local OpenAI-compatible PII guardrail proxy. Primary platform: Agent Action Governance & Verification."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

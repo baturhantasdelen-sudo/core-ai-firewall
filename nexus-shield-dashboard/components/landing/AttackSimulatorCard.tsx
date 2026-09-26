@@ -151,7 +151,7 @@ export function AttackSimulatorCard() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-zinc-950/60 px-5 py-4">
           <div className="inline-flex items-center gap-2 text-xs text-zinc-500">
             <Zap className="h-3.5 w-3.5 text-emerald-400" />
-            Sub-10ms Action Firewall · Kill Switch ready
+            Action Governance · READ_ONLY / REQUIRE_APPROVAL · Kill Switch ready
           </div>
           <div className="flex flex-wrap gap-2">
             <Link

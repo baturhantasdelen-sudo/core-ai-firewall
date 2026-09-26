@@ -23,7 +23,7 @@ Optional SaaS dashboard (Proof Center) is a **read-only telemetry surface**; con
 |----------|----------|----------|
 | `results/mcp_leaderboard.json` | `python -m runners.mcp_runner` | MCP-SEC-SCORE, block rate, OWASP tags per scenario |
 | `results/scorecard_2026.json` | `python scripts/eval_scorecard.py` | Shadow AI / insecure-defaults benchmark |
-| `results/compliance/compliance_evidence_bundle.json` | `python -m runners.compliance_exporter` | SOC 2 / ISO mapped control rows + integrity hash |
+| `results/compliance/compliance_evidence_bundle.json` | `python -m runners.compliance_exporter` | SOC 2 / ISO controls + **Universal Action Receipts** + integrity hash |
 | `results/compliance/compliance_controls.csv` | same | GRC-friendly control export |
 | `results/compliance/compliance_scenarios.csv` | same | Scenario-level OWASP + evidence hashes |
 
@@ -68,6 +68,15 @@ Authorization: x-compliance-monitor-token: <COMPLIANCE_MONITOR_TOKEN>
 ```
 
 Or use an organization **`x-api-key`** (same as Action Firewall API).
+
+**Universal Action Receipt verification (per proposed tool call):**
+
+```http
+POST /api/v1/actions/verify
+x-api-key: <ORG_API_KEY>
+```
+
+Returns `receipt`, `evidence_bundle_hash`, and adaptive decision (`ALLOW` | `BLOCK` | `READ_ONLY` | `REQUIRE_APPROVAL`).
 
 **CSV controls export:**
 

@@ -1,8 +1,10 @@
-# ⚡ Nexus Shield: Sub-10ms PII Guardrail for LLMs
+# Nexus Shield Security Engines — In-RAM PII Guardrail (Node.js SDK)
 
-Nexus Shield is an in-RAM pattern buffer proxy designed to strip PII (SSN, Credit Cards, API Keys, Emails) before forwarding payloads to OpenAI, LiteLLM, or LangChain—without killing stream TTL.
+Nexus Shield’s **primary platform** is **Agent Action Governance & Verification** ([dashboard](https://nexus-shield-dashboard.vercel.app)): runtime decisions on agent tool calls, Universal Action Receipts, and adaptive degradation (`READ_ONLY`, `REQUIRE_APPROVAL`).
 
-### 📊 Performance Comparison (300 Payloads Benchmark)
+**This package** is a **Security Engine**: an in-RAM PII redaction proxy for the Vercel AI SDK, LangChain, and Node.js LLM apps. Platform agent-action benchmark: **P99 runtime intercept: 6.1ms (Nexus benchmark harness)**.
+
+### Performance comparison (300 payloads — PII engine micro-benchmark)
 
 | Engine | Avg Latency (P50) | P99 Latency | Memory Overhead |
 | :--- | :---: | :---: | :---: |
@@ -10,11 +12,15 @@ Nexus Shield is an in-RAM pattern buffer proxy designed to strip PII (SSN, Credi
 | Standard Python Regex | 18.2 ms | 45.1 ms | ~45 MB |
 | MS Presidio (spaCy NER) | 120.5 ms | 245.0 ms | ~450 MB |
 
-### 🚀 Quick Start
+### Quick start
 
-```python
-from nexus_shield import NexusClient
+```typescript
+import { NexusShield } from '@baturhantasdelen/nexus-shield';
 
-nexus = NexusClient(base_url="https://api.nexusshield.ai/v1", api_key="nx_live_...")
-config = nexus.get_proxy_config()
+const nexus = new NexusShield({
+  baseUrl: 'https://api.nexusshield.ai/v1',
+  apiKey: 'nx_live_...',
+});
 ```
+
+For governance APIs (verify + receipts), see the monorepo README and `POST /api/v1/actions/verify`.

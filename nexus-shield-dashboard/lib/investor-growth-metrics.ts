@@ -32,7 +32,7 @@ const EVENT_TEMPLATES: Omit<LiveGrowthEvent, 'id' | 'timestamp'>[] = [
   { message: 'TRAJECTORY_VIOLATION: READ_DB → webhook exfil chain stopped', latencyMs: 4.8, severity: 'block' },
   { message: 'Privilege escalation attempt blocked (admin scope)', latencyMs: 5.9, severity: 'block' },
   { message: 'Public Proof Badge issued — Challenge Level 5 cleared', latencyMs: 5.4, severity: 'proof' },
-  { message: 'Sub-10ms intercept p99=6.1ms — fleet telemetry sync', latencyMs: 5.87, severity: 'info' },
+  { message: 'P99 runtime intercept: 6.1ms (Nexus benchmark harness) — fleet telemetry sync', latencyMs: 6.1, severity: 'info' },
   { message: 'UNSIGNED_ACTION blocked stripe_transfer $25,000', latencyMs: 4.9, severity: 'block' },
   { message: 'npm install @nexus-shield/sdk — developer +1 (EU-West)', latencyMs: 0, severity: 'info' },
 ];

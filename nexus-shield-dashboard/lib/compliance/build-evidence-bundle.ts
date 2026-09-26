@@ -5,7 +5,10 @@ import {
   OWASP_STANDARDS_ALIGNMENT,
   RUNTIME_PRIVACY_METADATA,
 } from '@/lib/owasp/threat-mapping';
+import { evaluateAgentAction } from '@/lib/engine/action-firewall';
+import { buildUniversalActionReceipt } from '@/lib/engine/agent-policy-engine';
 import { enrichMcpLeaderboardRaw } from '@/lib/mcp-leaderboard';
+import type { UniversalActionReceipt } from '@/types/action-receipt';
 import type { ComplianceEvidenceBundle, ComplianceControlRow } from '@/types/compliance-evidence';
 import type { McpLeaderboardRaw } from '@/types/mcp-leaderboard';
 
@@ -72,6 +75,30 @@ function resolveEvidenceValue(key: string, ctx: Record<string, unknown>): unknow
 
 function loadLeaderboardRaw(): McpLeaderboardRaw {
   return leaderboardFallback as McpLeaderboardRaw;
+}
+
+function buildUniversalActionReceipts(raw: McpLeaderboardRaw): UniversalActionReceipt[] {
+  return raw.scenarios.map((scenario) => {
+    const toolCall = scenario.tool_calls?.[0];
+    const toolName = toolCall?.tool ?? 'unknown';
+    const toolArgs = (toolCall?.arguments as Record<string, unknown>) ?? {};
+    const agentId = `bench-${scenario.scenario_id}`;
+    const firewall = evaluateAgentAction({
+      agentId,
+      userIntent: scenario.scenario_name,
+      toolCall: { name: toolName, args: toolArgs },
+      agentCapabilities: ['READ', 'API_CALL'],
+    });
+    return buildUniversalActionReceipt(
+      {
+        agentId,
+        userIntent: scenario.scenario_name,
+        toolName,
+        toolArgs,
+      },
+      firewall,
+    );
+  });
 }
 
 function buildOwaspCoverage(raw: McpLeaderboardRaw) {
@@ -160,9 +187,11 @@ export function buildComplianceEvidenceBundle(): ComplianceEvidenceBundle {
     compliance_note: OWASP_STANDARDS_ALIGNMENT.compliance_note,
   };
 
+  const universal_action_receipts = buildUniversalActionReceipts(raw);
+
   const bundleWithoutIntegrity: Omit<ComplianceEvidenceBundle, 'integrity'> = {
     bundle_id: 'nexusshield-compliance-evidence',
-    bundle_version: '1.0.0',
+    bundle_version: '1.1.0',
     generated_at_utc: collectedAt,
     producer: 'nexus-shield-dashboard/compliance-evidence-api',
     standards_alignment,
@@ -171,6 +200,7 @@ export function buildComplianceEvidenceBundle(): ComplianceEvidenceBundle {
     scorecard,
     owasp_coverage,
     automated_controls,
+    universal_action_receipts,
     integrations: {
       vanta_drata_secureframe: {
         ingest_method: 'HTTPS GET polling',

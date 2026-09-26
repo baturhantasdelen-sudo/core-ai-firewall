@@ -25,6 +25,11 @@ import { ContactSection } from '@/components/landing/ContactSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
 import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
+import {
+  NEXUS_CATEGORY_POSITIONING,
+  NEXUS_GOVERNANCE_TAGLINE,
+  NEXUS_RUNTIME_LATENCY_METRIC,
+} from '@/lib/brand/copy-standards';
 
 const PLATFORM_MODULES = [
   {
@@ -65,7 +70,7 @@ const PLATFORM_MODULES = [
     chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200',
     bullets: [
       'Intent vs. Action consistency engine',
-      'Sub-10ms tool call interception',
+      'Adaptive READ_ONLY / REQUIRE_APPROVAL degradation',
       'Instant Kill Switch session freeze',
     ],
   },
@@ -180,7 +185,7 @@ const RUNTIME_PILLARS = [
     chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200',
     bullets: [
       'Intent / Action divergence check — block at >80% misalignment',
-      'Sub-10ms tool call interception at runtime',
+      'P99 runtime intercept: 6.1ms (harness)',
       'Capability revocation with READ_ONLY fallback & Kill Switch',
     ],
   },
@@ -271,13 +276,15 @@ export default function Home() {
             </div>
 
             <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-              Discover every agent. Control every action. Verify every outcome.
+              Agent Action Governance &amp; Verification
             </h1>
 
             <p className="mx-auto mt-5 max-w-3xl text-lg text-zinc-300 sm:text-xl">
-              AI agents don&apos;t fail only because of bad prompts. They fail when authorized agents
-              take unauthorized actions. Nexus Shield intercepts the action, evaluates intent, controls
-              capability, and creates verifiable evidence.
+              {NEXUS_CATEGORY_POSITIONING}
+            </p>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-zinc-500">{NEXUS_GOVERNANCE_TAGLINE}</p>
+            <p className="mx-auto mt-2 max-w-2xl font-mono text-xs text-emerald-300/90">
+              {NEXUS_RUNTIME_LATENCY_METRIC}
             </p>
 
             <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-left backdrop-blur-sm">
@@ -327,7 +334,7 @@ export default function Home() {
             {[
               { label: '8 Modules', sub: 'Full platform stack' },
               { label: 'Telemetry', sub: 'Live green signal' },
-              { label: 'Sub-10ms', sub: 'Runtime intercept' },
+              { label: 'P99 6.1ms', sub: 'Runtime intercept' },
               { label: 'API Key', sub: 'Secure badge' },
             ].map(({ label, sub }) => (
               <div key={label} className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 text-center backdrop-blur-md">
@@ -503,7 +510,23 @@ export default function Home() {
         </div>
       </section>
 
-      <PlaygroundSection />
+      <section id="security-engines" className="scroll-mt-20 border-t border-white/5 bg-zinc-950/80 py-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+            Secondary — Security Engines
+          </p>
+          <h2 className="mt-2 text-center text-2xl font-semibold text-zinc-100">
+            Prompt &amp; PII engines (supporting layer)
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-zinc-500">
+            Legacy guardrails remain available; primary product value is agent action governance,
+            Universal Action Receipts, and verification APIs.
+          </p>
+          <div className="mt-8">
+            <PlaygroundSection />
+          </div>
+        </div>
+      </section>
       <PublicProofCenterSection />
       <PricingSection />
       <ContactSection />

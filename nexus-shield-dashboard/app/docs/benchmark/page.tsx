@@ -71,7 +71,8 @@ export default function BenchmarkMethodologyPage() {
             <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-zinc-400">
               <li>500+ MCP attack scenarios — indirect injection, cross-tool exfil, privilege escalation</li>
               <li>MCP-SEC-SCORE (0–100) composite grade with letter bands A+ through F</li>
-              <li>Sub-10ms runtime intercept latency (p50 / p95 / p99)</li>
+              <li>P99 runtime intercept: 6.1ms (Nexus benchmark harness)</li>
+              <li>Universal Action Receipts via POST /api/v1/actions/verify</li>
               <li>UNVERIFIED_ACTION detection when evidence chain breaks</li>
             </ul>
           </section>

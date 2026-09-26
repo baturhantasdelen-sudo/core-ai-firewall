@@ -10,7 +10,7 @@ Open-source benchmark harness for evaluating **AI agent runtime security** again
 
 This repository contains **only** the public scenario runner, scoring utilities, and HTTP adapters. It does **not** include proprietary Nexus Shield SaaS dashboard code, private API routes, database schemas, or production backend logic.
 
-> **Enterprise runtime protection:** Need sub-10ms edge enforcement, HITL governance, audit evidence, and the full Proof Center dashboard? Visit **[https://nexusshield.ai](https://nexusshield.ai)**.
+> **Enterprise runtime protection:** Agent Action Governance & Verification, Universal Action Receipts, HITL (`REQUIRE_APPROVAL`), and the Proof Center — P99 runtime intercept: 6.1ms (Nexus benchmark harness). Visit **[https://nexusshield.ai](https://nexusshield.ai)**.
 
 ## Quick start
 

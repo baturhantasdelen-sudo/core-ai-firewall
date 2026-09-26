@@ -11,7 +11,7 @@ echo "📦 1. PyPI Dosya Yapısı Oluşturuluyor..."
 mkdir -p packages/python/nexus_shield
 
 cat << 'EOF' > packages/python/nexus_shield/__init__.py
-"""Nexus Shield Python SDK - Sub-10ms In-RAM PII Guardrail Proxy"""
+"""Nexus Shield Security Engine — in-RAM PII guardrail proxy (Agent Action Governance is the primary platform)."""
 
 __version__ = "0.1.0"
 
@@ -46,7 +46,7 @@ version = "0.1.0"
 authors = [
   { name = "Nexus Shield Team", email = "dev@nexusshield.ai" },
 ]
-description = "Sub-10ms in-RAM PII redaction and guardrail proxy for LLMs (LiteLLM, LangChain, OpenAI)."
+description = "Security Engine: in-RAM PII redaction guardrail for LLMs (LiteLLM, LangChain, OpenAI). Primary platform: Agent Action Governance & Verification."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
@@ -72,9 +72,9 @@ include = ["nexus_shield*"]
 EOF
 
 cat << 'EOF' > packages/python/README.md
-# ⚡ Nexus Shield: Sub-10ms PII Guardrail for LLMs
+# Nexus Shield Security Engines — In-RAM PII Guardrail (Python SDK)
 
-Nexus Shield is an in-RAM pattern buffer proxy designed to strip PII (SSN, Credit Cards, API Keys, Emails) before forwarding payloads to OpenAI, LiteLLM, or LangChain—without killing stream TTL.
+Nexus Shield's primary platform is Agent Action Governance & Verification. This package is a Security Engine: an in-RAM pattern buffer that strips PII before payloads reach OpenAI, LiteLLM, or LangChain. P99 runtime intercept: 6.1ms (Nexus benchmark harness).
 
 ### 📊 Performance Comparison (300 Payloads Benchmark)
 
@@ -148,7 +148,7 @@ cat << 'EOF' > packages/npm/package.json
 {
   "name": "@baturhantasdelen/nexus-shield",
   "version": "0.1.0",
-  "description": "Sub-10ms in-RAM PII redaction proxy for Vercel AI SDK, LangChain, and Node.js LLM apps.",
+  "description": "Security Engine: in-RAM PII redaction for Vercel AI SDK, LangChain, and Node.js. Primary platform: Agent Action Governance & Verification.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -162,7 +162,7 @@ cat << 'EOF' > packages/npm/package.json
     "security",
     "langchain",
     "openai-proxy",
-    "sub-10ms",
+    "security-engines",
     "presidio-alternative"
   ],
   "author": "Nexus Shield Team",

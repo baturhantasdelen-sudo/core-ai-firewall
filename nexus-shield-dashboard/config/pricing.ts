@@ -73,7 +73,7 @@ export const PRICING_TIERS: PricingTier[] = [
     features: [
       'Inter-Agent Delegation Controls',
       'Evidence Verification Vault',
-      'Sub-10ms On-Prem Validation',
+      'P99 6.1ms Runtime Intercept (harness)',
       'Dedicated SLA & MCP Boundaries',
     ],
     cta: 'Contact Sales',

@@ -1,7 +1,7 @@
 {
   "name": "@baturhantasdelen/nexus-shield",
   "version": "0.1.0",
-  "description": "Sub-10ms in-RAM PII redaction proxy for Vercel AI SDK, LangChain, and Node.js LLM apps.",
+  "description": "Security Engine: in-RAM PII redaction for Vercel AI SDK, LangChain, and Node.js. Primary platform: Agent Action Governance & Verification.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -15,7 +15,7 @@
     "security",
     "langchain",
     "openai-proxy",
-    "sub-10ms",
+    "security-engines",
     "presidio-alternative"
   ],
   "author": "Nexus Shield Team",

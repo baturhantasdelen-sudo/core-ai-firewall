@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Shield — Sub-10ms Unified AI Firewall & Multi-LLM Proxy</title>
-    <meta name="description" content="Secure your LLM applications with Sub-10ms PII masking, Jailbreak prevention, and unified API access for OpenAI, Anthropic, and Google models.">
+    <title>Nexus Shield — Agent Action Governance & Verification</title>
+    <meta name="description" content="Agents can act. Nexus decides whether they should — and produces cryptographic proof. Security Engines: PII masking, jailbreak prevention, and multi-LLM proxy. P99 runtime intercept: 6.1ms (Nexus benchmark harness).">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -121,16 +121,16 @@
         
         <div class="inline-flex items-center space-x-2 bg-slate-800/80 border border-slate-700 px-3 py-1 rounded-full text-xs font-medium text-slate-300 mb-6">
             <span class="w-2 h-2 rounded-full bg-shield-green animate-pulse"></span>
-            <span>Ultra-Low Latency Sub-10ms AI Protection</span>
+            <span>Agent Action Governance &amp; Verification</span>
         </div>
 
         <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
-            One Unified API Key for All LLMs. <br>
-            <span class="gradient-text">Zero Data Leaks. Sub-10ms Speed.</span>
+            Agents can act. <br>
+            <span class="gradient-text">Nexus decides — with cryptographic proof.</span>
         </h1>
 
         <p class="mt-6 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Protect your AI applications from PII leaks, Jailbreaks, and Prompt Injections before they hit OpenAI, Anthropic, or Google Gemini. Fully KVKK & GDPR compliant.
+            Runtime governance for agent tool calls, Universal Action Receipts, and adaptive degradation. <strong class="text-slate-300 font-medium">Security Engines</strong> below add PII masking, jailbreak detection, and prompt guardrails before data reaches OpenAI, Anthropic, or Gemini. KVKK &amp; GDPR aligned.
         </p>
 
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -150,8 +150,8 @@
         <!-- Metric Badges -->
         <div class="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto border-t border-b border-shield-border py-6">
             <div>
-                <div class="text-2xl font-bold text-slate-100">&lt; 8.4 ms</div>
-                <div class="text-xs text-slate-400">Avg Inspection Latency</div>
+                <div class="text-2xl font-bold text-slate-100">6.1 ms</div>
+                <div class="text-xs text-slate-400">P99 Runtime Intercept (harness)</div>
             </div>
             <div>
                 <div class="text-2xl font-bold text-shield-green">100%</div>
@@ -171,8 +171,8 @@
     <!-- LIVE PLAYGROUND SECTION -->
     <section id="playground" class="py-12 px-6 max-w-7xl mx-auto scroll-mt-20">
         <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold">Interactive Security Playground</h2>
-            <p class="text-slate-400 text-sm mt-2">Select a preset or enter your own text to see Nexus Shield sanitize and inspect prompts in real-time.</p>
+            <h2 class="text-3xl font-bold">Security Engines Playground</h2>
+            <p class="text-slate-400 text-sm mt-2">Select a preset or enter your own text to see PII masking and prompt guardrails in real time (complements Agent Action Governance on the live dashboard).</p>
         </div>
 
         <div class="bg-shield-card border border-shield-border rounded-2xl glow overflow-hidden">
@@ -383,7 +383,7 @@ response = client.chat.completions.create(
                 <div class="overflow-y-auto px-6 py-5 text-sm text-slate-300 leading-relaxed space-y-4">
 
                     <div id="trust-panel-overview" class="trust-panel hidden">
-                        <p>Nexus Shield is built for regulated enterprises that require sub-10ms guardrails without sacrificing data sovereignty. Our Trust Center summarizes how we protect customer prompts, align with global compliance frameworks, and maintain a zero-training, zero-retention posture by default.</p>
+                        <p>Nexus Shield is built for regulated enterprises that require agent action governance and verifiable receipts without sacrificing data sovereignty. Security Engines provide complementary in-RAM guardrails. Our Trust Center summarizes prompt protection, compliance alignment, and a zero-training, zero-retention posture by default.</p>
                         <ul class="list-disc pl-5 space-y-2 text-slate-400">
                             <li><strong class="text-slate-200">SOC 2 Type II</strong> — Security, availability &amp; confidentiality controls mapped to AICPA Trust Services Criteria.</li>
                             <li><strong class="text-slate-200">ISO/IEC 27001</strong> — Information Security Management System (ISMS) controls for risk treatment &amp; continuous improvement.</li>
@@ -406,7 +406,7 @@ response = client.chat.completions.create(
                         <h4 class="font-semibold text-slate-200 mt-3">Availability</h4>
                         <ul class="list-disc pl-5 space-y-1 text-slate-400">
                             <li>Health probes (<code class="text-brand-500">/healthz</code>), Docker healthchecks, and nginx upstream failover.</li>
-                            <li>Sub-10ms inspection SLA with Redis optional caching layer for idempotent requests.</li>
+                            <li>P99 runtime intercept: 6.1ms (Nexus benchmark harness); Redis optional caching for idempotent Security Engine requests.</li>
                         </ul>
                         <h4 class="font-semibold text-slate-200 mt-3">Confidentiality &amp; Privacy</h4>
                         <ul class="list-disc pl-5 space-y-1 text-slate-400">
@@ -439,7 +439,7 @@ response = client.chat.completions.create(
                             </div>
                             <div class="bg-slate-900/60 border border-shield-border rounded-xl p-4">
                                 <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-2">A.14 — System Development</h4>
-                                <p class="text-slate-400 text-xs">Secure SDLC: code review, automated pytest (403 injection blocks, PII masking, SLA &lt;10ms), separation of Fast API guardrail vs ML pipeline.</p>
+                                <p class="text-slate-400 text-xs">Secure SDLC: code review, automated pytest (403 injection blocks, PII masking, harness latency baselines), separation of governance API vs ML pipeline.</p>
                             </div>
                             <div class="bg-slate-900/60 border border-shield-border rounded-xl p-4">
                                 <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-2">A.18 — Compliance</h4>

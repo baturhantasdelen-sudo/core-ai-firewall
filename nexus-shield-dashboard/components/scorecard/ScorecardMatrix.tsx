@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   XCircle,
 } from 'lucide-react';
+import { NEXUS_RUNTIME_LATENCY_METRIC } from '@/lib/brand/copy-standards';
 import { SCORECARD_2026 } from '@/lib/scorecard/scorecard-data';
 import type { ScorecardFrameworkRow, ScorecardVectorId } from '@/types/scorecard-2026';
 
@@ -228,7 +229,7 @@ export function ScorecardMatrix() {
             icon: ShieldCheck,
             label: 'Nexus Shield mitigation',
             value: `${SCORECARD_2026.headline_stats.nexus_shield_mitigation_avg_pct}%`,
-            sub: '<12ms intercept p50',
+            sub: NEXUS_RUNTIME_LATENCY_METRIC,
           },
           {
             icon: CheckCircle2,

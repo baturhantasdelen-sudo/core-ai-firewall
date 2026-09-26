@@ -1,7 +1,7 @@
 {
   "name": "@baturhantasdelen/nexus-shield-edge",
   "version": "0.1.0",
-  "description": "Sub-10ms in-RAM PII redaction for Vercel Edge Runtime and Cloudflare Workers.",
+  "description": "Security Engine: edge PII redaction for Vercel and Cloudflare Workers. Primary platform: Agent Action Governance & Verification.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -25,7 +25,7 @@
     "llm-guardrails",
     "pii-redaction",
     "edge-runtime",
-    "sub-10ms"
+    "security-engines"
   ],
   "author": "Nexus Shield Team",
   "license": "MIT",

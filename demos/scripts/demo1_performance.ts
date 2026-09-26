@@ -38,7 +38,7 @@ async function main(): Promise<void> {
     await runButton.click();
 
     await page.getByText(/Source: live/i).waitFor({ timeout: 180_000 });
-    await page.getByText(/Sub-10ms Certified/i).waitFor({ timeout: 30_000 });
+    await page.getByText(/P99 runtime intercept|6\.1ms|Agent Action Governance/i).waitFor({ timeout: 30_000 });
     await page.getByText(/100\.0% Blocked|50\/50/i).first().waitFor({ timeout: 30_000 });
 
     await highlightElement(page, '[data-demo="proof-latency-card"]');

@@ -12,7 +12,7 @@ from nexus_shield_cli.sanitize import MaskOptions
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="nexus-shield",
-        description="Nexus Shield CLI — local OpenAI-compatible PII guardrail proxy.",
+        description="Nexus Shield CLI (Security Engine) — local OpenAI-compatible PII guardrail proxy.",
     )
     parser.add_argument("--version", action="version", version=f"nexus-shield {__version__}")
 

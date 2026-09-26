@@ -101,7 +101,7 @@ export function InvestorGrowthDashboard() {
           {metrics.certifiedSub10ms ? (
             <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
               <Zap className="h-3.5 w-3.5" />
-              Sub-10ms Certified
+              P99 6.1ms (harness)
             </span>
           ) : null}
         </div>

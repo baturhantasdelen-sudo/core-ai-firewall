@@ -1,6 +1,8 @@
-# @baturhantasdelen/nexus-shield-edge
+# Nexus Shield Security Engines — Edge PII Guardrail
 
-Sub-10ms in-RAM PII redaction for **Vercel Edge Runtime** and **Cloudflare Workers**. No network hop — patterns run locally at the edge before prompts reach an LLM.
+Nexus Shield’s **primary platform** is **Agent Action Governance & Verification** ([dashboard](https://nexus-shield-dashboard.vercel.app)). **This package** is a **Security Engine**: in-RAM PII redaction for **Vercel Edge Runtime** and **Cloudflare Workers**—patterns run locally at the edge before prompts reach an LLM (no mandatory cloud hop).
+
+Platform agent-action benchmark: **P99 runtime intercept: 6.1ms (Nexus benchmark harness)**.
 
 ## Install
 

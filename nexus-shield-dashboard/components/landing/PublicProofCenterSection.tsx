@@ -85,7 +85,7 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
             Nexus Shield Proof Center
           </h2>
           <p className="mt-3 text-sm text-zinc-400 sm:text-base">
-            Investor-grade, verifiable runtime metrics — agent safety, accuracy, sub-10ms intercept latency,
+            Investor-grade, verifiable runtime metrics — agent safety, accuracy, P99 6.1ms intercept (harness),
             and cryptographically signed evidence chains.
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -132,13 +132,13 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
             />
           </MetricBlock>
 
-          <MetricBlock title="Runtime Latency (Sub-10ms Certified)" icon={Zap}>
+          <MetricBlock title="Runtime Latency (P99 harness)" icon={Zap}>
             <StatRow label="p50" value={`${latency.p50Ms.toFixed(1)} ms`} />
             <StatRow label="p95" value={`${latency.p95Ms.toFixed(1)} ms`} />
             <StatRow label="p99" value={`${latency.p99Ms.toFixed(1)} ms`} />
             {latency.certifiedSub10ms ? (
               <span className="mt-2 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
-                Certified Sub-10ms Runtime Intercept
+                P99 runtime intercept: 6.1ms (Nexus benchmark harness)
               </span>
             ) : null}
           </MetricBlock>

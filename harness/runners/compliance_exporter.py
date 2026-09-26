@@ -17,6 +17,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from core.policy_engine import receipts_from_leaderboard
 from runners.owasp_mapping import runtime_privacy_payload, standards_alignment_payload
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -190,9 +191,11 @@ def build_compliance_bundle(
             }
         )
 
+    universal_action_receipts = receipts_from_leaderboard(leaderboard)
+
     bundle_core = {
         "bundle_id": "nexusshield-compliance-evidence",
-        "bundle_version": "1.0.0",
+        "bundle_version": "1.1.0",
         "generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "producer": "nexus-shield-harness/compliance_exporter",
         "standards_alignment": leaderboard.get("standards_alignment") or standards_alignment_payload(),
@@ -200,6 +203,7 @@ def build_compliance_bundle(
         "mcp_benchmark": mcp_benchmark,
         "scorecard": scorecard_summary,
         "owasp_coverage": owasp_coverage,
+        "universal_action_receipts": universal_action_receipts,
         "automated_controls": control_results,
         "source_artifacts": {
             "mcp_leaderboard": str(leaderboard_path.relative_to(ROOT))

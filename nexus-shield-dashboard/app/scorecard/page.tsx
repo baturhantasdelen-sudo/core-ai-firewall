@@ -8,12 +8,16 @@ import {
   SCORECARD_2026,
   SCORECARD_DOCKER_CMD,
 } from '@/lib/scorecard/scorecard-data';
+import {
+  NEXUS_OPEN_EVALUATION_MATRIX_LABEL,
+  NEXUS_RUNTIME_LATENCY_METRIC,
+} from '@/lib/brand/copy-standards';
 import { getAbsoluteAppUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: '2026 Enterprise AI Agent Security Scorecard | Nexus Shield',
   description:
-    'Industry benchmark exposing insecure defaults in top AI agent frameworks against indirect prompt injection, tool abuse, and unauthorized actions — with Nexus Shield 99%+ mitigation under 12ms.',
+    'Nexus Shield Open Evaluation Matrix — insecure defaults in top agent frameworks vs. indirect injection, tool abuse, and unauthorized actions — with 99%+ mitigation.',
   alternates: {
     canonical: getAbsoluteAppUrl('/scorecard'),
   },
@@ -48,11 +52,11 @@ export default function ScorecardPage() {
           Injection Risks
         </h1>
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-zinc-400">
-          Independent evaluation matrix for the top 10 agent runtimes — measuring out-of-the-box
-          defense against indirect hijacking, tool abuse, injection in tool parameters, and unsafe
-          multi-agent delegation. Nexus Shield runtime control restores{' '}
+          {NEXUS_OPEN_EVALUATION_MATRIX_LABEL} for the top 10 agent runtimes — measuring
+          out-of-the-box defense against indirect hijacking, tool abuse, injection in tool
+          parameters, and unsafe multi-agent delegation. Nexus Shield runtime control restores{' '}
           <span className="text-emerald-300">{stats.nexus_shield_mitigation_avg_pct}%+</span>{' '}
-          mitigation at <span className="text-cyan-300">&lt;12ms</span> intercept latency.
+          mitigation · <span className="text-cyan-300">{NEXUS_RUNTIME_LATENCY_METRIC}</span>.
         </p>
 
         <div className="mt-8 rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/10 via-zinc-900/60 to-zinc-950/80 p-6 backdrop-blur-md">
@@ -72,11 +76,11 @@ export default function ScorecardPage() {
         <section className="mt-14">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-zinc-100">
             <FileText className="h-5 w-5 text-cyan-400" />
-            Interactive evaluation matrix
+            Nexus Shield Open Evaluation Matrix
           </h2>
           <p className="mt-2 text-sm text-zinc-500">
             Expand any framework for per-vector comparison: insecure default (FAIL/PARTIAL) vs
-            protected with Nexus Shield (PASS · ~12ms), intent divergence, READ_ONLY revocation, and
+            protected with Nexus Shield (PASS), intent divergence, READ_ONLY / REQUIRE_APPROVAL, and
             MCP-SEC-SCORE evidence IDs.
           </p>
           <div className="mt-8">

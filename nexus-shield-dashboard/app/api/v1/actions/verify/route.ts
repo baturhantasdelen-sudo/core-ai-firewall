@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authenticateApiKey, extractApiKey } from '@/lib/auth/api-key';
 import { evaluateAgentAction } from '@/lib/engine/action-firewall';
+import { createApprovalRequest } from '@/lib/engine/action-firewall/human-approval';
 import { evaluateAdaptivePolicy } from '@/lib/engine/agent-policy-engine';
-import { NEXUS_RUNTIME_LATENCY_METRIC } from '@/lib/brand/copy-standards';
 import {
   classifyOwaspThreat,
   inferThreatCategory,
-  OWASP_STANDARDS_ALIGNMENT,
   RUNTIME_PRIVACY_METADATA,
 } from '@/lib/owasp/threat-mapping';
+import { NEXUS_RUNTIME_LATENCY_METRIC } from '@/lib/brand/copy-standards';
 
 export const runtime = 'nodejs';
 
-const evaluateSchema = z.object({
+const verifySchema = z.object({
   agent_id: z.string().min(1),
   user_intent: z.string().min(1),
   tool_call: z.object({
@@ -21,12 +21,13 @@ const evaluateSchema = z.object({
     args: z.record(z.string(), z.unknown()).default({}),
   }),
   agent_capabilities: z.array(z.string()).default([]),
+  identity_verified: z.boolean().optional(),
 });
 
+/** POST /api/v1/actions/verify — cryptographic verification + Universal Action Receipt. */
 export async function POST(req: NextRequest) {
   try {
     const apiKey = extractApiKey(req);
-
     if (!apiKey) {
       return NextResponse.json(
         { error: 'Unauthorized: Missing x-api-key or x-nexus-api-key header' },
@@ -40,8 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const parsed = evaluateSchema.safeParse(body);
-
+    const parsed = verifySchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid payload', details: parsed.error.flatten() },
@@ -49,20 +49,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { agent_id, user_intent, tool_call, agent_capabilities } = parsed.data;
+    const { agent_id, user_intent, tool_call, agent_capabilities, identity_verified } = parsed.data;
 
-    const result = evaluateAgentAction({
+    const firewall = evaluateAgentAction({
       agentId: agent_id,
       userIntent: user_intent,
-      toolCall: {
-        name: tool_call.name,
-        args: tool_call.args,
-      },
+      toolCall: { name: tool_call.name, args: tool_call.args },
       agentCapabilities: agent_capabilities,
     });
-
-    const statusCode =
-      result.decision === 'BLOCK' ? 403 : result.decision === 'HUMAN_APPROVAL_REQUIRED' ? 202 : 200;
 
     const policy = evaluateAdaptivePolicy(
       {
@@ -70,56 +64,65 @@ export async function POST(req: NextRequest) {
         userIntent: user_intent,
         toolName: tool_call.name,
         toolArgs: tool_call.args,
+        identityVerified: identity_verified ?? true,
       },
-      result,
+      firewall,
     );
 
-    const threatCategory = inferThreatCategory(result.violations, tool_call.name);
+    let approval_request_id: string | undefined;
+    if (policy.decision === 'REQUIRE_APPROVAL') {
+      const approval = createApprovalRequest(agent_id, {
+        toolName: tool_call.name,
+        userIntent: user_intent,
+        riskScore: policy.risk_score,
+        violations: policy.violations,
+        args: tool_call.args,
+      });
+      approval_request_id = approval.id;
+    }
+
+    const permitted = policy.decision === 'ALLOW' || policy.decision === 'READ_ONLY';
+    const statusCode =
+      policy.decision === 'BLOCK' ? 403 : policy.decision === 'REQUIRE_APPROVAL' ? 202 : 200;
+
+    const threatCategory = inferThreatCategory(policy.violations, tool_call.name);
 
     return NextResponse.json(
       {
-        success: policy.decision !== 'BLOCK',
-        decision: result.decision,
-        governance_decision: policy.decision,
-        universal_action_receipt: policy.receipt,
+        verification: {
+          permitted,
+          decision: policy.decision,
+          rule_id: policy.rule_id,
+          runtime_latency_benchmark: NEXUS_RUNTIME_LATENCY_METRIC,
+        },
+        receipt: policy.receipt,
         evidence_bundle_hash: policy.receipt.evidence_bundle_hash,
-        runtime_latency_benchmark: NEXUS_RUNTIME_LATENCY_METRIC,
-        risk_score: result.riskScore,
-        intent_match_score: result.intentMatchScore,
-        intent_divergence_percent: result.intentDivergencePercent,
-        agent_status: result.agentStatus ?? 'ACTIVE',
-        capabilities_revoked: result.capabilitiesRevoked ?? false,
-        violations: result.violations,
-        kill_switch_triggered: result.killSwitchTriggered,
-        latency_ms: Math.round((result.latencyMs ?? 0) * 100) / 100,
-        owasp_classification: classifyOwaspThreat(threatCategory, result.violations),
-        standards_alignment: OWASP_STANDARDS_ALIGNMENT,
+        approval_request_id,
+        owasp_classification: classifyOwaspThreat(threatCategory, policy.violations),
         runtime_privacy: RUNTIME_PRIVACY_METADATA,
+        latency_ms: Math.round((firewall.latencyMs ?? 0) * 100) / 100,
       },
       { status: statusCode },
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Internal Server Error';
-    console.error('[action/evaluate] error:', message);
+    console.error('[actions/verify] error:', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
 export async function GET() {
   return NextResponse.json({
-    endpoint: '/api/v1/action/evaluate',
+    endpoint: '/api/v1/actions/verify',
     method: 'POST',
     auth: 'x-api-key or x-nexus-api-key',
     body: {
-      agent_id: 'crewai-ops-agent-1',
-      user_intent: 'Invoice Check for customer #4421',
-      tool_call: { name: 'read_invoice', args: { customer_id: '4421' } },
+      agent_id: 'financebot-prod-7f2a',
+      user_intent: 'Check August Invoice #8291',
+      tool_call: { name: 'read_invoice', args: { invoice_id: '8291' } },
       agent_capabilities: ['READ', 'API_CALL'],
+      identity_verified: true,
     },
-    responses: {
-      200: 'ALLOW',
-      202: 'HUMAN_APPROVAL_REQUIRED',
-      403: 'BLOCK',
-    },
+    decisions: ['ALLOW', 'BLOCK', 'READ_ONLY', 'REQUIRE_APPROVAL'],
   });
 }

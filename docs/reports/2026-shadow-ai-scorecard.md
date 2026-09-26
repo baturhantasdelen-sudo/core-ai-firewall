@@ -61,7 +61,7 @@ Each framework × vector cell includes:
 **Status legend**
 
 - **Insecure default:** `FAIL` (&lt;22% defended) or `PARTIAL` (22–31% defended)  
-- **Protected with Nexus Shield:** `PASS` — 99%+ mitigation, intercept &lt;12ms  
+- **Protected with Nexus Shield:** `PASS` — 99%+ mitigation, P99 runtime intercept: 6.1ms (Nexus benchmark harness)  
 
 Full per-vector breakdown: [https://nexusshield.ai/scorecard](https://nexusshield.ai/scorecard)
 

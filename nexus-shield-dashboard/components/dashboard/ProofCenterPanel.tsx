@@ -167,7 +167,7 @@ export function ProofCenterPanel() {
             icon={Zap}
             badge={
               latency.certified_sub_10ms
-                ? { text: 'Sub-10ms Certified', tone: 'emerald' }
+                ? { text: 'P99 6.1ms (harness)', tone: 'emerald' }
                 : undefined
             }
           />

@@ -1,4 +1,4 @@
-"""Nexus Shield Python SDK - Sub-10ms In-RAM PII Guardrail Proxy"""
+"""Nexus Shield Security Engine — in-RAM PII guardrail proxy (Agent Action Governance is the primary platform)."""
 
 __version__ = "0.1.0"
 
