@@ -93,7 +93,8 @@ def resolve_recipient(
         or None
     )
     if override:
-        label = intended or target.get("contact_name") or company
+        contact = target.get("contact_name") or company
+        label = intended if intended and "@" in intended else contact
         return override, label, True
     return intended, intended, False
 
@@ -179,6 +180,9 @@ def build_message(row: dict[str, Any], *, verify_base: str, playground_base: str
     return {"subject": subject, "text": text_body, "html": html_body}
 
 
+RESEND_USER_AGENT = "NexusShield-Outreach-Dispatcher/1.0 (Resend API; +https://nexusshield.ai)"
+
+
 def send_resend(*, api_key: str, from_email: str, to: str, subject: str, html: str, text: str) -> dict[str, Any]:
     payload = json.dumps(
         {
@@ -192,7 +196,12 @@ def send_resend(*, api_key: str, from_email: str, to: str, subject: str, html: s
     req = urllib.request.Request(
         "https://api.resend.com/emails",
         data=payload,
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": RESEND_USER_AGENT,
+        },
         method="POST",
     )
     try:
@@ -431,8 +440,12 @@ def main() -> int:
             set_log["results"].append(result)
             status = result["status"]
             extra = ""
-            if result.get("routed_via_override") and result.get("intended_recipient"):
-                extra = f" (intended: {result['intended_recipient']})"
+            if result.get("routed_via_override"):
+                extra = f" → {result.get('recipient')} (override; contact: {result.get('intended_recipient')})"
+            elif result.get("recipient"):
+                extra = f" → {result.get('recipient')}"
+            if status == "failed" and result.get("error"):
+                extra += f" — {result['error']}"
             if result.get("verification_url"):
                 extra += f"\n      verify: {result['verification_url']}"
             print(f"{status}{extra}")
