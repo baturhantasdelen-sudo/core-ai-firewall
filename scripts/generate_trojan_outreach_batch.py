@@ -301,6 +301,11 @@ def run_batch(output_dir: Path) -> dict[str, Any]:
                     "contact_name": target["contact_name"],
                     "primary_agent_tool": target["primary_agent_tool"],
                     "vulnerability_vector": target["vulnerability_vector"],
+                    **(
+                        {"outreach_email": target["outreach_email"]}
+                        if target.get("outreach_email")
+                        else {}
+                    ),
                 },
                 "simulation": {
                     "agent_id": agent_id,

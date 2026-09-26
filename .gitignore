@@ -36,6 +36,10 @@ _*.json
 .vscode/
 *.swp
 
+# Trojan outreach — live dispatch logs (recipients, message IDs; never commit)
+results/trojan_outreach/dispatch_log.json
+**/dispatch_log.json
+
 # Customer API keys (trial / pro registry)
 data/api_keys.json
 .vercel

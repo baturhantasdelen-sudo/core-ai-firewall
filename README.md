@@ -141,6 +141,10 @@ Open-source **Trojan Horse** demo — compare a vulnerable agent (no guardrails)
 ```bash
 python scripts/generate_trojan_outreach_batch.py
 # → results/trojan_outreach/outreach_batch_50.json + .md (human approval required)
+
+# Phased dispatch: 5×10 targets, dry-run by default (use --send + RESEND_API_KEY after approval)
+python scripts/dispatch_outreach_campaign.py --skip-set-confirm
+python scripts/dispatch_outreach_campaign.py --set 1 --send  # requires TROJAN_CAMPAIGN_RECIPIENT or outreach_email per target
 ```
 
 ```bash
