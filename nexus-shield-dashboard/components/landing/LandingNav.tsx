@@ -14,6 +14,7 @@ import { BrandLogo } from '@/components/brand/BrandLogo';
 type NavItem = { href: string; label: string; external?: boolean };
 
 const PLATFORM_LINKS: NavItem[] = [
+  { href: '/demo', label: 'Detect & Demonstrate' },
   { href: '/#attack-simulator', label: 'Attack Simulator' },
   { href: '/#playground', label: 'Playground' },
   { href: '/proof-center', label: 'Proof Center' },

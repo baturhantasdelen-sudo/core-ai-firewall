@@ -52,6 +52,19 @@ Public growth funnel routes on the live dashboard — no login required for core
 | **Usage & Action Pricing** | [/pricing](https://nexus-shield-dashboard.vercel.app/pricing) | Developer, Pro, Team, and Enterprise tiers |
 | **Investor Growth Dashboard** | [/investor](https://nexus-shield-dashboard.vercel.app/investor) | Fleet metrics, latency, and blocked-action telemetry |
 | **Public Proof Center** | [/proof-center](https://nexus-shield-dashboard.vercel.app/proof-center) | SHA-256 evidence ledger and verifiable audit artifacts |
+| **Detect & Demonstrate** | [/demo](https://nexus-shield-dashboard.vercel.app/demo) | FinTech attack sim, UAR + SHA-256 bundle, link to public [/verify](https://nexus-shield-dashboard.vercel.app/verify) |
+
+### Detect & Demonstrate — independent verification (Bul ve Göster)
+
+Reproducible **FinTech agent exfiltration** scenario → harness **policy engine** → **Universal Action Receipt** with **SHA-256 evidence bundle** → public verification URL.
+
+```bash
+# Print mitigation + verification URL; optional JSON for the /demo page
+python scripts/simulate_independent_demo.py
+python scripts/simulate_independent_demo.py --write-public-json
+```
+
+Technical walkthrough for CISO/CTO reviewers: [docs/DETECT_AND_DEMONSTRATE_PROOF.md](./docs/DETECT_AND_DEMONSTRATE_PROOF.md) · Report: [State of Agent Security 2026](https://www.nexusshield.ai/reports/state-of-agent-security-2026).
 
 ### Free Agent & MCP Security Scanner (`/scan`)
 
