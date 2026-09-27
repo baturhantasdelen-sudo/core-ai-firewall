@@ -4,7 +4,7 @@
   "cve_label": "CVE-2026-CI-0021",
   "title": "CI coding agent unauthorized merge + exfil callback",
   "severity": "critical",
-  "generated_at_utc": "2026-09-27T11:31:57Z",
+  "generated_at_utc": "2026-09-27T11:45:00Z",
   "positioning": "Agent Action Governance & Verification",
   "runtime_benchmark": "P99 runtime intercept: 6.1ms (Nexus benchmark harness)",
   "report_url": "https://www.nexusshield.ai/reports/state-of-agent-security-2026",

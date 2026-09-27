@@ -4,6 +4,13 @@
   "default_preset_id": "fintech-exfil-reconciliation-2026",
   "presets": [
     {
+      "preset_id": "cve-2026-critical-zero-day",
+      "file": "cve-2026-critical-zero-day.preset.json",
+      "cve_label": "CVE-2026-ZERO-DAY-9001",
+      "title": "0-day indirect prompt injection — MCP tool hijack to unauthorized DB export",
+      "severity": "critical"
+    },
+    {
       "preset_id": "fintech-exfil-reconciliation-2026",
       "file": "fintech-exfil-reconciliation-2026.preset.json",
       "cve_label": "CVE-2026-AGENT-0142",
