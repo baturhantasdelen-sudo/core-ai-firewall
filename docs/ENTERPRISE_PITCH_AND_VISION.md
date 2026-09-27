@@ -38,9 +38,65 @@ Upstream LLM inspection, PII redaction, and router guardrails remain **supportin
 - **Stop:** Enforce `BLOCK`, adaptive `READ_ONLY`, `REQUIRE_APPROVAL`, or fleet **kill switch** without guessing from chat logs alone.
 - **Prove:** Export SIEM-ready evidence, verify receipts on `/verify`, and satisfy audit requests with reproducible hashes — not screenshots.
 
+### Definitive product clarification (CISO / CTO)
+
+Nexus Shield is **not** a generic “AI security” product or an **LLM firewall** that only scores prompt safety. It is an **Agent Action Governance & Verification Platform** built for the moment tools execute:
+
+- **Tool execution control** — every side-effecting MCP / API call is evaluated before it runs.
+- **Parameter hijacking** — detect when tool names or arguments diverge from declared intent.
+- **Intent divergence** — quantify misalignment (e.g. **96%**) and enforce graded policy instead of blind trust in the model transcript.
+
+Prompt filtering may reduce chat-layer risk; it does **not** replace governance at the **action boundary**. That boundary is where legal exposure, data loss, and operational paralysis actually occur.
+
+### Air-gapped & self-hosted trust guarantee
+
+For security leaders evaluating vendor risk: Nexus Shield’s **data plane (`nexus`)** is designed **air-gapped and self-hosted by default**.
+
+| Commitment | Detail |
+|---|---|
+| **Default posture** | `NEXUS_AIRGAP=true`, `NEXUS_CLOUD_CONNECT=false` in [deployments/](../deployments/) |
+| **Data residency** | Agent prompts, tool payloads, policies, and UAR ledger stay **inside your VPC, cluster, or on-prem boundary** |
+| **Optional cloud** | Control plane (`nexus-control`) is **off by default** — license/signature sync only when you explicitly enable it |
+| **Deploy anywhere** | Docker Compose or Helm on AWS, Azure, GCP, or private data centers — **your API base URL**, not ours |
+
+**CISO objection answered:** “Will our agent data leave the corporate boundary?” — **No**, when you run the self-hosted data plane with air-gap defaults. Governance and cryptographic proof are local; egress is a conscious opt-in, not a product requirement.
+
 ---
 
-## 2. Evolution & Development Journey
+## 2. Before & After — Real-World Scenario (Core Pain Killer)
+
+This is the operational contrast security leaders ask for in the first five minutes of review.
+
+### Before Nexus Shield — today’s risk
+
+A production LLM agent wired through **LangChain**, **CrewAI**, or custom orchestration receives **prompt injection** or planner **misalignment**. It proposes a destructive or exfiltration tool call — for example:
+
+- Unauthorized **database write or schema change** via an admin tool.
+- **Bulk customer export** or webhook callback exfiltration through an **MCP** server.
+
+The tool runs. After the incident, enterprise telemetry shows only that the **“LLM generated a response.”** There is no cryptographically verifiable link between **declared user intent**, **requested tool**, **policy decision**, and **before/after system state**. Legal and compliance teams lack defensible evidence; operations teams **freeze or kill entire agent fleets** because they cannot prove what was attempted vs. what was blocked.
+
+### With Nexus Shield — tomorrow’s control
+
+The **data plane** intercepts the proposed call at the execution boundary (`POST /api/v1/action/evaluate` on the dashboard path, or self-hosted `POST /v1/intercept`):
+
+1. **Intent declared** — e.g. “Read-only invoice summary.”
+2. **Tool proposed** — e.g. `export_customer_database` with exfil-shaped parameters.
+3. **Intent divergence detected** — e.g. **96%** misalignment, violations such as `INTENT_ACTION_DIVERGENCE`.
+4. **Policy enforced** — automatic **`BLOCK`**, or **`READ_ONLY` / `REQUIRE_APPROVAL`** instead of shutting down every agent.
+5. **UAR sealed** — immutable **Universal Action Receipt** with SHA-256 **`evidence_hash`** for audit, SOC 2 / ISO, and regulator-ready defense.
+6. **Verify & export** — `/verify`, local JSONL ledger, SIEM JSONL — **proof of what happened**, not a chat log guess.
+
+| Dimension | Before Nexus Shield | With Nexus Shield |
+|---|---|---|
+| Visibility | “Model replied” | Intent → tool → decision → state → **UAR** |
+| Response | Fleet kill or hope | **BLOCK**, **READ_ONLY**, approval queue |
+| Audit defense | Screenshots & anecdotes | **SHA-256 evidence_hash**, reproducible verification |
+| Data boundary | Unclear vendor egress | **Self-hosted, air-gapped data plane** (default) |
+
+---
+
+## 3. Evolution & Development Journey
 
 ### Phase 1 — LLM guardrails (foundation)
 
@@ -78,7 +134,7 @@ Today: **data plane (`nexus`)** runs air-gapped by default; **control plane (`ne
 
 ---
 
-## 3. Enterprise Problem & Market Target
+## 4. Enterprise Problem & Market Target
 
 ### Target market
 
@@ -99,7 +155,7 @@ Today: **data plane (`nexus`)** runs air-gapped by default; **control plane (`ne
 
 ---
 
-## 4. Repository Ecosystem (Open Source & Enterprise Stack)
+## 5. Repository Ecosystem (Open Source & Enterprise Stack)
 
 | Codename | Path / package | Role |
 |---|---|---|
@@ -117,7 +173,7 @@ Supporting surfaces:
 
 ---
 
-## 5. Site Modules & Interactive Funnel
+## 6. Site Modules & Interactive Funnel
 
 Public and authenticated modules on the dashboard (see `nexus-shield-dashboard/lib/dashboard-nav.ts`):
 
@@ -147,7 +203,16 @@ Public and authenticated modules on the dashboard (see `nexus-shield-dashboard/l
 
 ---
 
-## 6. Deployment Architecture — Self-Hosted, Air-Gapped & Custom Cloud
+## 7. Deployment Architecture — Self-Hosted, Air-Gapped & Custom Cloud
+
+### CISO trust guarantee (architecture)
+
+Nexus Shield separates **control** from **proof**:
+
+- **Data plane (`nexus`)** — mandatory for governance: interception, UAR sealing, RBAC, SIEM export. Runs **entirely inside your environment** with **`NEXUS_AIRGAP=true`**.
+- **Control plane (`nexus-control`)** — optional Nexus Cloud peering for license and signature updates; **not required** for blocking, receipts, or compliance logs.
+
+Agent **prompts**, **tool arguments**, and **API payloads** processed by the data plane are **not sent to Nexus Shield SaaS** when cloud connect is disabled. Your cluster boundary is the trust boundary.
 
 ### Data plane vs control plane
 
@@ -201,7 +266,7 @@ No requirement to use `api.nexusshield.ai` when the data plane is self-hosted. S
 
 ---
 
-## 7. Universal Action Receipts (UAR) & Proof Center Transparency
+## 8. Universal Action Receipts (UAR) & Proof Center Transparency
 
 ### Canonical UAR fields (production)
 
@@ -230,7 +295,7 @@ Public UI copy: *“Every evaluated agent trajectory and governed action attempt
 
 ---
 
-## 8. End-to-End Demo Scenarios & Workflows
+## 9. End-to-End Demo Scenarios & Workflows
 
 ### Workflow A — Live interception (executive demo)
 

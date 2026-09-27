@@ -38,9 +38,53 @@
 - **Durdur:** `BLOCK`, uyarlamalı `READ_ONLY`, `REQUIRE_APPROVAL` veya filo **kill switch** uygulayın — yalnızca sohbet loglarından tahmin etmeyin.
 - **Kanıtla:** SIEM uyumlu kanıt dışa aktarın, `/verify` üzerinde makbuz doğrulayın; ekran görüntüsü değil, tekrarlanabilir hash ile denetim taleplerini karşılayın.
 
+### Kesin ürün tanımı (CISO / CTO)
+
+Nexus Shield genel bir “yapay zeka güvenliği” veya yalnızca istem güvenliğini ölçen bir **LLM güvenlik duvarı** değildir. **Araç yürütme anına** odaklanan bir **Yapay Zeka Ajanı Eylem Yönetişimi ve Doğrulama Platformu**dur:
+
+- **Araç yürütme kontrolü** — yan etkili her MCP / API çağrısı çalışmadan önce değerlendirilir.
+- **Parametre ele geçirme** — araç adı veya argümanların bildirilen niyetten sapmasının tespiti.
+- **Niyet sapması** — uyumsuzluğun ölçülmesi (ör. **%96**) ve kademeli politika uygulaması.
+
+İstem filtreleme sohbet katmanı riskini azaltabilir; **eylem sınırındaki yönetişimin** yerini tutmaz.
+
+### Hava boşluklu ve self-hosted güven taahhüdü
+
+**Veri düzlemi (`nexus`)** varsayılan olarak **hava boşluklu ve self-hosted** tasarlanmıştır.
+
+| Taahhüt | Detay |
+|---|---|
+| **Varsayılan duruş** | `NEXUS_AIRGAP=true`, `NEXUS_CLOUD_CONNECT=false` ([deployments/](../deployments/)) |
+| **Veri yerleşimi** | Ajan istemleri, araç yükleri, politikalar ve UAR defteri **VPC / küme / şirket içi sınırda** kalır |
+| **İsteğe bağlı bulut** | Kontrol düzlemi varsayılan **kapalı** |
+| **Her yerde dağıtım** | Docker Compose veya Helm — **sizin API taban URL'niz** |
+
+**CISO sorusu:** “Ajan verimiz kurumsal sınırı terk eder mi?” — Self-hosted veri düzlemi ile **hayır** (varsayılan hava boşluğu).
+
 ---
 
-## 2. Evrim ve Gelişim Yolculuğu
+## 2. Önce ve Sonra — Gerçek Dünya Senaryosu
+
+### Nexus Shield öncesi — bugünkü risk
+
+**LangChain**, **CrewAI** veya özel orkestrasyon ile bağlı bir ajan **prompt injection** veya planlayıcı **hizasızlığı** yaşar; yetkisiz **veritabanı yazımı** veya MCP ile **veri sızdırma** aracı çalışır. Loglarda yalnızca **“LLM yanıt üretti”** görünür; niyet, araç, karar ve durum arasında kriptografik bağ yoktur. Operasyon filoyu **dondurur veya kapatır**; hukuki ekip savunulabilir kanıt bulamaz.
+
+### Nexus Shield sonrası — yarının kontrolü
+
+**Veri düzlemi** çağrıyı yakalar (`POST /api/v1/action/evaluate` veya self-hosted `POST /v1/intercept`):
+
+1. Niyet bildirilir · 2. Araç önerilir · 3. Sapma tespit edilir (ör. **%96**) · 4. **`BLOCK`** veya **`READ_ONLY` / `REQUIRE_APPROVAL`** · 5. SHA-256 **UAR** · 6. `/verify` ve SIEM dışa aktarımı.
+
+| Boyut | Önce | Sonra |
+|---|---|---|
+| Görünürlük | “Model yanıtladı” | Niyet → araç → karar → durum → **UAR** |
+| Müdahale | Filo kapatma | **BLOCK**, **READ_ONLY**, onay kuyruğu |
+| Denetim savunması | Anecdote | **evidence_hash**, doğrulanabilir kanıt |
+| Veri sınırı | Belirsiz egress | **Self-hosted, hava boşluklu veri düzlemi** |
+
+---
+
+## 3. Evrim ve Gelişim Yolculuğu
 
 ### Faz 1 — LLM korkulukları (temel)
 
@@ -78,7 +122,7 @@ Bugün: **veri düzlemi (`nexus`)** varsayılan olarak hava boşluklu çalışı
 
 ---
 
-## 3. Kurumsal Problem ve Hedef Pazar
+## 4. Kurumsal Problem ve Hedef Pazar
 
 ### Hedef pazar
 
@@ -99,7 +143,7 @@ Bugün: **veri düzlemi (`nexus`)** varsayılan olarak hava boşluklu çalışı
 
 ---
 
-## 4. Depo Ekosistemi (Açık Kaynak ve Kurumsal Yığın)
+## 5. Depo Ekosistemi (Açık Kaynak ve Kurumsal Yığın)
 
 | Kod adı | Yol / paket | Rol |
 |---|---|---|
@@ -117,7 +161,7 @@ Destekleyici yüzeyler:
 
 ---
 
-## 5. Site Modülleri ve Etkileşimli Hunisi
+## 6. Site Modülleri ve Etkileşimli Hunisi
 
 Paneldeki genel ve kimlik doğrulamalı modüller (`nexus-shield-dashboard/lib/dashboard-nav.ts`):
 
@@ -147,7 +191,14 @@ Paneldeki genel ve kimlik doğrulamalı modüller (`nexus-shield-dashboard/lib/d
 
 ---
 
-## 6. Dağıtım Mimarisi — Self-Hosted, Hava Boşluklu ve Özel Bulut
+## 7. Dağıtım Mimarisi — Self-Hosted, Hava Boşluklu ve Özel Bulut
+
+### CISO güven garantisi (mimari)
+
+- **Veri düzlemi (`nexus`)** — yönetişim zorunlu: yakalama, UAR, RBAC, SIEM. **`NEXUS_AIRGAP=true`** ile ortamınızda çalışır.
+- **Kontrol düzlemi (`nexus-control`)** — isteğe bağlı; engelleme ve makbuz için **gerekli değildir**.
+
+`NEXUS_CLOUD_CONNECT=false` iken ajan **istemleri**, **araç argümanları** ve **API yükleri** Nexus Shield SaaS'a gönderilmez. Güven sınırı sizin küme sınırınızdır.
 
 ### Veri düzlemi vs kontrol düzlemi
 
@@ -201,7 +252,7 @@ Veri düzlemi self-hosted iken `api.nexusshield.ai` zorunlu değildir. LLM yönl
 
 ---
 
-## 7. Evrensel Eylem Makbuzu (UAR) ve Proof Center Şeffaflığı
+## 8. Evrensel Eylem Makbuzu (UAR) ve Proof Center Şeffaflığı
 
 ### Üretim UAR alanları
 
@@ -230,7 +281,7 @@ Genel arayüz metni: *“Değerlendirilen her ajan yörüngesi ve yönetilen eyl
 
 ---
 
-## 8. Uçtan Uca Demo Senaryoları ve İş Akışları
+## 9. Uçtan Uca Demo Senaryoları ve İş Akışları
 
 ### İş akışı A — Canlı yakalama (yönetici demosu)
 

@@ -28,6 +28,7 @@ class DeckMeta:
     product_name: str
     tagline: str
     cover_subtitle: str
+    cover_trust_line: str
     cover_footer: str
     pdf_title: str
 
@@ -43,6 +44,10 @@ LANG_PROFILES: dict[str, dict[str, object]] = {
                 "Prove what actually happened."
             ),
             cover_subtitle="Executive architectural overview · CISO / CTO briefing",
+            cover_trust_line=(
+                "Air-gapped · self-hosted data plane by default (NEXUS_AIRGAP=true, "
+                "NEXUS_CLOUD_CONNECT=false)"
+            ),
             cover_footer="https://www.nexusshield.ai/ · Confidential — for stakeholder review",
             pdf_title="Nexus Shield Enterprise Overview",
         ),
@@ -59,6 +64,10 @@ LANG_PROFILES: dict[str, dict[str, object]] = {
                 "Yapmamaları gerekenleri durdurun. Ne olduğunu kanıtlayın."
             ),
             cover_subtitle="Kurumsal mimari özeti · CISO / CTO brifingi",
+            cover_trust_line=(
+                "Hava boşluklu · varsayılan self-hosted veri düzlemi "
+                "(NEXUS_AIRGAP=true, NEXUS_CLOUD_CONNECT=false)"
+            ),
             cover_footer="https://www.nexusshield.ai/ · Gizli — paydaş incelemesi içindir",
             pdf_title="Nexus Shield Kurumsal Genel Bakış",
         ),
@@ -458,6 +467,9 @@ class _DeckBuilder:
         self.story.append(self.Spacer(1, SPACER_MD))
         self.story.append(self._p(self.meta.tagline, self.tagline_style))
         self.story.append(self.Spacer(1, SPACER_MD))
+        if self.meta.cover_trust_line:
+            self.story.append(self._p(self.meta.cover_trust_line, self.tagline_style))
+            self.story.append(self.Spacer(1, SPACER_SM))
         self.story.append(self._p(self.meta.cover_subtitle, self.tagline_style))
         self.story.append(self.Spacer(1, SPACER_MD))
         self.story.append(self._p(self.meta.cover_footer, self.tagline_style))
