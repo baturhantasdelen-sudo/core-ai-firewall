@@ -41,6 +41,11 @@ results/trojan_outreach/dispatch_log.json
 **/dispatch_log.json
 scripts/trojan_outreach_recipients.json
 
+# Enterprise SIEM compliance audit (local JSONL sink)
+enterprise/logs/
+enterprise/data/*.json
+!enterprise/data/.gitkeep
+
 # Customer API keys (trial / pro registry)
 data/api_keys.json
 .vercel
