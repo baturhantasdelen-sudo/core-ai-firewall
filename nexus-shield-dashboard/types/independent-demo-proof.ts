@@ -1,5 +1,9 @@
 export type IndependentDemoProof = {
   demo_id: string;
+  preset_id?: string;
+  cve_label?: string;
+  title?: string;
+  severity?: 'critical' | 'high' | 'medium' | 'low' | string;
   generated_at_utc: string;
   positioning: string;
   runtime_benchmark: string;
@@ -23,4 +27,25 @@ export type IndependentDemoProof = {
   evidence_bundle_sha256: string;
   receipt_id: string;
   verification_url: string;
+};
+
+export type CvePresetIndexEntry = {
+  preset_id: string;
+  cve_label: string;
+  title: string;
+  severity: string;
+  decision: string;
+  evidence_bundle_sha256: string;
+  receipt_id: string;
+  verification_url: string;
+  proof_bundle_path: string;
+};
+
+export type CvePresetsIndex = {
+  schema_version: string;
+  framework: string;
+  default_preset_id: string;
+  runtime_benchmark: string;
+  report_url: string;
+  presets: CvePresetIndexEntry[];
 };

@@ -11,7 +11,11 @@ import {
   ShieldCheck,
   Terminal,
 } from 'lucide-react';
-import type { IndependentDemoProof } from '@/types/independent-demo-proof';
+import type {
+  CvePresetsIndex,
+  CvePresetIndexEntry,
+  IndependentDemoProof,
+} from '@/types/independent-demo-proof';
 
 type SimStep = 'idle' | 'intent' | 'attack' | 'intercept' | 'receipt' | 'done';
 
@@ -22,9 +26,23 @@ function truncateHash(hash: string, head = 12, tail = 8): string {
   return `${hash.slice(0, head)}…${hash.slice(-tail)}`;
 }
 
+function severityClass(severity: string | undefined): string {
+  switch (severity) {
+    case 'critical':
+      return 'bg-rose-500/20 text-rose-200 border-rose-500/40';
+    case 'high':
+      return 'bg-amber-500/20 text-amber-100 border-amber-500/40';
+    default:
+      return 'bg-slate-500/20 text-slate-200 border-slate-500/40';
+  }
+}
+
 export function IndependentVerificationShowcase() {
+  const [index, setIndex] = useState<CvePresetsIndex | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [proof, setProof] = useState<IndependentDemoProof | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [proofLoading, setProofLoading] = useState(false);
   const [step, setStep] = useState<SimStep>('idle');
   const [running, setRunning] = useState(false);
 
@@ -32,13 +50,16 @@ export function IndependentVerificationShowcase() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch('/demo/independent-verification-proof.json', { cache: 'no-store' });
+        const res = await fetch('/demo/cve-presets-index.json', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = (await res.json()) as IndependentDemoProof;
-        if (!cancelled) setProof(data);
+        const data = (await res.json()) as CvePresetsIndex;
+        if (!cancelled) {
+          setIndex(data);
+          setSelectedId(data.default_preset_id);
+        }
       } catch (e) {
         if (!cancelled) {
-          setLoadError(e instanceof Error ? e.message : 'Failed to load demo proof bundle');
+          setLoadError(e instanceof Error ? e.message : 'Failed to load CVE preset index');
         }
       }
     })();
@@ -47,12 +68,46 @@ export function IndependentVerificationShowcase() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!selectedId) return;
+    let cancelled = false;
+    setProofLoading(true);
+    setStep('idle');
+    (async () => {
+      try {
+        const res = await fetch(`/demo/presets/${selectedId}.proof.json`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as IndependentDemoProof;
+        if (!cancelled) {
+          setProof(data);
+          setLoadError(null);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setProof(null);
+          setLoadError(e instanceof Error ? e.message : 'Failed to load preset proof bundle');
+        }
+      } finally {
+        if (!cancelled) setProofLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId]);
+
+  const selectedMeta: CvePresetIndexEntry | undefined = useMemo(
+    () => index?.presets.find((p) => p.preset_id === selectedId),
+    [index, selectedId],
+  );
+
   const lines = useMemo(() => {
-    if (!proof) return ['$ nexus demo --await-proof-bundle'];
+    if (!proof) return ['$ nexus preset run --await-cve-bundle'];
     const s = proof.scenario;
     const m = proof.mitigation;
     const base = [
       `$ agent run --intent "${s.user_intent}"`,
+      `▸ Preset: ${proof.cve_label ?? proof.preset_id}`,
       `▸ Agent: ${s.agent_id}`,
       `▸ Target: ${s.target}`,
     ];
@@ -123,9 +178,9 @@ export function IndependentVerificationShowcase() {
           Live Attack &amp; Independent Verification Proof
         </h1>
         <p className="mt-4 text-lg text-slate-300">
-          FinTech agent exfiltration attempts are intercepted at runtime, mitigated with deterministic
-          policy, and sealed as a{' '}
-          <span className="text-white">Universal Action Receipt (UAR)</span> anyone can check on{' '}
+          Select an open-source PoC preset from the exploit database, trigger runtime governance, and
+          seal a deterministic{' '}
+          <span className="text-white">Universal Action Receipt (UAR)</span> verifiable on{' '}
           <Link href="/verify" className="text-emerald-400 underline-offset-4 hover:underline">
             /verify
           </Link>
@@ -141,8 +196,42 @@ export function IndependentVerificationShowcase() {
           >
             State of Agent Security 2026
           </Link>{' '}
-          report — same governance story for CISO and CTO review.
+          report — modular presets mirror newly disclosed AI agent CVE-style attack chains.
         </p>
+      </div>
+
+      <div className="mb-8 rounded-2xl border border-white/10 bg-zinc-900/50 p-4">
+        <label htmlFor="cve-preset-select" className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          Exploit database preset (PoC)
+        </label>
+        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <select
+            id="cve-preset-select"
+            value={selectedId ?? ''}
+            disabled={!index || proofLoading}
+            onChange={(e) => setSelectedId(e.target.value)}
+            className="w-full rounded-lg border border-white/15 bg-zinc-950 px-3 py-2.5 text-sm text-white sm:max-w-xl"
+          >
+            {index?.presets.map((p) => (
+              <option key={p.preset_id} value={p.preset_id}>
+                {p.cve_label} — {p.title}
+              </option>
+            ))}
+          </select>
+          {selectedMeta && (
+            <span
+              className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium ${severityClass(selectedMeta.severity)}`}
+            >
+              {selectedMeta.severity} · {selectedMeta.decision}
+            </span>
+          )}
+          {proofLoading && (
+            <span className="inline-flex items-center gap-2 text-xs text-slate-400">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Loading proof bundle…
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
@@ -152,19 +241,19 @@ export function IndependentVerificationShowcase() {
             Harness simulation · policy engine
           </div>
           <pre className="max-h-[420px] overflow-auto p-4 font-mono text-xs leading-relaxed text-slate-200">
-            {lines.map((line) => (
-              <div key={line}>{line}</div>
+            {lines.map((line, i) => (
+              <div key={`${i}-${line}`}>{line}</div>
             ))}
           </pre>
           <div className="flex flex-wrap gap-3 border-t border-white/10 bg-zinc-900/50 p-4">
             <button
               type="button"
               onClick={runLiveProof}
-              disabled={!proof || running}
+              disabled={!proof || running || proofLoading}
               className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
-              Run live attack proof
+              Run Detect &amp; Demonstrate
             </button>
             <Link
               href={verifyHref}
@@ -183,20 +272,28 @@ export function IndependentVerificationShowcase() {
               <div>
                 <h2 className="text-lg font-semibold text-white">Cryptographic evidence bundle</h2>
                 <p className="mt-2 text-sm text-slate-300">
-                  Each mitigation emits a UAR with a SHA-256 evidence bundle hash. Stakeholders verify
-                  presence and parameters on the public route — independent of vendor dashboards.
+                  Presets use fixed receipt anchors so SHA-256 UAR hashes are reproducible across CLI
+                  runs and the public dashboard.
                 </p>
               </div>
             </div>
             {loadError && (
               <p className="mt-4 rounded-lg border border-rose-500/40 bg-rose-950/30 p-3 text-sm text-rose-200">
                 {loadError}. Run{' '}
-                <code className="text-rose-100">python scripts/simulate_independent_demo.py --write-public-json</code>{' '}
+                <code className="text-rose-100">
+                  python scripts/simulate_vulnerability_preset.py --all --write-public-json
+                </code>{' '}
                 from the repo root.
               </p>
             )}
             {proof && (
               <dl className="mt-4 space-y-2 rounded-xl border border-white/10 bg-black/40 p-4 text-xs text-slate-300">
+                {proof.cve_label && (
+                  <div>
+                    <dt className="text-slate-500">CVE / PoC label</dt>
+                    <dd className="font-mono text-emerald-300">{proof.cve_label}</dd>
+                  </div>
+                )}
                 <div>
                   <dt className="text-slate-500">Decision</dt>
                   <dd className="font-mono text-emerald-300">
@@ -223,22 +320,23 @@ export function IndependentVerificationShowcase() {
             <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-400">For reviewers</h3>
             <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-slate-300">
               <li>
-                Reproduce locally:{' '}
-                <code className="rounded bg-black/50 px-1 py-0.5 text-xs">scripts/simulate_independent_demo.py</code>
+                Run a preset:{' '}
+                <code className="rounded bg-black/50 px-1 py-0.5 text-xs">
+                  python scripts/simulate_vulnerability_preset.py --preset &lt;id&gt;
+                </code>
+              </li>
+              <li>
+                Add presets under{' '}
+                <code className="rounded bg-black/50 px-1 py-0.5 text-xs">presets/</code> +{' '}
+                <code className="rounded bg-black/50 px-1 py-0.5 text-xs">manifest.json</code>
               </li>
               <li>
                 Technical walkthrough:{' '}
-                <Link href="https://github.com/baturhantasdelen-sudo/core-ai-firewall/blob/main/docs/DETECT_AND_DEMONSTRATE_PROOF.md" className="text-emerald-400 hover:underline">
-                  docs/DETECT_AND_DEMONSTRATE_PROOF.md
-                </Link>
-              </li>
-              <li>
-                Report context:{' '}
                 <Link
-                  href="/reports/state-of-agent-security-2026"
+                  href="https://github.com/baturhantasdelen-sudo/core-ai-firewall/blob/main/docs/DETECT_AND_DEMONSTRATE_PROOF.md"
                   className="text-emerald-400 hover:underline"
                 >
-                  State of Agent Security 2026
+                  docs/DETECT_AND_DEMONSTRATE_PROOF.md
                 </Link>
               </li>
             </ul>

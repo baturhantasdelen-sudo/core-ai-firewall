@@ -59,10 +59,15 @@ Public growth funnel routes on the live dashboard — no login required for core
 Reproducible **FinTech agent exfiltration** scenario → harness **policy engine** → **Universal Action Receipt** with **SHA-256 evidence bundle** → public verification URL.
 
 ```bash
-# Print mitigation + verification URL; optional JSON for the /demo page
-python scripts/simulate_independent_demo.py
+# CVE-style preset database (deterministic UAR + /verify URL)
+python scripts/simulate_vulnerability_preset.py --list
+python scripts/simulate_vulnerability_preset.py --all --write-public-json
+
+# Default FinTech preset (same as manifest default)
 python scripts/simulate_independent_demo.py --write-public-json
 ```
+
+Presets live under [`presets/`](./presets/) — add a `*.preset.json` entry and regenerate public proof bundles for the live [`/demo`](https://nexus-shield-dashboard.vercel.app/demo) selector.
 
 Technical walkthrough for CISO/CTO reviewers: [docs/DETECT_AND_DEMONSTRATE_PROOF.md](./docs/DETECT_AND_DEMONSTRATE_PROOF.md) · Report: [State of Agent Security 2026](https://www.nexusshield.ai/reports/state-of-agent-security-2026).
 

@@ -21,12 +21,13 @@ flowchart LR
 
 | Layer | Responsibility | Repo location |
 |--------|----------------|---------------|
-| **Simulation** | Reproducible attack narrative (prompt injection → tool exfil) | `scripts/simulate_independent_demo.py` |
+| **Preset DB** | Modular CVE-style PoC definitions | `presets/*.preset.json`, `presets/manifest.json` |
+| **Simulation** | Preset runner + legacy default demo | `scripts/simulate_vulnerability_preset.py`, `scripts/simulate_independent_demo.py` |
 | **Governance** | Deterministic ALLOW / BLOCK / READ_ONLY / REQUIRE_APPROVAL | `harness/core/policy_engine.py` |
 | **Receipt schema** | UAR fields + evidence bundle hashing | `harness/schemas/action_receipt.py`, `nexus-shield-dashboard/types/action-receipt.ts` |
 | **Public proof UI** | Parameter presence check + stakeholder copy | `nexus-shield-dashboard/app/verify/page.tsx` |
 | **Showcase** | Interactive “Live Attack & Independent Verification Proof” | `nexus-shield-dashboard/app/demo/page.tsx` |
-| **Static bundle** | Latest sim output for the dashboard (optional commit) | `nexus-shield-dashboard/public/demo/independent-verification-proof.json` |
+| **Static bundle** | CVE index + per-preset proof JSON for `/demo` | `public/demo/cve-presets-index.json`, `public/demo/presets/*.proof.json` |
 
 The **independent** part means verification is anchored on a **stable public URL** with **receipt_hash** and **receipt_id** query parameters. Reviewers can re-run the Python simulator locally and compare hashes, or open the deployed `/verify` page to confirm the same identifiers were issued for the demo bundle.
 
@@ -49,14 +50,18 @@ Runtime benchmark copy used in demos: **P99 runtime intercept: 6.1ms** (Nexus be
 From the repository root (Python 3.10+):
 
 ```bash
-python scripts/simulate_independent_demo.py
+python scripts/simulate_vulnerability_preset.py --list
+python scripts/simulate_vulnerability_preset.py --preset fintech-exfil-reconciliation-2026
+python scripts/simulate_vulnerability_preset.py --all --write-public-json
 ```
 
-Optional: refresh the dashboard static JSON consumed by `/demo`:
+Legacy default (same as manifest default preset):
 
 ```bash
 python scripts/simulate_independent_demo.py --write-public-json
 ```
+
+**Deterministic UAR:** each preset sets `receipt_anchor_utc` and derives `receipt_id` from `preset_id` so SHA-256 evidence hashes match between CLI runs and committed dashboard bundles.
 
 The script prints:
 

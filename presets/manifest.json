@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "framework": "nexus-shield-exploit-preset-db",
+  "default_preset_id": "fintech-exfil-reconciliation-2026",
+  "presets": [
+    {
+      "preset_id": "fintech-exfil-reconciliation-2026",
+      "file": "fintech-exfil-reconciliation-2026.preset.json",
+      "cve_label": "CVE-2026-AGENT-0142",
+      "title": "FinTech reconciliation hijack to CSV exfil",
+      "severity": "critical"
+    },
+    {
+      "preset_id": "mcp-secret-scrape-2026",
+      "file": "mcp-secret-scrape-2026.preset.json",
+      "cve_label": "CVE-2026-MCP-0088",
+      "title": "MCP tool chain repo secret harvest",
+      "severity": "critical"
+    },
+    {
+      "preset_id": "ssrf-agent-fetch-2026",
+      "file": "ssrf-agent-fetch-2026.preset.json",
+      "cve_label": "CVE-2026-LLM-0193",
+      "title": "SSRF via agent fetch to attacker webhook",
+      "severity": "high"
+    },
+    {
+      "preset_id": "ci-agent-malicious-merge-2026",
+      "file": "ci-agent-malicious-merge-2026.preset.json",
+      "cve_label": "CVE-2026-CI-0021",
+      "title": "CI coding agent unauthorized merge + exfil callback",
+      "severity": "critical"
+    },
+    {
+      "preset_id": "path-traversal-write-2026",
+      "file": "path-traversal-write-2026.preset.json",
+      "cve_label": "CVE-2026-AGENT-0317",
+      "title": "Path traversal write via poisoned MCP arguments",
+      "severity": "high"
+    }
+  ]
+}

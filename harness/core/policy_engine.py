@@ -29,6 +29,8 @@ def evaluate_proposed_action(
     tool: str,
     params: dict[str, Any] | None = None,
     identity_verified: bool = True,
+    receipt_id: str | None = None,
+    timestamp_utc: str | None = None,
 ) -> dict[str, Any]:
     params = params or {}
     blob = f"{tool} {json.dumps(params, sort_keys=True)}".lower()
@@ -58,7 +60,7 @@ def evaluate_proposed_action(
         decision = "ALLOW"
         rule_id = "POLICY_BASELINE_ALLOW"
 
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    timestamp = timestamp_utc or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     before_hash = _sha256(json.dumps({"intent": intent, "agent": agent_id}, sort_keys=True))
     after_hash = (
         _sha256(json.dumps({"intent": intent, "tool": tool, "params": params}, sort_keys=True))
@@ -67,7 +69,7 @@ def evaluate_proposed_action(
     )
 
     receipt_core = {
-        "receipt_id": f"uar_{uuid.uuid4()}",
+        "receipt_id": receipt_id or f"uar_{uuid.uuid4()}",
         "timestamp": timestamp,
         "agent": {"id": agent_id, "identity_verified": identity_verified},
         "intent": intent,
