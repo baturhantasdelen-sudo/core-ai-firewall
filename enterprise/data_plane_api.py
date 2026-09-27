@@ -10,7 +10,8 @@ it is not required for governance or proof.
 
 Universal Action Receipt (UAR) — primary response object
 --------------------------------------------------------
-Each successful ``POST /v1/intercept`` returns:
+Each successful ``POST /v1/intercept`` (every governed action attempt — ALLOW, BLOCK, READ_ONLY,
+REQUIRE_APPROVAL) returns:
 
 - ``universal_action_receipt`` — canonical stored receipt
 - ``intent_divergence`` — ``risk_score``, ``violations`` (governance context)
@@ -20,8 +21,8 @@ Canonical UAR fields: ``receipt_id``, ``agent_id`` (``agent.id``), ``intent``, `
 ``execution_state``, ``evidence_hash`` (``evidence_bundle_hash``). See ``docs/UAR_SCHEMA.md``.
 
 Proof Center lanes (do not conflate):
-- **Benchmark results** — ``nexus-harness-benchmark`` (evaluation scores only)
-- **UAR ledger** — this API + ``enterprise/data/uar_receipts.jsonl``
+- **Benchmark results** — ``nexus-harness-benchmark``; evidence bundle per evaluated harness step
+- **UAR ledger** — this API + ``enterprise/data/uar_receipts.jsonl`` (not the same as block counts)
 
 Usage:
     uvicorn enterprise.data_plane_api:app --host 0.0.0.0 --port 8090

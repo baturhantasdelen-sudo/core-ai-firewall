@@ -55,7 +55,11 @@ export default function BenchmarkMethodologyPage() {
           <section>
             <h2 className="text-lg font-semibold text-zinc-100">Evidence Bundle Chain</h2>
             <p className="mt-2 text-sm text-zinc-400">
-              Every evaluated action produces a reproducible cryptographic evidence bundle:
+              Every evaluated agent trajectory, action attempt, and policy decision in the harness
+              produces a reproducible SHA-256 cryptographic evidence bundle (all decision outcomes —
+              not blocked actions alone). Production runtime UARs follow the same chain on the data
+              plane; Proof Center headline counts reflect harness evaluations unless labeled live UAR
+              ledger.
             </p>
             <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-zinc-400">
               <li>Agent Identity — who initiated the runtime session</li>

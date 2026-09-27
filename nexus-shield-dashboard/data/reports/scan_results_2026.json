@@ -47,7 +47,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -109,7 +109,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -171,7 +171,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -233,7 +233,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -295,7 +295,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -357,7 +357,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -419,7 +419,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -481,7 +481,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -543,7 +543,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -605,7 +605,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -667,7 +667,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -729,7 +729,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -791,7 +791,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -853,7 +853,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -915,7 +915,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -977,7 +977,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1039,7 +1039,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1101,7 +1101,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1163,7 +1163,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1225,7 +1225,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1287,7 +1287,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1349,7 +1349,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1411,7 +1411,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1473,7 +1473,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1535,7 +1535,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1597,7 +1597,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1659,7 +1659,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1721,7 +1721,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1783,7 +1783,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1845,7 +1845,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1907,7 +1907,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -1969,7 +1969,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2031,7 +2031,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2093,7 +2093,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2155,7 +2155,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2217,7 +2217,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2279,7 +2279,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2341,7 +2341,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2403,7 +2403,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2465,7 +2465,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2527,7 +2527,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2589,7 +2589,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2651,7 +2651,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           },
@@ -2722,7 +2722,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2784,7 +2784,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2846,7 +2846,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2908,7 +2908,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -2970,7 +2970,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -3032,7 +3032,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }
@@ -3094,7 +3094,7 @@
             "severity": "high",
             "category": "evidence_chain",
             "description": "No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.",
-            "recommendation": "Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.",
+            "recommendation": "Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.",
             "sdkFix": "NexusShield.attachEvidence({ actionId, sha256Proof: true })",
             "id": "NS-F002"
           }

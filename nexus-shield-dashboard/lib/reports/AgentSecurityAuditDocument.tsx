@@ -263,7 +263,7 @@ const verdict = await shield.evaluateAction({
   toolCall,
   agentCapabilities,
 });
-// Blocked actions attach SHA-256 evidence automatically.`}
+// Every evaluateAction() decision seals SHA-256 evidence (allow or block).`}
         </Text>
         <Text style={styles.remediationStep}>1. Install SDK: npm install @nexus-shield/sdk</Text>
         <Text style={styles.remediationStep}>

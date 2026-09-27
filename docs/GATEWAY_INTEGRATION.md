@@ -212,7 +212,7 @@ SDK plugins **share the agent’s trust domain**. A malicious or compromised age
 
 1. **LLM traffic** — Packet capture or router logs show requests to Nexus base URL, not direct to provider (when policy requires it).
 2. **Tool traffic** — No tool with side effects runs without `action/evaluate` (or equivalent harness policy) returning ALLOW.
-3. **Proof** — Sample blocked action produces `evidence_bundle_hash` + `receipt_id`; open public `/verify` or run `scripts/simulate_vulnerability_preset.py --preset <id>`.
+3. **Proof** — Sample governed action (any decision) produces `evidence_bundle_hash` + `receipt_id`; open public `/verify` or run `scripts/simulate_vulnerability_preset.py --preset <id>`.
 4. **Mode** — Document whether you use **managed** (`api.nexusshield.ai`) or **local proxy** only; align with `external_cloud_proxy: false` evidence in [COMPLIANCE_READINESS.md](./COMPLIANCE_READINESS.md) if air-gapped.
 
 ---

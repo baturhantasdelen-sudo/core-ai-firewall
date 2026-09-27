@@ -161,7 +161,7 @@ function analyzeTextSurface(text: string, findings: SecurityFinding[], seen: Set
       description:
         'No immutable audit trail, proof hash, or evidence chain configuration found for agent actions.',
       recommendation:
-        'Attach cryptographic evidence to every blocked/allowed action for SOC2 and EU AI Act audit readiness.',
+        'Attach cryptographic evidence to every evaluated action attempt and policy decision (allow, block, read-only, approval) for SOC2 and EU AI Act audit readiness.',
       sdkFix: 'NexusShield.attachEvidence({ actionId, sha256Proof: true })',
     });
   }

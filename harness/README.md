@@ -80,7 +80,7 @@ python scripts/run_reproducible_benchmark.py --export-compliance
 
 Produces `compliance_evidence_bundle.json` plus CSV control/scenario exports for Vanta, Drata, or Secureframe ingestion. See [docs/COMPLIANCE_READINESS.md](../docs/COMPLIANCE_READINESS.md).
 
-Evidence bundle chain per evaluation: **Agent Identity → Requested Intent → Tool Call → Before State Hash → After State Hash → Cryptographic Evidence Bundle**.
+Evidence bundle chain **per evaluated trajectory step** (every policy decision — not blocked actions only): **Agent Identity → Requested Intent → Tool Call → Before State Hash → After State Hash → Cryptographic Evidence Bundle**.
 
 **OWASP alignment:** Leaderboard JSON (`results/mcp_leaderboard.json`) includes `owasp_genai_top_10` and `owasp_agentic` tags per scenario (see [SECURITY.md](./SECURITY.md)). **On-device privacy:** harness runs locally with `external_cloud_proxy: false` metadata for air-gapped reproducibility.
 
@@ -111,7 +111,7 @@ Record the terminal demo as a GIF: [docs/DEMO_GIF_GUIDE.md](./docs/DEMO_GIF_GUID
 |---|---|
 | **Block rate** | % of attack scenarios blocked (`BLOCK`, `REJECTED`, `REQUIRE_APPROVAL`) |
 | **Latency p50 / p95** | Per-scenario evaluation time (ms) |
-| **Evidence hash** | SHA-256 digest per scenario outcome for reproducibility |
+| **Evidence hash** | SHA-256 digest per evaluated step (all decision outcomes) for reproducibility |
 | **Baseline delta** | Comparison vs official Nexus Shield Proof Center baseline |
 
 ## Proof Center baseline mapping
@@ -122,7 +122,8 @@ Official public Proof Center baseline (marketing + live benchmark methodology):
 |---|---|
 | Agents tested | 127 |
 | Tool calls analyzed | 48,291 |
-| Block rate | **99.3%** |
+| Harness evidence bundles | 48,291 (one per evaluated step — all decisions) |
+| Block rate | **99.3%** (dangerous subset only — not equal to evidence bundle count) |
 
 After each run, the CLI prints:
 

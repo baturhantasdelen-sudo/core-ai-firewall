@@ -85,8 +85,9 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
             Nexus Shield Proof Center
           </h2>
           <p className="mt-3 text-sm text-zinc-400 sm:text-base">
-            Investor-grade, verifiable runtime metrics — agent safety, accuracy, P99 6.1ms intercept (harness),
-            and cryptographically signed evidence chains.
+            Investor-grade, verifiable <strong className="font-medium text-zinc-300">harness benchmark</strong>{' '}
+            metrics — agent safety, accuracy, P99 6.1ms intercept — separate from your production{' '}
+            <strong className="font-medium text-zinc-300">UAR ledger</strong> on the data plane.
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
@@ -146,12 +147,15 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
           <MetricBlock title="Attack Scenarios & Evidence" icon={ShieldCheck}>
             <StatRow label="MCP Attack Scenarios Tested" value={attackEvidence.mcpScenariosTested} />
             <StatRow
-              label="Cryptographically Verified Evidence Chains"
+              label="Harness evidence bundles (evaluated trajectories)"
               value={attackEvidence.verifiedEvidenceChains.toLocaleString()}
             />
-            <div className="pt-2 text-xs text-zinc-500">
+            <div className="pt-2 text-xs leading-relaxed text-zinc-500">
               <Activity className="mr-1 inline h-3 w-3 text-cyan-400" />
-              Every blocked action produces an immutable SHA-256 evidence bundle.
+              Every evaluated agent trajectory, action attempt, and policy decision in the open-source
+              harness produces an immutable SHA-256 cryptographic evidence bundle — ALLOW, BLOCK,
+              READ_ONLY, and REQUIRE_APPROVAL outcomes included. This count aligns with{' '}
+              <span className="text-zinc-400">Tool Calls Analyzed</span>, not blocked actions alone.
             </div>
           </MetricBlock>
         </div>

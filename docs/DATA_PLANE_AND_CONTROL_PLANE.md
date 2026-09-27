@@ -45,10 +45,10 @@ When `NEXUS_CLOUD_CONNECT=false` (default in [deployments/docker-compose.yml](..
 
 | Artifact | Plane | Purpose |
 |---|---|---|
-| **Reproducible benchmark results** | Harness / evaluation | Academic & comparative **scores** — [BENCHMARK_VS_ACTION_FIREWALL.md](./BENCHMARK_VS_ACTION_FIREWALL.md) |
-| **UAR ledger / action evidence** | Data plane `nexus` | **What happened** in your environment — cryptographically sealed |
+| **Reproducible benchmark results** | Harness / evaluation | Academic & comparative **scores**; SHA-256 bundle per **evaluated trajectory step** (all decisions) — [BENCHMARK_VS_ACTION_FIREWALL.md](./BENCHMARK_VS_ACTION_FIREWALL.md) |
+| **UAR ledger / action evidence** | Data plane `nexus` | **What happened** in your environment — one UAR per governed action attempt (all decisions) |
 
-Never substitute harness leaderboard metrics for production UAR proof.
+Never substitute harness leaderboard metrics for production UAR proof. Public Proof Center totals such as **48,291 evidence bundles** align with **tool calls analyzed** in the harness, not with **dangerous actions blocked** alone.
 
 ## Deployment models
 

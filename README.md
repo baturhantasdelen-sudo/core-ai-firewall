@@ -32,7 +32,8 @@ Upstream LLM inspection and PII engines are **supporting Security Engines** — 
 
 ## Universal Action Receipt (UAR) — core product object
 
-Every interception produces a UAR. Canonical fields (see [UAR_SCHEMA.md](./docs/UAR_SCHEMA.md)):
+Every governed **action attempt** at the runtime boundary produces a UAR — regardless of
+`ALLOW`, `BLOCK`, `READ_ONLY`, or `REQUIRE_APPROVAL`. Canonical fields (see [UAR_SCHEMA.md](./docs/UAR_SCHEMA.md)):
 
 | Field | Role |
 |---|---|
@@ -50,12 +51,14 @@ Evidence chain: **Intent → Action → Policy → Decision → Execution → St
 
 ## Proof Center — two transparent lanes
 
-Do not mix benchmark marketing metrics with production proof.
+Do not mix benchmark marketing metrics with production proof. Public Proof Center counts such as
+**tool calls analyzed** and **harness evidence bundles** include full trajectory evaluation
+(ALLOW + BLOCK + other decisions) — they are **not** a count of blocked actions alone.
 
 | Lane | Source | What it proves | Where |
 |---|---|---|---|
-| **Reproducible benchmark results** | `nexus-harness-benchmark` (`harness/`) | How frameworks *score* on fixed scenarios | Leaderboards, GHCR harness, [/investor](https://nexus-shield-dashboard.vercel.app/investor) *benchmarks* |
-| **Deterministic action evidence / UAR ledger** | Data plane runtime | What *your* agents attempted, what was decided, cryptographic seal | `enterprise/data/uar_receipts.jsonl`, [/proof-center](https://nexus-shield-dashboard.vercel.app/proof-center), [/verify](https://nexus-shield-dashboard.vercel.app/verify) |
+| **Reproducible benchmark results** | `nexus-harness-benchmark` (`harness/`) | How frameworks *score* on fixed scenarios; one SHA-256 bundle per evaluated step | Leaderboards, GHCR harness, [/investor](https://nexus-shield-dashboard.vercel.app/investor) *benchmarks* |
+| **Deterministic action evidence / UAR ledger** | Data plane runtime | What *your* agents attempted, what was decided, cryptographic seal per attempt | `enterprise/data/uar_receipts.jsonl`, [/verify](https://nexus-shield-dashboard.vercel.app/verify), Trust Hub |
 
 Details: [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.md)
 

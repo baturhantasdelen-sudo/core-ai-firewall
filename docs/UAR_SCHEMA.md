@@ -1,6 +1,6 @@
 # Universal Action Receipt (UAR) — canonical product object
 
-Nexus Shield is an **AI Agent Action Governance & Verification Platform**. Every governed tool decision is sealed as a **UAR** — the primary object in API responses, SIEM exports, and audit trails.
+Nexus Shield is an **AI Agent Action Governance & Verification Platform**. Every governed **action attempt** and **policy decision** at runtime is sealed as a **UAR** — the primary object in API responses, SIEM exports, and audit trails. UARs are **not** limited to `BLOCK` outcomes; `ALLOW`, `READ_ONLY`, and `REQUIRE_APPROVAL` receive the same cryptographic evidence treatment so auditors can prove what was permitted as well as what was stopped.
 
 ## Core tagline
 
@@ -64,4 +64,11 @@ Runtime endpoints return the UAR plus **`intent_divergence`** metadata for audit
 - Local ledger: `enterprise/data/uar_receipts.jsonl`
 - Public check: `/verify?receipt_hash=&receipt_id=`
 
-Do not confuse UAR ledger entries with **harness benchmark scores** — see [BENCHMARK_VS_ACTION_FIREWALL.md](./BENCHMARK_VS_ACTION_FIREWALL.md).
+## Evidence bundles vs Proof Center counts
+
+| Artifact | Scope | What gets hashed |
+|---|---|---|
+| **Harness evidence bundle** | Reproducible benchmark / trajectory evaluation | Every evaluated step in the open-source harness (matches “tool calls analyzed” style metrics) |
+| **Production UAR** | Data plane runtime | Every intercepted action attempt → `evidence_bundle_hash` |
+
+Do not equate Proof Center **evidence chain** totals with **blocked action** counts. Do not confuse UAR ledger entries with **harness benchmark scores** — see [BENCHMARK_VS_ACTION_FIREWALL.md](./BENCHMARK_VS_ACTION_FIREWALL.md).

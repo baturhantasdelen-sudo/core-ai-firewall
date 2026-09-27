@@ -22,8 +22,9 @@ export default function ProofCenterPage() {
             Nexus Shield Proof Center
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-zinc-400">
-            Verify Every Agent Outcome with Cryptographic Proof — live benchmarks, attack resilience,
-            and immutable evidence chains for investor due diligence.
+            Verify every agent outcome with cryptographic proof — reproducible harness benchmarks
+            (trajectories &amp; evaluations) and production UAR receipts. Evidence bundles cover the
+            full evaluation lifecycle, not blocked actions only.
           </p>
           <Link
             href="/dashboard/trust-hub"

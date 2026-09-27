@@ -10,8 +10,10 @@ Production proof is the **UAR ledger**, not harness scores. See [UAR_SCHEMA.md](
 
 | Lane | Source | Use |
 |---|---|---|
-| **Reproducible benchmark results** | `nexus-harness-benchmark` | Transparency for evaluation & research |
-| **Deterministic action evidence (UAR ledger)** | Data plane `nexus` | Audit what your agents actually attempted |
+| **Reproducible benchmark results** | `nexus-harness-benchmark` | Transparency for evaluation & research; **one SHA-256 bundle per evaluated trajectory step** (all decisions) |
+| **Deterministic action evidence (UAR ledger)** | Data plane `nexus` | Audit what your agents actually attempted — **one UAR per governed action attempt** (all decisions) |
+
+**Copy rule:** Never claim that “every blocked action” equals the large Proof Center evidence totals (e.g. 48,291). Those figures align with **tool calls / trajectory evaluations** in the harness, including ALLOW and non-block outcomes.
 
 ## Summary
 

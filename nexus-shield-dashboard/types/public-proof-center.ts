@@ -25,6 +25,7 @@ export interface PublicProofCenterView {
   };
   attackEvidence: {
     mcpScenariosTested: string;
+    /** Harness-evaluated steps with SHA-256 bundles (matches toolCallsAnalyzed; not block count). */
     verifiedEvidenceChains: number;
   };
   live?: ProofCenterMetrics | null;

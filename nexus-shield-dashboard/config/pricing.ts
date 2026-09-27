@@ -47,7 +47,8 @@ export const PRICING_TIERS: PricingTier[] = [
     id: 'team',
     name: 'Action Governance',
     target: 'B2B SaaS & AI Agent Platforms',
-    description: 'Production intent/action divergence checks, capability revocation, and SHA-256 evidence chains.',
+    description:
+      'Production intent/action divergence checks, capability revocation, and SHA-256 UAR evidence for every governed action attempt.',
     monthlyPrice: TEAM_PLAN_MONTHLY_USD,
     annualMonthlyPrice: TEAM_PLAN_ANNUAL_MONTHLY_USD,
     metrics: 'Up to 25 Protected Agents | 500k Intercepted Actions',
