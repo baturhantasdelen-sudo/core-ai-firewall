@@ -268,6 +268,9 @@ class TenantManager:
             raise TenantIsolationError(f"Unknown tenant: {tenant_id}")
         return tenant
 
+    def list_tenants(self) -> list[Tenant]:
+        return list(self._tenants.values())
+
     def assert_tenant_active(self, tenant_id: str) -> Tenant:
         tenant = self.get_tenant(tenant_id)
         if tenant.status != "active":
