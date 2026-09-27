@@ -1,8 +1,12 @@
 """
-Nexus Shield Enterprise — unified Control Plane / SaaS management panel.
+Nexus Shield Enterprise — Control Plane (nexus-control) / data-plane orchestration.
 
-Orchestrates multi-tenant isolation (TenantManager), runtime interception, UAR receipts,
-and SIEM/compliance export (SiemExporter).
+AI Agent Action Governance & Verification Platform.
+
+Tagline: Know what your agents are allowed to do. Stop what they shouldn't. Prove what actually happened.
+
+Orchestrates multi-tenant isolation (TenantManager), runtime interception, Universal Action Receipts (UAR),
+and SIEM/compliance export (SiemExporter). Primary product object: UAR — see docs/UAR_SCHEMA.md.
 
 Usage:
     python -m enterprise.cloud_panel --demo
@@ -327,6 +331,10 @@ class CloudPanelService:
             "rule_id": evaluation.get("rule_id"),
             "risk_score": evaluation.get("risk_score"),
             "violations": evaluation.get("violations"),
+            "intent_divergence": {
+                "risk_score": evaluation.get("risk_score"),
+                "violations": evaluation.get("violations") or [],
+            },
             "universal_action_receipt": receipt,
             "cryptography": {
                 "evidence_bundle_sha256": evidence_hash,

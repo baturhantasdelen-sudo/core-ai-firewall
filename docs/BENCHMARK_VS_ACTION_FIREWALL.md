@@ -2,6 +2,17 @@
 
 Strict separation for academic reproducibility and production security clarity.
 
+> **Know what your agents are allowed to do. Stop what they shouldn't. Prove what actually happened.**
+
+Production proof is the **UAR ledger**, not harness scores. See [UAR_SCHEMA.md](./UAR_SCHEMA.md).
+
+## Proof Center — two lanes
+
+| Lane | Source | Use |
+|---|---|---|
+| **Reproducible benchmark results** | `nexus-harness-benchmark` | Transparency for evaluation & research |
+| **Deterministic action evidence (UAR ledger)** | Data plane `nexus` | Audit what your agents actually attempted |
+
 ## Summary
 
 | | **nexus-harness-benchmark** | **Nexus Action Firewall (runtime)** |
