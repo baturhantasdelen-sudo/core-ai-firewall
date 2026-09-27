@@ -152,9 +152,9 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
             />
             <div className="pt-2 text-xs leading-relaxed text-zinc-500">
               <Activity className="mr-1 inline h-3 w-3 text-cyan-400" />
-              Every evaluated agent trajectory, action attempt, and policy decision in the open-source
-              harness produces an immutable SHA-256 cryptographic evidence bundle — ALLOW, BLOCK,
-              READ_ONLY, and REQUIRE_APPROVAL outcomes included. This count aligns with{' '}
+              Every evaluated agent trajectory and governed action attempt produces an immutable
+              SHA-256 evidence bundle. UARs and harness bundles cover all policy decisions (ALLOW,
+              BLOCK, READ_ONLY, REQUIRE_APPROVAL); this total matches{' '}
               <span className="text-zinc-400">Tool Calls Analyzed</span>, not blocked actions alone.
             </div>
           </MetricBlock>
