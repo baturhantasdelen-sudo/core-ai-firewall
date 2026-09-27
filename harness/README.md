@@ -1,8 +1,10 @@
-# Nexus Shield Harness
+# nexus-harness-benchmark (Nexus Shield Harness)
 
 ![MCP Tool-Hijack Security Demo](docs/assets/mcp-shield-demo.gif)
 
-Open-source benchmark harness for evaluating **AI agent runtime security** against MCP tool chains, prompt injection, intent divergence, and multi-step trajectory attacks.
+Open-source **evaluation & scoring framework** for AI agent security (MCP tool chains, prompt injection, intent divergence, trajectory attacks).
+
+> **Not a production Action Firewall.** The harness produces reproducible scores and leaderboard JSON for research and CVE presets. Live interception, UAR sealing, and tenant RBAC run in the **Nexus data plane** (`enterprise/`, dashboard APIs). See [docs/BENCHMARK_VS_ACTION_FIREWALL.md](../docs/BENCHMARK_VS_ACTION_FIREWALL.md).
 
 **Quick demo:** `pip install rich && python scripts/demo_terminal_sim.py`
 

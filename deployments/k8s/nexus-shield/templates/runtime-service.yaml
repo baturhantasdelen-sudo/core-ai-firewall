@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nexus-shield.fullname" . }}-runtime
+spec:
+  selector:
+    app.kubernetes.io/name: nexus-runtime
+  ports:
+    - port: {{ .Values.nexusRuntime.service.port }}
+      targetPort: {{ .Values.nexusRuntime.service.port }}
+      name: http

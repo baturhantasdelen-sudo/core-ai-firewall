@@ -267,6 +267,46 @@ VENDOR_FORMATTERS: dict[SiemVendor, Callable[[dict[str, Any]], dict[str, Any]]] 
 }
 
 
+def format_soc2_iso_audit_record(
+    canonical: dict[str, Any],
+    *,
+    tenant_id: str | None = None,
+) -> dict[str, Any]:
+    """
+    Auditor-ready record (SOC 2 / ISO 27001) — stable schema for GRC tools and CSV export.
+    """
+    ns = canonical.get("nexus_shield") or {}
+    crypto = canonical.get("cryptography") or {}
+    hooks = resolve_compliance_hooks(canonical)
+    hook_details = [COMPLIANCE_HOOKS[h] for h in hooks if h in COMPLIANCE_HOOKS]
+    return {
+        "audit_schema": "nexus-shield-compliance/v1",
+        "logged_at_utc": utc_now_iso(),
+        "tenant_id": tenant_id or (canonical.get("extensions") or {}).get("tenant_id"),
+        "event_id": canonical.get("event_id"),
+        "timestamp": canonical.get("@timestamp"),
+        "control_frameworks": {
+            "soc2": [h for h in hook_details if h.get("framework") == "SOC 2"],
+            "iso_27001": [h for h in hook_details if "ISO" in h.get("framework", "")],
+        },
+        "security_event": {
+            "decision": ns.get("decision"),
+            "rule_id": ns.get("rule_id"),
+            "risk_score": ns.get("risk_score"),
+            "violations": ns.get("violations"),
+            "agent_id": ns.get("agent_id"),
+            "proposed_tool": ns.get("proposed_tool"),
+        },
+        "cryptographic_evidence": {
+            "receipt_id": crypto.get("receipt_id"),
+            "evidence_bundle_sha256": crypto.get("evidence_bundle_sha256"),
+            "independent_verify_url": crypto.get("independent_verify_url"),
+        },
+        "runtime_privacy": {"external_cloud_proxy_required": False},
+        "raw_canonical_event": canonical,
+    }
+
+
 def resolve_compliance_hooks(canonical: dict[str, Any]) -> list[str]:
     """Return compliance hook IDs that apply to this event."""
     ns = canonical.get("nexus_shield") or {}
@@ -286,18 +326,18 @@ class ComplianceLogger:
     audit_path: Path = field(default_factory=lambda: Path("enterprise/logs/siem_compliance_audit.jsonl"))
     hooks_catalog: dict[str, dict[str, str]] = field(default_factory=lambda: COMPLIANCE_HOOKS.copy())
 
-    def log_event(self, canonical: dict[str, Any], *, hook_ids: list[str] | None = None) -> dict[str, Any]:
+    def log_event(
+        self,
+        canonical: dict[str, Any],
+        *,
+        hook_ids: list[str] | None = None,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any]:
         hook_ids = hook_ids or resolve_compliance_hooks(canonical)
-        record = {
-            "logged_at_utc": utc_now_iso(),
-            "event_id": canonical.get("event_id"),
-            "compliance_hooks": [
-                {"hook_id": hid, **self.hooks_catalog[hid]} for hid in hook_ids if hid in self.hooks_catalog
-            ],
-            "decision": (canonical.get("nexus_shield") or {}).get("decision"),
-            "evidence_bundle_sha256": (canonical.get("cryptography") or {}).get("evidence_bundle_sha256"),
-            "receipt_id": (canonical.get("cryptography") or {}).get("receipt_id"),
-        }
+        record = format_soc2_iso_audit_record(canonical, tenant_id=tenant_id)
+        record["compliance_hooks"] = [
+            {"hook_id": hid, **self.hooks_catalog[hid]} for hid in hook_ids if hid in self.hooks_catalog
+        ]
         self.audit_path.parent.mkdir(parents=True, exist_ok=True)
         with self.audit_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")

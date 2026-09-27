@@ -1,0 +1,68 @@
+# Nexus Shield — Data Plane (self-hostable, air-gapped by default)
+# Optional Nexus Cloud: set NEXUS_CLOUD_CONNECT=true on nexus-runtime only.
+
+name: nexus-shield-enterprise
+
+networks:
+  nexus_data_plane:
+    driver: bridge
+    internal: false
+
+volumes:
+  nexus-enterprise-data:
+  nexus-enterprise-logs:
+
+services:
+  nexus-runtime:
+    image: python:3.12-slim
+    container_name: nexus_runtime
+    working_dir: /app
+    command:
+      [
+        "sh",
+        "-c",
+        "pip install -q -r requirements-ci.txt && pip install -q fastapi uvicorn pydantic && python -m uvicorn enterprise.data_plane_api:app --host 0.0.0.0 --port 8090",
+      ]
+    ports:
+      - "8090:8090"
+    environment:
+      NEXUS_AIRGAP: ${NEXUS_AIRGAP:-true}
+      NEXUS_CLOUD_CONNECT: ${NEXUS_CLOUD_CONNECT:-false}
+      NEXUS_DATA_PLANE_BOOTSTRAP: ${NEXUS_DATA_PLANE_BOOTSTRAP:-true}
+      PYTHONPATH: /app
+    volumes:
+      - ..:/app:ro
+      - nexus-enterprise-data:/app/enterprise/data
+      - nexus-enterprise-logs:/app/enterprise/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - nexus_data_plane
+
+  nexus-guardrail:
+    profiles: ["full-stack"]
+    build:
+      context: ..
+      dockerfile: Dockerfile.fast
+    image: nexus-shield-fast:local
+    container_name: nexus_guardrail
+    ports:
+      - "8080:8080"
+    environment:
+      NEXUS_API_KEY: ${NEXUS_API_KEY:-local-dev-key}
+      NEXUS_AIRGAP: ${NEXUS_AIRGAP:-true}
+      REDIS_URL: redis://nexus-redis:6379/0
+    depends_on:
+      - nexus-redis
+    networks:
+      - nexus_data_plane
+
+  nexus-redis:
+    profiles: ["full-stack"]
+    image: redis:7-alpine
+    container_name: nexus_redis
+    networks:
+      - nexus_data_plane

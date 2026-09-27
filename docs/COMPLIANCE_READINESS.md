@@ -26,6 +26,8 @@ Optional SaaS dashboard (Proof Center) is a **read-only telemetry surface**; con
 | `results/compliance/compliance_evidence_bundle.json` | `python -m runners.compliance_exporter` | SOC 2 / ISO controls + **Universal Action Receipts** + integrity hash |
 | `results/compliance/compliance_controls.csv` | same | GRC-friendly control export |
 | `results/compliance/compliance_scenarios.csv` | same | Scenario-level OWASP + evidence hashes |
+| `enterprise/logs/siem_compliance_audit.jsonl` | `enterprise/siem_exporter.py` | **`audit_schema: nexus-shield-compliance/v1`** — SOC 2 / ISO control mapping + UAR hashes |
+| `enterprise/data/uar_receipts.jsonl` | `CloudPanelService` / data plane | Local UAR store (air-gapped Proof Center source) |
 
 ---
 

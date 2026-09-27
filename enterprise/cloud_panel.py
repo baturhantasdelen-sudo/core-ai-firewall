@@ -18,12 +18,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
+from enterprise.evidence_chain import build_evidence_chain_record, finalize_receipt_execution_state
 from enterprise.siem_exporter import (
     DEFAULT_VERIFY_BASE,
     SiemExporter,
     SiemVendor,
     build_canonical_interception_event,
 )
+from enterprise.uar_store import LocalUarStore
 from enterprise.tenant_manager import (
     AuthorizationError,
     Permission,
@@ -86,6 +88,7 @@ class CloudPanelService:
     tenant_manager: TenantManager = field(default_factory=TenantManager)
     siem_exporter: SiemExporter = field(default_factory=SiemExporter)
     audit_log_path: Path = field(default_factory=lambda: Path("enterprise/logs/control_plane_audit.jsonl"))
+    receipt_store: LocalUarStore = field(default_factory=LocalUarStore)
     _siem_configs: dict[str, TenantSiemConfig] = field(default_factory=dict, repr=False)
     _audits: list[ControlPlaneAuditEntry] = field(default_factory=list, repr=False)
 
@@ -230,9 +233,13 @@ class CloudPanelService:
         params: dict[str, Any] | None = None,
         identity_verified: bool = False,
         dispatch_siem: bool = True,
+        tool_executed: bool = False,
+        after_execution_payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
         RBAC authorize → tenant policy + policy engine → UAR receipt → optional SIEM dispatch.
+
+        Evidence chain: Intent → Action → Policy → Decision → (optional) Tool Execution → State → SHA-256 UAR.
         """
         try:
             evaluation = self.tenant_manager.evaluate_action(
@@ -254,9 +261,37 @@ class CloudPanelService:
             )
             raise
 
+        receipt = dict(evaluation.get("receipt") or {})
+        if evaluation.get("decision") == "ALLOW" and tool_executed:
+            receipt = finalize_receipt_execution_state(
+                receipt,
+                executed=True,
+                after_payload=after_execution_payload,
+            )
+            evaluation["receipt"] = receipt
+        elif evaluation.get("decision") != "ALLOW":
+            receipt = finalize_receipt_execution_state(receipt, executed=False)
+            evaluation["receipt"] = receipt
+
+        evidence_chain = build_evidence_chain_record(
+            intent=intent,
+            tool=tool,
+            params=params or {},
+            evaluation=evaluation,
+            execution_outcome="executed" if tool_executed and evaluation.get("decision") == "ALLOW" else "blocked"
+            if evaluation.get("decision") == "BLOCK"
+            else "not_run",
+            after_state_payload=after_execution_payload,
+        )
+
         receipt = evaluation.get("receipt") or {}
         evidence_hash = receipt.get("evidence_bundle_hash")
         receipt_id = receipt.get("receipt_id")
+        self.receipt_store.save_receipt(
+            receipt,
+            tenant_id=tenant_id,
+            metadata={"evaluated_by": actor_user_id, "evidence_chain_valid": evidence_chain["verification"].get("valid")},
+        )
         verify_url = (
             f"{self.siem_exporter.verify_base}?receipt_hash={evidence_hash}&receipt_id={receipt_id}"
             if evidence_hash and receipt_id
@@ -299,8 +334,51 @@ class CloudPanelService:
                 "independent_verify_url": verify_url,
             },
             "siem_exports": siem_results,
+            "evidence_chain": evidence_chain,
             "evaluated_at_utc": evaluation.get("evaluated_at_utc"),
         }
+
+    def get_receipt_by_id(
+        self,
+        *,
+        actor_user_id: str,
+        tenant_id: str,
+        receipt_id: str,
+    ) -> dict[str, Any]:
+        """Fetch stored UAR by ID (Auditor / SecurityEngineer)."""
+        self.tenant_manager.authorize(actor_user_id, Permission.VIEW_RECEIPTS, tenant_id=tenant_id)
+        record = self.receipt_store.get_by_receipt_id(receipt_id)
+        if not record or record.get("tenant_id") != tenant_id:
+            raise TenantIsolationError(f"Receipt not found for tenant: {receipt_id}")
+        return {
+            "tenant_id": tenant_id,
+            "receipt_id": receipt_id,
+            "record": record,
+            "verification": self.receipt_store.verify_by_receipt_id(receipt_id),
+        }
+
+    def verify_receipt_by_id(
+        self,
+        *,
+        receipt_id: str,
+        evidence_bundle_hash: str | None = None,
+        actor_user_id: str | None = None,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Proof Center verification — cryptographic hash check (optional RBAC when actor provided).
+        """
+        if actor_user_id and tenant_id:
+            self.tenant_manager.authorize(actor_user_id, Permission.VIEW_RECEIPTS, tenant_id=tenant_id)
+        result = self.receipt_store.verify_by_receipt_id(receipt_id, evidence_bundle_hash=evidence_bundle_hash)
+        if tenant_id and result.get("tenant_id") and result["tenant_id"] != tenant_id:
+            raise TenantIsolationError("Receipt belongs to another tenant")
+        verify_base = self.siem_exporter.verify_base
+        if result.get("valid") and result.get("evidence_bundle_sha256"):
+            result["independent_verify_url"] = (
+                f"{verify_base}?receipt_hash={result['evidence_bundle_sha256']}&receipt_id={receipt_id}"
+            )
+        return result
 
     def _dispatch_tenant_siem(
         self,
@@ -321,7 +399,7 @@ class CloudPanelService:
             verify_base=self.siem_exporter.verify_base,
             extra={"tenant_id": tenant_id},
         )
-        self.siem_exporter.compliance.log_event(canonical)
+        self.siem_exporter.compliance.log_event(canonical, tenant_id=tenant_id)
 
         results: list[dict[str, Any]] = []
         for vendor in config.enabled_vendors:
@@ -431,8 +509,11 @@ class CloudPanelService:
 
 def _demo() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s | %(message)s")
+    registry_path = Path("enterprise/data/cloud_panel_demo_registry.json")
+    if registry_path.is_file():
+        registry_path.unlink()
     panel = CloudPanelService(
-        tenant_manager=TenantManager(registry_path=Path("enterprise/data/cloud_panel_demo_registry.json")),
+        tenant_manager=TenantManager(registry_path=registry_path),
         siem_exporter=SiemExporter(
             verify_base=DEFAULT_VERIFY_BASE,
         ),

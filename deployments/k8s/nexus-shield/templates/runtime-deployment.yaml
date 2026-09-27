@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nexus-shield.fullname" . }}-runtime
+  labels:
+    app.kubernetes.io/name: nexus-runtime
+    app.kubernetes.io/component: data-plane
+spec:
+  replicas: {{ .Values.nexusRuntime.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nexus-runtime
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nexus-runtime
+    spec:
+      containers:
+        - name: nexus-runtime
+          image: "{{ .Values.nexusRuntime.image.repository }}:{{ .Values.nexusRuntime.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.nexusRuntime.service.port }}
+          env:
+            - name: NEXUS_AIRGAP
+              value: {{ .Values.global.airgap | quote }}
+            - name: NEXUS_CLOUD_CONNECT
+              value: {{ .Values.nexusCloud.connect | quote }}
+            - name: NEXUS_DATA_PLANE_BOOTSTRAP
+              value: {{ .Values.nexusRuntime.env.NEXUS_DATA_PLANE_BOOTSTRAP | quote }}
+          volumeMounts:
+            {{- if .Values.nexusRuntime.persistence.enabled }}
+            - name: enterprise-data
+              mountPath: {{ .Values.nexusRuntime.persistence.dataMountPath }}
+            - name: enterprise-logs
+              mountPath: {{ .Values.nexusRuntime.persistence.logsMountPath }}
+            {{- end }}
+      volumes:
+        {{- if .Values.nexusRuntime.persistence.enabled }}
+        - name: enterprise-data
+          emptyDir: {}
+        - name: enterprise-logs
+          emptyDir: {}
+        {{- end }}

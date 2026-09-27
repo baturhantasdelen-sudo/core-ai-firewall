@@ -1,0 +1,27 @@
+global:
+  airgap: true
+
+nexusCloud:
+  connect: false
+  endpoint: https://cloud.nexusshield.ai
+
+nexusRuntime:
+  replicaCount: 2
+  image:
+    repository: python
+    tag: "3.12-slim"
+  service:
+    port: 8090
+  env:
+    NEXUS_AIRGAP: "true"
+    NEXUS_CLOUD_CONNECT: "false"
+    NEXUS_DATA_PLANE_BOOTSTRAP: "false"
+  persistence:
+    enabled: true
+    dataMountPath: /app/enterprise/data
+    logsMountPath: /app/enterprise/logs
+
+nexusGuardrail:
+  enabled: false
+  service:
+    port: 8080

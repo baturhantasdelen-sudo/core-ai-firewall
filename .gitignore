@@ -44,6 +44,7 @@ scripts/trojan_outreach_recipients.json
 # Enterprise SIEM compliance audit (local JSONL sink)
 enterprise/logs/
 enterprise/data/*.json
+enterprise/data/*.jsonl
 !enterprise/data/.gitkeep
 
 # Customer API keys (trial / pro registry)
