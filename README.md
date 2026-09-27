@@ -153,6 +153,8 @@ Gateway (LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION.md)
 
 | Document | Topic |
 |---|---|
+| [ENTERPRISE_PITCH_AND_VISION.md](./docs/ENTERPRISE_PITCH_AND_VISION.md) | CISO / CTO pitch & architecture (PDF: `python scripts/generate_enterprise_deck.py --lang en`) |
+| [ENTERPRISE_PITCH_AND_VISION_TR.md](./docs/ENTERPRISE_PITCH_AND_VISION_TR.md) | Turkish enterprise pitch (PDF: `python scripts/generate_enterprise_deck.py --lang tr`) |
 | [UAR_SCHEMA.md](./docs/UAR_SCHEMA.md) | Canonical UAR fields |
 | [DATA_PLANE_AND_CONTROL_PLANE.md](./docs/DATA_PLANE_AND_CONTROL_PLANE.md) | Air-gap, nexus vs nexus-control |
 | [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.md) | Benchmark vs UAR ledger |
