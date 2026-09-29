@@ -4,7 +4,6 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -20,6 +19,10 @@ fun signingValue(vararg envNames: String, propertyName: String): String? {
     }
     return keystoreProperties.getProperty(propertyName)?.trim()?.takeIf { it.isNotEmpty() }
 }
+
+val isCi =
+    System.getenv("CI") == "true" ||
+        System.getenv("GITHUB_ACTIONS") == "true"
 
 android {
     namespace = "ai.nexusshield.nexusshield_mobile"
@@ -44,19 +47,10 @@ android {
         signingValue("ANDROID_KEY_ALIAS", "ANDROID_KEYSTORE_ALIAS", propertyName = "keyAlias")
     val keyPassword = signingValue("ANDROID_KEY_PASSWORD", propertyName = "keyPassword")
     val keystorePath = signingValue("ANDROID_KEYSTORE_PATH", propertyName = "storeFile")
-
     val appModuleKeystore = file("upload-keystore.jks")
 
     fun resolveReleaseKeystoreFile(): java.io.File? {
-        System.getenv("ANDROID_KEYSTORE_BASE64")?.trim()?.takeIf { it.isNotEmpty() }?.let { encoded ->
-            val normalized = encoded.replace("\\s".toRegex(), "")
-            if (!appModuleKeystore.exists()) {
-                appModuleKeystore.parentFile?.mkdirs()
-                appModuleKeystore.writeBytes(Base64.getDecoder().decode(normalized))
-            }
-            return appModuleKeystore
-        }
-
+        // Prefer explicit file path / key.properties (CI writes android/key.properties).
         if (!keystorePath.isNullOrBlank()) {
             val declared = file(keystorePath)
             val resolved =
@@ -71,20 +65,43 @@ android {
             }
         }
 
-        return appModuleKeystore.takeIf { it.exists() }
+        if (appModuleKeystore.exists()) {
+            return appModuleKeystore
+        }
+
+        // Optional fallback: decode BASE64 only when no keystore file exists yet.
+        System.getenv("ANDROID_KEYSTORE_BASE64")?.trim()?.takeIf { it.isNotEmpty() }?.let { encoded ->
+            val normalized = encoded.replace("\\s".toRegex(), "")
+            appModuleKeystore.parentFile?.mkdirs()
+            appModuleKeystore.writeBytes(Base64.getDecoder().decode(normalized))
+            return appModuleKeystore
+        }
+
+        return null
     }
 
     val releaseKeystoreFile = resolveReleaseKeystoreFile()
     val hasReleaseSigning =
         releaseKeystoreFile != null &&
+            releaseKeystoreFile.exists() &&
             !storePassword.isNullOrBlank() &&
             !keyAlias.isNullOrBlank() &&
             !keyPassword.isNullOrBlank()
 
-    val isCi = System.getenv("CI") == "true" || System.getenv("GITHUB_ACTIONS") == "true"
+    if (!hasReleaseSigning) {
+        val message =
+            "Release signing is required. Configure android/key.properties or env vars: " +
+                "ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS " +
+                "(or ANDROID_KEYSTORE_ALIAS), ANDROID_KEY_PASSWORD."
+        if (isCi) {
+            throw GradleException(message)
+        } else {
+            logger.warn(message)
+        }
+    }
 
-    if (hasReleaseSigning) {
-        signingConfigs {
+    signingConfigs {
+        if (hasReleaseSigning) {
             create("release") {
                 storeFile = releaseKeystoreFile
                 this.storePassword = storePassword
@@ -92,23 +109,14 @@ android {
                 this.keyPassword = keyPassword
             }
         }
-    } else if (isCi) {
-        throw GradleException(
-            "Release signing is required in CI. Provide ANDROID_KEYSTORE_BASE64 (recommended) " +
-                "or ANDROID_KEYSTORE_PATH / android/app/upload-keystore.jks, plus " +
-                "ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS (or ANDROID_KEYSTORE_ALIAS), " +
-                "and ANDROID_KEY_PASSWORD."
-        )
     }
 
     buildTypes {
         release {
-            signingConfig =
-                if (hasReleaseSigning) {
-                    signingConfigs.getByName("release")
-                } else {
-                    signingConfigs.getByName("debug")
-                }
+            if (!hasReleaseSigning) {
+                throw GradleException("Release build refused: upload keystore is not configured.")
+            }
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             isShrinkResources = false
         }

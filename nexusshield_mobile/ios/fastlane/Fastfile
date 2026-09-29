@@ -39,6 +39,52 @@ def nexus_team_id
   team
 end
 
+def nexus_validate_match_env!
+  UI.user_error!("MATCH_PASSWORD is required for match.") if ENV["MATCH_PASSWORD"].to_s.strip.empty?
+  UI.user_error!("MATCH_GIT_URL is required for match.") if ENV["MATCH_GIT_URL"].to_s.strip.empty?
+  UI.user_error!("FASTLANE_TEAM_ID is required for match.") if ENV["FASTLANE_TEAM_ID"].to_s.strip.empty?
+end
+
+def nexus_persist_ci_keychain_env!
+  return unless is_ci
+
+  keychain_name = ENV["MATCH_KEYCHAIN_NAME"]
+  keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"]
+  return if keychain_name.to_s.empty? || keychain_password.to_s.empty?
+
+  ios_root = File.expand_path("..", __dir__)
+  env_path = File.join(ios_root, ".ci-keychain.env")
+  File.write(
+    env_path,
+    <<~ENV
+      MATCH_KEYCHAIN_NAME=#{keychain_name}
+      MATCH_KEYCHAIN_PASSWORD=#{keychain_password}
+    ENV
+  )
+  env_path
+end
+
+def nexus_unlock_ci_keychain!
+  return unless is_ci
+
+  ios_root = File.expand_path("..", __dir__)
+  env_path = File.join(ios_root, ".ci-keychain.env")
+  UI.user_error!(".ci-keychain.env missing. Run fastlane ci_keychain before sign/build.") unless File.exist?(env_path)
+
+  env_path.each_line do |line|
+    key, value = line.strip.split("=", 2)
+    next if key.nil? || value.nil?
+
+    ENV[key] = value
+  end
+
+  keychain_name = ENV["MATCH_KEYCHAIN_NAME"]
+  keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"]
+  sh("security", "unlock-keychain", "-p", keychain_password, keychain_name)
+  sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_name)
+  sh("security", "list-keychains", "-s", keychain_name)
+end
+
 def write_export_options_plist!(profile_name:, team_id:)
   ios_root = File.expand_path("..", __dir__)
   path = File.join(ios_root, "ExportOptions.plist")
@@ -77,45 +123,49 @@ end
 platform :ios do
   desc "Create/unlock ephemeral CI keychain (run before match on GitHub Actions)"
   lane :ci_keychain do
+    nexus_validate_match_env!
     setup_ci if is_ci
     ENV["NEXUS_CI_KEYCHAIN_READY"] = "true"
 
     if is_ci
       keychain_name = ENV["MATCH_KEYCHAIN_NAME"]
       keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"]
-      if keychain_name && keychain_password
-        sh("security", "unlock-keychain", "-p", keychain_password, keychain_name)
-        sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_name)
-        sh("security", "list-keychains", "-s", keychain_name)
-      end
+      UI.user_error!("setup_ci did not configure MATCH_KEYCHAIN_NAME/PASSWORD") if keychain_name.to_s.empty? || keychain_password.to_s.empty?
+
+      sh("security", "unlock-keychain", "-p", keychain_password, keychain_name)
+      sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_name)
+      sh("security", "list-keychains", "-s", keychain_name)
     end
+
+    nexus_persist_ci_keychain_env!
   end
 
   desc "Install App Store distribution cert and profile (match, readonly on CI)"
   lane :sign do
-    setup_ci if is_ci && ENV["NEXUS_CI_KEYCHAIN_READY"] != "true"
+    nexus_validate_match_env!
+    if is_ci && ENV["NEXUS_CI_KEYCHAIN_READY"] != "true"
+      ci_keychain
+    else
+      nexus_unlock_ci_keychain! if is_ci
+    end
 
     api_key = nexus_app_store_connect_api_key
     team_id = nexus_team_id
 
-    match(
+    match_params = {
       type: "appstore",
       readonly: is_ci,
       api_key: api_key,
       app_identifier: "com.nexusshield.guard",
       git_url: ENV.fetch("MATCH_GIT_URL"),
       git_branch: ENV.fetch("MATCH_GIT_BRANCH", "main")
-    )
-
-    if is_ci
-      keychain_name = ENV["MATCH_KEYCHAIN_NAME"]
-      keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"]
-      if keychain_name && keychain_password
-        sh("security", "unlock-keychain", "-p", keychain_password, keychain_name)
-        sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_name)
-        sh("security", "list-keychains", "-s", keychain_name)
-      end
+    }
+    if ENV["MATCH_GIT_BASIC_AUTHORIZATION"] && !ENV["MATCH_GIT_BASIC_AUTHORIZATION"].strip.empty?
+      match_params[:git_basic_authorization] = ENV["MATCH_GIT_BASIC_AUTHORIZATION"]
     end
+    match(match_params)
+
+    nexus_unlock_ci_keychain! if is_ci
 
     profiles = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING] || {}
     profile_name = profiles["com.nexusshield.guard"]
@@ -145,11 +195,17 @@ platform :ios do
   desc "match sign + Flutter release IPA"
   lane :build do
     sign
+    nexus_unlock_ci_keychain! if is_ci
 
     mobile_root = File.expand_path("../..", __dir__)
     Dir.chdir(mobile_root) do
       sh("flutter", "build", "ipa", "--release", "--export-options-plist=ios/ExportOptions.plist")
     end
+  end
+
+  desc "Unlock CI keychain before xcodebuild/flutter (GitHub Actions follow-up steps)"
+  lane :unlock_keychain do
+    nexus_unlock_ci_keychain!
   end
 
   desc "Upload release IPA to App Store Connect (upload_to_app_store / deliver)"
