@@ -170,6 +170,7 @@ jobs:
       MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
       MATCH_GIT_BRANCH: ${{ secrets.MATCH_GIT_BRANCH }}
       MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      MATCH_GITHUB_PAT: ${{ secrets.MATCH_GITHUB_PAT }}
       MATCH_KEYCHAIN_NAME: ${{ secrets.MATCH_KEYCHAIN_NAME }}
       MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
       CI: true
@@ -179,6 +180,28 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Prepare Match git authentication
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ]; then
+            echo "Using MATCH_GIT_BASIC_AUTHORIZATION from secrets."
+            exit 0
+          fi
+          PAT="${MATCH_GITHUB_PAT:-${GH_TOKEN:-}}"
+          if [ -z "$PAT" ]; then
+            if echo "${MATCH_GIT_URL:-}" | grep -Eq 'https://[^/@]+@'; then
+              echo "MATCH_GIT_URL already contains embedded credentials."
+              exit 0
+            fi
+            echo "::error::Set MATCH_GITHUB_PAT, MATCH_GIT_BASIC_AUTHORIZATION, or embed PAT in MATCH_GIT_URL."
+            exit 1
+          fi
+          AUTH=$(printf 'x-access-token:%s' "$PAT" | base64 | tr -d '\n')
+          echo "MATCH_GIT_BASIC_AUTHORIZATION=$AUTH" >> "$GITHUB_ENV"
+          echo "Configured Match git auth via x-access-token (MATCH_GITHUB_PAT or GITHUB_TOKEN)."
 
       - name: Prepare Fastlane CI keychain environment
         run: |
@@ -235,6 +258,10 @@ jobs:
           fi
           if [ ! -s "${APP_STORE_CONNECT_API_KEY_PATH}" ]; then
             echo "::error::App Store Connect API key file is missing (APP_STORE_CONNECT_API_KEY_KEY secret)."
+            missing=1
+          fi
+          if [ -z "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ] && [ -z "${MATCH_GITHUB_PAT:-}" ] && ! echo "${MATCH_GIT_URL:-}" | grep -Eq 'https://[^/@]+@'; then
+            echo "::error::Match git auth missing: set MATCH_GITHUB_PAT or MATCH_GIT_BASIC_AUTHORIZATION, or PAT in MATCH_GIT_URL."
             missing=1
           fi
           echo "MATCH_GIT_URL host: $(echo "$MATCH_GIT_URL" | sed -E 's#^https://([^/@]+@)?([^/]+)/.*#\2#; s#^git@([^:]+):.*#\1#')"

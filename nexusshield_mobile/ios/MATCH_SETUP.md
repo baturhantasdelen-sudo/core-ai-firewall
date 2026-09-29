@@ -13,7 +13,9 @@ Private git repository stores **distribution certificate** and **App Store provi
 
 | Secret | Required | Example / notes |
 |--------|----------|-----------------|
-| `MATCH_GIT_URL` | **Yes** | `https://github.com/YOUR_ORG/nexusshield-ios-certificates.git` (or embed PAT: `https://x-access-token:ghp_xxx@github.com/...`) |
+| `MATCH_GIT_URL` | **Yes** | `https://github.com/YOUR_ORG/nexusshield-ios-certificates.git` |
+| `MATCH_GITHUB_PAT` | **Recommended** | GitHub PAT with `repo` read access to the match repo (CI builds `MATCH_GIT_BASIC_AUTHORIZATION` automatically) |
+| `MATCH_GIT_BASIC_AUTHORIZATION` | Optional | Base64 of `x-access-token:ghp_xxx` if you prefer not to use `MATCH_GITHUB_PAT` |
 | `MATCH_PASSWORD` | **Yes** | Strong passphrase used to encrypt files in the match repo |
 | `FASTLANE_TEAM_ID` | **Yes** | 10-character Apple Developer Team ID |
 | `MATCH_GIT_BRANCH` | No | Default `main` |
@@ -71,7 +73,7 @@ Fastlane reads **`ENV["MATCH_GIT_URL"]`** — there is no hardcoded repo URL in 
 | Symptom | Fix |
 |---------|-----|
 | `MATCH_GIT_URL is required` | Add secret `MATCH_GIT_URL` on GitHub; re-run workflow |
-| `could not clone` / auth failed | PAT with `repo` scope; use `MATCH_GIT_BASIC_AUTHORIZATION` or token in HTTPS URL |
+| `could not clone` / auth failed | Add `MATCH_GITHUB_PAT` (fine-grained: read on match repo) or `MATCH_GIT_BASIC_AUTHORIZATION`; ensure PAT is not expired |
 | `No code signing identities` | Run local `match appstore` once; verify `ci_keychain` → `sign` order in Actions |
 | Wrong team | Set `FASTLANE_TEAM_ID` to the team that owns `com.nexusshield.guard` |
 

@@ -54,6 +54,26 @@ def nexus_match_git_url
   url
 end
 
+def nexus_match_git_url_for_logs(url)
+  url.gsub(%r{https://[^/@]+@}i, "https://***@")
+end
+
+def nexus_match_git_basic_authorization
+  auth = ENV["MATCH_GIT_BASIC_AUTHORIZATION"].to_s.strip
+  return auth unless auth.empty?
+
+  pat = ENV["MATCH_GITHUB_PAT"].to_s.strip
+  return Base64.strict_encode64("x-access-token:#{pat}") unless pat.empty?
+
+  nil
+end
+
+def nexus_match_git_auth_configured?(git_url)
+  return true if git_url.match?(%r{https://[^/@]+@}i)
+
+  !nexus_match_git_basic_authorization.to_s.empty?
+end
+
 def nexus_validate_match_env!
   UI.user_error!("MATCH_PASSWORD is required for match.") if ENV["MATCH_PASSWORD"].to_s.strip.empty?
   nexus_match_git_url
@@ -194,7 +214,15 @@ platform :ios do
     team_id = nexus_team_id
 
     match_git_url = nexus_match_git_url
-    UI.message("match git_url: #{match_git_url}")
+    unless nexus_match_git_auth_configured?(match_git_url)
+      UI.user_error!(
+        "Match git authentication is not configured. Set MATCH_GIT_BASIC_AUTHORIZATION, " \
+          "MATCH_GITHUB_PAT, or embed a PAT in MATCH_GIT_URL " \
+          "(https://x-access-token:TOKEN@github.com/ORG/certs.git)."
+      )
+    end
+
+    UI.message("match git_url: #{nexus_match_git_url_for_logs(match_git_url)}")
 
     match_params = {
       type: "appstore",
@@ -205,11 +233,14 @@ platform :ios do
       git_branch: ENV.fetch("MATCH_GIT_BRANCH", "main"),
       skip_confirmation: true,
       skip_docs: true,
-      verbose: is_ci
+      verbose: is_ci,
+      shallow_clone: true,
+      clone_branch_directly: true
     }
-    if ENV["MATCH_GIT_BASIC_AUTHORIZATION"] && !ENV["MATCH_GIT_BASIC_AUTHORIZATION"].strip.empty?
-      match_params[:git_basic_authorization] = ENV["MATCH_GIT_BASIC_AUTHORIZATION"]
-    end
+
+    git_auth = nexus_match_git_basic_authorization
+    match_params[:git_basic_authorization] = git_auth if git_auth && !git_auth.empty?
+
     match(match_params)
 
     nexus_unlock_ci_keychain! if is_ci
