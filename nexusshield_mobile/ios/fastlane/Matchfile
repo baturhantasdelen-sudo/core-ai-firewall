@@ -10,6 +10,6 @@ type("appstore")
 
 app_identifier(["com.nexusshield.guard"])
 
-git_branch(ENV.fetch("MATCH_GIT_BRANCH", "main"))
-
-clone_branch_directly(true)
+git_branch(
+  ENV["MATCH_GIT_BRANCH"].to_s.strip.empty? ? "main" : ENV["MATCH_GIT_BRANCH"].to_s.strip
+)

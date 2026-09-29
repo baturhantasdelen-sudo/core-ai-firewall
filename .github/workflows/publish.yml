@@ -203,6 +203,13 @@ jobs:
           echo "MATCH_GIT_BASIC_AUTHORIZATION=$AUTH" >> "$GITHUB_ENV"
           echo "Configured Match git auth via x-access-token (MATCH_GITHUB_PAT or GITHUB_TOKEN)."
 
+      - name: Prepare Match git branch default
+        run: |
+          if [ -z "${MATCH_GIT_BRANCH:-}" ]; then
+            echo "MATCH_GIT_BRANCH=main" >> "$GITHUB_ENV"
+            echo "Defaulting MATCH_GIT_BRANCH to main."
+          fi
+
       - name: Prepare Fastlane CI keychain environment
         run: |
           set -euo pipefail
@@ -269,6 +276,14 @@ jobs:
 
       - name: Sign and build release IPA (Fastlane)
         working-directory: nexusshield_mobile/ios
+        env:
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GITHUB_PAT: ${{ secrets.MATCH_GITHUB_PAT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BRANCH: ${{ secrets.MATCH_GIT_BRANCH }}
+          FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
+          FASTLANE_DISABLE_PROMPTS: "1"
+          CI: true
         run: bundle exec fastlane build
 
       - name: Verify IPA artifact exists
