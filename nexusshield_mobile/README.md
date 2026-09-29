@@ -68,7 +68,7 @@ Archive: `build/ios/ipa/*.ipa`
 
 Open `ios/Runner.xcworkspace` → Runner target → Signing & Capabilities → Team, then Product → Archive for Transporter / App Store Connect if you prefer Xcode.
 
-### Fastlane (TestFlight upload)
+### Fastlane (App Store Connect / TestFlight via deliver)
 
 From `nexusshield_mobile/ios/` after a release IPA exists:
 
@@ -77,12 +77,15 @@ bundle install
 export APP_STORE_CONNECT_API_KEY_KEY_ID=...
 export APP_STORE_CONNECT_API_KEY_ISSUER_ID=...
 export APP_STORE_CONNECT_API_KEY_PATH=/path/to/AuthKey_XXXXXX.p8
+# or: export APP_STORE_CONNECT_API_KEY_KEY="$(cat AuthKey_XXXXXX.p8)"
 export FASTLANE_APPLE_ID=your@apple.id
 export FASTLANE_TEAM_ID=...
-bundle exec fastlane beta
+bundle exec fastlane deploy
 ```
 
-### CI secrets (tag `v*` → `.github/workflows/publish.yml`)
+(`fastlane beta` is an alias for `deploy`.)
+
+### CI secrets (semver tag `v*.*.*`, e.g. `v1.0.0` → `.github/workflows/publish.yml`)
 
 | Secret | Platform |
 |--------|----------|

@@ -3,7 +3,7 @@ name: Publish Mobile Store Builds
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*'
 
 permissions:
   contents: read
@@ -72,17 +72,17 @@ jobs:
         env:
           GOOGLE_PLAY_JSON_KEY_CONTENT: ${{ secrets.GOOGLE_PLAY_JSON_KEY_CONTENT }}
         run: |
-          printf '%s\n' "$GOOGLE_PLAY_JSON_KEY_CONTENT" > fastlane/play-store-credentials.json
+          echo "$GOOGLE_PLAY_JSON_KEY_CONTENT" > fastlane/play-store-key.json
 
-      - name: Deploy to Google Play (Fastlane supply)
+      - name: Deploy to Google Play (Fastlane)
         working-directory: nexusshield_mobile/android
         env:
-          GOOGLE_PLAY_JSON_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/android/fastlane/play-store-credentials.json
+          GOOGLE_PLAY_JSON_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/android/fastlane/play-store-key.json
           GOOGLE_PLAY_TRACK: internal
         run: bundle exec fastlane deploy
 
   build-ios:
-    name: iOS IPA (App Store / TestFlight)
+    name: iOS IPA (App Store Connect)
     runs-on: macos-latest
     defaults:
       run:
@@ -130,9 +130,9 @@ jobs:
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
         run: |
           mkdir -p fastlane/keys
-          printf '%s\n' "$APP_STORE_CONNECT_API_KEY_KEY" > fastlane/keys/AuthKey.p8
+          echo "$APP_STORE_CONNECT_API_KEY_KEY" > fastlane/keys/AuthKey.p8
 
-      - name: Deploy to TestFlight (Fastlane pilot)
+      - name: Deploy to App Store Connect (Fastlane)
         working-directory: nexusshield_mobile/ios
         env:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
@@ -141,4 +141,4 @@ jobs:
           FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
           FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
           FASTLANE_ITC_TEAM_ID: ${{ secrets.FASTLANE_ITC_TEAM_ID }}
-        run: bundle exec fastlane beta
+        run: bundle exec fastlane deploy

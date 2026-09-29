@@ -1,7 +1,7 @@
 default_platform(:android)
 
 platform :android do
-  desc "Upload release App Bundle to Google Play (supply)"
+  desc "Upload release App Bundle to Google Play (upload_to_play_store)"
   lane :deploy do
     android_root = File.expand_path("..", __dir__)
     aab_path = File.expand_path(
@@ -13,7 +13,7 @@ platform :android do
 
     track = ENV.fetch("GOOGLE_PLAY_TRACK", "internal")
 
-    supply(
+    upload_to_play_store(
       package_name: "com.nexusshield.guard",
       track: track,
       aab: aab_path,
