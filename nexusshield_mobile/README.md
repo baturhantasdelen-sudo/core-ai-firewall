@@ -68,19 +68,32 @@ Archive: `build/ios/ipa/*.ipa`
 
 Open `ios/Runner.xcworkspace` → Runner target → Signing & Capabilities → Team, then Product → Archive for Transporter / App Store Connect if you prefer Xcode.
 
-### Fastlane (App Store Connect / TestFlight via deliver)
+### Fastlane + match (CI signing)
 
-From `nexusshield_mobile/ios/` after a release IPA exists:
+Private certificates repo (one-time on a Mac):
 
 ```bash
+cd nexusshield_mobile/ios
 bundle install
+export FASTLANE_TEAM_ID=XXXXXXXXXX
+export MATCH_PASSWORD='strong-encryption-password'
+export MATCH_GIT_URL='git@github.com:YOUR_ORG/nexusshield-ios-certificates.git'
 export APP_STORE_CONNECT_API_KEY_KEY_ID=...
 export APP_STORE_CONNECT_API_KEY_ISSUER_ID=...
 export APP_STORE_CONNECT_API_KEY_PATH=/path/to/AuthKey_XXXXXX.p8
-# or: export APP_STORE_CONNECT_API_KEY_KEY="$(cat AuthKey_XXXXXX.p8)"
-export FASTLANE_APPLE_ID=your@apple.id
+bundle exec fastlane match appstore
+```
+
+CI / release build (readonly match → IPA → upload):
+
+```bash
+export MATCH_PASSWORD=...
+export MATCH_GIT_URL=...   # HTTPS + token in CI is fine
 export FASTLANE_TEAM_ID=...
-bundle exec fastlane deploy
+bundle exec fastlane sign      # match readonly on CI + ExportOptions.plist
+# from nexusshield_mobile/: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+bundle exec fastlane deploy    # upload_to_app_store
+# or: bundle exec fastlane release   # sign + build + deploy
 ```
 
 (`fastlane beta` is an alias for `deploy`.)
@@ -91,8 +104,13 @@ bundle exec fastlane deploy
 |--------|----------|
 | `GOOGLE_PLAY_JSON_KEY_CONTENT` | Android Play service account JSON (full file) |
 | `ANDROID_KEYSTORE_*` | Release signing for AAB |
-| `APP_STORE_CONNECT_API_KEY_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY_KEY` | TestFlight upload (.p8 contents) |
-| `FASTLANE_APPLE_ID`, `FASTLANE_TEAM_ID`, `FASTLANE_ITC_TEAM_ID` | Optional Appfile hints |
+| `APP_STORE_CONNECT_API_KEY_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY_KEY` | match + TestFlight upload (.p8 contents) |
+| `FASTLANE_TEAM_ID` | **Required** — Apple Developer Team ID for match / manual signing |
+| `MATCH_PASSWORD` | **Required** — encrypts/decrypts the match certificates git repo |
+| `MATCH_GIT_URL` | **Required** — private git URL for certs/profiles (use PAT in URL or `MATCH_GIT_BASIC_AUTHORIZATION`) |
+| `MATCH_GIT_BRANCH` | Optional — default `main` |
+| `MATCH_GIT_BASIC_AUTHORIZATION` | Optional — Base64 `username:token` if not embedding token in `MATCH_GIT_URL` |
+| `FASTLANE_APPLE_ID`, `FASTLANE_ITC_TEAM_ID` | Optional Appfile hints |
 
 Privacy strings in `ios/Runner/Info.plist`:
 

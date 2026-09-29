@@ -84,34 +84,23 @@ jobs:
   build-ios:
     name: iOS IPA (App Store Connect)
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: nexusshield_mobile
+    env:
+      APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+      APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/ios/fastlane/keys/AuthKey.p8
+      FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
+      FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
+      FASTLANE_ITC_TEAM_ID: ${{ secrets.FASTLANE_ITC_TEAM_ID }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+      MATCH_GIT_BRANCH: ${{ secrets.MATCH_GIT_BRANCH }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      CI: true
     steps:
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - name: Set up Flutter (stable)
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build release IPA
-        run: flutter build ipa --release
-
-      - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nexusshield-ios-ipa-${{ github.ref_name }}
-          path: nexusshield_mobile/build/ios/ipa/*.ipa
-          if-no-files-found: error
-          retention-days: 30
 
       - name: Set up Ruby for Fastlane
         uses: ruby/setup-ruby@v1
@@ -132,13 +121,32 @@ jobs:
           mkdir -p fastlane/keys
           echo "$APP_STORE_CONNECT_API_KEY_KEY" > fastlane/keys/AuthKey.p8
 
+      - name: Install code signing (Fastlane match)
+        working-directory: nexusshield_mobile/ios
+        run: bundle exec fastlane sign
+
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: nexusshield_mobile
+        run: flutter pub get
+
+      - name: Build release IPA
+        working-directory: nexusshield_mobile
+        run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexusshield-ios-ipa-${{ github.ref_name }}
+          path: nexusshield_mobile/build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Deploy to App Store Connect (Fastlane)
         working-directory: nexusshield_mobile/ios
-        env:
-          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
-          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/ios/fastlane/keys/AuthKey.p8
-          FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
-          FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
-          FASTLANE_ITC_TEAM_ID: ${{ secrets.FASTLANE_ITC_TEAM_ID }}
         run: bundle exec fastlane deploy

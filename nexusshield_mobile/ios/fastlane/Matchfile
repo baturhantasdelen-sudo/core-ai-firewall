@@ -1,0 +1,11 @@
+git_url(ENV.fetch("MATCH_GIT_URL"))
+
+storage_mode("git")
+
+type("appstore")
+
+app_identifier(["com.nexusshield.guard"])
+
+git_branch(ENV.fetch("MATCH_GIT_BRANCH", "main"))
+
+clone_branch_directly(true)

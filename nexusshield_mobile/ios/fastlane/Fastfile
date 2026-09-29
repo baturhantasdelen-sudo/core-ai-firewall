@@ -32,14 +32,98 @@ def nexus_app_store_connect_api_key
   )
 end
 
+def nexus_team_id
+  team = CredentialsManager::AppfileConfig.try_fetch_value(:team_id) || ENV["FASTLANE_TEAM_ID"]
+  UI.user_error!("FASTLANE_TEAM_ID (or team_id in Appfile) is required for match and code signing.") if team.to_s.strip.empty?
+
+  team
+end
+
+def write_export_options_plist!(profile_name:, team_id:)
+  ios_root = File.expand_path("..", __dir__)
+  path = File.join(ios_root, "ExportOptions.plist")
+  escaped_profile = profile_name.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;")
+
+  File.write(
+    path,
+    <<~PLIST
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>method</key>
+        <string>app-store</string>
+        <key>teamID</key>
+        <string>#{team_id}</string>
+        <key>signingStyle</key>
+        <string>manual</string>
+        <key>provisioningProfiles</key>
+        <dict>
+          <key>com.nexusshield.guard</key>
+          <string>#{escaped_profile}</string>
+        </dict>
+        <key>uploadSymbols</key>
+        <true/>
+        <key>compileBitcode</key>
+        <false/>
+      </dict>
+      </plist>
+    PLIST
+  )
+
+  path
+end
+
 platform :ios do
+  desc "Install App Store distribution cert and profile (match, readonly on CI)"
+  lane :sign do
+    setup_ci if is_ci
+
+    api_key = nexus_app_store_connect_api_key
+    team_id = nexus_team_id
+
+    match(
+      type: "appstore",
+      readonly: is_ci,
+      api_key: api_key,
+      app_identifier: "com.nexusshield.guard"
+    )
+
+    profiles = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING] || {}
+    profile_name = profiles["com.nexusshield.guard"]
+    UI.user_error!("match did not return a provisioning profile for com.nexusshield.guard") if profile_name.to_s.empty?
+
+    update_code_signing_settings(
+      path: "Runner.xcodeproj",
+      targets: ["Runner"],
+      build_configurations: ["Release", "Profile"],
+      bundle_identifier: "com.nexusshield.guard",
+      profile_name: profile_name,
+      code_sign_identity: "Apple Distribution",
+      use_automatic_signing: false,
+      team_id: team_id
+    )
+
+    write_export_options_plist!(profile_name: profile_name, team_id: team_id)
+  end
+
+  desc "match sign + Flutter release IPA"
+  lane :build do
+    sign
+
+    mobile_root = File.expand_path("../..", __dir__)
+    Dir.chdir(mobile_root) do
+      sh("flutter", "build", "ipa", "--release", "--export-options-plist=ios/ExportOptions.plist")
+    end
+  end
+
   desc "Upload release IPA to App Store Connect (upload_to_app_store / deliver)"
   lane :deploy do
     ios_root = File.expand_path("..", __dir__)
     ipa_glob = File.expand_path("../build/ios/ipa/*.ipa", ios_root)
     ipa_path = Dir[ipa_glob].max_by { |path| File.mtime(path) }
 
-    UI.user_error!("IPA not found matching #{ipa_glob}. Run flutter build ipa --release first.") if ipa_path.nil?
+    UI.user_error!("IPA not found matching #{ipa_glob}. Run fastlane build or flutter build ipa first.") if ipa_path.nil?
 
     api_key = nexus_app_store_connect_api_key
 
@@ -54,7 +138,13 @@ platform :ios do
     )
   end
 
-  desc "Alias for deploy (TestFlight binary upload via deliver)"
+  desc "sign, build IPA, upload to App Store Connect"
+  lane :release do
+    build
+    deploy
+  end
+
+  desc "Alias for deploy"
   lane :beta do
     deploy
   end
