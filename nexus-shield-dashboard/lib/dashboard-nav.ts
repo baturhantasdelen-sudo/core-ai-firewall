@@ -19,6 +19,7 @@ export interface DashboardNavItem {
   external?: boolean;
 }
 
+/** Dashboard nav — all modules extend the Action Control Plane (governance spine). */
 export const DASHBOARD_NAV_ITEMS: DashboardNavItem[] = [
   {
     label: 'Setup Guide',

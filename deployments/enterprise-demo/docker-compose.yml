@@ -1,0 +1,74 @@
+# Nexus Shield — 2-minute enterprise self-hosted trial
+# Usage: docker compose up
+# Then: curl demo scripts / open Proof Center (see README)
+
+name: nexus-enterprise-demo
+
+networks:
+  demo_net:
+    driver: bridge
+
+volumes:
+  nexus-demo-data:
+  nexus-demo-logs:
+
+services:
+  nexus-runtime:
+    image: python:3.12-slim
+    container_name: nexus_demo_runtime
+    working_dir: /app
+    command:
+      [
+        "sh",
+        "-c",
+        "pip install -q -r requirements-ci.txt fastapi uvicorn pydantic && python -m uvicorn enterprise.data_plane_api:app --host 0.0.0.0 --port 8090",
+      ]
+    ports:
+      - "8090:8090"
+    environment:
+      NEXUS_AIRGAP: "true"
+      NEXUS_CLOUD_CONNECT: "false"
+      NEXUS_DATA_PLANE_BOOTSTRAP: "true"
+      PYTHONPATH: /app
+    volumes:
+      - ../..:/app:ro
+      - nexus-demo-data:/app/enterprise/data
+      - nexus-demo-logs:/app/enterprise/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/healthz')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - demo_net
+
+  mock-target-api:
+    image: python:3.12-slim
+    container_name: nexus_demo_target_api
+    working_dir: /app
+    command: ["python", "deployments/enterprise-demo/mock_target_api.py"]
+    ports:
+      - "8091:8091"
+    volumes:
+      - ../..:/app:ro
+    networks:
+      - demo_net
+
+  mock-agent:
+    image: python:3.12-slim
+    container_name: nexus_demo_agent
+    working_dir: /app
+    depends_on:
+      nexus-runtime:
+        condition: service_healthy
+      mock-target-api:
+        condition: service_started
+    environment:
+      NEXUS_INTERCEPT_URL: http://nexus-runtime:8090/v1/intercept
+      MOCK_TARGET_URL: http://mock-target-api:8091
+      DEMO_INTERVAL_SEC: "8"
+    command: ["python", "deployments/enterprise-demo/mock_langchain_agent.py"]
+    volumes:
+      - ../..:/app:ro
+    networks:
+      - demo_net

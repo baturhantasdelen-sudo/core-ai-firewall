@@ -120,7 +120,7 @@ export function buildSiteMetadata(origin?: string): Metadata {
   const siteUrl = getSiteUrl(origin);
   const title = 'Nexus Shield — Agent Action Governance & Verification';
   const description =
-    'Agents can act. Nexus decides whether they should — and produces cryptographic proof of what happened. Runtime governance with Universal Action Receipts and reproducible security baselines.';
+    'Your AI agent can call your APIs. Who verifies the action? Runtime action governance, trajectory-aware control, and SHA-256 Universal Action Receipts — air-gapped self-hosted data plane.';
 
   return {
     metadataBase: new URL(siteUrl),

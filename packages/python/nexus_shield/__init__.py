@@ -2,7 +2,9 @@
 
 __version__ = "0.1.0"
 
-__all__ = ["NexusClient", "__version__"]
+from .action_receipt import build_action_receipt, inspect_action
+
+__all__ = ["NexusClient", "build_action_receipt", "inspect_action", "__version__"]
 
 
 class NexusClient:

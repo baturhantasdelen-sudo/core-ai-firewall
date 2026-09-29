@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexusshield.ai/schemas/uar_action_receipt.schema.json",
+  "title": "Nexus Shield Action Receipt API",
+  "description": "Standard UAR envelope for SDK, bridge, and control plane responses.",
+  "type": "object",
+  "required": [
+    "action_id",
+    "agent_id",
+    "intent",
+    "tool",
+    "authorization",
+    "policy",
+    "execution",
+    "before_state_hash",
+    "after_state_hash",
+    "evidence_hash",
+    "timestamp"
+  ],
+  "properties": {
+    "action_id": { "type": "string", "description": "Unique action / receipt identifier (alias receipt_id)" },
+    "agent_id": { "type": "string" },
+    "intent": { "type": "string" },
+    "tool": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "params": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "authorization": {
+      "type": "string",
+      "enum": ["approved", "blocked", "read_only", "approval_required"]
+    },
+    "policy": { "type": "string", "enum": ["passed", "failed"] },
+    "execution": { "type": "string", "enum": ["success", "failure", "blocked", "pending"] },
+    "before_state_hash": { "type": "string" },
+    "after_state_hash": { "type": "string" },
+    "evidence_hash": { "type": "string", "description": "SHA-256 over canonical receipt core" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "signature": { "type": "string", "description": "Optional HMAC or sealed evidence reference" },
+    "universal_action_receipt": { "type": "object", "description": "Canonical stored UAR (optional nested form)" }
+  }
+}

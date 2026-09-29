@@ -7,6 +7,15 @@
 
 > **Your AI agents. Your infrastructure. Your data. Your policies.**
 
+## Enterprise demo (single command)
+
+```bash
+cd deployments/enterprise-demo
+docker compose up
+```
+
+Mock agent + target API + **nexus-runtime** — see [enterprise-demo/README.md](./enterprise-demo/README.md).
+
 ## Docker Compose (on-prem / air-gapped)
 
 ```bash

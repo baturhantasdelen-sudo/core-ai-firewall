@@ -103,7 +103,8 @@ bundle exec fastlane deploy    # upload_to_app_store
 | Secret | Platform |
 |--------|----------|
 | `GOOGLE_PLAY_JSON_KEY_CONTENT` | Android Play service account JSON (full file) |
-| `ANDROID_KEYSTORE_*` | Release signing for AAB |
+| `ANDROID_KEYSTORE_BASE64` | **Recommended** — base64-encoded upload keystore (`.jks`) |
+| `ANDROID_KEYSTORE_PATH` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` | Release signing for AAB (CI fails if missing) |
 | `APP_STORE_CONNECT_API_KEY_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY_KEY` | match + TestFlight upload (.p8 contents) |
 | `FASTLANE_TEAM_ID` | **Required** — Apple Developer Team ID for match / manual signing |
 | `MATCH_PASSWORD` | **Required** — encrypts/decrypts the match certificates git repo |

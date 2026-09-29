@@ -11,6 +11,13 @@ platform :android do
 
     UI.user_error!("AAB not found at #{aab_path}. Run flutter build appbundle --release first.") unless File.exist?(aab_path)
 
+    verify_output = sh("jarsigner", "-verify", "-verbose", "-certs", aab_path, log: false)
+    if verify_output.include?("CN=Android Debug")
+      UI.user_error!(
+        "AAB is debug-signed. Configure ANDROID_KEYSTORE_BASE64 (or ANDROID_KEYSTORE_PATH) and related secrets in CI before building."
+      )
+    end
+
     track = ENV.fetch("GOOGLE_PLAY_TRACK", "internal")
 
     upload_to_play_store(

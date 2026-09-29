@@ -1,3 +1,10 @@
+export {
+  buildActionReceipt,
+  inspectActionReceipt,
+  type ActionReceiptAPI,
+  type Authorization,
+} from "./action-receipt";
+
 export interface NexusConfig {
   baseUrl?: string;
   apiKey?: string;

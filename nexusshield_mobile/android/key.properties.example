@@ -8,7 +8,8 @@ keyAlias=upload
 storeFile=upload-keystore.jks
 
 # Equivalent environment variables (CI / Play Console pipelines):
-# ANDROID_KEYSTORE_PATH
+# ANDROID_KEYSTORE_BASE64   (recommended in GitHub Actions — base64-encoded .jks file)
+# ANDROID_KEYSTORE_PATH     (absolute path to .jks on the runner, if not using BASE64)
 # ANDROID_KEYSTORE_PASSWORD
 # ANDROID_KEY_ALIAS
 # ANDROID_KEY_PASSWORD

@@ -18,7 +18,15 @@
 
 ## What Nexus Shield is (and is not)
 
-Nexus Shield is an **AI Agent Action Governance & Verification Platform**. It governs **what agents may execute**, blocks unauthorized tool actions, and issues **Universal Action Receipts (UAR)** so you can prove what occurred.
+**Your AI agent can call your APIs. Who verifies the action?**
+
+Nexus Shield is an **AI Agent Action Governance & Verification Platform** — **not** a generic AI security checkbox or prompt-only LLM firewall. It governs **tool execution**, parameter hijacking, and intent divergence, and issues **Universal Action Receipts (UAR)** so you can prove what occurred.
+
+> Nexus combines runtime action governance, trajectory-aware control, and verifiable cryptographic evidence into a single air-gapped deployment layer.
+
+**Flow:** Interception (SEE) → Authority / Policy (CONTROL) → Execution → State Change → Cryptographic Proof (VERIFY).
+
+Architecture: [ARCHITECTURE_WHITE_PAPER.md](./docs/ARCHITECTURE_WHITE_PAPER.md) · Action Receipt API: [ACTION_RECEIPT_API.md](./docs/ACTION_RECEIPT_API.md)
 
 | We are | We are not |
 |---|---|
@@ -87,6 +95,19 @@ Details: [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.m
 
 Deployment: [deployments/](./deployments/) · [DATA_PLANE_AND_CONTROL_PLANE.md](./docs/DATA_PLANE_AND_CONTROL_PLANE.md)
 
+### 2-minute enterprise self-hosted trial
+
+```bash
+cd deployments/enterprise-demo
+docker compose up
+# mock LangChain-style agent → intercept → UAR logs on :8090
+curl http://localhost:8090/healthz
+```
+
+See [deployments/enterprise-demo/README.md](./deployments/enterprise-demo/README.md). Inspect UAR JSON locally: `POST /api/v1/uar/inspect` (dashboard) or `python -c "from nexus_shield import inspect_action; print(inspect_action(...))"`.
+
+### Air-gapped data plane (production-style)
+
 ```bash
 cd deployments && NEXUS_AIRGAP=true NEXUS_CLOUD_CONNECT=false docker compose up -d
 curl http://localhost:8090/healthz
@@ -153,6 +174,8 @@ Gateway (LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION.md)
 
 | Document | Topic |
 |---|---|
+| [ARCHITECTURE_WHITE_PAPER.md](./docs/ARCHITECTURE_WHITE_PAPER.md) | Multi-repo hierarchy & Action Control Plane |
+| [ACTION_RECEIPT_API.md](./docs/ACTION_RECEIPT_API.md) | Living UAR / Action Receipt standard |
 | [ENTERPRISE_PITCH_AND_VISION.md](./docs/ENTERPRISE_PITCH_AND_VISION.md) | CISO / CTO pitch & architecture (PDF: `python scripts/generate_enterprise_deck.py --lang en`) |
 | [ENTERPRISE_PITCH_AND_VISION_TR.md](./docs/ENTERPRISE_PITCH_AND_VISION_TR.md) | Turkish enterprise pitch (PDF: `python scripts/generate_enterprise_deck.py --lang tr`) |
 | [UAR_SCHEMA.md](./docs/UAR_SCHEMA.md) | Canonical UAR fields |

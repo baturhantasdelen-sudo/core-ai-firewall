@@ -2,7 +2,6 @@ import Link from 'next/link';
 import {
   ArrowRight,
   BookOpen,
-  Bot,
   Copy,
   Crosshair,
   FileText,
@@ -26,187 +25,101 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
 import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
 import {
-  NEXUS_CATEGORY_POSITIONING,
+  NEXUS_DEFENSIVE_POSITIONING,
   NEXUS_GOVERNANCE_TAGLINE,
+  NEXUS_RUNTIME_FLOW_LABEL,
   NEXUS_RUNTIME_LATENCY_METRIC,
+  NEXUS_VALUE_PROP_HOOK,
 } from '@/lib/brand/copy-standards';
 
-const PLATFORM_MODULES = [
+/** Core Action Control Plane — product spine. */
+const ACTION_CONTROL_PLANE = [
   {
-    number: '1',
-    title: 'Setup Guide',
-    href: '/dashboard',
-    icon: BookOpen,
-    border: 'border-zinc-500/25',
-    accent: 'text-zinc-300',
-    chip: 'border-white/10 bg-zinc-900/80 text-zinc-300',
-    bullets: [
-      'Quick integration & GitHub App onboarding',
-      'Active secret validation & VS Code extension',
-      'Scanner hub with SARIF & auto-fix previews',
-    ],
-  },
-  {
-    number: '2',
-    title: 'Agents',
+    phase: 'SEE',
+    title: 'Interception & Discovery',
     href: '/dashboard/agents',
-    icon: Bot,
+    icon: Fingerprint,
     border: 'border-violet-500/25',
     accent: 'text-violet-400',
     chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200',
     bullets: [
-      'LangChain, LlamaIndex, CrewAI & MCP discovery',
-      'OpenAI Assistants tool capability mapping',
-      'Per-agent risk scoring inventory',
+      'Agent & MCP inventory (LangChain, CrewAI, Assistants)',
+      'Free scan funnel — Attack → Prove → Install → Protect',
+      'Effective authority vs declared capabilities',
     ],
   },
   {
-    number: '3',
-    title: 'Action Firewall',
+    phase: 'CONTROL',
+    title: 'Action Firewall & Policy',
     href: '/dashboard/actions',
     icon: ShieldAlert,
     border: 'border-rose-500/25',
     accent: 'text-rose-400',
     chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200',
     bullets: [
-      'Intent vs. Action consistency engine',
-      'Adaptive READ_ONLY / REQUIRE_APPROVAL degradation',
-      'Instant Kill Switch session freeze',
+      'POST /api/v1/action/evaluate — intent divergence & BLOCK',
+      'READ_ONLY / REQUIRE_APPROVAL / Kill Switch degradation',
+      'Self-hosted POST /v1/intercept (air-gapped data plane)',
     ],
   },
   {
-    number: '4',
-    title: 'Threat Intel',
+    phase: 'PROVE',
+    title: 'UAR & Proof Center',
+    href: '/proof-center',
+    icon: ShieldCheck,
+    border: 'border-emerald-500/25',
+    accent: 'text-emerald-400',
+    chip: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200',
+    bullets: [
+      'SHA-256 Universal Action Receipts on every governed attempt',
+      'POST /api/v1/uar/inspect — instant developer receipt JSON',
+      'Public Proof Center vs production UAR ledger (transparent lanes)',
+    ],
+  },
+] as const;
+
+/** Extends the control plane — not standalone product lines. */
+const CONTROL_PLANE_EXTENSIONS = [
+  {
+    title: 'Trust Hub & Compliance',
+    href: '/dashboard/trust-hub',
+    icon: FileText,
+    border: 'border-cyan-500/25',
+    accent: 'text-cyan-400',
+    chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200',
+    bullets: ['Trajectory audit stream', 'KVKK/GDPR evidence export', 'SOC 2 / ISO reporting hooks'],
+  },
+  {
+    title: 'Threat Intel & Red Team',
     href: '/dashboard/threat-intel',
     icon: Radar,
     border: 'border-indigo-500/25',
     accent: 'text-indigo-400',
     chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200',
-    bullets: [
-      'Zero-Knowledge signatures (#TS-xxxx)',
-      'Global immune memory sync',
-      'Collective threat pattern matching',
-    ],
+    bullets: ['Immune memory patterns', 'Simulator & challenge engine', 'Resilience scoring'],
   },
   {
-    number: '5',
-    title: 'Red Teaming',
-    href: '/dashboard/simulator',
-    icon: Crosshair,
-    border: 'border-orange-500/25',
-    accent: 'text-orange-400',
-    chip: 'border-orange-500/20 bg-orange-500/10 text-orange-200',
-    bullets: [
-      '5 synthetic attack vectors per agent',
-      'Resilience score (0–100) reporting',
-      'Live red-team console replay',
-    ],
-  },
-  {
-    number: '6',
-    title: 'Trust Hub',
-    href: '/dashboard/trust-hub',
-    icon: ShieldCheck,
-    border: 'border-cyan-500/25',
-    accent: 'text-cyan-400',
-    chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200',
-    bullets: [
-      'Tool-Chain trajectory enforcement',
-      'Evidence Chain verification',
-      'Memory poisoning guard & reputation',
-    ],
-  },
-  {
-    number: '7',
-    title: 'Compliance',
-    href: '/dashboard/compliance',
-    icon: FileText,
-    border: 'border-indigo-500/25',
-    accent: 'text-indigo-300',
-    chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200',
-    bullets: [
-      'KVKK/GDPR PDF audit reports',
-      'Policy management & masking stats',
-      'Executive compliance grades',
-    ],
-  },
-  {
-    number: '8',
-    title: 'Settings',
-    href: '/dashboard/settings',
+    title: 'Setup & Settings',
+    href: '/dashboard',
     icon: Settings,
     border: 'border-zinc-500/25',
     accent: 'text-zinc-300',
     chip: 'border-white/10 bg-zinc-900/80 text-zinc-300',
-    bullets: [
-      'API key & org configuration',
-      'Billing & plan management',
-      'GitHub App connection settings',
-    ],
+    bullets: ['Integration checklist', 'API keys & GitHub App', 'Enterprise demo: docker compose up'],
   },
 ] as const;
 
 const QUICK_NAV = [
-  { label: 'Setup Guide', href: '/dashboard', chip: 'border-white/10 bg-zinc-900/80 text-zinc-300 hover:border-white/20' },
-  { label: 'Agents', href: '/dashboard/agents', chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200 hover:border-violet-500/40' },
   { label: 'Action Firewall', href: '/dashboard/actions', chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200 hover:border-rose-500/40' },
-  { label: 'Threat Intel', href: '/dashboard/threat-intel', chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200 hover:border-indigo-500/40' },
-  { label: 'Red Teaming', href: '/dashboard/simulator', chip: 'border-orange-500/20 bg-orange-500/10 text-orange-200 hover:border-orange-500/40' },
   { label: 'Proof Center', href: '/proof-center', chip: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200 hover:border-emerald-500/40' },
+  { label: 'Free Scan', href: '/scan', chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200 hover:border-violet-500/40' },
+  { label: 'Demo / UAR', href: '/demo', chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200 hover:border-cyan-500/40' },
   { label: 'Trust Hub', href: '/dashboard/trust-hub', chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200 hover:border-cyan-500/40' },
-  { label: 'Compliance', href: '/dashboard/compliance', chip: 'border-indigo-500/20 bg-indigo-500/10 text-indigo-200 hover:border-indigo-500/40' },
-  { label: 'Settings', href: '/dashboard/settings', chip: 'border-white/10 bg-zinc-900/80 text-zinc-300 hover:border-white/20' },
 ] as const;
 
-const RUNTIME_PILLARS = [
-  {
-    phase: 'SEE',
-    title: 'Agent & MCP Discovery',
-    subtitle: 'Discover every agent.',
-    href: '/dashboard/agents',
-    icon: Fingerprint,
-    accent: 'text-violet-400',
-    border: 'border-violet-500/25',
-    chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200',
-    bullets: [
-      'Agent & MCP discovery across LangChain, CrewAI, OpenAI Assistants',
-      'Effective Authority matrix — declared vs actual capabilities',
-      'Risk visibility badges for financial & write access',
-    ],
-  },
-  {
-    phase: 'CONTROL',
-    title: 'Action Firewall & Kill Switch',
-    subtitle: 'Control every action.',
-    href: '/dashboard/actions',
-    icon: ShieldAlert,
-    accent: 'text-rose-400',
-    border: 'border-rose-500/25',
-    chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200',
-    bullets: [
-      'Intent / Action divergence check — block at >80% misalignment',
-      'P99 runtime intercept: 6.1ms (harness)',
-      'Capability revocation with READ_ONLY fallback & Kill Switch',
-    ],
-  },
-  {
-    phase: 'TRUST',
-    title: 'Evidence Chain & MCP-SEC-SCORE',
-    subtitle: 'Verify every outcome.',
-    href: '/proof-center',
-    icon: ShieldCheck,
-    accent: 'text-cyan-400',
-    border: 'border-cyan-500/25',
-    chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200',
-    bullets: [
-      'Before/after state hashes & cryptographic evidence bundles',
-      'UNVERIFIED_ACTION detection & log diff audit trails',
-      'Agent Reputation Score (MCP-SEC-SCORE) with public Proof Center',
-    ],
-  },
-] as const;
-
-const NAV_BUTTONS = DASHBOARD_NAV_ITEMS.filter((item) => item.label !== 'Setup Guide');
+const NAV_BUTTONS = DASHBOARD_NAV_ITEMS.filter((item) =>
+  ['Action Firewall', 'Agents', 'Proof Center', 'Trust Hub', 'Setup Guide'].includes(item.label),
+);
 
 function PlatformNavPreview() {
   return (
@@ -253,7 +166,7 @@ function PlatformNavPreview() {
 
       <p className="mt-3 text-center text-[11px] text-zinc-500">
         <span className="text-emerald-400">Telemetry Active</span> live signal ·{' '}
-        <span className="text-zinc-300">API Key</span> badge · 8 module shortcuts
+        <span className="text-zinc-300">API Key</span> badge · Action Control Plane shortcuts
       </p>
     </div>
   );
@@ -272,27 +185,35 @@ export default function Home() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/5 px-4 py-1.5 text-xs font-semibold tracking-widest text-cyan-200 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-              SEE → CONTROL → TRUST → VERIFY
+              Action Control Plane
             </div>
 
             <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-              Agent Action Governance &amp; Verification
+              {NEXUS_VALUE_PROP_HOOK}
             </h1>
 
             <p className="mx-auto mt-5 max-w-3xl text-lg text-zinc-300 sm:text-xl">
-              {NEXUS_CATEGORY_POSITIONING}
+              Agent Action Governance &amp; Verification — not a prompt-only firewall.
             </p>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-zinc-500">{NEXUS_GOVERNANCE_TAGLINE}</p>
+            <p className="mx-auto mt-3 max-w-3xl text-xs leading-relaxed text-zinc-500">
+              {NEXUS_DEFENSIVE_POSITIONING}
+            </p>
+            <p className="mx-auto mt-2 max-w-3xl font-mono text-[11px] leading-relaxed text-cyan-400/90">
+              {NEXUS_RUNTIME_FLOW_LABEL}
+            </p>
             <p className="mx-auto mt-2 max-w-2xl font-mono text-xs text-emerald-300/90">
               {NEXUS_RUNTIME_LATENCY_METRIC}
             </p>
 
             <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-left backdrop-blur-sm">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-400/80">
-                Competitive differentiator — VERIFY
+                Execution → state change → cryptographic proof
               </p>
               <p className="mt-2 text-sm text-zinc-300">
-                Legacy gateways log prompts. Nexus Shield <strong className="font-semibold text-emerald-300">verifies actions</strong> — before/after state hashes, UNVERIFIED_ACTION detection, and downloadable evidence bundles auditors can reproduce.
+                Intercept tool calls, enforce policy at the API boundary, and seal{' '}
+                <strong className="font-semibold text-emerald-300">Universal Action Receipts</strong> — before/after
+                state hashes and SHA-256 evidence auditors can reproduce.
               </p>
             </div>
 
@@ -332,7 +253,7 @@ export default function Home() {
 
           <div className="mx-auto mt-8 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: '8 Modules', sub: 'Full platform stack' },
+              { label: 'Action Control Plane', sub: 'SEE · CONTROL · PROVE' },
               { label: 'Telemetry', sub: 'Live green signal' },
               { label: 'P99 6.1ms', sub: 'Runtime intercept' },
               { label: 'API Key', sub: 'Secure badge' },
@@ -389,13 +310,14 @@ export default function Home() {
           <div className="mx-auto max-w-2xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-3 py-1 text-xs font-medium text-cyan-300">
               <ShieldCheck className="h-3.5 w-3.5" />
-              SEE → CONTROL → TRUST → VERIFY
+              {NEXUS_RUNTIME_FLOW_LABEL}
             </div>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-              Runtime Control Architecture
+              Action Control Plane
             </h2>
             <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-              Three pillars plus VERIFY — the differentiator legacy prompt gateways cannot offer.
+              One engine: intercept, authorize, execute under policy, prove with UAR. Extensions (intel, red team,
+              compliance) plug into this spine.
             </p>
           </div>
 
@@ -404,13 +326,13 @@ export default function Home() {
             <ArrowRight className="hidden h-4 w-4 sm:block" />
             <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-rose-400">CONTROL</span>
             <ArrowRight className="hidden h-4 w-4 sm:block" />
-            <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-cyan-400">TRUST</span>
+            <span className="rounded-full border border-zinc-500/20 bg-zinc-500/10 px-3 py-1 text-zinc-300">EXECUTE</span>
             <ArrowRight className="hidden h-4 w-4 sm:block" />
-            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-emerald-400">VERIFY</span>
+            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-emerald-400">PROVE</span>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:items-stretch xl:grid-cols-3">
-            {RUNTIME_PILLARS.map(({ phase, title, subtitle, href, icon: Icon, accent, border, chip, bullets }) => (
+          <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+            {ACTION_CONTROL_PLANE.map(({ phase, title, href, icon: Icon, accent, border, chip, bullets }) => (
               <Link
                 key={phase}
                 href={href}
@@ -424,8 +346,7 @@ export default function Home() {
                     {phase}
                   </span>
                 </div>
-                <p className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">{subtitle}</p>
-                <h3 className="mt-1 text-lg font-semibold text-zinc-50">{title}</h3>
+                <h3 className="mt-3 text-lg font-semibold text-zinc-50">{title}</h3>
                 <ul className="mt-4 flex-1 space-y-2">
                   {bullets.map((bullet) => (
                     <li key={bullet} className="flex items-start gap-1.5 text-xs text-zinc-400">
@@ -435,7 +356,7 @@ export default function Home() {
                   ))}
                 </ul>
                 <span className="mt-5 inline-flex items-center gap-1 text-xs font-medium text-emerald-400/80 group-hover:text-emerald-300">
-                  Open live dashboard
+                  Open module
                   <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                 </span>
               </Link>
@@ -467,30 +388,26 @@ export default function Home() {
         <div className="mx-auto max-w-2xl text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/5 px-3 py-1 text-xs font-medium text-violet-300">
             <ScanSearch className="h-3.5 w-3.5" />
-            8 Dashboard Modules
+            Control plane extensions
           </div>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-            Complete Platform Modules
+            Built on the Action Control Plane
           </h2>
           <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-            Every panel from the live header — Setup Guide through Settings, with direct dashboard links.
+            Threat intel, red team, trust hub, and compliance extend governance — they are not separate security
+            products.
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {PLATFORM_MODULES.map(({ number, title, href, icon: Icon, border, accent, chip, bullets }) => (
+        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {CONTROL_PLANE_EXTENSIONS.map(({ title, href, icon: Icon, border, accent, chip, bullets }) => (
             <Link
               key={href}
               href={href}
               className={`group flex flex-col rounded-2xl border ${border} bg-zinc-950/60 p-5 backdrop-blur-xl transition-all hover:scale-[1.01] hover:bg-zinc-900/70 hover:shadow-lg hover:shadow-emerald-500/5`}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-zinc-900/80 ${accent}`}>
-                  <Icon className="h-4 w-4" />
-                </div>
-                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${chip}`}>
-                  {number}
-                </span>
+              <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-zinc-900/80 ${accent}`}>
+                <Icon className="h-4 w-4" />
               </div>
               <h3 className="mt-3 text-base font-semibold text-zinc-50">{title}</h3>
               <ul className="mt-3 flex-1 space-y-1.5">
