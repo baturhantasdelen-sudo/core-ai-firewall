@@ -70,6 +70,8 @@ Open `ios/Runner.xcworkspace` → Runner target → Signing & Capabilities → T
 
 ### Fastlane + match (CI signing)
 
+Full checklist: **[ios/MATCH_SETUP.md](ios/MATCH_SETUP.md)** (`MATCH_GIT_URL`, `MATCH_PASSWORD`, private certs repo).
+
 Private certificates repo (one-time on a Mac):
 
 ```bash

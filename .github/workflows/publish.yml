@@ -204,10 +204,15 @@ jobs:
               missing=1
             fi
           done
+          if [ -n "${MATCH_GIT_URL:-}" ] && ! echo "$MATCH_GIT_URL" | grep -Eq '^(https://|git@|ssh://)'; then
+            echo "::error::MATCH_GIT_URL must start with https://, git@, or ssh://"
+            missing=1
+          fi
           if [ ! -s "${APP_STORE_CONNECT_API_KEY_PATH}" ]; then
             echo "::error::App Store Connect API key file is missing (APP_STORE_CONNECT_API_KEY_KEY secret)."
             missing=1
           fi
+          echo "MATCH_GIT_URL host: $(echo "$MATCH_GIT_URL" | sed -E 's#^https://([^/@]+@)?([^/]+)/.*#\2#; s#^git@([^:]+):.*#\1#')"
           exit "$missing"
 
       - name: Create and unlock CI keychain

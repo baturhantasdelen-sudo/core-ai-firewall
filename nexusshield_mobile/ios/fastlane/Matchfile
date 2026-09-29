@@ -1,4 +1,8 @@
-git_url(ENV.fetch("MATCH_GIT_URL"))
+# Certificates/profiles git repo — URL comes from MATCH_GIT_URL (GitHub Secret / shell env).
+# Fastfile passes git_url explicitly to match(); this line is a fallback for `fastlane match` CLI.
+if ENV["MATCH_GIT_URL"] && !ENV["MATCH_GIT_URL"].strip.empty?
+  git_url(ENV["MATCH_GIT_URL"].strip)
+end
 
 storage_mode("git")
 

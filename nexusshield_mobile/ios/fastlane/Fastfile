@@ -39,9 +39,24 @@ def nexus_team_id
   team
 end
 
+def nexus_match_git_url
+  url = ENV["MATCH_GIT_URL"].to_s.strip
+  if url.empty?
+    UI.user_error!(
+      "MATCH_GIT_URL is required. Set the GitHub Actions secret to your private match repo " \
+        "(example: https://github.com/YOUR_ORG/nexusshield-ios-certificates.git)."
+    )
+  end
+  unless url.match?(%r{\A(https://|git@|ssh://)}i)
+    UI.user_error!("MATCH_GIT_URL must be an https://, git@, or ssh:// URL. Current value: #{url}")
+  end
+
+  url
+end
+
 def nexus_validate_match_env!
   UI.user_error!("MATCH_PASSWORD is required for match.") if ENV["MATCH_PASSWORD"].to_s.strip.empty?
-  UI.user_error!("MATCH_GIT_URL is required for match.") if ENV["MATCH_GIT_URL"].to_s.strip.empty?
+  nexus_match_git_url
   UI.user_error!("FASTLANE_TEAM_ID is required for match.") if ENV["FASTLANE_TEAM_ID"].to_s.strip.empty?
 end
 
@@ -152,12 +167,15 @@ platform :ios do
     api_key = nexus_app_store_connect_api_key
     team_id = nexus_team_id
 
+    match_git_url = nexus_match_git_url
+    UI.message("match git_url: #{match_git_url}")
+
     match_params = {
       type: "appstore",
       readonly: is_ci,
       api_key: api_key,
       app_identifier: "com.nexusshield.guard",
-      git_url: ENV.fetch("MATCH_GIT_URL"),
+      git_url: match_git_url,
       git_branch: ENV.fetch("MATCH_GIT_BRANCH", "main")
     }
     if ENV["MATCH_GIT_BASIC_AUTHORIZATION"] && !ENV["MATCH_GIT_BASIC_AUTHORIZATION"].strip.empty?
