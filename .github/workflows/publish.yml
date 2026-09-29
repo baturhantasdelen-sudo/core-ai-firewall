@@ -19,8 +19,10 @@ jobs:
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       CI: true
+      GITHUB_ACTIONS: true
     steps:
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
@@ -47,33 +49,49 @@ jobs:
         run: flutter pub get
 
       - name: Prepare Android release keystore
-        working-directory: nexusshield_mobile/android
+        working-directory: nexusshield_mobile/android/app
         env:
           ANDROID_KEYSTORE_PATH: ${{ secrets.ANDROID_KEYSTORE_PATH }}
         run: |
           set -euo pipefail
-          KEYSTORE_FILE="${{ github.workspace }}/nexusshield_mobile/android/upload-keystore.jks"
+          KEYSTORE_FILE="${{ github.workspace }}/nexusshield_mobile/android/app/upload-keystore.jks"
+          mkdir -p "$(dirname "$KEYSTORE_FILE")"
+
           if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ]; then
-            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_FILE"
-            echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_FILE" >> "$GITHUB_ENV"
-            echo "Release keystore materialized from ANDROID_KEYSTORE_BASE64."
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > "$KEYSTORE_FILE"
+            echo "Release keystore written to android/app/upload-keystore.jks from ANDROID_KEYSTORE_BASE64."
           elif [ -n "${ANDROID_KEYSTORE_PATH:-}" ] && [ -f "$ANDROID_KEYSTORE_PATH" ]; then
-            echo "ANDROID_KEYSTORE_PATH=$ANDROID_KEYSTORE_PATH" >> "$GITHUB_ENV"
-            echo "Using keystore file from ANDROID_KEYSTORE_PATH secret."
+            cp "$ANDROID_KEYSTORE_PATH" "$KEYSTORE_FILE"
+            echo "Release keystore copied from ANDROID_KEYSTORE_PATH to android/app/upload-keystore.jks."
+          elif [ -f "$KEYSTORE_FILE" ]; then
+            echo "Using existing android/app/upload-keystore.jks on runner."
           else
-            echo "::error::Configure ANDROID_KEYSTORE_BASE64 (recommended) or a runner-visible ANDROID_KEYSTORE_PATH for release signing."
+            echo "::error::Configure ANDROID_KEYSTORE_BASE64 (recommended) or ANDROID_KEYSTORE_PATH."
             exit 1
           fi
-          if [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ] || [ -z "${ANDROID_KEY_ALIAS:-}" ] || [ -z "${ANDROID_KEY_PASSWORD:-}" ]; then
-            echo "::error::ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD secrets are required."
+
+          if [ ! -s "$KEYSTORE_FILE" ]; then
+            echo "::error::Keystore file is empty. Re-encode ANDROID_KEYSTORE_BASE64 without line breaks."
             exit 1
           fi
+
+          ALIAS="${ANDROID_KEY_ALIAS:-${ANDROID_KEYSTORE_ALIAS:-}}"
+          if [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ] || [ -z "$ALIAS" ] || [ -z "${ANDROID_KEY_PASSWORD:-}" ]; then
+            echo "::error::ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS (or ANDROID_KEYSTORE_ALIAS), and ANDROID_KEY_PASSWORD are required."
+            exit 1
+          fi
+
+          echo "ANDROID_KEY_ALIAS=$ALIAS" >> "$GITHUB_ENV"
+          keytool -list -keystore "$KEYSTORE_FILE" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ALIAS" >/dev/null
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_FILE" >> "$GITHUB_ENV"
+          echo "Keystore alias verified: $ALIAS"
 
       - name: Build release App Bundle
         run: flutter build appbundle --release
 
       - name: Verify AAB is release-signed
         run: |
+          set -euo pipefail
           AAB="build/app/outputs/bundle/release/app-release.aab"
           jarsigner -verify -verbose -certs "$AAB" | tee /tmp/aab-verify.txt
           if grep -qi "CN=Android Debug" /tmp/aab-verify.txt; then
@@ -130,6 +148,7 @@ jobs:
       MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
       CI: true
     steps:
+      # (a) Checkout & Flutter setup
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
         with:
@@ -145,6 +164,7 @@ jobs:
         working-directory: nexusshield_mobile
         run: flutter pub get
 
+      # (b) Ruby & Fastlane setup
       - name: Set up Ruby for Fastlane
         uses: ruby/setup-ruby@v1
         with:
@@ -164,7 +184,7 @@ jobs:
           mkdir -p fastlane/keys
           printf '%s\n' "$APP_STORE_CONNECT_API_KEY_KEY" > fastlane/keys/AuthKey.p8
 
-      - name: Validate match secrets
+      - name: Validate match and signing secrets
         run: |
           set -euo pipefail
           missing=0
@@ -180,6 +200,12 @@ jobs:
           fi
           exit "$missing"
 
+      # (c) CI keychain (required before match / xcodebuild)
+      - name: Create and unlock CI keychain
+        working-directory: nexusshield_mobile/ios
+        run: bundle exec fastlane ci_keychain
+
+      # (d) Fastlane match sign — MUST run before flutter build ipa
       - name: Install code signing (Fastlane match sign)
         working-directory: nexusshield_mobile/ios
         run: bundle exec fastlane sign
@@ -192,8 +218,11 @@ jobs:
           security find-identity -v -p codesigning | grep -q "Apple Distribution" || (echo "::error::No Apple Distribution identity in keychain after match." && exit 1)
           echo "ExportOptions.plist and distribution identity OK."
 
+      # (e) Build IPA with match profiles + ExportOptions.plist
       - name: Build release IPA
         working-directory: nexusshield_mobile
+        env:
+          CODESIGNING_FOLDER_PATH: ${{ github.workspace }}/nexusshield_mobile/ios
         run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
 
       - name: Upload IPA artifact
@@ -204,6 +233,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # (f) App Store Connect deploy
       - name: Deploy to App Store Connect (Fastlane)
         working-directory: nexusshield_mobile/ios
         run: bundle exec fastlane deploy

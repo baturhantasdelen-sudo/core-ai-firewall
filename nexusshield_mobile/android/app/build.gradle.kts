@@ -14,8 +14,10 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
-fun signingValue(envName: String, propertyName: String): String? {
-    System.getenv(envName)?.trim()?.takeIf { it.isNotEmpty() }?.let { return it }
+fun signingValue(vararg envNames: String, propertyName: String): String? {
+    for (envName in envNames) {
+        System.getenv(envName)?.trim()?.takeIf { it.isNotEmpty() }?.let { return it }
+    }
     return keystoreProperties.getProperty(propertyName)?.trim()?.takeIf { it.isNotEmpty() }
 }
 
@@ -37,32 +39,39 @@ android {
         versionName = flutter.versionName
     }
 
-    val storePassword = signingValue("ANDROID_KEYSTORE_PASSWORD", "storePassword")
-    val keyAlias = signingValue("ANDROID_KEY_ALIAS", "keyAlias")
-    val keyPassword = signingValue("ANDROID_KEY_PASSWORD", "keyPassword")
-    val keystorePath = signingValue("ANDROID_KEYSTORE_PATH", "storeFile")
+    val storePassword = signingValue("ANDROID_KEYSTORE_PASSWORD", propertyName = "storePassword")
+    val keyAlias =
+        signingValue("ANDROID_KEY_ALIAS", "ANDROID_KEYSTORE_ALIAS", propertyName = "keyAlias")
+    val keyPassword = signingValue("ANDROID_KEY_PASSWORD", propertyName = "keyPassword")
+    val keystorePath = signingValue("ANDROID_KEYSTORE_PATH", propertyName = "storeFile")
+
+    val appModuleKeystore = file("upload-keystore.jks")
 
     fun resolveReleaseKeystoreFile(): java.io.File? {
         System.getenv("ANDROID_KEYSTORE_BASE64")?.trim()?.takeIf { it.isNotEmpty() }?.let { encoded ->
-            val out = File(rootProject.layout.buildDirectory.get().asFile, "ci/upload-keystore.jks")
-            if (!out.exists()) {
-                out.parentFile.mkdirs()
-                out.writeBytes(Base64.getDecoder().decode(encoded))
+            val normalized = encoded.replace("\\s".toRegex(), "")
+            if (!appModuleKeystore.exists()) {
+                appModuleKeystore.parentFile?.mkdirs()
+                appModuleKeystore.writeBytes(Base64.getDecoder().decode(normalized))
             }
-            return out
+            return appModuleKeystore
         }
 
-        if (keystorePath.isNullOrBlank()) {
-            return null
+        if (!keystorePath.isNullOrBlank()) {
+            val declared = file(keystorePath)
+            val resolved =
+                when {
+                    declared.isAbsolute && declared.exists() -> declared
+                    declared.exists() -> declared
+                    rootProject.file(keystorePath).exists() -> rootProject.file(keystorePath)
+                    else -> null
+                }
+            if (resolved != null) {
+                return resolved
+            }
         }
 
-        val declared = file(keystorePath)
-        return when {
-            declared.isAbsolute && declared.exists() -> declared
-            declared.exists() -> declared
-            rootProject.file(keystorePath).exists() -> rootProject.file(keystorePath)
-            else -> null
-        }
+        return appModuleKeystore.takeIf { it.exists() }
     }
 
     val releaseKeystoreFile = resolveReleaseKeystoreFile()
@@ -86,8 +95,9 @@ android {
     } else if (isCi) {
         throw GradleException(
             "Release signing is required in CI. Provide ANDROID_KEYSTORE_BASE64 (recommended) " +
-                "or ANDROID_KEYSTORE_PATH pointing to an existing keystore file, plus " +
-                "ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD."
+                "or ANDROID_KEYSTORE_PATH / android/app/upload-keystore.jks, plus " +
+                "ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS (or ANDROID_KEYSTORE_ALIAS), " +
+                "and ANDROID_KEY_PASSWORD."
         )
     }
 

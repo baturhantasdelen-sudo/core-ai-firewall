@@ -75,9 +75,25 @@ def write_export_options_plist!(profile_name:, team_id:)
 end
 
 platform :ios do
+  desc "Create/unlock ephemeral CI keychain (run before match on GitHub Actions)"
+  lane :ci_keychain do
+    setup_ci if is_ci
+    ENV["NEXUS_CI_KEYCHAIN_READY"] = "true"
+
+    if is_ci
+      keychain_name = ENV["MATCH_KEYCHAIN_NAME"]
+      keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"]
+      if keychain_name && keychain_password
+        sh("security", "unlock-keychain", "-p", keychain_password, keychain_name)
+        sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_name)
+        sh("security", "list-keychains", "-s", keychain_name)
+      end
+    end
+  end
+
   desc "Install App Store distribution cert and profile (match, readonly on CI)"
   lane :sign do
-    setup_ci if is_ci
+    setup_ci if is_ci && ENV["NEXUS_CI_KEYCHAIN_READY"] != "true"
 
     api_key = nexus_app_store_connect_api_key
     team_id = nexus_team_id
