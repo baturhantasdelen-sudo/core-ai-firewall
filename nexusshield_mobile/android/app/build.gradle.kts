@@ -20,6 +20,9 @@ fun signingValue(vararg envNames: String, propertyName: String): String? {
     return keystoreProperties.getProperty(propertyName)?.trim()?.takeIf { it.isNotEmpty() }
 }
 
+fun projectProp(name: String): String? =
+    (findProperty(name) as String?)?.trim()?.takeIf { it.isNotEmpty() }
+
 val isCi =
     System.getenv("CI") == "true" ||
         System.getenv("GITHUB_ACTIONS") == "true"
@@ -42,15 +45,24 @@ android {
         versionName = flutter.versionName
     }
 
-    val storePassword = signingValue("ANDROID_KEYSTORE_PASSWORD", propertyName = "storePassword")
+    val storePassword =
+        projectProp("android.injected.signing.store.password")
+            ?: signingValue("ANDROID_KEYSTORE_PASSWORD", propertyName = "storePassword")
     val keyAlias =
-        signingValue("ANDROID_KEYSTORE_ALIAS", "ANDROID_KEY_ALIAS", propertyName = "keyAlias")
-    val keyPassword = signingValue("ANDROID_KEY_PASSWORD", propertyName = "keyPassword")
-    val keystorePath = signingValue("ANDROID_KEYSTORE_PATH", propertyName = "storeFile")
+        projectProp("android.injected.signing.key.alias")
+            ?: signingValue("ANDROID_KEYSTORE_ALIAS", "ANDROID_KEY_ALIAS", propertyName = "keyAlias")
+    val keyPassword =
+        projectProp("android.injected.signing.key.password")
+            ?: signingValue("ANDROID_KEY_PASSWORD", propertyName = "keyPassword")
+
+    val injectedStoreFilePath = projectProp("android.injected.signing.store.file")
+    val keystorePath =
+        injectedStoreFilePath
+            ?: signingValue("ANDROID_KEYSTORE_PATH", propertyName = "storeFile")
+
     val appModuleKeystore = file("upload-keystore.jks")
 
     fun resolveReleaseKeystoreFile(): java.io.File? {
-        // Prefer explicit file path / key.properties (CI writes android/key.properties).
         if (!keystorePath.isNullOrBlank()) {
             val declared = file(keystorePath)
             val resolved =
@@ -69,7 +81,6 @@ android {
             return appModuleKeystore
         }
 
-        // Optional fallback: decode BASE64 only when no keystore file exists yet.
         System.getenv("ANDROID_KEYSTORE_BASE64")?.trim()?.takeIf { it.isNotEmpty() }?.let { encoded ->
             val normalized = encoded.replace("\\s".toRegex(), "")
             appModuleKeystore.parentFile?.mkdirs()
@@ -90,9 +101,8 @@ android {
 
     if (!hasReleaseSigning) {
         val message =
-            "Release signing is required. Configure android/key.properties or env vars: " +
-                "ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEYSTORE_ALIAS " +
-                "(or ANDROID_KEY_ALIAS), ANDROID_KEY_PASSWORD."
+            "Release signing is required. Configure android/key.properties, Gradle -Pandroid.injected.signing.*, " +
+                "or env: ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEYSTORE_ALIAS, ANDROID_KEY_PASSWORD."
         if (isCi) {
             throw GradleException(message)
         } else {
@@ -116,10 +126,42 @@ android {
             if (!hasReleaseSigning) {
                 throw GradleException("Release build refused: upload keystore is not configured.")
             }
-            signingConfig = signingConfigs.getByName("release")
+            val releaseSigning = signingConfigs.getByName("release")
+            signingConfig = releaseSigning
             isMinifyEnabled = false
             isShrinkResources = false
         }
+        debug {
+            // Prevent accidental debug signing inheritance on release tasks.
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+}
+
+fun assertReleaseNotDebugSigned(taskLabel: String) {
+    val releaseBuildType = android.buildTypes.getByName("release")
+    val config = releaseBuildType.signingConfig
+        ?: throw GradleException("$taskLabel: release signingConfig is null.")
+
+    if (config.name == "debug") {
+        throw GradleException("$taskLabel: release variant is configured to use debug signing.")
+    }
+
+    val store = config.storeFile
+        ?: throw GradleException("$taskLabel: release keystore file is null.")
+
+    if (!store.exists()) {
+        throw GradleException("$taskLabel: release keystore not found at ${store.absolutePath}")
+    }
+
+    logger.lifecycle(
+        "$taskLabel: signing with config='${config.name}', store='${store.absolutePath}', alias='${config.keyAlias}'"
+    )
+}
+
+tasks.configureEach {
+    if (name == "bundleRelease" || name == "signReleaseBundle" || name == "packageReleaseBundle") {
+        doFirst { assertReleaseNotDebugSigned(name) }
     }
 }
 

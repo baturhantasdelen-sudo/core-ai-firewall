@@ -55,6 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           KEYSTORE_FILE="${{ github.workspace }}/nexusshield_mobile/android/app/upload-keystore.jks"
+          KEY_PROPS="${{ github.workspace }}/nexusshield_mobile/android/key.properties"
           mkdir -p "$(dirname "$KEYSTORE_FILE")"
 
           if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ]; then
@@ -83,7 +84,6 @@ jobs:
           keytool -list -keystore "$KEYSTORE_FILE" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ALIAS"
           keytool -list -v -keystore "$KEYSTORE_FILE" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ALIAS" | grep -E "Alias name:|Valid from:|Owner:"
 
-          KEY_PROPS="${{ github.workspace }}/nexusshield_mobile/android/key.properties"
           {
             echo "storePassword=${ANDROID_KEYSTORE_PASSWORD}"
             echo "keyPassword=${ANDROID_KEY_PASSWORD}"
@@ -95,19 +95,35 @@ jobs:
           echo "ANDROID_KEYSTORE_ALIAS=$ALIAS" >> "$GITHUB_ENV"
           echo "ANDROID_KEY_ALIAS=$ALIAS" >> "$GITHUB_ENV"
           echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_FILE" >> "$GITHUB_ENV"
+          echo "NEXUS_KEYSTORE_FILE=$KEYSTORE_FILE" >> "$GITHUB_ENV"
+          echo "NEXUS_KEY_ALIAS=$ALIAS" >> "$GITHUB_ENV"
 
       - name: Build release App Bundle
         env:
           ANDROID_KEYSTORE_BASE64: ""
-        run: flutter build appbundle --release
+        run: |
+          set -euo pipefail
+          test -f android/key.properties
+          test -f android/app/upload-keystore.jks
+          flutter build appbundle --release -- \
+            -Pandroid.injected.signing.store.file="${NEXUS_KEYSTORE_FILE}" \
+            -Pandroid.injected.signing.store.password="${ANDROID_KEYSTORE_PASSWORD}" \
+            -Pandroid.injected.signing.key.alias="${NEXUS_KEY_ALIAS}" \
+            -Pandroid.injected.signing.key.password="${ANDROID_KEY_PASSWORD}" \
+            --no-configuration-cache
 
       - name: Verify AAB is release-signed
         run: |
           set -euo pipefail
           AAB="build/app/outputs/bundle/release/app-release.aab"
+          test -f "$AAB"
           jarsigner -verify -verbose -certs "$AAB" | tee /tmp/aab-verify.txt
           if grep -qi "CN=Android Debug" /tmp/aab-verify.txt; then
-            echo "::error::AAB is debug-signed. Gradle must use android/key.properties release signing."
+            echo "::error::AAB is debug-signed. Fix keystore secrets before Play upload."
+            exit 1
+          fi
+          if ! grep -qi "jar verified" /tmp/aab-verify.txt; then
+            echo "::error::AAB signature verification failed."
             exit 1
           fi
 
@@ -216,29 +232,15 @@ jobs:
           echo "MATCH_GIT_URL host: $(echo "$MATCH_GIT_URL" | sed -E 's#^https://([^/@]+@)?([^/]+)/.*#\2#; s#^git@([^:]+):.*#\1#')"
           exit "$missing"
 
-      - name: Create and unlock CI keychain
+      - name: Sign and build release IPA (Fastlane)
         working-directory: nexusshield_mobile/ios
-        run: bundle exec fastlane ci_keychain
+        run: bundle exec fastlane build
 
-      - name: Install code signing (Fastlane match sign)
-        working-directory: nexusshield_mobile/ios
-        run: bundle exec fastlane sign
-
-      - name: Verify signing assets before IPA build
-        working-directory: nexusshield_mobile/ios
+      - name: Verify IPA artifact exists
+        working-directory: nexusshield_mobile
         run: |
           set -euo pipefail
-          bundle exec fastlane unlock_keychain
-          test -f ExportOptions.plist || (echo "::error::ExportOptions.plist missing — fastlane sign must run first." && exit 1)
-          security find-identity -v -p codesigning | grep -q "Apple Distribution" || (echo "::error::No Apple Distribution identity after match." && exit 1)
-
-      - name: Build release IPA
-        working-directory: nexusshield_mobile/ios
-        run: |
-          set -euo pipefail
-          bundle exec fastlane unlock_keychain
-          cd ..
-          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+          ls -la build/ios/ipa/*.ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
