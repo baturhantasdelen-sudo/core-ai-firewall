@@ -309,7 +309,7 @@ platform :ios do
   end
 
   desc "Unlock CI keychain before xcodebuild/flutter (GitHub Actions follow-up steps)"
-  lane :unlock_keychain do
+  lane :nexus_ci_unlock_keychain do
     nexus_unlock_ci_keychain!
   end
 
