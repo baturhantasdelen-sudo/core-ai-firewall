@@ -162,6 +162,7 @@ jobs:
     env:
       APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
       APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
       APP_STORE_CONNECT_API_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/ios/fastlane/keys/AuthKey.p8
       FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
       FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
