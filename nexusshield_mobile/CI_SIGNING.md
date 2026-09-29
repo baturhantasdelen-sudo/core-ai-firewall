@@ -35,6 +35,8 @@ App: **`com.nexusshield.guard`** · Workflow: [`.github/workflows/publish.yml`](
 | `APP_STORE_CONNECT_API_KEY_KEY` | `.p8` file body |
 | `MATCH_GIT_BRANCH` | Optional (default `main`) |
 | `MATCH_GIT_BASIC_AUTHORIZATION` | Optional Base64 `x-access-token:PAT` |
+| `MATCH_KEYCHAIN_NAME` | Optional (default `nexusshield-ci.keychain-db` in CI) |
+| `MATCH_KEYCHAIN_PASSWORD` | Optional (CI generates random if unset; not the same as `MATCH_PASSWORD`) |
 
 **CI behavior:** validate secrets → `fastlane ci_keychain` → `fastlane sign` (match **appstore**, readonly) → `flutter build ipa` → `fastlane deploy`.
 

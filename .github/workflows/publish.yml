@@ -104,13 +104,9 @@ jobs:
         run: |
           set -euo pipefail
           test -f android/key.properties
-          test -f android/app/upload-keystore.jks
-          flutter build appbundle --release -- \
-            -Pandroid.injected.signing.store.file="${NEXUS_KEYSTORE_FILE}" \
-            -Pandroid.injected.signing.store.password="${ANDROID_KEYSTORE_PASSWORD}" \
-            -Pandroid.injected.signing.key.alias="${NEXUS_KEY_ALIAS}" \
-            -Pandroid.injected.signing.key.password="${ANDROID_KEY_PASSWORD}" \
-            --no-configuration-cache
+          test -f "${ANDROID_KEYSTORE_PATH}"
+          grep -q "storeFile=" android/key.properties
+          flutter build appbundle --release
 
       - name: Verify AAB is release-signed
         run: |
@@ -174,6 +170,8 @@ jobs:
       MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
       MATCH_GIT_BRANCH: ${{ secrets.MATCH_GIT_BRANCH }}
       MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      MATCH_KEYCHAIN_NAME: ${{ secrets.MATCH_KEYCHAIN_NAME }}
+      MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
       CI: true
       GITHUB_ACTIONS: true
     steps:
@@ -181,6 +179,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Prepare Fastlane CI keychain environment
+        run: |
+          set -euo pipefail
+          if [ -z "${MATCH_KEYCHAIN_NAME:-}" ]; then
+            echo "MATCH_KEYCHAIN_NAME=nexusshield-ci.keychain-db" >> "$GITHUB_ENV"
+          fi
+          if [ -z "${MATCH_KEYCHAIN_PASSWORD:-}" ]; then
+            echo "MATCH_KEYCHAIN_PASSWORD=$(openssl rand -base64 32 | tr -d '\n')" >> "$GITHUB_ENV"
+          fi
 
       - name: Set up Flutter (stable)
         uses: subosito/flutter-action@v2

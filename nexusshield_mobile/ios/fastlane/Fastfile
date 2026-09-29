@@ -79,6 +79,38 @@ def nexus_persist_ci_keychain_env!
   env_path
 end
 
+def nexus_ensure_match_keychain!
+  return unless is_ci
+
+  require "securerandom"
+
+  keychain_name = ENV["MATCH_KEYCHAIN_NAME"].to_s.strip
+  keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"].to_s.strip
+  keychain_name = "nexusshield-ci.keychain-db" if keychain_name.empty?
+  keychain_password = SecureRandom.hex(32) if keychain_password.empty?
+
+  ENV["MATCH_KEYCHAIN_NAME"] = keychain_name
+  ENV["MATCH_KEYCHAIN_PASSWORD"] = keychain_password
+
+  begin
+    delete_keychain(name: keychain_name)
+  rescue StandardError
+    # Keychain may not exist on first CI run.
+  end
+  create_keychain(
+    name: keychain_name,
+    password: keychain_password,
+    default_keychain: true,
+    unlock: true,
+    timeout: 3600,
+    lock_when_sleeps: false
+  )
+
+  sh("security", "unlock-keychain", "-p", keychain_password, keychain_name)
+  sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_name)
+  sh("security", "list-keychains", "-s", keychain_name)
+end
+
 def nexus_unlock_ci_keychain!
   return unless is_ci
 
@@ -139,19 +171,8 @@ platform :ios do
   desc "Create/unlock ephemeral CI keychain (run before match on GitHub Actions)"
   lane :ci_keychain do
     nexus_validate_match_env!
-    setup_ci if is_ci
+    nexus_ensure_match_keychain! if is_ci
     ENV["NEXUS_CI_KEYCHAIN_READY"] = "true"
-
-    if is_ci
-      keychain_name = ENV["MATCH_KEYCHAIN_NAME"]
-      keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"]
-      UI.user_error!("setup_ci did not configure MATCH_KEYCHAIN_NAME/PASSWORD") if keychain_name.to_s.empty? || keychain_password.to_s.empty?
-
-      sh("security", "unlock-keychain", "-p", keychain_password, keychain_name)
-      sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_name)
-      sh("security", "list-keychains", "-s", keychain_name)
-    end
-
     nexus_persist_ci_keychain_env!
   end
 
