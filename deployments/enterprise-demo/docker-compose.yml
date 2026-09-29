@@ -14,15 +14,12 @@ volumes:
 
 services:
   nexus-runtime:
-    image: python:3.12-slim
+    build:
+      context: ../..
+      dockerfile: deployments/enterprise-demo/Dockerfile
+    image: nexusshield/runtime:local-demo
     container_name: nexus_demo_runtime
     working_dir: /app
-    command:
-      [
-        "sh",
-        "-c",
-        "pip install -q -r requirements-ci.txt fastapi uvicorn pydantic && python -m uvicorn enterprise.data_plane_api:app --host 0.0.0.0 --port 8090",
-      ]
     ports:
       - "8090:8090"
     environment:

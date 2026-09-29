@@ -23,6 +23,7 @@ import { AttackDemo } from '@/components/landing/AttackDemo';
 import { ContactSection } from '@/components/landing/ContactSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
+import { ProofCenterUarPlayground } from '@/components/proof-center/ProofCenterUarPlayground';
 import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
 import {
   NEXUS_DEFENSIVE_POSITIONING,
@@ -443,6 +444,9 @@ export default function Home() {
             <PlaygroundSection />
           </div>
         </div>
+      </section>
+      <section className="mx-auto max-w-7xl px-6 py-12">
+        <ProofCenterUarPlayground />
       </section>
       <PublicProofCenterSection />
       <PricingSection />

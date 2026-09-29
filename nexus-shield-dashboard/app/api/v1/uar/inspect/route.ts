@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { evaluateAgentAction } from '@/lib/engine/action-firewall';
 import { toActionReceiptAPI } from '@/lib/uar/action-receipt-api';
+import { buildEvidenceChainPreview } from '@/lib/uar/evidence-chain-stages';
 import crypto from 'crypto';
 
 export const runtime = 'nodejs';
@@ -67,9 +68,19 @@ export async function POST(req: NextRequest) {
     evidenceHash,
   });
 
+  const evidence_chain = buildEvidenceChainPreview({
+    intent: user_intent,
+    toolName: tool_call.name,
+    decision: result.decision,
+    beforeHash,
+    afterHash,
+    evidenceHash,
+  });
+
   return NextResponse.json({
     action_receipt: actionReceipt,
     universal_action_receipt: { ...core, evidence_bundle_hash: evidenceHash },
+    evidence_chain,
     evaluation: {
       decision: result.decision,
       risk_score: result.riskScore,

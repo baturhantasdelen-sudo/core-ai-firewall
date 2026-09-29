@@ -1,6 +1,37 @@
 # Nexus Shield — AI Agent Action Governance & Verification Platform
 
+![Docker Pulls](https://img.shields.io/docker/pulls/nexusshield/runtime)
+![Evidence Harness](https://img.shields.io/badge/Harness-Evidence%20First-blue)
+![UAR Standard](https://img.shields.io/badge/UAR-SHA--256%20Verified-success)
+
 > **Know what your agents are allowed to do. Stop what they shouldn't. Prove what actually happened.**
+
+## Try it in 30 Seconds (No Registration Required)
+
+Run the air-gapped enterprise demo stack locally and generate your first cryptographic **Universal Action Receipt (UAR)**:
+
+```bash
+git clone https://github.com/baturhantasdelen-sudo/core-ai-firewall.git && cd core-ai-firewall/deployments/enterprise-demo
+docker compose up --build
+```
+
+The runtime prints a **Proof Banner** on startup and listens on **`:8090`**. Verify a receipt instantly (local dashboard on `:3000` after `cd nexus-shield-dashboard && npm run dev`):
+
+```bash
+curl -X POST http://localhost:3000/api/v1/uar/inspect \
+  -H "Content-Type: application/json" \
+  -d '{"user_intent":"Test action","tool_call":{"name":"export_db","args":{}}}'
+```
+
+Or use the hosted **Proof Center Playground** (no login): [nexus-shield-dashboard.vercel.app/proof-center#proof-playground](https://nexus-shield-dashboard.vercel.app/proof-center#proof-playground)
+
+Data plane intercept (demo stack only):
+
+```bash
+curl -X POST http://localhost:8090/v1/intercept \
+  -H "Content-Type: application/json" \
+  -d '{"user_intent":"Test action","tool":"export_db","params":{}}'
+```
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](packages/vscode-extension/LICENSE)
 [![Dashboard](https://img.shields.io/badge/Dashboard-LIVE-brightgreen)](https://nexus-shield-dashboard.vercel.app)

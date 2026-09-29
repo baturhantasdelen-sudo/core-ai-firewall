@@ -7,6 +7,8 @@ cd deployments/enterprise-demo
 docker compose up
 ```
 
+On startup, **nexus-runtime** prints the Nexus Shield Engine proof banner (air-gap status, Action Firewall port **8090**, SHA-256 UAR engine ready).
+
 ## What starts
 
 | Service | Port | Role |

@@ -31,6 +31,7 @@ Usage:
 from __future__ import annotations
 
 import os
+from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
@@ -42,9 +43,20 @@ from enterprise.uar_store import LocalUarStore
 
 NEXUS_CLOUD_CONNECT = os.getenv("NEXUS_CLOUD_CONNECT", "false").lower() in ("1", "true", "yes")
 NEXUS_AIRGAP = os.getenv("NEXUS_AIRGAP", "true").lower() in ("1", "true", "yes")
+RUNTIME_PORT = int(os.getenv("NEXUS_RUNTIME_PORT", "8090"))
+
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    from enterprise.startup_banner import emit_proof_banner
+
+    emit_proof_banner(port=RUNTIME_PORT)
+    yield
+
 
 app = FastAPI(
     title="Nexus Data Plane (nexus)",
+    lifespan=_lifespan,
     description=(
         "AI Agent Action Governance & Verification Platform — data plane runtime. "
         "Returns Universal Action Receipts (UAR) with SHA-256 evidence_hash. "

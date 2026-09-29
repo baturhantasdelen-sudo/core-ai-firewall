@@ -4,6 +4,7 @@ import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
 import { ProveItDemoCard } from '@/components/landing/ProveItDemoCard';
+import { ProofCenterUarPlayground } from '@/components/proof-center/ProofCenterUarPlayground';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,10 @@ export default function ProofCenterPage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-10">
+        <ProofCenterUarPlayground />
       </section>
 
       <PublicProofCenterSection compact />
