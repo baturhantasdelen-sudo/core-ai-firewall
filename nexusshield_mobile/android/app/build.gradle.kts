@@ -44,7 +44,7 @@ android {
 
     val storePassword = signingValue("ANDROID_KEYSTORE_PASSWORD", propertyName = "storePassword")
     val keyAlias =
-        signingValue("ANDROID_KEY_ALIAS", "ANDROID_KEYSTORE_ALIAS", propertyName = "keyAlias")
+        signingValue("ANDROID_KEYSTORE_ALIAS", "ANDROID_KEY_ALIAS", propertyName = "keyAlias")
     val keyPassword = signingValue("ANDROID_KEY_PASSWORD", propertyName = "keyPassword")
     val keystorePath = signingValue("ANDROID_KEYSTORE_PATH", propertyName = "storeFile")
     val appModuleKeystore = file("upload-keystore.jks")
@@ -91,8 +91,8 @@ android {
     if (!hasReleaseSigning) {
         val message =
             "Release signing is required. Configure android/key.properties or env vars: " +
-                "ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS " +
-                "(or ANDROID_KEYSTORE_ALIAS), ANDROID_KEY_PASSWORD."
+                "ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEYSTORE_ALIAS " +
+                "(or ANDROID_KEY_ALIAS), ANDROID_KEY_PASSWORD."
         if (isCi) {
             throw GradleException(message)
         } else {

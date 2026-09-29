@@ -1,15 +1,19 @@
 # Copy to android/key.properties (gitignored) or export the env vars below.
-# Generate a Play upload keystore once:
-#   keytool -genkey -v -keystore android/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+# Production upload keystore path (CI writes the same path from ANDROID_KEYSTORE_BASE64):
+#   android/app/upload-keystore.jks
+#
+# Generate once:
+#   keytool -genkey -v -keystore android/app/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload-alias
 
 storePassword=YOUR_STORE_PASSWORD
 keyPassword=YOUR_KEY_PASSWORD
-keyAlias=upload
+keyAlias=upload-alias
 storeFile=app/upload-keystore.jks
 
-# Equivalent environment variables (CI / Play Console pipelines):
-# ANDROID_KEYSTORE_BASE64   (recommended in GitHub Actions — base64-encoded .jks file)
-# ANDROID_KEYSTORE_PATH     (absolute path to .jks on the runner, if not using BASE64)
+# GitHub Actions / CI environment variables:
+# ANDROID_KEYSTORE_BASE64        — base64(upload-keystore.jks), single line
 # ANDROID_KEYSTORE_PASSWORD
-# ANDROID_KEY_ALIAS  (or ANDROID_KEYSTORE_ALIAS)
+# ANDROID_KEYSTORE_ALIAS         — e.g. upload-alias
 # ANDROID_KEY_PASSWORD
+# ANDROID_KEYSTORE_PATH          — optional absolute path (CI sets automatically)
+# ANDROID_KEY_ALIAS              — optional alias of ANDROID_KEYSTORE_ALIAS

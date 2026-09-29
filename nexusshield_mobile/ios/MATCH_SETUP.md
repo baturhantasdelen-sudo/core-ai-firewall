@@ -13,7 +13,7 @@ Private git repository stores **distribution certificate** and **App Store provi
 
 | Secret | Required | Example / notes |
 |--------|----------|-----------------|
-| `MATCH_GIT_URL` | **Yes** | `https://github.com/YOUR_ORG/nexusshield-ios-certificates.git` |
+| `MATCH_GIT_URL` | **Yes** | `https://github.com/YOUR_ORG/nexusshield-ios-certificates.git` (or embed PAT: `https://x-access-token:ghp_xxx@github.com/...`) |
 | `MATCH_PASSWORD` | **Yes** | Strong passphrase used to encrypt files in the match repo |
 | `FASTLANE_TEAM_ID` | **Yes** | 10-character Apple Developer Team ID |
 | `MATCH_GIT_BRANCH` | No | Default `main` |
@@ -60,7 +60,7 @@ This creates/uploads the App Store cert + profile for `com.nexusshield.guard`.
 Workflow job `build-ios` (see `.github/workflows/publish.yml`):
 
 1. `fastlane ci_keychain`
-2. `fastlane sign` (match **readonly** + `ExportOptions.plist`)
+2. `fastlane sign` or `fastlane match_appstore` (match **appstore**, **readonly** + `ExportOptions.plist`)
 3. `fastlane unlock_keychain` + `flutter build ipa`
 4. `fastlane deploy`
 

@@ -1,53 +1,39 @@
-name: 'Nexus Shield Security Scan'
-description: 'Ultra-fast, policy-driven PII & secret protection for developer workflows'
+name: 'Nexus Shield Action Verifier'
+description: 'Intercepts AI agent tool calls, enforces governance policies, and generates SHA-256 Universal Action Receipts (UAR).'
 author: 'Nexus Shield'
 branding:
   icon: 'shield'
-  color: 'purple'
+  color: 'blue'
 
 inputs:
-  api_key:
-    description: 'Nexus Shield API Key'
+  agent_intent:
+    description: 'The natural language or parsed intent of the AI agent'
     required: true
-  profile:
-    description: 'PII Profile (TR, US, GLOBAL)'
+  tool_call_payload:
+    description: 'JSON payload representing the tool name and arguments'
+    required: true
+  policy_endpoint:
+    description: 'Nexus Shield control plane or air-gapped engine URL'
     required: false
-    default: 'TR'
+    default: 'http://localhost:8090'
+
+outputs:
+  uar_receipt_id:
+    description: 'The cryptographic SHA-256 receipt ID generated for the action'
+    value: ${{ steps.nexus_verify.outputs.uar_receipt_id }}
+  verification_status:
+    description: 'Passed, Blocked, or Requires Approval'
+    value: ${{ steps.nexus_verify.outputs.verification_status }}
 
 runs:
   using: 'composite'
   steps:
-    - name: Run Nexus Shield Scan
+    - name: Verify agent action and seal UAR
+      id: nexus_verify
       shell: bash
       env:
-        NEXUS_API_KEY: ${{ inputs.api_key }}
-        NEXUS_PROFILE: ${{ inputs.profile }}
-        REPO_NAME: ${{ github.repository }}
-        COMMIT_SHA: ${{ github.sha }}
-        SCAN_PATH: ${{ github.event.head_commit.modified[0] || 'src/config.ts' }}
-      run: |
-        set -euo pipefail
-
-        FILE_PATH="${SCAN_PATH}"
-        if [ -f "$FILE_PATH" ]; then
-          FILE_CONTENT=$(python3 -c "import json, pathlib; print(json.dumps(pathlib.Path('${FILE_PATH}').read_text(encoding='utf-8', errors='replace')))")
-        else
-          FILE_CONTENT='"check"'
-        fi
-
-        curl -fsSL -X POST "https://nexus-shield-dashboard.vercel.app/api/v1/scan?format=sarif" \
-          -H "x-api-key: ${NEXUS_API_KEY}" \
-          -H "Content-Type: application/json" \
-          -d "{
-            \"repo_name\": \"${REPO_NAME}\",
-            \"commit_sha\": \"${COMMIT_SHA}\",
-            \"policy\": { \"profile\": \"${NEXUS_PROFILE}\" },
-            \"files\": [{ \"path\": \"${FILE_PATH}\", \"content\": ${FILE_CONTENT} }]
-          }" -o results.sarif
-
-        echo "SARIF results written to results.sarif"
-
-    - name: Upload SARIF file to GitHub Code Scanning
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: results.sarif
+        INPUT_AGENT_INTENT: ${{ inputs.agent_intent }}
+        INPUT_TOOL_CALL_PAYLOAD: ${{ inputs.tool_call_payload }}
+        INPUT_POLICY_ENDPOINT: ${{ inputs.policy_endpoint }}
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+      run: python3 "${{ github.action_path }}/.github/actions/verify/verify.py"

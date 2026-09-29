@@ -155,7 +155,12 @@ platform :ios do
     nexus_persist_ci_keychain_env!
   end
 
-  desc "Install App Store distribution cert and profile (match, readonly on CI)"
+  desc "match appstore — install certs/profiles (readonly on CI; unattended GitHub Actions)"
+  lane :match_appstore do
+    sign
+  end
+
+  desc "Install App Store distribution cert and profile (match appstore, readonly on CI)"
   lane :sign do
     nexus_validate_match_env!
     if is_ci && ENV["NEXUS_CI_KEYCHAIN_READY"] != "true"

@@ -25,6 +25,29 @@ curl -X POST http://localhost:3000/api/v1/uar/inspect \
 
 Or use the hosted **Proof Center Playground** (no login): [nexus-shield-dashboard.vercel.app/proof-center#proof-playground](https://nexus-shield-dashboard.vercel.app/proof-center#proof-playground)
 
+### GitHub Action — verify agent tool calls in CI
+
+Govern proposed agent actions in workflows and emit a **SHA-256 UAR** plus `Passed` / `Blocked` / `Requires Approval`:
+
+```yaml
+name: Agent governance
+on: [workflow_dispatch]
+
+jobs:
+  verify-agent-action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: nexus-shield/action-verify@v1
+        id: nexus
+        with:
+          agent_intent: "Export production database"
+          tool_call_payload: '{"name": "export_db", "args": {"db": "prod"}}'
+          policy_endpoint: http://localhost:8090
+      - run: echo "${{ steps.nexus.outputs.uar_receipt_id }} — ${{ steps.nexus.outputs.verification_status }}"
+```
+
+Same action from this repository: `uses: baturhantasdelen-sudo/core-ai-firewall@v1`. Point `policy_endpoint` at a running data plane (`NEXUS_DATA_PLANE_BOOTSTRAP=true` on `:8090`) or rely on the bundled offline policy engine when the runtime is unreachable. PII/security scanning remains at [`.github/actions/security-scan`](./.github/actions/security-scan/action.yml).
+
 Data plane intercept (demo stack only):
 
 ```bash

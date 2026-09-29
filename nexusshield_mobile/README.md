@@ -4,6 +4,8 @@ Flutter + Rust FFI client for on-device PII firewall, BYOK vault, and Personal A
 
 Store identifiers: `com.nexusshield.guard` (Android `applicationId` and iOS `PRODUCT_BUNDLE_IDENTIFIER`).
 
+**Production CI/CD & secrets:** [CI_SIGNING.md](CI_SIGNING.md) · iOS Match: [ios/MATCH_SETUP.md](ios/MATCH_SETUP.md)
+
 ## Store assets
 
 From `nexusshield_mobile/`:

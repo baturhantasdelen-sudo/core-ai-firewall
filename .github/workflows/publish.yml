@@ -74,9 +74,9 @@ jobs:
             exit 1
           fi
 
-          ALIAS="${ANDROID_KEY_ALIAS:-${ANDROID_KEYSTORE_ALIAS:-}}"
+          ALIAS="${ANDROID_KEYSTORE_ALIAS:-${ANDROID_KEY_ALIAS:-}}"
           if [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ] || [ -z "$ALIAS" ] || [ -z "${ANDROID_KEY_PASSWORD:-}" ]; then
-            echo "::error::ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS (or ANDROID_KEYSTORE_ALIAS), ANDROID_KEY_PASSWORD required."
+            echo "::error::ANDROID_KEYSTORE_PASSWORD, ANDROID_KEYSTORE_ALIAS (or ANDROID_KEY_ALIAS), ANDROID_KEY_PASSWORD required."
             exit 1
           fi
 
@@ -92,6 +92,7 @@ jobs:
           } > "$KEY_PROPS"
           chmod 600 "$KEY_PROPS"
 
+          echo "ANDROID_KEYSTORE_ALIAS=$ALIAS" >> "$GITHUB_ENV"
           echo "ANDROID_KEY_ALIAS=$ALIAS" >> "$GITHUB_ENV"
           echo "ANDROID_KEYSTORE_PATH=$KEYSTORE_FILE" >> "$GITHUB_ENV"
 
