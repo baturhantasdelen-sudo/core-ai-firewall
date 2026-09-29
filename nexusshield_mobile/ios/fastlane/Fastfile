@@ -50,6 +50,13 @@ def nexus_match_git_url
   unless url.match?(%r{\A(https://|git@|ssh://)}i)
     UI.user_error!("MATCH_GIT_URL must be an https://, git@, or ssh:// URL. Current value: #{url}")
   end
+  unless url.match?(%r{github\.com[/:][A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+}i)
+    UI.user_error!(
+      "MATCH_GIT_URL must be the private match certificates repo on GitHub " \
+        "(example: https://github.com/YOUR_ORG/nexusshield-ios-certificates.git). " \
+        "Got: #{nexus_match_git_url_for_logs(url)}"
+    )
+  end
 
   url
 end
