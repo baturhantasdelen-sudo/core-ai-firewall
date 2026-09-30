@@ -31,7 +31,7 @@ Secrets for CI live on **`nexus-shield`** → Settings → Secrets and variables
 | `APP_STORE_CONNECT_API_KEY_KEY` | **Yes** | Full `.p8` file contents |
 | `MATCH_GITHUB_PAT` | **Required (CI)** | Fine-grained or classic PAT with **read** on the **match repo only** (e.g. `nexus-shield-match`). Used with `readonly: true` — **no push**, avoids 403. |
 | `MATCH_GITHUB_PAT_WRITE` | Optional | **Write** PAT for CI bootstrap only. Set `NEXUS_MATCH_ALLOW_BOOTSTRAP=true` and unset/disable `NEXUS_MATCH_DISABLE_BOOTSTRAP`. Prefer Mac bootstrap instead. |
-| `MATCH_GIT_BASIC_AUTHORIZATION` | Optional | Base64 of `x-access-token:PAT` if you skip `MATCH_GITHUB_PAT` |
+| `MATCH_GIT_BASIC_AUTHORIZATION` | Optional | **Pre-encoded** `base64(x-access-token:PAT)` — do not store raw PAT here. CI can omit this if `MATCH_GITHUB_PAT` is set (workflow encodes automatically). |
 | `MATCH_GIT_BRANCH` | Optional | Default **`main`** in workflow + Fastfile |
 | `MATCH_KEYCHAIN_NAME` | Optional | Default **`nexusshield-ci.keychain-db`** in CI |
 | `MATCH_KEYCHAIN_PASSWORD` | Optional | CI auto-generates if empty |
