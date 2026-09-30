@@ -1,6 +1,15 @@
 default_platform(:ios)
 
+# Fastlane actions (match, upload_to_app_store, etc.) auto-map APP_STORE_CONNECT_API_KEY_PATH
+# to the api_key_path option. Passing api_key: at the same time raises:
+# "Unresolved conflict between options: 'api_key_path' and 'api_key'".
+def nexus_prepare_app_store_connect_api_key_env!
+  ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
+end
+
 def nexus_app_store_connect_api_key
+  nexus_prepare_app_store_connect_api_key_env!
+
   key_id = ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_ID")
   issuer_id = ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID")
 
@@ -205,6 +214,7 @@ platform :ios do
 
   desc "Install App Store distribution cert and profile (match appstore, readonly on CI)"
   lane :sign do
+    nexus_prepare_app_store_connect_api_key_env!
     nexus_validate_match_env!
     if is_ci && ENV["NEXUS_CI_KEYCHAIN_READY"] != "true"
       ci_keychain
@@ -304,6 +314,8 @@ platform :ios do
 
   desc "Upload release IPA to App Store Connect (upload_to_app_store / deliver)"
   lane :deploy do
+    nexus_prepare_app_store_connect_api_key_env!
+
     ios_root = File.expand_path("..", __dir__)
     ipa_glob = File.expand_path("../build/ios/ipa/*.ipa", ios_root)
     ipa_path = Dir[ipa_glob].max_by { |path| File.mtime(path) }
