@@ -196,7 +196,6 @@ jobs:
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
       MATCH_GIT_BRANCH: ${{ secrets.MATCH_GIT_BRANCH }}
-      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
       MATCH_GITHUB_PAT: ${{ secrets.MATCH_GITHUB_PAT }}
       MATCH_KEYCHAIN_NAME: ${{ secrets.MATCH_KEYCHAIN_NAME }}
       MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
@@ -225,11 +224,38 @@ jobs:
             echo "NEXUS_MATCH_READONLY=true" >> "$GITHUB_ENV"
           fi
 
+      - name: Normalize MATCH_GIT_URL (certificates repo)
+        run: |
+          set -euo pipefail
+          DEFAULT="https://github.com/baturhantasdelen-sudo/nexus-shield-match.git"
+          URL="${MATCH_GIT_URL:-}"
+          URL="$(printf '%s' "$URL" | tr -d '\r\n' | sed 's/[[:space:]]*$//')"
+          if [ -z "$URL" ]; then
+            URL="$DEFAULT"
+            echo "::warning::MATCH_GIT_URL secret empty — using default certificates repo: $DEFAULT"
+          fi
+          case "$URL" in
+            https://*|git@*|ssh://*) ;;
+            *)
+              echo "::error::MATCH_GIT_URL must start with https://, git@, or ssh://"
+              exit 1
+              ;;
+          esac
+          if echo "$URL" | grep -Eq 'nexus-shield\.git' && ! echo "$URL" | grep -q 'nexus-shield-match'; then
+            echo "::error::MATCH_GIT_URL must be the match repo (nexus-shield-match), not the app repo (nexus-shield)."
+            exit 1
+          fi
+          echo "MATCH_GIT_URL=$URL" >> "$GITHUB_ENV"
+          echo "Match certificates repository: $(echo "$URL" | sed -E 's#^https://([^/@]+@)?github.com/([^/.]+/[^/.]+).*#\2#; s#^git@github.com:([^/]+/[^/.]+).*#\1#')"
+
       - name: Prepare Match git authentication
+        env:
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         run: |
           set -euo pipefail
           if [ -n "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ] && [ "${NEXUS_MATCH_CI_BOOTSTRAP:-false}" != "true" ]; then
-            echo "Using MATCH_GIT_BASIC_AUTHORIZATION from secrets (read-only clone)."
+            echo "MATCH_GIT_BASIC_AUTHORIZATION=$MATCH_GIT_BASIC_AUTHORIZATION" >> "$GITHUB_ENV"
+            echo "Using MATCH_GIT_BASIC_AUTHORIZATION secret (read-only clone)."
             exit 0
           fi
           if echo "${MATCH_GIT_URL:-}" | grep -Eq 'https://[^/@]+@'; then
@@ -267,6 +293,28 @@ jobs:
             echo "MATCH_GIT_BRANCH=main" >> "$GITHUB_ENV"
             echo "Defaulting MATCH_GIT_BRANCH to main."
           fi
+
+      - name: Verify match repository access
+        run: |
+          set -euo pipefail
+          URL="${MATCH_GIT_URL}"
+          BRANCH="${MATCH_GIT_BRANCH:-main}"
+          if [ -z "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ]; then
+            echo "::error::MATCH_GIT_BASIC_AUTHORIZATION missing after Prepare Match git authentication."
+            exit 1
+          fi
+          DECODED="$(printf '%s' "$MATCH_GIT_BASIC_AUTHORIZATION" | base64 -d 2>/dev/null || true)"
+          PAT="${DECODED#x-access-token:}"
+          if [ -z "$PAT" ] || [ "$PAT" = "$DECODED" ]; then
+            echo "::error::Could not derive PAT from MATCH_GIT_BASIC_AUTHORIZATION. Regenerate from MATCH_GITHUB_PAT."
+            exit 1
+          fi
+          AUTH_URL="$(echo "$URL" | sed -E "s#^https://#https://x-access-token:${PAT}@#")"
+          if ! git ls-remote "$AUTH_URL" "refs/heads/$BRANCH" >/dev/null 2>&1; then
+            echo "::error::Cannot access match repo branch '$BRANCH' at $URL (404/not found = wrong URL, missing repo, or PAT lacks access to nexus-shield-match)."
+            exit 1
+          fi
+          echo "Verified git access to match repo (branch: $BRANCH)."
 
       - name: Prepare Fastlane CI keychain environment
         run: |
@@ -321,6 +369,10 @@ jobs:
             echo "::error::MATCH_GIT_URL must start with https://, git@, or ssh://"
             missing=1
           fi
+          if echo "${MATCH_GIT_URL:-}" | grep -Eq 'nexus-shield\.git' && ! echo "${MATCH_GIT_URL:-}" | grep -q 'nexus-shield-match'; then
+            echo "::error::MATCH_GIT_URL must be nexus-shield-match (certificates), not nexus-shield (app)."
+            missing=1
+          fi
           ASC_KEY_FILE="${GITHUB_WORKSPACE}/nexusshield_mobile/ios/fastlane/keys/AuthKey.p8"
           if [ ! -s "$ASC_KEY_FILE" ]; then
             echo "::error::App Store Connect API key file is missing at $ASC_KEY_FILE (check APP_STORE_CONNECT_API_KEY_KEY secret)."
@@ -336,10 +388,11 @@ jobs:
       - name: Sign and build release IPA (Fastlane)
         working-directory: nexusshield_mobile/ios
         env:
-          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_URL: ${{ env.MATCH_GIT_URL }}
           MATCH_GITHUB_PAT: ${{ secrets.MATCH_GITHUB_PAT }}
+          MATCH_GITHUB_PAT_WRITE: ${{ secrets.MATCH_GITHUB_PAT_WRITE }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_BRANCH: ${{ secrets.MATCH_GIT_BRANCH }}
+          MATCH_GIT_BRANCH: ${{ env.MATCH_GIT_BRANCH }}
           MATCH_KEYCHAIN_NAME: ${{ env.MATCH_KEYCHAIN_NAME }}
           MATCH_KEYCHAIN_PASSWORD: ${{ env.MATCH_KEYCHAIN_PASSWORD }}
           FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}

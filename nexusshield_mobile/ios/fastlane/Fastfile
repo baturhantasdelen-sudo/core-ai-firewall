@@ -1,6 +1,7 @@
 default_platform(:ios)
 
 NEXUS_APP_IDENTIFIER = "com.nexusshield.guard"
+NEXUS_MATCH_GIT_URL_DEFAULT = "https://github.com/baturhantasdelen-sudo/nexus-shield-match.git"
 
 # Fastlane actions (match, upload_to_app_store, etc.) auto-map APP_STORE_CONNECT_API_KEY_PATH
 # to the api_key_path option. Passing api_key: at the same time raises:
@@ -57,22 +58,30 @@ def nexus_team_id
   team
 end
 
-def nexus_match_git_url
+def nexus_normalize_match_git_env!
   url = ENV["MATCH_GIT_URL"].to_s.strip
-  if url.empty?
-    UI.user_error!(
-      "MATCH_GIT_URL is required. Set the GitHub Actions secret to your private match repo " \
-        "(example: https://github.com/YOUR_ORG/nexusshield-ios-certificates.git)."
-    )
-  end
+  url = NEXUS_MATCH_GIT_URL_DEFAULT if url.empty?
+  ENV["MATCH_GIT_URL"] = url
+end
+
+def nexus_match_git_url
+  nexus_normalize_match_git_env!
+  url = ENV["MATCH_GIT_URL"].to_s.strip
+
   unless url.match?(%r{\A(https://|git@|ssh://)}i)
     UI.user_error!("MATCH_GIT_URL must be an https://, git@, or ssh:// URL. Current value: #{url}")
   end
   unless url.match?(%r{github\.com[/:][A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+}i)
     UI.user_error!(
-      "MATCH_GIT_URL must be the private match certificates repo on GitHub " \
-        "(example: https://github.com/YOUR_ORG/nexusshield-ios-certificates.git). " \
+      "MATCH_GIT_URL must be the private match certificates repo on GitHub. " \
         "Got: #{nexus_match_git_url_for_logs(url)}"
+    )
+  end
+
+  if url.match?(%r{nexus-shield\.git}i) && !url.match?(%r{nexus-shield-match}i)
+    UI.user_error!(
+      "MATCH_GIT_URL must point to the match certificates repo (nexus-shield-match), " \
+        "not the application repo (nexus-shield). Current: #{nexus_match_git_url_for_logs(url)}"
     )
   end
 
@@ -441,6 +450,7 @@ platform :ios do
   desc "Install App Store distribution cert and profile (match appstore, readonly on CI)"
   lane :sign do
     nexus_normalize_asc_env!
+    nexus_normalize_match_git_env!
     nexus_validate_match_env!
     if is_ci && ENV["NEXUS_CI_KEYCHAIN_READY"] != "true"
       ci_keychain

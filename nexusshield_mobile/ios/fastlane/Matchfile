@@ -1,14 +1,17 @@
-# NexusShield — Fastlane Match (App Store distribution)
-# Lanes pass explicit match() params; this file aligns CLI usage with CI.
+# NexusShield match — certificates repo (NOT the nexus-shield application repo).
 
 storage_mode("git")
 type("appstore")
 
 app_identifier(["com.nexusshield.guard"])
 
-if ENV["MATCH_GIT_URL"] && !ENV["MATCH_GIT_URL"].strip.empty?
-  git_url(ENV["MATCH_GIT_URL"].strip)
-end
+git_url(
+  begin
+    url = ENV["MATCH_GIT_URL"].to_s.strip
+    url = "https://github.com/baturhantasdelen-sudo/nexus-shield-match.git" if url.empty?
+    url
+  end
+)
 
 git_branch(
   ENV["MATCH_GIT_BRANCH"].to_s.strip.empty? ? "main" : ENV["MATCH_GIT_BRANCH"].to_s.strip
