@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      ios_match_bootstrap:
+        description: 'One-time writable match bootstrap (push certs to match repo on macOS runner)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 permissions:
   contents: read
@@ -191,8 +201,8 @@ jobs:
       MATCH_KEYCHAIN_NAME: ${{ secrets.MATCH_KEYCHAIN_NAME }}
       MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
       MATCH_GITHUB_PAT_WRITE: ${{ secrets.MATCH_GITHUB_PAT_WRITE }}
+      NEXUS_MATCH_CI_BOOTSTRAP: ${{ secrets.NEXUS_MATCH_CI_BOOTSTRAP }}
       NEXUS_MATCH_DISABLE_BOOTSTRAP: "true"
-      NEXUS_MATCH_READONLY: "true"
       CI: true
       GITHUB_ACTIONS: true
     steps:
@@ -201,10 +211,24 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Resolve iOS match bootstrap mode
+        run: |
+          set -euo pipefail
+          BOOT="${NEXUS_MATCH_CI_BOOTSTRAP:-false}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.ios_match_bootstrap }}" = "true" ]; then
+            BOOT="true"
+          fi
+          echo "NEXUS_MATCH_CI_BOOTSTRAP=$BOOT" >> "$GITHUB_ENV"
+          if [ "$BOOT" = "true" ]; then
+            echo "::warning::CI match BOOTSTRAP enabled — match will run readonly=false and may push to the match git repo. Revert after success."
+          else
+            echo "NEXUS_MATCH_READONLY=true" >> "$GITHUB_ENV"
+          fi
+
       - name: Prepare Match git authentication
         run: |
           set -euo pipefail
-          if [ -n "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ]; then
+          if [ -n "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ] && [ "${NEXUS_MATCH_CI_BOOTSTRAP:-false}" != "true" ]; then
             echo "Using MATCH_GIT_BASIC_AUTHORIZATION from secrets (read-only clone)."
             exit 0
           fi
@@ -212,9 +236,21 @@ jobs:
             echo "MATCH_GIT_URL already contains embedded credentials."
             exit 0
           fi
+          if [ "${NEXUS_MATCH_CI_BOOTSTRAP:-false}" = "true" ]; then
+            PAT="${MATCH_GITHUB_PAT_WRITE:-${MATCH_GITHUB_PAT:-}}"
+            if [ -z "$PAT" ]; then
+              echo "::error::Bootstrap requires MATCH_GITHUB_PAT (Read+Write on match repo) or MATCH_GITHUB_PAT_WRITE."
+              exit 1
+            fi
+            AUTH=$(printf 'x-access-token:%s' "$PAT" | base64 | tr -d '\n')
+            echo "MATCH_GIT_BASIC_AUTHORIZATION=$AUTH" >> "$GITHUB_ENV"
+            echo "MATCH_GIT_BASIC_AUTHORIZATION_WRITE=$AUTH" >> "$GITHUB_ENV"
+            echo "Configured Match git write auth for CI bootstrap."
+            exit 0
+          fi
           PAT="${MATCH_GITHUB_PAT:-}"
           if [ -z "$PAT" ]; then
-            echo "::error::Set MATCH_GITHUB_PAT (read access to the private match repo, e.g. nexus-shield-match). Do not rely on GITHUB_TOKEN — it cannot push to external match repos and often causes 403."
+            echo "::error::Set MATCH_GITHUB_PAT (read access to the private match repo, e.g. nexus-shield-match)."
             exit 1
           fi
           AUTH=$(printf 'x-access-token:%s' "$PAT" | base64 | tr -d '\n')
@@ -223,7 +259,6 @@ jobs:
           if [ -n "${MATCH_GITHUB_PAT_WRITE:-}" ]; then
             AUTH_WRITE=$(printf 'x-access-token:%s' "$MATCH_GITHUB_PAT_WRITE" | base64 | tr -d '\n')
             echo "MATCH_GIT_BASIC_AUTHORIZATION_WRITE=$AUTH_WRITE" >> "$GITHUB_ENV"
-            echo "Configured Match git write auth via MATCH_GITHUB_PAT_WRITE (bootstrap only)."
           fi
 
       - name: Prepare Match git branch default
@@ -314,6 +349,10 @@ jobs:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           ASC_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          NEXUS_MATCH_CI_BOOTSTRAP: ${{ env.NEXUS_MATCH_CI_BOOTSTRAP }}
+          NEXUS_MATCH_READONLY: ${{ env.NEXUS_MATCH_READONLY }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ env.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_GIT_BASIC_AUTHORIZATION_WRITE: ${{ env.MATCH_GIT_BASIC_AUTHORIZATION_WRITE }}
           FASTLANE_DISABLE_PROMPTS: "1"
           CI: true
         run: bundle exec fastlane build

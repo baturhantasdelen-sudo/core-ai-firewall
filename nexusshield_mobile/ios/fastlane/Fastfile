@@ -205,8 +205,13 @@ rescue StandardError
   false
 end
 
+def nexus_match_ci_bootstrap?
+  is_ci && ENV["NEXUS_MATCH_CI_BOOTSTRAP"].to_s.strip.casecmp("true").zero?
+end
+
 def nexus_match_readonly_for_run?
   return false unless is_ci
+  return false if nexus_match_ci_bootstrap?
   return false if ENV["NEXUS_MATCH_FORCE_GENERATE"] == "true"
   return false if ENV["NEXUS_MATCH_READONLY"] == "false"
   return true if ENV["NEXUS_MATCH_READONLY"].to_s.strip.empty?
@@ -465,12 +470,19 @@ platform :ios do
       UI.message("NEXUS_MATCH_FORCE_GENERATE=true — starting match with readonly: false")
       match_readonly = false
     end
+    if nexus_match_ci_bootstrap?
+      UI.important(
+        "NEXUS_MATCH_CI_BOOTSTRAP=true — writable match on GitHub Actions. " \
+          "Revert bootstrap flag and use read-only PAT after certificates exist in the match repo."
+      )
+      match_readonly = false
+    end
 
     git_auth = nexus_match_git_basic_authorization(writable: !match_readonly)
     unless nexus_match_git_auth_configured?(match_git_url, writable: !match_readonly)
       UI.user_error!(
         "Match git authentication missing for readonly=#{match_readonly}. " \
-          "Set MATCH_GITHUB_PAT (read) for CI, or MATCH_GITHUB_PAT_WRITE for bootstrap/writable runs."
+          "Set MATCH_GITHUB_PAT (read) for CI, or MATCH_GITHUB_PAT / MATCH_GITHUB_PAT_WRITE with push for bootstrap."
       )
     end
 
@@ -483,7 +495,11 @@ platform :ios do
       readonly: match_readonly
     )
 
-    nexus_run_match_with_readonly_fallback!(match_params)
+    if nexus_match_ci_bootstrap? || ENV["NEXUS_MATCH_FORCE_GENERATE"] == "true"
+      nexus_run_match!(match_params)
+    else
+      nexus_run_match_with_readonly_fallback!(match_params)
+    end
 
     nexus_unlock_ci_keychain! if is_ci
     nexus_set_keychain_partition_list_for_codesign!

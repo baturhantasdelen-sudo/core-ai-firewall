@@ -113,6 +113,13 @@ CI env toggles:
 
 **Do not** use `GITHUB_TOKEN` for match — it only sees the workflow repo and will **403** when match lives in `nexus-shield-match`.
 
+### One-time CI bootstrap (no local Mac)
+
+1. Set secret **`NEXUS_MATCH_CI_BOOTSTRAP`** = `true` on **`nexus-shield`**, **or** run workflow **Publish Mobile Store Builds** manually with **ios_match_bootstrap = true**.
+2. Set **`MATCH_GITHUB_PAT`** (or `MATCH_GITHUB_PAT_WRITE`) with **Contents: Read and write** on **`nexus-shield-match`**.
+3. Push a tag (e.g. `v1.0.31`) or run workflow_dispatch.
+4. After green iOS match step, set **`NEXUS_MATCH_CI_BOOTSTRAP`** = `false` (or delete) and downgrade PAT to **Read** only.
+
 ## Troubleshooting
 
 | Symptom | Fix |
