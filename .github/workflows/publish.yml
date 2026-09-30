@@ -194,10 +194,11 @@ jobs:
       FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
       FASTLANE_ITC_TEAM_ID: ${{ secrets.FASTLANE_ITC_TEAM_ID }}
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      # Normalize step fills default if secret empty; Fastfile default matches nexus-shield-match.git
       MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
       MATCH_GIT_BRANCH: ${{ secrets.MATCH_GIT_BRANCH }}
-      # Optional: pre-computed base64(x-access-token:PAT). Do NOT put raw PAT here — use MATCH_GITHUB_PAT + Prepare step instead.
-      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      MATCH_TYPE: appstore
+      # PAT for match git (workflow encodes to MATCH_GIT_BASIC_AUTHORIZATION — do not set raw PAT as BASIC_AUTH)
       MATCH_GITHUB_PAT: ${{ secrets.MATCH_GITHUB_PAT }}
       MATCH_KEYCHAIN_NAME: ${{ secrets.MATCH_KEYCHAIN_NAME }}
       MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
@@ -251,20 +252,32 @@ jobs:
           echo "Match certificates repository: $(echo "$URL" | sed -E 's#^https://([^/@]+@)?github.com/([^/.]+/[^/.]+).*#\2#; s#^git@github.com:([^/]+/[^/.]+).*#\1#')"
 
       - name: Prepare Match git authentication
+        env:
+          # Pre-encoded base64(x-access-token:PAT) only — never raw PAT (Prepare validates or ignores invalid value)
+          MATCH_GIT_BASIC_AUTHORIZATION_SECRET: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
         run: |
           set -euo pipefail
           encode_pat_auth() {
             local pat="$1"
             printf 'x-access-token:%s' "$pat" | base64 | tr -d '\n'
           }
+          is_valid_basic_auth() {
+            local b64="$1"
+            [ -n "$b64" ] || return 1
+            local decoded
+            decoded="$(printf '%s' "$b64" | base64 -d 2>/dev/null || true)"
+            case "$decoded" in
+              x-access-token:*) return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+          if [ -z "${MATCH_GIT_BRANCH:-}" ]; then
+            echo "MATCH_GIT_BRANCH=main" >> "$GITHUB_ENV"
+            echo "Defaulting MATCH_GIT_BRANCH to main."
+          fi
           if echo "${MATCH_GIT_URL:-}" | grep -Eq 'https://[^/@]+@'; then
             echo "MATCH_GIT_URL already contains embedded credentials."
             echo "MATCH_GIT_AUTH_EMBEDDED=true" >> "$GITHUB_ENV"
-            exit 0
-          fi
-          if [ -n "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ] && [ "${NEXUS_MATCH_CI_BOOTSTRAP:-false}" != "true" ]; then
-            echo "MATCH_GIT_BASIC_AUTHORIZATION=$MATCH_GIT_BASIC_AUTHORIZATION" >> "$GITHUB_ENV"
-            echo "Using MATCH_GIT_BASIC_AUTHORIZATION secret (base64 x-access-token)."
             exit 0
           fi
           if [ "${NEXUS_MATCH_CI_BOOTSTRAP:-false}" = "true" ]; then
@@ -279,54 +292,25 @@ jobs:
             echo "Configured Match git write auth for CI bootstrap (from MATCH_GITHUB_PAT / MATCH_GITHUB_PAT_WRITE)."
             exit 0
           fi
-          PAT="${MATCH_GITHUB_PAT:-}"
-          if [ -z "$PAT" ]; then
-            echo "::error::Set MATCH_GITHUB_PAT (read access to nexus-shield-match). Fastlane needs MATCH_GIT_BASIC_AUTHORIZATION as base64(x-access-token:PAT) — this step encodes it automatically."
-            exit 1
-          fi
-          AUTH="$(encode_pat_auth "$PAT")"
-          echo "MATCH_GIT_BASIC_AUTHORIZATION=$AUTH" >> "$GITHUB_ENV"
-          echo "Configured MATCH_GIT_BASIC_AUTHORIZATION from MATCH_GITHUB_PAT (base64 x-access-token)."
-          if [ -n "${MATCH_GITHUB_PAT_WRITE:-}" ]; then
-            echo "MATCH_GIT_BASIC_AUTHORIZATION_WRITE=$(encode_pat_auth "$MATCH_GITHUB_PAT_WRITE")" >> "$GITHUB_ENV"
-          fi
-
-      - name: Prepare Match git branch default
-        run: |
-          if [ -z "${MATCH_GIT_BRANCH:-}" ]; then
-            echo "MATCH_GIT_BRANCH=main" >> "$GITHUB_ENV"
-            echo "Defaulting MATCH_GIT_BRANCH to main."
-          fi
-
-      - name: Verify match repository access
-        run: |
-          set -euo pipefail
-          URL="${MATCH_GIT_URL}"
-          BRANCH="${MATCH_GIT_BRANCH:-main}"
-          if [ "${MATCH_GIT_AUTH_EMBEDDED:-false}" = "true" ]; then
-            if ! git ls-remote "$URL" "refs/heads/$BRANCH" >/dev/null 2>&1; then
-              echo "::error::Cannot access match repo (embedded URL credentials)."
-              exit 1
+          if [ -n "${MATCH_GITHUB_PAT:-}" ]; then
+            AUTH="$(encode_pat_auth "$MATCH_GITHUB_PAT")"
+            echo "MATCH_GIT_BASIC_AUTHORIZATION=$AUTH" >> "$GITHUB_ENV"
+            echo "Configured MATCH_GIT_BASIC_AUTHORIZATION from MATCH_GITHUB_PAT (base64 x-access-token)."
+            if [ -n "${MATCH_GITHUB_PAT_WRITE:-}" ]; then
+              echo "MATCH_GIT_BASIC_AUTHORIZATION_WRITE=$(encode_pat_auth "$MATCH_GITHUB_PAT_WRITE")" >> "$GITHUB_ENV"
             fi
-            echo "Verified git access (embedded credentials in MATCH_GIT_URL)."
             exit 0
           fi
-          if [ -z "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ]; then
-            echo "::error::MATCH_GIT_BASIC_AUTHORIZATION missing after Prepare Match git authentication."
-            exit 1
+          if is_valid_basic_auth "${MATCH_GIT_BASIC_AUTHORIZATION_SECRET:-}"; then
+            echo "MATCH_GIT_BASIC_AUTHORIZATION=$MATCH_GIT_BASIC_AUTHORIZATION_SECRET" >> "$GITHUB_ENV"
+            echo "Using MATCH_GIT_BASIC_AUTHORIZATION secret (validated base64 x-access-token)."
+            exit 0
           fi
-          DECODED="$(printf '%s' "$MATCH_GIT_BASIC_AUTHORIZATION" | base64 -d 2>/dev/null || true)"
-          PAT="${DECODED#x-access-token:}"
-          if [ -z "$PAT" ] || [ "$PAT" = "$DECODED" ]; then
-            echo "::error::Could not derive PAT from MATCH_GIT_BASIC_AUTHORIZATION. Regenerate from MATCH_GITHUB_PAT."
-            exit 1
+          if [ -n "${MATCH_GIT_BASIC_AUTHORIZATION_SECRET:-}" ]; then
+            echo "::warning::MATCH_GIT_BASIC_AUTHORIZATION secret is not valid base64(x-access-token:PAT) — ignored. Set MATCH_GITHUB_PAT instead."
           fi
-          AUTH_URL="$(echo "$URL" | sed -E "s#^https://#https://x-access-token:${PAT}@#")"
-          if ! git ls-remote "$AUTH_URL" "refs/heads/$BRANCH" >/dev/null 2>&1; then
-            echo "::error::Cannot access match repo branch '$BRANCH' at $URL (404/not found = wrong URL, missing repo, or PAT lacks access to nexus-shield-match)."
-            exit 1
-          fi
-          echo "Verified git access to match repo (branch: $BRANCH)."
+          echo "::error::Set MATCH_GITHUB_PAT (read access to nexus-shield-match) or a valid MATCH_GIT_BASIC_AUTHORIZATION secret."
+          exit 1
 
       - name: Prepare Fastlane CI keychain environment
         run: |
@@ -390,8 +374,8 @@ jobs:
             echo "::error::App Store Connect API key file is missing at $ASC_KEY_FILE (check APP_STORE_CONNECT_API_KEY_KEY secret)."
             missing=1
           fi
-          if [ -z "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ] && [ -z "${MATCH_GITHUB_PAT:-}" ] && ! echo "${MATCH_GIT_URL:-}" | grep -Eq 'https://[^/@]+@'; then
-            echo "::error::Match git auth missing: set MATCH_GITHUB_PAT or MATCH_GIT_BASIC_AUTHORIZATION, or PAT in MATCH_GIT_URL."
+          if [ -z "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ] && [ "${MATCH_GIT_AUTH_EMBEDDED:-false}" != "true" ]; then
+            echo "::error::Match git auth missing after Prepare step (set MATCH_GITHUB_PAT or embed PAT in MATCH_GIT_URL)."
             missing=1
           fi
           echo "MATCH_GIT_URL host: $(echo "$MATCH_GIT_URL" | sed -E 's#^https://([^/@]+@)?([^/]+)/.*#\2#; s#^git@([^:]+):.*#\1#')"
@@ -404,6 +388,7 @@ jobs:
           MATCH_GITHUB_PAT: ${{ secrets.MATCH_GITHUB_PAT }}
           MATCH_GITHUB_PAT_WRITE: ${{ secrets.MATCH_GITHUB_PAT_WRITE }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_TYPE: appstore
           MATCH_GIT_BRANCH: ${{ env.MATCH_GIT_BRANCH }}
           MATCH_KEYCHAIN_NAME: ${{ env.MATCH_KEYCHAIN_NAME }}
           MATCH_KEYCHAIN_PASSWORD: ${{ env.MATCH_KEYCHAIN_PASSWORD }}

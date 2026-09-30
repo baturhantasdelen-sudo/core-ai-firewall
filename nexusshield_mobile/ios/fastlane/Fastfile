@@ -92,10 +92,19 @@ def nexus_match_git_url_for_logs(url)
   url.gsub(%r{https://[^/@]+@}i, "https://***@")
 end
 
+def nexus_match_basic_auth_header?(value)
+  return false if value.to_s.strip.empty?
+
+  decoded = Base64.decode64(value.to_s.strip)
+  decoded.start_with?("x-access-token:")
+rescue ArgumentError
+  false
+end
+
 def nexus_match_git_basic_authorization(writable: false)
   if writable
     write_auth = ENV["MATCH_GIT_BASIC_AUTHORIZATION_WRITE"].to_s.strip
-    return write_auth unless write_auth.empty?
+    return write_auth if nexus_match_basic_auth_header?(write_auth)
 
     pat = ENV["MATCH_GITHUB_PAT_WRITE"].to_s.strip
     pat = ENV["MATCH_GITHUB_PAT"].to_s.strip if pat.empty?
@@ -105,7 +114,7 @@ def nexus_match_git_basic_authorization(writable: false)
   end
 
   auth = ENV["MATCH_GIT_BASIC_AUTHORIZATION"].to_s.strip
-  return auth unless auth.empty?
+  return auth if nexus_match_basic_auth_header?(auth)
 
   pat = ENV["MATCH_GITHUB_PAT"].to_s.strip
   return Base64.strict_encode64("x-access-token:#{pat}") unless pat.empty?
