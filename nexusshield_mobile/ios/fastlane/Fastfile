@@ -181,14 +181,55 @@ def nexus_unlock_ci_keychain!
   nexus_refresh_ci_keychain_search_list!
 end
 
+def nexus_match_keychain_name_for_fastlane
+  ENV["MATCH_KEYCHAIN_NAME"].to_s.strip
+end
+
+def nexus_bind_ci_keychain_for_match!
+  return unless is_ci
+
+  name = nexus_match_keychain_name_for_fastlane
+  password = ENV["MATCH_KEYCHAIN_PASSWORD"].to_s.strip
+  UI.user_error!("MATCH_KEYCHAIN_NAME is missing before match on CI.") if name.empty?
+  UI.user_error!("MATCH_KEYCHAIN_PASSWORD is missing before match on CI.") if password.empty?
+
+  keychain_path = nexus_ci_keychain_file_path
+  unless File.exist?(keychain_path)
+    UI.user_error!(
+      "CI keychain not found at #{keychain_path}. Run fastlane ci_keychain before sign/match."
+    )
+  end
+
+  ENV["MATCH_KEYCHAIN_NAME"] = name
+  ENV["MATCH_KEYCHAIN_PASSWORD"] = password
+  nexus_refresh_ci_keychain_search_list!
+
+  UI.message("CI keychain for match: name=#{name}, path=#{keychain_path}")
+end
+
 def nexus_apply_ci_keychain_to_match_params!(match_params)
   return unless is_ci
 
-  keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"].to_s.strip
-  return if keychain_password.empty?
+  name = nexus_match_keychain_name_for_fastlane
+  password = ENV["MATCH_KEYCHAIN_PASSWORD"].to_s.strip
+  return if name.empty? || password.empty?
 
-  match_params[:keychain_name] = nexus_ci_keychain_file_path
-  match_params[:keychain_password] = keychain_password
+  # Must match create_keychain(name:) — not the absolute path — so match imports the private key correctly.
+  match_params[:keychain_name] = name
+  match_params[:keychain_password] = password
+end
+
+def nexus_run_match!(match_params)
+  nexus_bind_ci_keychain_for_match! if is_ci
+  nexus_apply_ci_keychain_to_match_params!(match_params)
+
+  if is_ci
+    UI.message("match keychain_name param: #{match_params[:keychain_name]}")
+    pre = sh("security", "find-identity", "-v", "-p", "codesigning", nexus_ci_keychain_file_path, log: false)
+    UI.message("Identities in CI keychain before match:\n#{pre}")
+  end
+
+  match(match_params)
 end
 
 def nexus_set_keychain_partition_list_for_codesign!
@@ -308,24 +349,33 @@ platform :ios do
     match_branch = nexus_match_git_branch
     UI.message("match git_branch: #{match_branch}")
 
+    match_readonly =
+      if is_ci
+        ENV["NEXUS_MATCH_READONLY"].to_s.strip.empty? ? true : ENV["NEXUS_MATCH_READONLY"] == "true"
+      else
+        false
+      end
+
     match_params = {
       type: "appstore",
-      readonly: is_ci,
+      readonly: match_readonly,
       api_key: api_key,
       app_identifier: "com.nexusshield.guard",
       git_url: match_git_url,
       git_branch: match_branch,
+      team_id: team_id,
       skip_confirmation: true,
       skip_docs: true,
       verbose: is_ci,
-      shallow_clone: true
+      shallow_clone: true,
+      include_all_certificates: is_ci,
+      force_for_new_devices: false
     }
 
     git_auth = nexus_match_git_basic_authorization
     match_params[:git_basic_authorization] = git_auth if git_auth && !git_auth.empty?
-    nexus_apply_ci_keychain_to_match_params!(match_params)
 
-    match(match_params)
+    nexus_run_match!(match_params)
 
     nexus_unlock_ci_keychain! if is_ci
     nexus_set_keychain_partition_list_for_codesign!
@@ -376,6 +426,7 @@ platform :ios do
 
     mobile_root = File.expand_path("../..", __dir__)
     Dir.chdir(mobile_root) do
+      nexus_refresh_ci_keychain_search_list! if is_ci
       sh("flutter", "pub", "get")
       sh("flutter", "build", "ipa", "--release", "--export-options-plist=ios/ExportOptions.plist")
     end

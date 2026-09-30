@@ -13,3 +13,11 @@ app_identifier(["com.nexusshield.guard"])
 git_branch(
   ENV["MATCH_GIT_BRANCH"].to_s.strip.empty? ? "main" : ENV["MATCH_GIT_BRANCH"].to_s.strip
 )
+
+if ENV["MATCH_KEYCHAIN_NAME"] && !ENV["MATCH_KEYCHAIN_NAME"].strip.empty?
+  keychain_name(ENV["MATCH_KEYCHAIN_NAME"].strip)
+end
+
+if ENV["MATCH_KEYCHAIN_PASSWORD"] && !ENV["MATCH_KEYCHAIN_PASSWORD"].strip.empty?
+  keychain_password(ENV["MATCH_KEYCHAIN_PASSWORD"].strip)
+end
