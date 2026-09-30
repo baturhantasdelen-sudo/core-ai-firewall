@@ -94,7 +94,16 @@ Job `build-ios` runs **`bundle exec fastlane build`**, which:
 3. `flutter build ipa`
 4. **`deploy`** → App Store Connect
 
-Optional: `NEXUS_MATCH_READONLY=false` on a single CI run only if you must refresh certs (Apple cert limit still applies).
+CI env toggles:
+
+| Variable | Effect |
+|----------|--------|
+| `NEXUS_MATCH_FORCE_GENERATE=true` | Skip readonly; bootstrap certs in match repo (needs PAT **write** on match repo) |
+| `NEXUS_MATCH_READONLY=false` | Same as force generate for the first attempt |
+| `NEXUS_MATCH_DISABLE_BOOTSTRAP=true` | Do not auto-retry with `readonly: false` after readonly failure |
+| `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_KEY_CONTENT` | Aliases for App Store Connect API secrets (also set in workflow) |
+
+By default CI runs **readonly** first; on identity/bootstrap errors Fastlane **retries once** with `readonly: false` unless disabled.
 
 ## Troubleshooting
 

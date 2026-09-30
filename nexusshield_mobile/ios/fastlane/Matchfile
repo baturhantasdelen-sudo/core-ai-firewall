@@ -1,18 +1,22 @@
-# Certificates/profiles git repo — URL comes from MATCH_GIT_URL (GitHub Secret / shell env).
-# Fastfile passes git_url explicitly to match(); this line is a fallback for `fastlane match` CLI.
-if ENV["MATCH_GIT_URL"] && !ENV["MATCH_GIT_URL"].strip.empty?
-  git_url(ENV["MATCH_GIT_URL"].strip)
-end
+# NexusShield — Fastlane Match (App Store distribution)
+# Lanes pass explicit match() params; this file aligns CLI usage with CI.
 
 storage_mode("git")
-
 type("appstore")
 
 app_identifier(["com.nexusshield.guard"])
 
+if ENV["MATCH_GIT_URL"] && !ENV["MATCH_GIT_URL"].strip.empty?
+  git_url(ENV["MATCH_GIT_URL"].strip)
+end
+
 git_branch(
   ENV["MATCH_GIT_BRANCH"].to_s.strip.empty? ? "main" : ENV["MATCH_GIT_BRANCH"].to_s.strip
 )
+
+if ENV["FASTLANE_TEAM_ID"] && !ENV["FASTLANE_TEAM_ID"].strip.empty?
+  team_id(ENV["FASTLANE_TEAM_ID"].strip)
+end
 
 if ENV["MATCH_KEYCHAIN_NAME"] && !ENV["MATCH_KEYCHAIN_NAME"].strip.empty?
   keychain_name(ENV["MATCH_KEYCHAIN_NAME"].strip)

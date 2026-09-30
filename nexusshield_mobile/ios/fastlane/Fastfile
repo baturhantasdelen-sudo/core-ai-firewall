@@ -1,5 +1,7 @@
 default_platform(:ios)
 
+NEXUS_APP_IDENTIFIER = "com.nexusshield.guard"
+
 # Fastlane actions (match, upload_to_app_store, etc.) auto-map APP_STORE_CONNECT_API_KEY_PATH
 # to the api_key_path option. Passing api_key: at the same time raises:
 # "Unresolved conflict between options: 'api_key_path' and 'api_key'".
@@ -7,8 +9,26 @@ def nexus_prepare_app_store_connect_api_key_env!
   ENV.delete("APP_STORE_CONNECT_API_KEY_PATH")
 end
 
-def nexus_app_store_connect_api_key
+def nexus_normalize_asc_env!
+  ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"] = ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"].to_s.strip
+  ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"] = ENV["ASC_KEY_ID"].to_s.strip if ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"].empty?
+
+  ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"] = ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"].to_s.strip
+  ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"] = ENV["ASC_ISSUER_ID"].to_s.strip if ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"].empty?
+
+  key_content = ENV["APP_STORE_CONNECT_API_KEY_KEY"].to_s.strip
+  key_content = ENV["ASC_KEY_CONTENT"].to_s.strip if key_content.empty?
+  if key_content.empty?
+    key_file = File.expand_path("keys/AuthKey.p8", __dir__)
+    key_content = File.read(key_file).strip if File.exist?(key_file) && File.size?(key_file).to_i.positive?
+  end
+  ENV["APP_STORE_CONNECT_API_KEY_KEY"] = key_content unless key_content.empty?
+
   nexus_prepare_app_store_connect_api_key_env!
+end
+
+def nexus_app_store_connect_api_key
+  nexus_normalize_asc_env!
 
   key_id = ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_ID")
   issuer_id = ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID")
@@ -157,11 +177,81 @@ def nexus_refresh_ci_keychain_search_list!
 
   sh("security", "unlock-keychain", "-p", keychain_password, keychain_path) unless keychain_password.empty?
   sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_path)
+  sh("security", "default-keychain", "-s", keychain_path)
 
   login_keychain = File.expand_path("~/Library/Keychains/login.keychain-db")
   search_list = [keychain_path]
   search_list << login_keychain if File.exist?(login_keychain)
   sh("security", "list-keychains", "-s", *search_list)
+end
+
+def nexus_ci_keychain_has_distribution_identity?
+  return false unless is_ci
+
+  output = sh("security", "find-identity", "-v", "-p", "codesigning", nexus_ci_keychain_file_path, log: false)
+  output.match?(/Apple Distribution|iPhone Distribution/)
+rescue StandardError
+  false
+end
+
+def nexus_match_readonly_for_run?
+  return false unless is_ci
+  return false if ENV["NEXUS_MATCH_FORCE_GENERATE"] == "true"
+  return false if ENV["NEXUS_MATCH_READONLY"] == "false"
+  return true if ENV["NEXUS_MATCH_READONLY"].to_s.strip.empty?
+  ENV["NEXUS_MATCH_READONLY"] == "true"
+end
+
+def nexus_match_bootstrap_failure?(error)
+  msg = error.message.to_s
+  msg.match?(/readonly|No code signing identity|Could not find a valid code signing identity|valid code signing identity for distribution/i)
+end
+
+def nexus_build_match_params(api_key:, team_id:, match_git_url:, match_branch:, git_auth:, readonly:)
+  params = {
+    type: "appstore",
+    readonly: readonly,
+    api_key: api_key,
+    app_identifier: NEXUS_APP_IDENTIFIER,
+    git_url: match_git_url,
+    git_branch: match_branch,
+    team_id: team_id,
+    storage_mode: "git",
+    skip_confirmation: true,
+    skip_docs: true,
+    verbose: is_ci,
+    shallow_clone: true,
+    include_all_certificates: true,
+    force_for_new_devices: false
+  }
+  params[:git_basic_authorization] = git_auth if git_auth && !git_auth.empty?
+  params
+end
+
+def nexus_run_match_with_readonly_fallback!(match_params)
+  readonly = match_params[:readonly]
+  begin
+    nexus_run_match!(match_params)
+  rescue StandardError => e
+    bootstrap_allowed =
+      is_ci &&
+      readonly &&
+      ENV["NEXUS_MATCH_DISABLE_BOOTSTRAP"] != "true" &&
+      nexus_match_bootstrap_failure?(e)
+
+    unless bootstrap_allowed
+      UI.error("match failed (readonly=#{readonly}): #{e.message}")
+      raise e
+    end
+
+    UI.important(
+      "match readonly failed (likely missing certs in match git repo). " \
+        "Retrying once with readonly: false to bootstrap via App Store Connect API. " \
+        "Ensure MATCH_GITHUB_PAT can push to the match repo."
+    )
+    retry_params = match_params.merge(readonly: false)
+    nexus_run_match!(retry_params)
+  end
 end
 
 def nexus_unlock_ci_keychain!
@@ -324,7 +414,7 @@ platform :ios do
 
   desc "Install App Store distribution cert and profile (match appstore, readonly on CI)"
   lane :sign do
-    nexus_prepare_app_store_connect_api_key_env!
+    nexus_normalize_asc_env!
     nexus_validate_match_env!
     if is_ci && ENV["NEXUS_CI_KEYCHAIN_READY"] != "true"
       ci_keychain
@@ -349,47 +439,37 @@ platform :ios do
     match_branch = nexus_match_git_branch
     UI.message("match git_branch: #{match_branch}")
 
-    match_readonly =
-      if is_ci
-        ENV["NEXUS_MATCH_READONLY"].to_s.strip.empty? ? true : ENV["NEXUS_MATCH_READONLY"] == "true"
-      else
-        false
-      end
-
-    match_params = {
-      type: "appstore",
-      readonly: match_readonly,
-      api_key: api_key,
-      app_identifier: "com.nexusshield.guard",
-      git_url: match_git_url,
-      git_branch: match_branch,
-      team_id: team_id,
-      skip_confirmation: true,
-      skip_docs: true,
-      verbose: is_ci,
-      shallow_clone: true,
-      include_all_certificates: is_ci,
-      force_for_new_devices: false
-    }
+    match_readonly = is_ci ? nexus_match_readonly_for_run? : false
+    if is_ci && ENV["NEXUS_MATCH_FORCE_GENERATE"] == "true"
+      UI.message("NEXUS_MATCH_FORCE_GENERATE=true — starting match with readonly: false")
+      match_readonly = false
+    end
 
     git_auth = nexus_match_git_basic_authorization
-    match_params[:git_basic_authorization] = git_auth if git_auth && !git_auth.empty?
+    match_params = nexus_build_match_params(
+      api_key: api_key,
+      team_id: team_id,
+      match_git_url: match_git_url,
+      match_branch: match_branch,
+      git_auth: git_auth,
+      readonly: match_readonly
+    )
 
-    nexus_run_match!(match_params)
+    nexus_run_match_with_readonly_fallback!(match_params)
 
     nexus_unlock_ci_keychain! if is_ci
     nexus_set_keychain_partition_list_for_codesign!
     nexus_assert_distribution_codesigning_identity!
 
     profiles = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING] || {}
-    profile_name = profiles["com.nexusshield.guard"]
-    UI.user_error!("match did not return a provisioning profile for com.nexusshield.guard") if profile_name.to_s.empty?
+    profile_name = profiles[NEXUS_APP_IDENTIFIER]
+    UI.user_error!("match did not return a provisioning profile for #{NEXUS_APP_IDENTIFIER}") if profile_name.to_s.empty?
 
     update_code_signing_settings(
       path: "Runner.xcodeproj",
       targets: ["Runner"],
       build_configurations: ["Release", "Profile"],
-      bundle_identifier: "com.nexusshield.guard",
+      bundle_identifier: NEXUS_APP_IDENTIFIER,
       profile_name: profile_name,
       code_sign_identity: "Apple Distribution",
       use_automatic_signing: false,
@@ -439,7 +519,7 @@ platform :ios do
 
   desc "Upload release IPA to App Store Connect (upload_to_app_store / deliver)"
   lane :deploy do
-    nexus_prepare_app_store_connect_api_key_env!
+    nexus_normalize_asc_env!
 
     ios_root = File.expand_path("..", __dir__)
     ipa_glob = File.expand_path("../build/ios/ipa/*.ipa", ios_root)
