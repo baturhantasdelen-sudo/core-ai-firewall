@@ -34,7 +34,8 @@ App: **`com.nexusshield.guard`** · Workflow: [`.github/workflows/publish.yml`](
 | `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | ASC issuer UUID |
 | `APP_STORE_CONNECT_API_KEY_KEY` | `.p8` file body |
 | `MATCH_GIT_BRANCH` | Optional (default `main`) |
-| `MATCH_GITHUB_PAT` | **Recommended** — PAT with read access to match repo (workflow derives auth header) |
+| `MATCH_GITHUB_PAT` | **Required** — read-only PAT for **match certs repo** (not `nexus-shield`); CI uses `readonly: true` |
+| `MATCH_GITHUB_PAT_WRITE` | Optional — push to match repo; only if `NEXUS_MATCH_ALLOW_BOOTSTRAP=true` |
 | `MATCH_GIT_BASIC_AUTHORIZATION` | Optional Base64 `x-access-token:PAT` (skip if `MATCH_GITHUB_PAT` is set) |
 | `MATCH_KEYCHAIN_NAME` | Optional (default `nexusshield-ci.keychain-db` in CI) |
 | `MATCH_KEYCHAIN_PASSWORD` | Optional (CI generates random if unset; not the same as `MATCH_PASSWORD`) |

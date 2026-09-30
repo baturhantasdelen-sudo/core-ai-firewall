@@ -83,7 +83,18 @@ def nexus_match_git_url_for_logs(url)
   url.gsub(%r{https://[^/@]+@}i, "https://***@")
 end
 
-def nexus_match_git_basic_authorization
+def nexus_match_git_basic_authorization(writable: false)
+  if writable
+    write_auth = ENV["MATCH_GIT_BASIC_AUTHORIZATION_WRITE"].to_s.strip
+    return write_auth unless write_auth.empty?
+
+    pat = ENV["MATCH_GITHUB_PAT_WRITE"].to_s.strip
+    pat = ENV["MATCH_GITHUB_PAT"].to_s.strip if pat.empty?
+    return Base64.strict_encode64("x-access-token:#{pat}") unless pat.empty?
+
+    return nil
+  end
+
   auth = ENV["MATCH_GIT_BASIC_AUTHORIZATION"].to_s.strip
   return auth unless auth.empty?
 
@@ -93,10 +104,10 @@ def nexus_match_git_basic_authorization
   nil
 end
 
-def nexus_match_git_auth_configured?(git_url)
+def nexus_match_git_auth_configured?(git_url, writable: false)
   return true if git_url.match?(%r{https://[^/@]+@}i)
 
-  !nexus_match_git_basic_authorization.to_s.empty?
+  !nexus_match_git_basic_authorization(writable: writable).to_s.empty?
 end
 
 def nexus_match_git_branch
@@ -204,7 +215,7 @@ end
 
 def nexus_match_bootstrap_failure?(error)
   msg = error.message.to_s
-  msg.match?(/readonly|No code signing identity|Could not find a valid code signing identity|valid code signing identity for distribution/i)
+  msg.match?(/403|Forbidden|readonly|No code signing identity|Could not find a valid code signing identity|valid code signing identity for distribution/i)
 end
 
 def nexus_build_match_params(api_key:, team_id:, match_git_url:, match_branch:, git_auth:, readonly:)
@@ -237,6 +248,7 @@ def nexus_run_match_with_readonly_fallback!(match_params)
       is_ci &&
       readonly &&
       ENV["NEXUS_MATCH_DISABLE_BOOTSTRAP"] != "true" &&
+      ENV["NEXUS_MATCH_ALLOW_BOOTSTRAP"] == "true" &&
       nexus_match_bootstrap_failure?(e)
 
     unless bootstrap_allowed
@@ -244,12 +256,21 @@ def nexus_run_match_with_readonly_fallback!(match_params)
       raise e
     end
 
+    write_auth = nexus_match_git_basic_authorization(writable: true)
+    if write_auth.to_s.empty?
+      UI.user_error!(
+        "match readonly failed and bootstrap retry was skipped: no write credentials for the match git repo.\n" \
+          "Option A (recommended for CI): populate the match repo on a Mac, keep CI readonly — set NEXUS_MATCH_DISABLE_BOOTSTRAP=true.\n" \
+          "Option B: add MATCH_GITHUB_PAT_WRITE (or MATCH_GIT_BASIC_AUTHORIZATION_WRITE) with push access to the match repo " \
+          "and set NEXUS_MATCH_ALLOW_BOOTSTRAP=true.\n" \
+          "Original error: #{e.message}"
+      )
+    end
+
     UI.important(
-      "match readonly failed (likely missing certs in match git repo). " \
-        "Retrying once with readonly: false to bootstrap via App Store Connect API. " \
-        "Ensure MATCH_GITHUB_PAT can push to the match repo."
+      "match readonly failed — retrying once with readonly: false using write PAT for match git push."
     )
-    retry_params = match_params.merge(readonly: false)
+    retry_params = match_params.merge(readonly: false, git_basic_authorization: write_auth)
     nexus_run_match!(retry_params)
   end
 end
@@ -445,7 +466,14 @@ platform :ios do
       match_readonly = false
     end
 
-    git_auth = nexus_match_git_basic_authorization
+    git_auth = nexus_match_git_basic_authorization(writable: !match_readonly)
+    unless nexus_match_git_auth_configured?(match_git_url, writable: !match_readonly)
+      UI.user_error!(
+        "Match git authentication missing for readonly=#{match_readonly}. " \
+          "Set MATCH_GITHUB_PAT (read) for CI, or MATCH_GITHUB_PAT_WRITE for bootstrap/writable runs."
+      )
+    end
+
     match_params = nexus_build_match_params(
       api_key: api_key,
       team_id: team_id,

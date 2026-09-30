@@ -29,7 +29,8 @@ Secrets for CI live on **`nexus-shield`** → Settings → Secrets and variables
 | `APP_STORE_CONNECT_API_KEY_KEY_ID` | **Yes** | ASC API Key ID |
 | `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | **Yes** | ASC issuer UUID |
 | `APP_STORE_CONNECT_API_KEY_KEY` | **Yes** | Full `.p8` file contents |
-| `MATCH_GITHUB_PAT` | **Recommended** | PAT with **read** on match repo (CI); **read+write** for Mac bootstrap |
+| `MATCH_GITHUB_PAT` | **Required (CI)** | Fine-grained or classic PAT with **read** on the **match repo only** (e.g. `nexus-shield-match`). Used with `readonly: true` — **no push**, avoids 403. |
+| `MATCH_GITHUB_PAT_WRITE` | Optional | **Write** PAT for CI bootstrap only. Set `NEXUS_MATCH_ALLOW_BOOTSTRAP=true` and unset/disable `NEXUS_MATCH_DISABLE_BOOTSTRAP`. Prefer Mac bootstrap instead. |
 | `MATCH_GIT_BASIC_AUTHORIZATION` | Optional | Base64 of `x-access-token:PAT` if you skip `MATCH_GITHUB_PAT` |
 | `MATCH_GIT_BRANCH` | Optional | Default **`main`** in workflow + Fastfile |
 | `MATCH_KEYCHAIN_NAME` | Optional | Default **`nexusshield-ci.keychain-db`** in CI |
@@ -98,12 +99,19 @@ CI env toggles:
 
 | Variable | Effect |
 |----------|--------|
-| `NEXUS_MATCH_FORCE_GENERATE=true` | Skip readonly; bootstrap certs in match repo (needs PAT **write** on match repo) |
-| `NEXUS_MATCH_READONLY=false` | Same as force generate for the first attempt |
-| `NEXUS_MATCH_DISABLE_BOOTSTRAP=true` | Do not auto-retry with `readonly: false` after readonly failure |
-| `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_KEY_CONTENT` | Aliases for App Store Connect API secrets (also set in workflow) |
+| `NEXUS_MATCH_READONLY=true` | **Default in CI** — match only **clones/decrypts**; never pushes to match git (avoids 403 with read PAT) |
+| `NEXUS_MATCH_DISABLE_BOOTSTRAP=true` | **Default in CI** — do not auto-retry with `readonly: false` |
+| `NEXUS_MATCH_ALLOW_BOOTSTRAP=true` | Allow one writable retry; requires `MATCH_GITHUB_PAT_WRITE` |
+| `NEXUS_MATCH_FORCE_GENERATE=true` | First run writable (needs write PAT) |
+| `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_KEY_CONTENT` | Aliases for App Store Connect API secrets |
 
-By default CI runs **readonly** first; on identity/bootstrap errors Fastlane **retries once** with `readonly: false` unless disabled.
+### PAT scopes (GitHub)
+
+**CI read (`MATCH_GITHUB_PAT`):** target repository = **match certs repo** (not `nexus-shield` app repo). Permissions: **Contents: Read**.
+
+**Bootstrap write (`MATCH_GITHUB_PAT_WRITE` or Mac):** same repo, **Contents: Read and write**. Classic PAT: `repo` scope on that private repo.
+
+**Do not** use `GITHUB_TOKEN` for match — it only sees the workflow repo and will **403** when match lives in `nexus-shield-match`.
 
 ## Troubleshooting
 

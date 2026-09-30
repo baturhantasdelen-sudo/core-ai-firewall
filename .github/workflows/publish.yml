@@ -190,6 +190,9 @@ jobs:
       MATCH_GITHUB_PAT: ${{ secrets.MATCH_GITHUB_PAT }}
       MATCH_KEYCHAIN_NAME: ${{ secrets.MATCH_KEYCHAIN_NAME }}
       MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
+      MATCH_GITHUB_PAT_WRITE: ${{ secrets.MATCH_GITHUB_PAT_WRITE }}
+      NEXUS_MATCH_DISABLE_BOOTSTRAP: "true"
+      NEXUS_MATCH_READONLY: "true"
       CI: true
       GITHUB_ACTIONS: true
     steps:
@@ -199,26 +202,29 @@ jobs:
           submodules: recursive
 
       - name: Prepare Match git authentication
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           if [ -n "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ]; then
-            echo "Using MATCH_GIT_BASIC_AUTHORIZATION from secrets."
+            echo "Using MATCH_GIT_BASIC_AUTHORIZATION from secrets (read-only clone)."
             exit 0
           fi
-          PAT="${MATCH_GITHUB_PAT:-${GH_TOKEN:-}}"
+          if echo "${MATCH_GIT_URL:-}" | grep -Eq 'https://[^/@]+@'; then
+            echo "MATCH_GIT_URL already contains embedded credentials."
+            exit 0
+          fi
+          PAT="${MATCH_GITHUB_PAT:-}"
           if [ -z "$PAT" ]; then
-            if echo "${MATCH_GIT_URL:-}" | grep -Eq 'https://[^/@]+@'; then
-              echo "MATCH_GIT_URL already contains embedded credentials."
-              exit 0
-            fi
-            echo "::error::Set MATCH_GITHUB_PAT, MATCH_GIT_BASIC_AUTHORIZATION, or embed PAT in MATCH_GIT_URL."
+            echo "::error::Set MATCH_GITHUB_PAT (read access to the private match repo, e.g. nexus-shield-match). Do not rely on GITHUB_TOKEN — it cannot push to external match repos and often causes 403."
             exit 1
           fi
           AUTH=$(printf 'x-access-token:%s' "$PAT" | base64 | tr -d '\n')
           echo "MATCH_GIT_BASIC_AUTHORIZATION=$AUTH" >> "$GITHUB_ENV"
-          echo "Configured Match git auth via x-access-token (MATCH_GITHUB_PAT or GITHUB_TOKEN)."
+          echo "Configured Match git read auth via MATCH_GITHUB_PAT."
+          if [ -n "${MATCH_GITHUB_PAT_WRITE:-}" ]; then
+            AUTH_WRITE=$(printf 'x-access-token:%s' "$MATCH_GITHUB_PAT_WRITE" | base64 | tr -d '\n')
+            echo "MATCH_GIT_BASIC_AUTHORIZATION_WRITE=$AUTH_WRITE" >> "$GITHUB_ENV"
+            echo "Configured Match git write auth via MATCH_GITHUB_PAT_WRITE (bootstrap only)."
+          fi
 
       - name: Prepare Match git branch default
         run: |
