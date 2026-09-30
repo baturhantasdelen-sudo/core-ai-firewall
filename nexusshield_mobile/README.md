@@ -81,10 +81,11 @@ cd nexusshield_mobile/ios
 bundle install
 export FASTLANE_TEAM_ID=XXXXXXXXXX
 export MATCH_PASSWORD='strong-encryption-password'
-export MATCH_GIT_URL='git@github.com:YOUR_ORG/nexusshield-ios-certificates.git'
+export MATCH_GIT_URL='https://github.com/YOUR_ORG/nexusshield-ios-certificates.git'
+export MATCH_GITHUB_PAT='ghp_...'
 export APP_STORE_CONNECT_API_KEY_KEY_ID=...
 export APP_STORE_CONNECT_API_KEY_ISSUER_ID=...
-export APP_STORE_CONNECT_API_KEY_PATH=/path/to/AuthKey_XXXXXX.p8
+export APP_STORE_CONNECT_API_KEY_KEY="$(cat /path/to/AuthKey_XXXXXX.p8)"
 bundle exec fastlane match appstore
 ```
 

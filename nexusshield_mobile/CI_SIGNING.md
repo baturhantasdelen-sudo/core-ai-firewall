@@ -39,7 +39,9 @@ App: **`com.nexusshield.guard`** · Workflow: [`.github/workflows/publish.yml`](
 | `MATCH_KEYCHAIN_NAME` | Optional (default `nexusshield-ci.keychain-db` in CI) |
 | `MATCH_KEYCHAIN_PASSWORD` | Optional (CI generates random if unset; not the same as `MATCH_PASSWORD`) |
 
-**CI behavior:** validate secrets → `fastlane ci_keychain` → `fastlane sign` (match **appstore**, readonly) → `flutter build ipa` → `fastlane deploy`.
+**CI behavior:** validate secrets → `bundle exec fastlane build` (internally: `ci_keychain` → `sign` with match **appstore** readonly → `flutter build ipa`) → `fastlane deploy`.
+
+**CI remote:** push tags to **`nexus-shield`** (`git push nexus-shield vX.Y.Z`), not `git push nexus-shield --tags`.
 
 Details: [ios/MATCH_SETUP.md](ios/MATCH_SETUP.md).
 
