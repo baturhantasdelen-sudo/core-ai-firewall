@@ -163,6 +163,53 @@ def nexus_unlock_ci_keychain!
   sh("security", "list-keychains", "-s", keychain_name)
 end
 
+def nexus_apply_ci_keychain_to_match_params!(match_params)
+  return unless is_ci
+
+  keychain_name = ENV["MATCH_KEYCHAIN_NAME"].to_s.strip
+  keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"].to_s.strip
+  return if keychain_name.empty? || keychain_password.empty?
+
+  match_params[:keychain_name] = keychain_name
+  match_params[:keychain_password] = keychain_password
+end
+
+def nexus_set_keychain_partition_list_for_codesign!
+  return unless is_ci
+
+  keychain_name = ENV["MATCH_KEYCHAIN_NAME"].to_s.strip
+  keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"].to_s.strip
+  return if keychain_name.empty? || keychain_password.empty?
+
+  sh(
+    "security", "set-key-partition-list",
+    "-S", "apple-tool:,apple:,codesign:",
+    "-s", "-k", keychain_password,
+    keychain_name
+  )
+rescue StandardError => e
+  UI.important("set-key-partition-list skipped: #{e.message}")
+end
+
+def nexus_assert_distribution_codesigning_identity!
+  keychain_name = ENV["MATCH_KEYCHAIN_NAME"].to_s.strip
+  search_args =
+    if is_ci && !keychain_name.empty?
+      ["security", "find-identity", "-v", "-p", "codesigning", keychain_name]
+    else
+      ["security", "find-identity", "-v", "-p", "codesigning"]
+    end
+
+  output = sh(*search_args, log: false)
+  return if output.match?(/Apple Distribution|iPhone Distribution|Apple Development/)
+
+  UI.user_error!(
+    "No code signing identity in keychain after match. " \
+      "Ensure the match repo contains the distribution certificate + private key for this team, " \
+      "and that MATCH_KEYCHAIN_NAME/PASSWORD are set on CI. Output:\n#{output}"
+  )
+end
+
 def write_export_options_plist!(profile_name:, team_id:)
   ios_root = File.expand_path("..", __dir__)
   path = File.join(ios_root, "ExportOptions.plist")
@@ -241,7 +288,7 @@ platform :ios do
 
     match_params = {
       type: "appstore",
-      readonly: true,
+      readonly: is_ci,
       api_key: api_key,
       app_identifier: "com.nexusshield.guard",
       git_url: match_git_url,
@@ -254,10 +301,13 @@ platform :ios do
 
     git_auth = nexus_match_git_basic_authorization
     match_params[:git_basic_authorization] = git_auth if git_auth && !git_auth.empty?
+    nexus_apply_ci_keychain_to_match_params!(match_params)
 
     match(match_params)
 
     nexus_unlock_ci_keychain! if is_ci
+    nexus_set_keychain_partition_list_for_codesign!
+    nexus_assert_distribution_codesigning_identity!
 
     profiles = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING] || {}
     profile_name = profiles["com.nexusshield.guard"]
@@ -296,6 +346,7 @@ platform :ios do
     sign unless ENV["NEXUS_SIGN_COMPLETED"] == "true"
     ENV["NEXUS_SIGN_COMPLETED"] = "true"
     nexus_unlock_ci_keychain! if is_ci
+    nexus_set_keychain_partition_list_for_codesign! if is_ci
 
     export_plist = File.expand_path("../ExportOptions.plist", __dir__)
     UI.user_error!("ExportOptions.plist missing after sign.") unless File.exist?(export_plist)

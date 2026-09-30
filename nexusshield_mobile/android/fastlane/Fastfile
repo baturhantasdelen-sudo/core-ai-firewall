@@ -1,6 +1,79 @@
 default_platform(:android)
 
+def nexus_google_play_json_key
+  path = ENV["GOOGLE_PLAY_JSON_KEY_PATH"].to_s.strip
+  path = File.expand_path("play-store-key.json", __dir__) if path.empty?
+  UI.user_error!("Google Play JSON key not found at #{path}. Set GOOGLE_PLAY_JSON_KEY_PATH or write fastlane/play-store-key.json.") unless File.exist?(path)
+
+  path
+end
+
+def nexus_pubspec_version_parts
+  pubspec_path = File.expand_path("../../pubspec.yaml", __dir__)
+  line = File.read(pubspec_path).each_line.find { |l| l.start_with?("version:") }
+  UI.user_error!("version: line missing in #{pubspec_path}") if line.nil?
+
+  raw = line.split(":", 2)[1].to_s.strip
+  name, build = raw.split("+", 2)
+  [name, build.to_i]
+end
+
+def nexus_play_store_max_version_code(json_key)
+  package_name = "com.nexusshield.guard"
+  tracks = ENV.fetch("GOOGLE_PLAY_VERSION_TRACKS", "internal,alpha,beta,production").split(",").map(&:strip).reject(&:empty?)
+  max_code = 0
+
+  tracks.each do |track|
+    codes = google_play_track_version_codes(
+      package_name: package_name,
+      track: track,
+      json_key: json_key
+    )
+    track_max = codes.values.flatten.compact.map(&:to_i).max || 0
+    max_code = track_max if track_max > max_code
+    UI.message("Play track #{track} max versionCode: #{track_max}")
+  rescue StandardError => e
+    UI.important("Could not read version codes for track #{track}: #{e.message}")
+  end
+
+  max_code
+end
+
+def nexus_resolve_android_version_code
+  json_key = nexus_google_play_json_key
+  version_name, pubspec_code = nexus_pubspec_version_parts
+
+  play_max = nexus_play_store_max_version_code(json_key)
+  run_number = ENV["GITHUB_RUN_NUMBER"].to_i
+  min_floor = ENV["ANDROID_MIN_VERSION_CODE"].to_i
+  min_floor = pubspec_code if min_floor <= 0
+
+  next_code = [play_max + 1, min_floor].max
+  next_code = [next_code, run_number].max if run_number.positive?
+
+  UI.success(
+    "Android versionCode resolved: #{next_code} " \
+      "(Play max: #{play_max}, pubspec build: #{pubspec_code}, run: #{run_number})"
+  )
+
+  next_code
+end
+
+def nexus_export_version_code_to_github!(version_code)
+  github_env = ENV["GITHUB_ENV"]
+  return if github_env.to_s.strip.empty?
+
+  File.open(github_env, "a") { |f| f.puts "FLUTTER_BUILD_NUMBER=#{version_code}" }
+end
+
 platform :android do
+  desc "Resolve monotonic Android versionCode from Play + pubspec; writes FLUTTER_BUILD_NUMBER to GITHUB_ENV"
+  lane :ci_version_code do
+    code = nexus_resolve_android_version_code
+    nexus_export_version_code_to_github!(code)
+    code
+  end
+
   desc "Upload release App Bundle to Google Play (upload_to_play_store)"
   lane :deploy do
     android_root = File.expand_path("..", __dir__)

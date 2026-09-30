@@ -98,6 +98,31 @@ jobs:
           echo "NEXUS_KEYSTORE_FILE=$KEYSTORE_FILE" >> "$GITHUB_ENV"
           echo "NEXUS_KEY_ALIAS=$ALIAS" >> "$GITHUB_ENV"
 
+      - name: Set up Ruby for Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: nexusshield_mobile/android
+
+      - name: Install Fastlane (Android)
+        working-directory: nexusshield_mobile/android
+        run: bundle install
+
+      - name: Configure Google Play service account
+        working-directory: nexusshield_mobile/android
+        env:
+          GOOGLE_PLAY_JSON_KEY_CONTENT: ${{ secrets.GOOGLE_PLAY_JSON_KEY_CONTENT }}
+        run: |
+          echo "$GOOGLE_PLAY_JSON_KEY_CONTENT" > fastlane/play-store-key.json
+
+      - name: Resolve Android version code (Play Store)
+        working-directory: nexusshield_mobile/android
+        env:
+          GOOGLE_PLAY_JSON_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/android/fastlane/play-store-key.json
+          GOOGLE_PLAY_TRACK: internal
+        run: bundle exec fastlane ci_version_code
+
       - name: Build release App Bundle
         env:
           ANDROID_KEYSTORE_BASE64: ""
@@ -106,7 +131,13 @@ jobs:
           test -f android/key.properties
           test -f "${ANDROID_KEYSTORE_PATH}"
           grep -q "storeFile=" android/key.properties
-          flutter build appbundle --release
+          BUILD_NUMBER="${FLUTTER_BUILD_NUMBER:-}"
+          if [ -z "$BUILD_NUMBER" ]; then
+            echo "::error::FLUTTER_BUILD_NUMBER was not set by ci_version_code lane."
+            exit 1
+          fi
+          echo "Building with versionCode (build-number): $BUILD_NUMBER"
+          flutter build appbundle --release --build-number="$BUILD_NUMBER"
 
       - name: Verify AAB is release-signed
         run: |
@@ -131,24 +162,6 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Set up Ruby for Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-          working-directory: nexusshield_mobile/android
-
-      - name: Install Fastlane (Android)
-        working-directory: nexusshield_mobile/android
-        run: bundle install
-
-      - name: Configure Google Play service account
-        working-directory: nexusshield_mobile/android
-        env:
-          GOOGLE_PLAY_JSON_KEY_CONTENT: ${{ secrets.GOOGLE_PLAY_JSON_KEY_CONTENT }}
-        run: |
-          echo "$GOOGLE_PLAY_JSON_KEY_CONTENT" > fastlane/play-store-key.json
-
       - name: Deploy to Google Play (Fastlane)
         working-directory: nexusshield_mobile/android
         env:
@@ -163,7 +176,6 @@ jobs:
       APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
       APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
       APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
-      APP_STORE_CONNECT_API_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/ios/fastlane/keys/AuthKey.p8
       FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
       FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
       FASTLANE_ITC_TEAM_ID: ${{ secrets.FASTLANE_ITC_TEAM_ID }}
@@ -264,8 +276,9 @@ jobs:
             echo "::error::MATCH_GIT_URL must start with https://, git@, or ssh://"
             missing=1
           fi
-          if [ ! -s "${APP_STORE_CONNECT_API_KEY_PATH}" ]; then
-            echo "::error::App Store Connect API key file is missing (APP_STORE_CONNECT_API_KEY_KEY secret)."
+          ASC_KEY_FILE="${GITHUB_WORKSPACE}/nexusshield_mobile/ios/fastlane/keys/AuthKey.p8"
+          if [ ! -s "$ASC_KEY_FILE" ]; then
+            echo "::error::App Store Connect API key file is missing at $ASC_KEY_FILE (check APP_STORE_CONNECT_API_KEY_KEY secret)."
             missing=1
           fi
           if [ -z "${MATCH_GIT_BASIC_AUTHORIZATION:-}" ] && [ -z "${MATCH_GITHUB_PAT:-}" ] && ! echo "${MATCH_GIT_URL:-}" | grep -Eq 'https://[^/@]+@'; then
@@ -282,6 +295,8 @@ jobs:
           MATCH_GITHUB_PAT: ${{ secrets.MATCH_GITHUB_PAT }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BRANCH: ${{ secrets.MATCH_GIT_BRANCH }}
+          MATCH_KEYCHAIN_NAME: ${{ env.MATCH_KEYCHAIN_NAME }}
+          MATCH_KEYCHAIN_PASSWORD: ${{ env.MATCH_KEYCHAIN_PASSWORD }}
           FASTLANE_TEAM_ID: ${{ secrets.FASTLANE_TEAM_ID }}
           FASTLANE_DISABLE_PROMPTS: "1"
           CI: true
