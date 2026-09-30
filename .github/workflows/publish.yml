@@ -117,6 +117,7 @@ jobs:
           echo "$GOOGLE_PLAY_JSON_KEY_CONTENT" > fastlane/play-store-key.json
 
       - name: Resolve Android version code (Play Store)
+        id: android_version
         working-directory: nexusshield_mobile/android
         env:
           GOOGLE_PLAY_JSON_KEY_PATH: ${{ github.workspace }}/nexusshield_mobile/android/fastlane/play-store-key.json
@@ -131,9 +132,9 @@ jobs:
           test -f android/key.properties
           test -f "${ANDROID_KEYSTORE_PATH}"
           grep -q "storeFile=" android/key.properties
-          BUILD_NUMBER="${FLUTTER_BUILD_NUMBER:-}"
+          BUILD_NUMBER="${{ steps.android_version.outputs.version_code }}"
           if [ -z "$BUILD_NUMBER" ]; then
-            echo "::error::FLUTTER_BUILD_NUMBER was not set by ci_version_code lane."
+            echo "::error::android_version step did not produce version_code output."
             exit 1
           fi
           echo "Building with versionCode (build-number): $BUILD_NUMBER"

@@ -137,9 +137,31 @@ def nexus_ensure_match_keychain!
     lock_when_sleeps: false
   )
 
-  sh("security", "unlock-keychain", "-p", keychain_password, keychain_name)
-  sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_name)
-  sh("security", "list-keychains", "-s", keychain_name)
+  nexus_refresh_ci_keychain_search_list!
+end
+
+def nexus_ci_keychain_file_path
+  name = ENV["MATCH_KEYCHAIN_NAME"].to_s.strip
+  UI.user_error!("MATCH_KEYCHAIN_NAME is missing on CI.") if name.empty?
+
+  return File.expand_path(name) if name.start_with?("~") || name.start_with?("/")
+
+  File.expand_path("~/Library/Keychains/#{name}")
+end
+
+def nexus_refresh_ci_keychain_search_list!
+  return unless is_ci
+
+  keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"].to_s.strip
+  keychain_path = nexus_ci_keychain_file_path
+
+  sh("security", "unlock-keychain", "-p", keychain_password, keychain_path) unless keychain_password.empty?
+  sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_path)
+
+  login_keychain = File.expand_path("~/Library/Keychains/login.keychain-db")
+  search_list = [keychain_path]
+  search_list << login_keychain if File.exist?(login_keychain)
+  sh("security", "list-keychains", "-s", *search_list)
 end
 
 def nexus_unlock_ci_keychain!
@@ -156,57 +178,57 @@ def nexus_unlock_ci_keychain!
     ENV[key] = value
   end
 
-  keychain_name = ENV["MATCH_KEYCHAIN_NAME"]
-  keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"]
-  sh("security", "unlock-keychain", "-p", keychain_password, keychain_name)
-  sh("security", "set-keychain-settings", "-t", "3600", "-u", keychain_name)
-  sh("security", "list-keychains", "-s", keychain_name)
+  nexus_refresh_ci_keychain_search_list!
 end
 
 def nexus_apply_ci_keychain_to_match_params!(match_params)
   return unless is_ci
 
-  keychain_name = ENV["MATCH_KEYCHAIN_NAME"].to_s.strip
   keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"].to_s.strip
-  return if keychain_name.empty? || keychain_password.empty?
+  return if keychain_password.empty?
 
-  match_params[:keychain_name] = keychain_name
+  match_params[:keychain_name] = nexus_ci_keychain_file_path
   match_params[:keychain_password] = keychain_password
 end
 
 def nexus_set_keychain_partition_list_for_codesign!
   return unless is_ci
 
-  keychain_name = ENV["MATCH_KEYCHAIN_NAME"].to_s.strip
   keychain_password = ENV["MATCH_KEYCHAIN_PASSWORD"].to_s.strip
-  return if keychain_name.empty? || keychain_password.empty?
+  return if keychain_password.empty?
 
   sh(
     "security", "set-key-partition-list",
     "-S", "apple-tool:,apple:,codesign:",
     "-s", "-k", keychain_password,
-    keychain_name
+    nexus_ci_keychain_file_path
   )
 rescue StandardError => e
   UI.important("set-key-partition-list skipped: #{e.message}")
 end
 
 def nexus_assert_distribution_codesigning_identity!
-  keychain_name = ENV["MATCH_KEYCHAIN_NAME"].to_s.strip
+  keychain_path = is_ci ? nexus_ci_keychain_file_path : nil
   search_args =
-    if is_ci && !keychain_name.empty?
-      ["security", "find-identity", "-v", "-p", "codesigning", keychain_name]
+    if keychain_path
+      ["security", "find-identity", "-v", "-p", "codesigning", keychain_path]
     else
       ["security", "find-identity", "-v", "-p", "codesigning"]
     end
 
   output = sh(*search_args, log: false)
-  return if output.match?(/Apple Distribution|iPhone Distribution|Apple Development/)
+  return if output.match?(/Apple Distribution|iPhone Distribution/)
 
+  team = ENV["FASTLANE_TEAM_ID"].to_s.strip
+  readonly = is_ci ? "true" : "false"
   UI.user_error!(
-    "No code signing identity in keychain after match. " \
-      "Ensure the match repo contains the distribution certificate + private key for this team, " \
-      "and that MATCH_KEYCHAIN_NAME/PASSWORD are set on CI. Output:\n#{output}"
+    "No Apple Distribution identity in keychain after match (readonly=#{readonly}).\n" \
+      "The CI keychain (#{keychain_path || 'default'}) must contain the distribution private key imported by match.\n\n" \
+      "Fix checklist:\n" \
+      "  1) Verify the match git repo includes a valid App Store distribution cert + encrypted private key for team #{team.empty? ? '(set FASTLANE_TEAM_ID)' : team}.\n" \
+      "  2) If Apple reports too many distribution certificates, revoke an unused cert in Developer portal, then on a trusted Mac run once: bundle exec fastlane match appstore (readonly false).\n" \
+      "  3) Confirm CI exports MATCH_KEYCHAIN_NAME and MATCH_KEYCHAIN_PASSWORD to the fastlane build step.\n\n" \
+      "security find-identity output:\n#{output}"
   )
 end
 
@@ -347,6 +369,7 @@ platform :ios do
     ENV["NEXUS_SIGN_COMPLETED"] = "true"
     nexus_unlock_ci_keychain! if is_ci
     nexus_set_keychain_partition_list_for_codesign! if is_ci
+    nexus_assert_distribution_codesigning_identity! if is_ci
 
     export_plist = File.expand_path("../ExportOptions.plist", __dir__)
     UI.user_error!("ExportOptions.plist missing after sign.") unless File.exist?(export_plist)

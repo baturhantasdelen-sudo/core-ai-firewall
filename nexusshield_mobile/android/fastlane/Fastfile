@@ -59,18 +59,22 @@ def nexus_resolve_android_version_code
   next_code
 end
 
-def nexus_export_version_code_to_github!(version_code)
-  github_env = ENV["GITHUB_ENV"]
-  return if github_env.to_s.strip.empty?
+def nexus_export_version_code_for_ci!(version_code)
+  # Do not set FLUTTER_BUILD_NUMBER in the environment — Flutter rejects it as reserved.
+  github_output = ENV["GITHUB_OUTPUT"].to_s.strip
+  unless github_output.empty?
+    File.open(github_output, "a") { |f| f.puts "version_code=#{version_code}" }
+    return
+  end
 
-  File.open(github_env, "a") { |f| f.puts "FLUTTER_BUILD_NUMBER=#{version_code}" }
+  UI.message("Resolved Android versionCode: #{version_code} (GITHUB_OUTPUT not set; use --build-number in CI)")
 end
 
 platform :android do
-  desc "Resolve monotonic Android versionCode from Play + pubspec; writes FLUTTER_BUILD_NUMBER to GITHUB_ENV"
+  desc "Resolve monotonic Android versionCode from Play + pubspec; writes version_code to GITHUB_OUTPUT"
   lane :ci_version_code do
     code = nexus_resolve_android_version_code
-    nexus_export_version_code_to_github!(code)
+    nexus_export_version_code_for_ci!(code)
     code
   end
 
