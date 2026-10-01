@@ -1,0 +1,83 @@
+name: Production VM Maintenance
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "cleanup = free disk; grow-fs = after GCP boot disk resize in console"
+        required: true
+        default: cleanup
+        type: choice
+        options:
+          - cleanup
+          - grow-fs
+          - cleanup-and-grow-fs
+
+jobs:
+  prod-maintenance:
+    name: Prod VM disk / filesystem
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Sync maintenance scripts to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          overwrite: true
+          source: "scripts/prod-emergency-disk-cleanup.sh,scripts/gcp-grow-root-filesystem.sh,scripts/recover-docker-stack.sh"
+          target: /opt/nexus-core-firewall/
+
+      - name: Run maintenance on production server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 30m
+          command_timeout: 30m
+          script: |
+            set -euo pipefail
+            sudo mkdir -p /opt/nexus-core-firewall
+            cd /opt/nexus-core-firewall
+            sed -i 's/\r$//' scripts/prod-emergency-disk-cleanup.sh scripts/gcp-grow-root-filesystem.sh scripts/recover-docker-stack.sh || true
+            chmod +x scripts/prod-emergency-disk-cleanup.sh scripts/gcp-grow-root-filesystem.sh scripts/recover-docker-stack.sh
+            ACTION="${{ github.event.inputs.action }}"
+            case "${ACTION}" in
+              cleanup)
+                sudo bash scripts/prod-emergency-disk-cleanup.sh
+                ;;
+              grow-fs)
+                sudo bash scripts/gcp-grow-root-filesystem.sh
+                ;;
+              cleanup-and-grow-fs)
+                sudo bash scripts/gcp-grow-root-filesystem.sh || true
+                sudo bash scripts/prod-emergency-disk-cleanup.sh
+                ;;
+              *)
+                echo "Unknown action: ${ACTION}"
+                exit 1
+                ;;
+            esac
+
+      - name: Recover lightweight stack (after cleanup)
+        if: github.event.inputs.action == 'cleanup' || github.event.inputs.action == 'cleanup-and-grow-fs'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 30m
+          command_timeout: 30m
+          script: |
+            set -euo pipefail
+            cd /opt/nexus-core-firewall
+            export DEPLOY_ML_IMAGE=0
+            [[ -f .env ]] && export DEPLOY_ML_IMAGE="$(grep '^DEPLOY_ML_IMAGE=' .env | cut -d= -f2- || echo 0)"
+            sudo -E bash scripts/recover-docker-stack.sh

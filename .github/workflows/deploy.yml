@@ -314,8 +314,21 @@ jobs:
             else
               echo "==> Lightweight deploy: nexus-quantum-guard (PyTorch) skipped"
             fi
+            echo "==> Wait for nginx-gateway before cloudflared + healthcheck..."
+            for _i in $(seq 1 45); do
+              if curl -fsS http://127.0.0.1:80/healthz 2>/dev/null | grep -q HEALTHY; then
+                break
+              fi
+              sleep 2
+            done
             sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d cloudflared || true
             sudo docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
+            for _i in $(seq 1 30); do
+              if curl -fsS http://127.0.0.1:80/healthz 2>/dev/null | grep -q HEALTHY; then
+                break
+              fi
+              sleep 2
+            done
             sudo bash scripts/post-deploy-healthcheck.sh
             sudo bash scripts/start-tunnel.sh || sudo bash scripts/fix-cloudflare-tunnel-origin.sh
             if command -v node >/dev/null 2>&1; then

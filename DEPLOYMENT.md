@@ -23,7 +23,19 @@ Bu belge GCP VM üzerinde Docker Compose ile production deploy adımlarını öz
 | GCP VM | Örn. `35.246.212.11`, deploy path: `/opt/nexus-core-firewall` |
 | Docker + Compose | Sunucuda kurulu |
 | GitHub Secrets | Aşağıdaki tablo |
-| Disk | En az 10 GB (model image ~2 GB); önerilen 20 GB |
+| Disk | En az 10 GB (model image ~2 GB); **önerilen 40 GB** (20 GB root Docker build ile dolabiliyor) |
+
+### Boot disk dolduğunda (GCP)
+
+1. **Console:** Compute Engine → VM instance → **Edit** → Boot disk **Increase size** (ör. 40 GB) → Save.
+2. **Sunucuda** (veya Actions → **Production VM Maintenance** → `grow-fs`):
+   ```bash
+   cd /opt/nexus-core-firewall
+   sudo bash scripts/gcp-grow-root-filesystem.sh
+   sudo bash scripts/prod-emergency-disk-cleanup.sh
+   sudo bash scripts/recover-docker-stack.sh
+   ```
+3. Alternatif: GitHub **Actions → Production VM Maintenance → Run workflow → `cleanup-and-grow-fs`** (önce Console’da disk büyütün).
 
 ## 2. Ortam değişkenleri
 
