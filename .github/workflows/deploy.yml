@@ -136,6 +136,23 @@ jobs:
             set -x
             echo "==> Preflight user: $(whoami) uid=$(id -u)"
             df -h / /opt /var/lib/docker 2>/dev/null || df -h /
+            avail_kb() { df -Pk / | awk 'NR==2 {print $4}'; }
+            AVAIL="$(avail_kb)"
+            echo "==> Root free: ${AVAIL} KiB"
+            # SCP unpack needs scratch space — full disk was the root cause of drone-scp exit 1.
+            if [[ "${AVAIL}" -lt $((512 * 1024)) ]]; then
+              echo "WARN: low disk — pruning unused Docker data before SCP..."
+              sudo docker system prune -af || true
+              sudo docker builder prune -af || true
+              sudo journalctl --vacuum-size=128M 2>/dev/null || true
+              AVAIL="$(avail_kb)"
+              df -h /
+              echo "==> Root free after prune: ${AVAIL} KiB"
+            fi
+            if [[ "${AVAIL}" -lt $((64 * 1024)) ]]; then
+              echo "ERROR: need at least 64MiB free on / for SCP extract (have ${AVAIL} KiB). Free disk on the prod VM."
+              exit 1
+            fi
             ls -la /opt/ 2>/dev/null || true
             sudo mkdir -p /opt/nexus-core-firewall
             sudo chown -R "$(whoami):$(whoami)" /opt/nexus-core-firewall || true
