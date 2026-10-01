@@ -32,9 +32,45 @@ jobs:
       - name: Run tests
         run: python -m pytest tests/ -v --tb=short
 
+  dashboard-build:
+    name: Dashboard build (Next.js)
+    runs-on: ubuntu-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: nexus-shield-dashboard
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: nexus-shield-dashboard/package-lock.json
+
+      - name: Install and build dashboard
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy dashboard to Vercel (optional)
+        continue-on-error: true
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "VERCEL_TOKEN not set — skip Vercel deploy (GitHub/Vercel git integration may still deploy)."
+            exit 0
+          fi
+          npx vercel deploy --prod --token "$VERCEL_TOKEN" --yes
+
   build-and-deploy:
     name: Build & Deploy
-    needs: test
+    needs: [test, dashboard-build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code

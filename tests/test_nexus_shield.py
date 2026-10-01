@@ -287,8 +287,9 @@ def test_landing_page_serves_index_html(shield_client: TestClient | httpx.Client
     assert response.status_code == 200
     assert "text/html" in response.headers.get("content-type", "")
     assert "Nexus Shield" in response.text
-    assert "Interactive Security Playground" in response.text
+    assert "Security Engines Playground" in response.text
     assert "/api/sandbox" in response.text
+    assert "sandbox-v3" in response.text
 
 
 def test_docs_benchmark_redirects_to_marketing_site(shield_client: TestClient | httpx.Client) -> None:

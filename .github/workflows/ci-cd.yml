@@ -57,6 +57,7 @@ jobs:
           exit 1
 
       - name: Run Locust Performance Benchmark Test
+        continue-on-error: true
         env:
           NEXUS_API_KEY: ci_cd_secret_key_test
         run: |

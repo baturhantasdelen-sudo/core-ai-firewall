@@ -24,7 +24,9 @@ export async function GET() {
         latency: { avg_ms: 7.28, p95_ms: 6.5, certified_sub_10ms: true },
         attack_benchmark: { blocked: 50, total: 50, accuracy_pct: 100.0 },
         intent_divergence: { accuracy_pct: 100.0 },
-        false_positive_rate: 0.0,
+        false_positive_rate: -1,
+        false_positive_note:
+          'Benchmark test suite evaluated (low false-positive rate under controlled test vectors — not a production SLA)',
         standards_alignment: {
           frameworks: ['OWASP GenAI Top 10', 'OWASP Agentic AI Threats & Mitigations'],
         },
