@@ -116,8 +116,6 @@ jobs:
     name: Production SSH Deploy
     needs: docker-push
     runs-on: ubuntu-latest
-    # SCP/SSH failures must not block CI green — fix server secrets/path separately.
-    continue-on-error: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -137,8 +135,21 @@ jobs:
             echo "==> Preflight user: $(whoami) uid=$(id -u)"
             df -h / /opt /var/lib/docker 2>/dev/null || df -h /
             avail_kb() { df -Pk / | awk 'NR==2 {print $4}'; }
+            ls -la /opt/ 2>/dev/null || true
+            sudo mkdir -p /opt/nexus-core-firewall
+            sudo chown -R "$(whoami):$(whoami)" /opt/nexus-core-firewall || true
+            cd /opt/nexus-core-firewall
+            if [[ -f docker-compose.prod.yml ]]; then
+              echo "==> Preflight: compose down --remove-orphans + network prune"
+              _dc=(sudo docker compose -f docker-compose.prod.yml)
+              [[ -f .env ]] && _dc+=(--env-file .env)
+              "${_dc[@]}" --profile cloudflare --profile ml down --remove-orphans \
+                || "${_dc[@]}" down --remove-orphans || true
+              sudo docker network prune -f || true
+              docker rm -f cloudflared-prod 2>/dev/null || true
+            fi
             AVAIL="$(avail_kb)"
-            echo "==> Root free: ${AVAIL} KiB"
+            echo "==> Root free after stack teardown: ${AVAIL} KiB"
             # SCP unpack needs scratch space — full disk was the root cause of drone-scp exit 1.
             if [[ "${AVAIL}" -lt $((512 * 1024)) ]]; then
               echo "WARN: low disk — pruning unused Docker data before SCP..."
@@ -153,9 +164,6 @@ jobs:
               echo "ERROR: need at least 64MiB free on / for SCP extract (have ${AVAIL} KiB). Free disk on the prod VM."
               exit 1
             fi
-            ls -la /opt/ 2>/dev/null || true
-            sudo mkdir -p /opt/nexus-core-firewall
-            sudo chown -R "$(whoami):$(whoami)" /opt/nexus-core-firewall || true
             ls -la /opt/nexus-core-firewall | head -20
             test -w /opt/nexus-core-firewall || { echo "ERROR: deploy path not writable"; exit 1; }
             echo "ci-preflight-$(date +%s)" > /opt/nexus-core-firewall/.ci-write-test
@@ -242,6 +250,15 @@ jobs:
             sudo mkdir -p /opt/nexus-core-firewall
             sudo chown -R "$(whoami):$(whoami)" /opt/nexus-core-firewall || true
             cd /opt/nexus-core-firewall
+            echo "==> Pre-deploy: compose down --remove-orphans + network prune"
+            if [[ -f docker-compose.prod.yml ]]; then
+              _dc=(sudo docker compose -f docker-compose.prod.yml)
+              [[ -f .env ]] && _dc+=(--env-file .env)
+              "${_dc[@]}" --profile cloudflare --profile ml down --remove-orphans \
+                || "${_dc[@]}" down --remove-orphans || true
+            fi
+            sudo docker network prune -f || true
+            docker rm -f cloudflared-prod 2>/dev/null || true
             if [[ -d .git ]]; then
               git fetch origin main 2>/dev/null || true
               git checkout main 2>/dev/null || true
@@ -283,7 +300,6 @@ jobs:
             df -h / /var/lib/docker 2>/dev/null || df -h /
             echo "==> Build lightweight Fast API locally (no PyTorch pull)..."
             sudo docker compose --env-file .env -f docker-compose.prod.yml build nexus-shield-api
-            docker rm -f cloudflared-prod 2>/dev/null || true
             sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans nexus-shield-api nginx-gateway
             if [[ "${DEPLOY_ML_IMAGE}" == "1" ]]; then
               AVAIL_KB="$(df -Pk / | awk 'NR==2 {print $4}')"
