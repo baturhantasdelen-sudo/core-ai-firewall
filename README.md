@@ -11,8 +11,9 @@
 Run the air-gapped enterprise demo stack locally and generate your first cryptographic **Universal Action Receipt (UAR)**:
 
 ```bash
-git clone https://github.com/baturhantasdelen-sudo/core-ai-firewall.git && cd core-ai-firewall/deployments/enterprise-demo
-docker compose up --build
+git clone https://github.com/baturhantasdelen-sudo/core-ai-firewall.git && cd core-ai-firewall
+docker compose -f docker-compose.nexus-reference.yml up --build
+# legacy enterprise demo: deployments/enterprise-demo
 ```
 
 The runtime prints a **Proof Banner** on startup and listens on **`:8090`**. Verify a receipt instantly (local dashboard on `:3000` after `cd nexus-shield-dashboard && npm run dev`):
@@ -235,6 +236,11 @@ Gateway (LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION.md)
 
 | Document | Topic |
 |---|---|
+| [under-the-hood.md](./docs/under-the-hood.md) | 8-step chain → GitHub module map |
+| [integration-quickstart.md](./docs/integration-quickstart.md) | Python SDK, MCP config, `POST /v1/intercept` curl |
+| [architecture-whitepaper.md](./docs/architecture-whitepaper.md) | CISO ADD — air-gap, PBKDF2 ledger, zero telemetry |
+| [security-benchmarks.md](./docs/security-benchmarks.md) | Harness raw scores & transparency template |
+| [nexus-reference-app/README.md](./nexus-reference-app/README.md) | Agent + MCP + sidecar Docker reference stack |
 | [ARCHITECTURE_WHITE_PAPER.md](./docs/ARCHITECTURE_WHITE_PAPER.md) | Multi-repo hierarchy & Action Control Plane |
 | [ACTION_RECEIPT_API.md](./docs/ACTION_RECEIPT_API.md) | Living UAR / Action Receipt standard |
 | [ENTERPRISE_PITCH_AND_VISION.md](./docs/ENTERPRISE_PITCH_AND_VISION.md) | CISO / CTO pitch & architecture (PDF: `python scripts/generate_enterprise_deck.py --lang en`) |

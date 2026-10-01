@@ -1,0 +1,94 @@
+# Nexus Shield Reference App — Agent + MCP sim + Sidecar intercept + UAR sealing
+# Usage (from repo root):
+#   docker compose -f nexus-reference-app/docker-compose.yml up --build
+
+name: nexus-reference-app
+
+networks:
+  ref_net:
+    driver: bridge
+
+volumes:
+  nexus-ref-data:
+  nexus-ref-logs:
+
+services:
+  nexus-sidecar:
+    build:
+      context: ..
+      dockerfile: nexus-reference-app/Dockerfile
+    image: nexusshield/reference-sidecar:local
+    container_name: nexus_ref_sidecar
+    ports:
+      - "8090:8090"
+    environment:
+      NEXUS_AIRGAP: "true"
+      NEXUS_CLOUD_CONNECT: "false"
+      NEXUS_DATA_PLANE_BOOTSTRAP: "true"
+      PYTHONPATH: /app
+    volumes:
+      - nexus-ref-data:/app/enterprise/data
+      - nexus-ref-logs:/app/enterprise/logs
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/healthz')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks:
+      - ref_net
+
+  mcp-server:
+    image: python:3.12-slim
+    container_name: nexus_ref_mcp
+    working_dir: /app
+    command: ["python", "nexus-reference-app/mock_mcp_server.py"]
+    ports:
+      - "8100:8100"
+    volumes:
+      - ..:/app:ro
+    networks:
+      - ref_net
+
+  sample-agent:
+    image: python:3.12-slim
+    container_name: nexus_ref_agent
+    working_dir: /app
+    depends_on:
+      nexus-sidecar:
+        condition: service_healthy
+      mcp-server:
+        condition: service_started
+    environment:
+      NEXUS_INTERCEPT_URL: http://nexus-sidecar:8090/v1/intercept
+      MCP_SERVER_URL: http://mcp-server:8100
+      DEMO_INTERVAL_SEC: "8"
+    command: ["python", "nexus-reference-app/sample_agent.py"]
+    volumes:
+      - ..:/app:ro
+    networks:
+      - ref_net
+
+  uar-sealer:
+    image: nexusshield/reference-sidecar:local
+    container_name: nexus_ref_uar
+    depends_on:
+      nexus-sidecar:
+        condition: service_healthy
+    environment:
+      NEXUS_AIRGAP: "true"
+      NEXUS_CLOUD_CONNECT: "false"
+      PYTHONPATH: /app
+    command:
+      [
+        "python",
+        "-c",
+        "import urllib.request, json; r=urllib.request.urlopen('http://nexus-sidecar:8090/healthz'); print('UAR engine ready:', json.loads(r.read()))",
+      ]
+    networks:
+      - ref_net

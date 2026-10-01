@@ -20,6 +20,7 @@ import { PlaygroundSection } from '@/components/playground/PlaygroundSection';
 import { PricingSection } from '@/components/pricing/PricingSection';
 import { LandingNav } from '@/components/landing/LandingNav';
 import { AttackDemo } from '@/components/landing/AttackDemo';
+import { McpHijackTrajectoryDemo } from '@/components/landing/McpHijackTrajectoryDemo';
 import { ContactSection } from '@/components/landing/ContactSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
@@ -285,6 +286,8 @@ export default function Home() {
       </section>
 
       <AttackDemo />
+
+      <McpHijackTrajectoryDemo />
 
       <section className="border-y border-white/5 bg-zinc-900/40 py-6">
         <div className="mx-auto max-w-7xl px-6">

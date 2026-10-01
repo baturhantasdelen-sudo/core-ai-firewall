@@ -1,0 +1,7 @@
+# Official Nexus Shield reference stack (Action Control Plane template).
+# Does not replace the legacy ML docker-compose.yml — use this file for intercept + UAR demos.
+#
+#   docker compose -f docker-compose.nexus-reference.yml up --build
+
+include:
+  - path: ./nexus-reference-app/docker-compose.yml
