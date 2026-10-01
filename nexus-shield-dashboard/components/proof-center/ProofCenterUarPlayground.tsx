@@ -72,7 +72,7 @@ export function ProofCenterUarPlayground() {
       </div>
       <p className="mt-2 max-w-2xl text-sm text-zinc-400">
         Simulate an agent tool call and inspect a live SHA-256 Universal Action Receipt — before/after
-        state hashes and cryptographic signature chain (imza zinciri).
+        state hashes and tamper-evident SHA-256 receipt core (hash integrity only).
       </p>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -131,7 +131,7 @@ export function ProofCenterUarPlayground() {
       {chain.length > 0 ? (
         <div className="mt-6">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-            Evidence chain (imza zinciri)
+            Evidence chain (hash-linked stages)
           </p>
           <ol className="mt-2 space-y-1.5">
             {chain.map((step, i) => (

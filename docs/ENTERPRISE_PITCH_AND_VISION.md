@@ -84,7 +84,7 @@ The **data plane** intercepts the proposed call at the execution boundary (`POST
 2. **Tool proposed** — e.g. `export_customer_database` with exfil-shaped parameters.
 3. **Intent divergence detected** — e.g. **96%** misalignment, violations such as `INTENT_ACTION_DIVERGENCE`.
 4. **Policy enforced** — automatic **`BLOCK`**, or **`READ_ONLY` / `REQUIRE_APPROVAL`** instead of shutting down every agent.
-5. **UAR sealed** — immutable **Universal Action Receipt** with SHA-256 **`evidence_hash`** for audit, SOC 2 / ISO, and regulator-ready defense.
+5. **UAR sealed** — tamper-evident **Universal Action Receipt** with SHA-256 **`evidence_hash`** for audit workflows (hash integrity — add KMS/HSM for legal non-repudiation if required).
 6. **Verify & export** — `/verify`, local JSONL ledger, SIEM JSONL — **proof of what happened**, not a chat log guess.
 
 | Dimension | Before Nexus Shield | With Nexus Shield |
@@ -287,11 +287,11 @@ Every governed **action attempt** receives a UAR — not only blocks.
 
 | Lane | Representative metrics | What it means |
 |---|---|---|
-| **Reproducible benchmark results** | **127** agents tested · **48,291** tool calls / harness evidence bundles | Open-source harness **evaluated trajectory steps** (all decision types) |
+| **Reproducible benchmark results** | Harness baseline fixture (**127** agents · **48,291** trajectory steps in `harness/fixtures/sample-output.json`) | Open-source **harness test suite** — not live customer fleet counts |
 | **Dangerous-action benchmark subset** | **3,817 / 3,842** dangerous actions blocked (**99.3%**) | Attack-scenario **block rate** — not equal to total evidence count |
 | **Deterministic UAR ledger** | Per-tenant `uar_receipts.jsonl` | **Your** production attempts, decisions, and seals |
 
-Public UI copy: *“Every evaluated agent trajectory and governed action attempt produces an immutable SHA-256 evidence bundle.”*
+Public UI copy: *“Harness runs produce tamper-evident SHA-256 bundles per evaluated trajectory step; production UARs are sealed on your data plane.”*
 
 ---
 

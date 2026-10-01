@@ -1,7 +1,9 @@
 import { APP_DOC_ROUTES, BENCHMARK_GITHUB_URL } from '@/lib/site';
 
+/** @deprecated Legacy Pro tier removed from public pricing — use Team. */
 export const PRO_PLAN_MONTHLY_USD = 89;
-export const PRO_PLAN_ANNUAL_MONTHLY_USD = 74;
+/** @deprecated Legacy Pro tier removed from public pricing — use Team. */
+export const PRO_PLAN_ANNUAL_MONTHLY_USD = 249;
 export const TEAM_PLAN_MONTHLY_USD = 299;
 export const TEAM_PLAN_ANNUAL_MONTHLY_USD = 249;
 export const FREE_TIER_MONTHLY_SCANS = 50;
@@ -55,7 +57,7 @@ export const PRICING_TIERS: PricingTier[] = [
     features: [
       'Intent / Action Divergence Engine',
       'Kill Switch & READ_ONLY Fallback',
-      'Cryptographic Evidence Bundles',
+      'Tamper-evident UAR evidence bundles',
       'LangChain / CrewAI / MCP Sidecars',
     ],
     cta: 'Checkout — Team',
@@ -74,7 +76,7 @@ export const PRICING_TIERS: PricingTier[] = [
     features: [
       'Inter-Agent Delegation Controls',
       'Evidence Verification Vault',
-      'P99 6.1ms Runtime Intercept (harness)',
+      'Harness P99 intercept benchmarks (see methodology)',
       'Dedicated SLA & MCP Boundaries',
     ],
     cta: 'Contact Sales',

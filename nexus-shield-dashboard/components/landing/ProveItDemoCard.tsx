@@ -21,8 +21,8 @@ const STEPS = [
   },
   {
     id: 'evidence',
-    title: 'Cryptographic Evidence',
-    detail: 'Action suspended · SHA-256 evidence hash a50455955e7f… immutable audit ledger entry',
+    title: 'Tamper-evident UAR',
+    detail: 'Action suspended · SHA-256 evidence hash a50455955e7f… local UAR ledger entry (hash integrity — not HSM non-repudiation)',
     tone: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
     icon: Fingerprint,
   },

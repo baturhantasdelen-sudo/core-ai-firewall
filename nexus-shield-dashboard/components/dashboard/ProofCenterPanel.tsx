@@ -10,6 +10,10 @@ import {
   Target,
   Zap,
 } from 'lucide-react';
+import {
+  NEXUS_HARNESS_FALSE_POSITIVE_NOTE,
+  NEXUS_HARNESS_LATENCY_FOOTNOTE,
+} from '@/lib/brand/copy-standards';
 import { fetchProofCenterMetrics, runProofCenterBenchmark } from '@/lib/proof-center';
 import type { ProofCenterMetrics } from '@/types/proof-center';
 
@@ -121,7 +125,7 @@ export function ProofCenterPanel() {
               Nexus Shield Proof Center
             </h2>
             <p className="mt-0.5 text-xs text-zinc-500">
-              Live benchmark latency, attack blocking accuracy, and intent divergence metrics
+              Harness benchmark metrics — not production fleet telemetry
             </p>
           </div>
         </div>
@@ -161,13 +165,13 @@ export function ProofCenterPanel() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div data-demo="proof-latency-card">
           <MetricCard
-            label="Live Benchmark Latency"
+            label="Harness latency"
             value={`Avg ${latency.avg_ms.toFixed(2)}ms | p95 ${latency.p95_ms.toFixed(2)}ms`}
-            detail="Health endpoint round-trip on production Fast API"
+            detail={NEXUS_HARNESS_LATENCY_FOOTNOTE}
             icon={Zap}
             badge={
               latency.certified_sub_10ms
-                ? { text: 'P99 6.1ms (harness)', tone: 'emerald' }
+                ? { text: 'Sub-10ms (harness fixture)', tone: 'emerald' }
                 : undefined
             }
           />
@@ -187,9 +191,13 @@ export function ProofCenterPanel() {
             icon={Target}
           />
           <MetricCard
-            label="False Positive Rate"
-            value={`${false_positive_rate.toFixed(1)}%`}
-            detail="Benign traffic incorrectly blocked"
+            label="False positive (harness)"
+            value={
+              false_positive_rate <= 0
+                ? 'See methodology'
+                : `${false_positive_rate.toFixed(1)}%`
+            }
+            detail={NEXUS_HARNESS_FALSE_POSITIVE_NOTE}
             icon={Activity}
           />
         </div>

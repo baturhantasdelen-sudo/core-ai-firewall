@@ -31,8 +31,9 @@ export interface PublicProofCenterView {
   live?: ProofCenterMetrics | null;
 }
 
+/** Baseline fixture: harness/fixtures/sample-output.json (reproducible corpus, not production telemetry). */
 export const PUBLIC_PROOF_DEFAULTS: PublicProofCenterView = {
-  source: 'verified_benchmark',
+  source: 'harness_baseline_fixture',
   agentSafety: {
     agentsTested: 127,
     toolCallsAnalyzed: 48_291,
@@ -44,7 +45,7 @@ export const PUBLIC_PROOF_DEFAULTS: PublicProofCenterView = {
     intentMisalignmentPct: 98.7,
     toolMisusePct: 99.1,
     privilegeEscalationPct: 97.8,
-    falsePositivePct: 0.0,
+    falsePositivePct: -1,
     falseNegativePct: 0.2,
   },
   latency: {

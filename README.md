@@ -24,7 +24,7 @@ curl -X POST http://localhost:3000/api/v1/uar/inspect \
   -d '{"user_intent":"Test action","tool_call":{"name":"export_db","args":{}}}'
 ```
 
-Or use the hosted **Proof Center Playground** (no login): [nexus-shield-dashboard.vercel.app/proof-center#proof-playground](https://nexus-shield-dashboard.vercel.app/proof-center#proof-playground)
+Or run the dashboard locally and open **Proof Center Playground** (`/proof-center#proof-playground`) after `cd nexus-shield-dashboard && npm run dev`.
 
 ### GitHub Action — verify agent tool calls in CI
 
@@ -65,14 +65,17 @@ curl -X POST http://localhost:8090/v1/intercept \
 ```
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](packages/vscode-extension/LICENSE)
-[![Dashboard](https://img.shields.io/badge/Dashboard-LIVE-brightgreen)](https://nexus-shield-dashboard.vercel.app)
+[![GitHub](https://img.shields.io/badge/GitHub-core--ai--firewall-181717)](https://github.com/baturhantasdelen-sudo/core-ai-firewall)
+[![Harness](https://img.shields.io/badge/Harness-nexus--harness--benchmark-blue)](https://github.com/baturhantasdelen-sudo/core-ai-firewall/tree/main/harness)
 [![Governance](https://img.shields.io/badge/Platform-Action%20Governance%20%26%20Verification-0ea5e9)](docs/UAR_SCHEMA.md)
 [![Data Plane](https://img.shields.io/badge/Data%20Plane-Air--Gap%20Ready-059669)](deployments/README.md)
-[![UAR](https://img.shields.io/badge/UAR-SHA--256%20Verified-violet)](https://nexus-shield-dashboard.vercel.app/verify)
+[![UAR](https://img.shields.io/badge/UAR-Tamper--evident%20SHA--256-violet)](docs/UAR_SCHEMA.md)
 [![Compliance](https://img.shields.io/badge/SOC%202%20%7C%20ISO%2027001-Audit%20Ready-6366f1)](docs/COMPLIANCE_READINESS.md)
-[![P99 6.1ms](https://img.shields.io/badge/P99%20intercept-6.1ms-22c55e)](https://nexus-shield-dashboard.vercel.app/investor)
+[![P99 harness](https://img.shields.io/badge/P99%20intercept-6.1ms%20(harness)-22c55e)](docs/security-benchmarks.md)
 
-**Live dashboard:** [nexus-shield-dashboard.vercel.app](https://nexus-shield-dashboard.vercel.app) · **Runtime API (optional):** [api.nexusshield.ai](https://api.nexusshield.ai/healthz) · **UAR verify:** [/verify](https://nexus-shield-dashboard.vercel.app/verify)
+**Source:** [github.com/baturhantasdelen-sudo/core-ai-firewall](https://github.com/baturhantasdelen-sudo/core-ai-firewall) · **Dashboard UI:** [`nexus-shield-dashboard/`](nexus-shield-dashboard/) (local `npm run dev`) · **Harness:** [`harness/`](harness/) · **Optional cloud runtime:** [api.nexusshield.ai/healthz](https://api.nexusshield.ai/healthz)
+
+*P99 intercept figures are **harness benchmark** measurements — see [security-benchmarks.md](docs/security-benchmarks.md).*
 
 *Infrastructure promise:* **Your AI agents. Your infrastructure. Your data. Your policies.** — [Data plane vs control plane](./docs/DATA_PLANE_AND_CONTROL_PLANE.md)
 
@@ -84,7 +87,7 @@ curl -X POST http://localhost:8090/v1/intercept \
 
 Nexus Shield is an **AI Agent Action Governance & Verification Platform** — **not** a generic AI security checkbox or prompt-only LLM firewall. It governs **tool execution**, parameter hijacking, and intent divergence, and issues **Universal Action Receipts (UAR)** so you can prove what occurred.
 
-> Nexus combines runtime action governance, trajectory-aware control, and verifiable cryptographic evidence into a single air-gapped deployment layer.
+> Nexus combines runtime action governance, trajectory-aware control, and tamper-evident SHA-256 Universal Action Receipts in a local-first, air-gapped deployment layer.
 
 **Flow:** Interception (SEE) → Authority / Policy (CONTROL) → Execution → State Change → Cryptographic Proof (VERIFY).
 
@@ -127,8 +130,8 @@ Do not mix benchmark marketing metrics with production proof. Public Proof Cente
 
 | Lane | Source | What it proves | Where |
 |---|---|---|---|
-| **Reproducible benchmark results** | `nexus-harness-benchmark` (`harness/`) | How frameworks *score* on fixed scenarios; one SHA-256 bundle per evaluated step | Leaderboards, GHCR harness, [/investor](https://nexus-shield-dashboard.vercel.app/investor) *benchmarks* |
-| **Deterministic action evidence / UAR ledger** | Data plane runtime | What *your* agents attempted, what was decided, cryptographic seal per attempt | `enterprise/data/uar_receipts.jsonl`, [/verify](https://nexus-shield-dashboard.vercel.app/verify), Trust Hub |
+| **Reproducible benchmark results** | `nexus-harness-benchmark` (`harness/`) | How frameworks *score* on fixed scenarios; one SHA-256 bundle per evaluated step | [`harness/results/`](harness/results/), [security-benchmarks.md](docs/security-benchmarks.md) |
+| **Deterministic action evidence / UAR ledger** | Data plane runtime | What *your* agents attempted, what was decided, tamper-evident SHA-256 UAR per attempt | `enterprise/data/uar_receipts.jsonl`, `GET /v1/receipts/{id}/verify` |
 
 Details: [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.md)
 
@@ -210,7 +213,7 @@ docker run --rm ghcr.io/baturhantasdelen-sudo/harness:latest --eval-mcp
 python scripts/simulate_vulnerability_preset.py --all --write-public-json
 ```
 
-Public CVE demo: [/demo](https://nexus-shield-dashboard.vercel.app/demo) · [DETECT_AND_DEMONSTRATE_PROOF.md](./docs/DETECT_AND_DEMONSTRATE_PROOF.md)
+Public CVE demo: [`nexus-shield-dashboard/app/demo`](nexus-shield-dashboard/app/demo) (self-host) · [DETECT_AND_DEMONSTRATE_PROOF.md](./docs/DETECT_AND_DEMONSTRATE_PROOF.md)
 
 ---
 
@@ -226,7 +229,7 @@ curl -X POST http://localhost:8090/v1/intercept \
   -d '{"user_intent":"read invoice","tool":"export_customer_database","params":{}}'
 ```
 
-Verify: `GET /v1/receipts/{receipt_id}/verify` · Public: [/verify](https://nexus-shield-dashboard.vercel.app/verify)
+Verify: `GET /v1/receipts/{receipt_id}/verify` · Dashboard UI: `/verify` when running `nexus-shield-dashboard` locally
 
 Gateway (LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION.md)
 

@@ -1,7 +1,7 @@
 # Nexus Shield — Kurumsal Sunum ve Mimari Vizyon
 
 **Resmi site:** [https://www.nexusshield.ai/](https://www.nexusshield.ai/)  
-**Canlı panel:** [https://nexus-shield-dashboard.vercel.app](https://nexus-shield-dashboard.vercel.app)  
+**Kaynak depo:** [github.com/baturhantasdelen-sudo/core-ai-firewall](https://github.com/baturhantasdelen-sudo/core-ai-firewall) · **Panel UI:** `nexus-shield-dashboard/` (yerel `npm run dev`)  
 **Belge sınıfı:** CISO / CTO / üst yönetim brifingi · mimari genel bakış  
 **PDF üretimi:** `python scripts/generate_enterprise_deck.py --lang tr`
 

@@ -42,7 +42,9 @@ npm run eval:mcp
 | Harness commit SHA | _e.g. `main@7f42a8c`_ | Pin in release notes |
 | Scenario count | _from `mcp_leaderboard.json`_ | |
 | Strict mode | _true/false_ | |
-| MCP-SEC-SCORE | _numeric_ | Marketing must label as **benchmark lane** |
+| MCP-SEC-SCORE | _numeric_ | Marketing must label as **benchmark lane** (harness only) |
+| Baseline fixture | `harness/fixtures/sample-output.json` | **127** agents / **48,291** steps — reproducible corpus, not fleet telemetry |
+| False positive claims | _methodology only_ | Do not publish **0%** production FP rates; cite controlled harness vectors |
 | Raw logs archived | _CI artifact URL_ | |
 | Production UAR sample | _redacted intercept JSON_ | Optional customer appendix |
 

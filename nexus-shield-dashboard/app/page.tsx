@@ -30,6 +30,7 @@ import {
   NEXUS_DEFENSIVE_POSITIONING,
   NEXUS_GOVERNANCE_TAGLINE,
   NEXUS_RUNTIME_FLOW_LABEL,
+  NEXUS_HARNESS_LATENCY_FOOTNOTE,
   NEXUS_RUNTIME_LATENCY_METRIC,
   NEXUS_VALUE_PROP_HOOK,
 } from '@/lib/brand/copy-standards';
@@ -256,9 +257,9 @@ export default function Home() {
           <div className="mx-auto mt-8 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               { label: 'Action Control Plane', sub: 'SEE · CONTROL · PROVE' },
-              { label: 'Telemetry', sub: 'Live green signal' },
-              { label: 'P99 6.1ms', sub: 'Runtime intercept' },
-              { label: 'API Key', sub: 'Secure badge' },
+              { label: 'Open harness', sub: 'core-ai-firewall/harness' },
+              { label: 'P99 6.1ms', sub: NEXUS_HARNESS_LATENCY_FOOTNOTE },
+              { label: 'UAR receipts', sub: 'Tamper-evident SHA-256' },
             ].map(({ label, sub }) => (
               <div key={label} className="rounded-xl border border-white/8 bg-white/3 px-4 py-3 text-center backdrop-blur-md">
                 <p className="text-sm font-semibold text-emerald-300 sm:text-base">{label}</p>

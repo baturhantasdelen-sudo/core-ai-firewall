@@ -116,14 +116,14 @@ Record the terminal demo as a GIF: [docs/DEMO_GIF_GUIDE.md](./docs/DEMO_GIF_GUID
 
 ## Proof Center baseline mapping
 
-Official public Proof Center baseline (marketing + live benchmark methodology):
+Reproducible **harness baseline fixture** (`fixtures/sample-output.json` — not production telemetry):
 
-| Baseline | Value |
+| Baseline field | Value |
 |---|---|
-| Agents tested | 127 |
-| Tool calls analyzed | 48,291 |
-| Harness evidence bundles | 48,291 (one per evaluated step — all decisions) |
-| Block rate | **99.3%** (dangerous subset only — not equal to evidence bundle count) |
+| Harness agents evaluated | 127 |
+| Harness trajectory steps | 48,291 |
+| SHA-256 bundles (one per evaluated step — all decisions) | 48,291 |
+| Dangerous-subset block rate in fixture | **99.3%** (subset metric — not equal to bundle count) |
 
 After each run, the CLI prints:
 
@@ -135,7 +135,7 @@ Example output:
 
 ```text
 --- Proof Center Baseline ---
-Official block rate: 99.3% (127 agents, 48,291 tool calls)
+Harness baseline block rate: 99.3% (fixture: 127 agents, 48,291 trajectory steps)
 Your block rate:     100% (+0.7 vs baseline)
 Meets baseline:      YES
 ```

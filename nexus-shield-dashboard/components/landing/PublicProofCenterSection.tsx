@@ -13,6 +13,11 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
+import {
+  NEXUS_HARNESS_FALSE_POSITIVE_NOTE,
+  NEXUS_HARNESS_LATENCY_FOOTNOTE,
+  NEXUS_HARNESS_METRICS_LABEL,
+} from '@/lib/brand/copy-standards';
 import { APP_DOC_ROUTES, BENCHMARK_GITHUB_URL } from '@/lib/site';
 import { fetchPublicProofCenter } from '@/lib/public-proof-center';
 import type { PublicProofCenterView } from '@/types/public-proof-center';
@@ -85,8 +90,8 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
             Nexus Shield Proof Center
           </h2>
           <p className="mt-3 text-sm text-zinc-400 sm:text-base">
-            Investor-grade, verifiable <strong className="font-medium text-zinc-300">harness benchmark</strong>{' '}
-            metrics — agent safety, accuracy, P99 6.1ms intercept — separate from your production{' '}
+            Open-source <strong className="font-medium text-zinc-300">harness benchmark</strong> metrics
+            ({NEXUS_HARNESS_METRICS_LABEL}) — separate from your production{' '}
             <strong className="font-medium text-zinc-300">UAR ledger</strong> on the data plane.
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -114,34 +119,45 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
         </div>
 
         <div className="mt-10 grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
-          <MetricBlock title="Agent Safety & Trajectory Benchmark" icon={Users}>
-            <StatRow label="Agents Tested" value={agentSafety.agentsTested.toLocaleString()} />
-            <StatRow label="Tool Calls Analyzed" value={agentSafety.toolCallsAnalyzed.toLocaleString()} />
+          <MetricBlock title="Harness · Agent Safety" icon={Users}>
+            <StatRow
+              label="Harness agents evaluated (baseline fixture)"
+              value={agentSafety.agentsTested.toLocaleString()}
+            />
+            <StatRow
+              label="Harness trajectory steps evaluated"
+              value={agentSafety.toolCallsAnalyzed.toLocaleString()}
+            />
             <StatRow
               label="Dangerous Actions Blocked"
               value={`${agentSafety.dangerousBlocked.toLocaleString()} / ${agentSafety.dangerousTotal.toLocaleString()} (${agentSafety.blockRatePct}%)`}
             />
           </MetricBlock>
 
-          <MetricBlock title="Accuracy & Resilience" icon={Target}>
-            <StatRow label="Intent/Action Misalignment Detection" value={`${accuracy.intentMisalignmentPct}%`} />
-            <StatRow label="Tool Misuse & Parameter Hijack" value={`${accuracy.toolMisusePct}%`} />
-            <StatRow label="Privilege Escalation Block Rate" value={`${accuracy.privilegeEscalationPct}%`} />
+          <MetricBlock title="Harness · Scenario accuracy" icon={Target}>
             <StatRow
-              label="False Positive / Negative Rate"
-              value={`${accuracy.falsePositivePct}% | ${accuracy.falseNegativePct}%`}
+              label="Intent/action misalignment (harness scenarios)"
+              value={`${accuracy.intentMisalignmentPct}%`}
+            />
+            <StatRow label="Tool misuse & hijack (harness)" value={`${accuracy.toolMisusePct}%`} />
+            <StatRow label="Privilege escalation blocks (harness)" value={`${accuracy.privilegeEscalationPct}%`} />
+            <StatRow
+              label="False positive / negative (harness)"
+              value={
+                accuracy.falsePositivePct < 0
+                  ? NEXUS_HARNESS_FALSE_POSITIVE_NOTE
+                  : `${accuracy.falsePositivePct}% | ${accuracy.falseNegativePct}% (controlled vectors)`
+              }
             />
           </MetricBlock>
 
-          <MetricBlock title="Runtime Latency (P99 harness)" icon={Zap}>
+          <MetricBlock title="Harness · Runtime latency" icon={Zap}>
             <StatRow label="p50" value={`${latency.p50Ms.toFixed(1)} ms`} />
             <StatRow label="p95" value={`${latency.p95Ms.toFixed(1)} ms`} />
             <StatRow label="p99" value={`${latency.p99Ms.toFixed(1)} ms`} />
-            {latency.certifiedSub10ms ? (
-              <span className="mt-2 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
-                P99 runtime intercept: 6.1ms (Nexus benchmark harness)
-              </span>
-            ) : null}
+            <p className="pt-2 text-[10px] lowercase leading-relaxed text-zinc-500">
+              {NEXUS_HARNESS_LATENCY_FOOTNOTE}
+            </p>
           </MetricBlock>
 
           <MetricBlock title="Attack Scenarios & Evidence" icon={ShieldCheck}>
@@ -152,10 +168,11 @@ export function PublicProofCenterSection({ compact = false }: { compact?: boolea
             />
             <div className="pt-2 text-xs leading-relaxed text-zinc-500">
               <Activity className="mr-1 inline h-3 w-3 text-cyan-400" />
-              Every evaluated agent trajectory and governed action attempt produces an immutable
-              SHA-256 evidence bundle. UARs and harness bundles cover all policy decisions (ALLOW,
-              BLOCK, READ_ONLY, REQUIRE_APPROVAL); this total matches{' '}
-              <span className="text-zinc-400">Tool Calls Analyzed</span>, not blocked actions alone.
+              Harness runs emit tamper-evident SHA-256 bundles per evaluated trajectory step (ALLOW,
+              BLOCK, READ_ONLY, REQUIRE_APPROVAL). Counts match{' '}
+              <span className="text-zinc-400">trajectory steps evaluated</span>, not blocked actions
+              alone — see{' '}
+              <code className="text-zinc-400">harness/fixtures/sample-output.json</code>.
             </div>
           </MetricBlock>
         </div>

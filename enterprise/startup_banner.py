@@ -16,9 +16,9 @@ def emit_proof_banner(port: int | None = None) -> None:
 ║  [🛡️  Nexus Shield Engine v{ENGINE_VERSION}]                          ║
 ║  Status: {airlock:<44} ║
 ║  Action Firewall: LISTENING on port {listen_port:<23} ║
-║  Cryptographic UAR Engine: SECURE (SHA-256 Active)           ║
-║  -> Ready to intercept agent tool calls and generate         ║
-║     immutable Universal Action Receipts.                     ║
+║  UAR Engine: SHA-256 tamper-evident receipts (local)         ║
+║  -> Ready to intercept agent tool calls and seal             ║
+║     Universal Action Receipts on-box.                        ║
 ╚══════════════════════════════════════════════════════════════╝
 """
     print(banner, flush=True)

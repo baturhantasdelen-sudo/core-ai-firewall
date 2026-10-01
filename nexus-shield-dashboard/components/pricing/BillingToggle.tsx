@@ -1,6 +1,7 @@
 'use client';
 
 import type { BillingInterval } from '@/config/pricing';
+import { TEAM_PLAN_ANNUAL_MONTHLY_USD } from '@/config/pricing';
 
 interface BillingToggleProps {
   interval: BillingInterval;
@@ -41,7 +42,7 @@ export function BillingToggle({ interval, onChange }: BillingToggleProps) {
           isAnnual ? 'text-emerald-400 opacity-100' : 'text-zinc-500 opacity-70'
         }`}
       >
-        Save 17% with annual billing — Pro from $74/mo
+        Save ~17% with annual billing — Action Governance (Team) from ${TEAM_PLAN_ANNUAL_MONTHLY_USD}/mo
       </p>
     </div>
   );

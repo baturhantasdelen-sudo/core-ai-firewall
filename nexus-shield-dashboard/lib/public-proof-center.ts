@@ -31,7 +31,8 @@ export function mergePublicProofCenter(
       intentMisalignmentPct: live.intent_divergence.accuracy_pct || base.accuracy.intentMisalignmentPct,
       toolMisusePct: live.attack_benchmark.accuracy_pct || base.accuracy.toolMisusePct,
       privilegeEscalationPct: base.accuracy.privilegeEscalationPct,
-      falsePositivePct: live.false_positive_rate,
+      falsePositivePct:
+        live.false_positive_rate <= 0 ? -1 : live.false_positive_rate,
       falseNegativePct: base.accuracy.falseNegativePct,
     },
     latency: {

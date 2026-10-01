@@ -34,8 +34,15 @@ export const APP_DOC_ROUTES = {
   sdk: '/docs#sdk',
 } as const;
 
-/** Open-source agent runtime security benchmark harness. */
-export const BENCHMARK_GITHUB_URL = 'https://github.com/baturhantasdelen-sudo/harness';
+/** Primary open-source monorepo (Action Control Plane + harness). */
+export const CORE_AI_FIREWALL_GITHUB_URL =
+  'https://github.com/baturhantasdelen-sudo/core-ai-firewall';
+
+/** Harness benchmark path inside core-ai-firewall (nexus-harness-benchmark). */
+export const HARNESS_GITHUB_URL = `${CORE_AI_FIREWALL_GITHUB_URL}/tree/main/harness`;
+
+/** @deprecated Use HARNESS_GITHUB_URL */
+export const BENCHMARK_GITHUB_URL = HARNESS_GITHUB_URL;
 
 function normalizeOrigin(url: string): string {
   return url.replace(/\/$/, '');

@@ -16,8 +16,8 @@ Extended narrative: [ARCHITECTURE_WHITE_PAPER.md](./ARCHITECTURE_WHITE_PAPER.md)
 |------|-----------|
 | **Air-gapped guarantee** | Data plane (`nexus-runtime`) runs with `NEXUS_CLOUD_CONNECT=false` by default; governance and UAR sealing require no Nexus Cloud |
 | **Zero telemetry** | No outbound product telemetry from `nexus/memory.py`, `nexus/evolution.py`, or `enterprise/data_plane_api.py` |
-| **Cryptographic proof** | SHA-256 `evidence_hash` on every governed attempt (`ALLOW` and `BLOCK`) |
-| **Self-auditing evolution** | Policy patches emit `POLICY_PATCH` audit UARs before/after policy hash |
+| **Tamper-evident receipts** | SHA-256 `evidence_hash` on every governed attempt (`ALLOW` and `BLOCK`) — integrity checking, not legal non-repudiation |
+| **Self-auditing evolution** | Policy patches record before/after policy hashes locally (`POLICY_PATCH` audit entries) |
 
 ---
 
@@ -59,7 +59,11 @@ Reference deployment: [`nexus-reference-app/docker-compose.yml`](../nexus-refere
 | Policy evolution | [`nexus/evolution.py`](../nexus/evolution.py) | Threshold-driven patches to `policy.effective.yml`; snapshot + rollback |
 | Key material | `nexus/data/.memory.key` | Generated locally, never transmitted |
 
-**Cryptographic self-auditing:** each patch records `before_hash`, `after_hash`, and `evidence_hash` in `policy_audits` (see `LocalMemoryLedger.record_policy_audit`).
+**Hash-based self-auditing:** each patch records `before_hash`, `after_hash`, and `evidence_hash` in `policy_audits` (see `LocalMemoryLedger.record_policy_audit`). These are **tamper-evident action receipts (UAR)** — they demonstrate hash integrity over stored policy state. They do **not** constitute legal non-repudiation unless you add an external KMS/HSM or hardware signing layer.
+
+### Threat model note (intent source)
+
+Intent used for divergence analysis must be taken from the **user session** or a **trusted orchestrator boundary** (your app, IdP-attested context, signed workflow step). Text produced solely by a potentially **compromised agent** must not be treated as trusted intent for policy decisions.
 
 Rollback command:
 
