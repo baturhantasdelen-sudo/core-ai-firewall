@@ -55,7 +55,7 @@ export function EvidencePanel() {
             Evidence Engine &amp; Merkle Verification
           </h2>
           <p className="mt-1 text-xs text-zinc-600">
-            P1 Sprint 7-8 — SHA-256 signed bundles · immutable Merkle chain
+            P1 Sprint 7-8 — SHA-256 hash-linked bundles · Merkle integrity (harness/demo)
           </p>
         </div>
         <div className="rounded-xl border border-cyan-500/25 bg-cyan-500/10 px-4 py-3">
