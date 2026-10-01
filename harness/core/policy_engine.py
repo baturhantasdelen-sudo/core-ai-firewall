@@ -22,6 +22,30 @@ def _sha256(payload: str) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _resolve_policy_sets(
+    policy_config: dict[str, Any] | None,
+) -> tuple[frozenset[str], frozenset[str], frozenset[str], frozenset[str], int]:
+    high_risk = set(HIGH_RISK_TOOLS)
+    blocked: set[str] = set()
+    allowed: set[str] = set()
+    require_approval: set[str] = set()
+    block_threshold = 85
+    if policy_config:
+        high_risk.update(policy_config.get("high_risk_tools") or [])
+        blocked.update(policy_config.get("blocked_tools") or [])
+        allowed.update(policy_config.get("allowed_tools") or [])
+        require_approval.update(policy_config.get("require_approval_tools") or [])
+        if policy_config.get("block_risk_threshold") is not None:
+            block_threshold = int(policy_config["block_risk_threshold"])
+    return (
+        frozenset(high_risk),
+        frozenset(blocked),
+        frozenset(allowed),
+        frozenset(require_approval),
+        block_threshold,
+    )
+
+
 def evaluate_proposed_action(
     *,
     agent_id: str,
@@ -31,13 +55,63 @@ def evaluate_proposed_action(
     identity_verified: bool = True,
     receipt_id: str | None = None,
     timestamp_utc: str | None = None,
+    policy_config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     params = params or {}
     blob = f"{tool} {json.dumps(params, sort_keys=True)}".lower()
     risk = 0
     violations: list[str] = []
 
-    if tool in HIGH_RISK_TOOLS:
+    high_risk, blocked, allowed, require_approval, block_threshold = _resolve_policy_sets(
+        policy_config
+    )
+
+    if tool in blocked:
+        return _finalize_evaluation(
+            agent_id=agent_id,
+            intent=intent,
+            tool=tool,
+            params=params,
+            identity_verified=identity_verified,
+            receipt_id=receipt_id,
+            timestamp_utc=timestamp_utc,
+            decision="BLOCK",
+            rule_id="POLICY_BLOCKED_TOOL",
+            risk_score=100,
+            violations=[f"BLOCKED_TOOL:{tool}"],
+        )
+
+    if tool in require_approval:
+        return _finalize_evaluation(
+            agent_id=agent_id,
+            intent=intent,
+            tool=tool,
+            params=params,
+            identity_verified=identity_verified,
+            receipt_id=receipt_id,
+            timestamp_utc=timestamp_utc,
+            decision="REQUIRE_APPROVAL",
+            rule_id="POLICY_REQUIRE_APPROVAL",
+            risk_score=70,
+            violations=[f"REQUIRE_APPROVAL:{tool}"],
+        )
+
+    if tool in allowed and not any(p in blob for p in EXFIL_PATTERN):
+        return _finalize_evaluation(
+            agent_id=agent_id,
+            intent=intent,
+            tool=tool,
+            params=params,
+            identity_verified=identity_verified,
+            receipt_id=receipt_id,
+            timestamp_utc=timestamp_utc,
+            decision="ALLOW",
+            rule_id="POLICY_ALLOWLIST",
+            risk_score=0,
+            violations=[],
+        )
+
+    if tool in high_risk:
         risk += 35
         violations.append(f"HIGH_RISK_TOOL:{tool}")
     if any(p in blob for p in EXFIL_PATTERN):
@@ -47,7 +121,7 @@ def evaluate_proposed_action(
         risk += 45
         violations.append("INTENT_ACTION_DIVERGENCE")
 
-    if risk >= 85:
+    if risk >= block_threshold:
         decision: AdaptiveDecision = "BLOCK"
         rule_id = "POLICY_BLOCK_CRITICAL"
     elif risk >= 65:
@@ -59,6 +133,36 @@ def evaluate_proposed_action(
     else:
         decision = "ALLOW"
         rule_id = "POLICY_BASELINE_ALLOW"
+
+    return _finalize_evaluation(
+        agent_id=agent_id,
+        intent=intent,
+        tool=tool,
+        params=params,
+        identity_verified=identity_verified,
+        receipt_id=receipt_id,
+        timestamp_utc=timestamp_utc,
+        decision=decision,
+        rule_id=rule_id,
+        risk_score=min(100, risk),
+        violations=violations,
+    )
+
+
+def _finalize_evaluation(
+    *,
+    agent_id: str,
+    intent: str,
+    tool: str,
+    params: dict[str, Any],
+    identity_verified: bool,
+    receipt_id: str | None,
+    timestamp_utc: str | None,
+    decision: AdaptiveDecision,
+    rule_id: str,
+    risk_score: int,
+    violations: list[str],
+) -> dict[str, Any]:
 
     timestamp = timestamp_utc or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     before_hash = _sha256(json.dumps({"intent": intent, "agent": agent_id}, sort_keys=True))
@@ -83,7 +187,7 @@ def evaluate_proposed_action(
     return {
         "decision": decision,
         "rule_id": rule_id,
-        "risk_score": min(100, risk),
+        "risk_score": risk_score,
         "violations": violations,
         "receipt": receipt_core,
     }

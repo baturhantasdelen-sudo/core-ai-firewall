@@ -16,6 +16,14 @@ inputs:
     description: 'Nexus Shield control plane or air-gapped engine URL'
     required: false
     default: 'http://localhost:8090'
+  feedback:
+    description: 'Optional learning hint — set to false_positive when a block was incorrect'
+    required: false
+    default: ''
+  rollback:
+    description: 'When true, rollback policy.yml to the last stable UAR snapshot instead of verifying'
+    required: false
+    default: 'false'
 
 outputs:
   uar_receipt_id:
@@ -35,5 +43,9 @@ runs:
         INPUT_AGENT_INTENT: ${{ inputs.agent_intent }}
         INPUT_TOOL_CALL_PAYLOAD: ${{ inputs.tool_call_payload }}
         INPUT_POLICY_ENDPOINT: ${{ inputs.policy_endpoint }}
+        INPUT_FEEDBACK: ${{ inputs.feedback }}
+        INPUT_ROLLBACK: ${{ inputs.rollback }}
         GITHUB_ACTION_PATH: ${{ github.action_path }}
-      run: python3 "${{ github.action_path }}/.github/actions/verify/verify.py"
+      run: |
+        python3 -m pip install -q pyyaml
+        python3 "${{ github.action_path }}/.github/actions/verify/verify.py"

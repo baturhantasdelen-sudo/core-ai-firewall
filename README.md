@@ -48,6 +48,13 @@ jobs:
 
 Same action from this repository: `uses: baturhantasdelen-sudo/core-ai-firewall@v1`. Point `policy_endpoint` at a running data plane (`NEXUS_DATA_PLANE_BOOTSTRAP=true` on `:8090`) or rely on the bundled offline policy engine when the runtime is unreachable. PII/security scanning remains at [`.github/actions/security-scan`](./.github/actions/security-scan/action.yml).
 
+**Self-healing (local-first):** blocked actions and optional `feedback: false_positive` feed the encrypted ledger ([`nexus/memory.py`](./nexus/memory.py)); [`nexus/evolution.py`](./nexus/evolution.py) patches `policy.yml` with a SHA-256 self-audit UAR. Roll back one command:
+
+```bash
+python .github/actions/verify/verify.py rollback
+# or: python -m nexus.evolution rollback
+```
+
 Data plane intercept (demo stack only):
 
 ```bash

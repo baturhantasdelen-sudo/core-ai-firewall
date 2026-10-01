@@ -244,7 +244,7 @@ end
 def nexus_build_match_params(api_key:, team_id:, match_git_url:, match_branch:, git_auth:, readonly:)
   params = {
     type: "appstore",
-    readonly: readonly,
+    readonly: true,
     api_key: api_key,
     app_identifier: NEXUS_APP_IDENTIFIER,
     git_url: match_git_url,

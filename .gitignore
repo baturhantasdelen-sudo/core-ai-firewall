@@ -1,3 +1,10 @@
+# Nexus local self-healing ledger (air-gapped runtime data)
+nexus/data/memory.db
+nexus/data/events.jsonl.enc
+nexus/data/.memory.key
+nexus/data/policy.effective.yml
+nexus/data/policy_snapshots/
+
 # Python
 __pycache__/
 *.py[cod]

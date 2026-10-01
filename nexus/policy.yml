@@ -1,0 +1,27 @@
+# Nexus Shield — local policy (air-gapped runtime source of truth after first boot)
+version: 1
+schema: nexus-shield-policy-v1
+
+high_risk_tools:
+  - query
+  - write_file
+  - export_customer_database
+  - list_repo_secrets
+  - merge_pull_request
+  - fetch
+
+blocked_tools: []
+allowed_tools: []
+require_approval_tools: []
+
+block_risk_threshold: 85
+
+anomaly:
+  blocked_window_minutes: 60
+  blocked_count_threshold: 5
+  false_positive_threshold: 2
+
+evolution:
+  enabled: true
+  patch_on_endpoint_unreachable: true
+  max_patches_per_day: 24
