@@ -37,7 +37,8 @@ docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'nginx-gateway|clou
 log "2/4 Fast API direct (:8080 /healthz)"
 wait_http "http://127.0.0.1:8080/healthz" HEALTHY 30
 
-log "3/5 Nginx gateway (:80 /healthz + /api/health + /api/v1/health)"
+log "3/5 Nginx gateway (liveness /nginx-live, then proxied /healthz + API routes)"
+wait_http "http://127.0.0.1:80/nginx-live" OK 20
 wait_http "http://127.0.0.1:80/healthz" HEALTHY 45
 curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY
 curl -fsS http://127.0.0.1:80/api/health | grep -q HEALTHY
