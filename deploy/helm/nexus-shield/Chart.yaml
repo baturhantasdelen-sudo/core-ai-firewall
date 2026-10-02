@@ -1,0 +1,17 @@
+apiVersion: v2
+name: nexus-shield
+description: Nexus Shield Action Control Plane — Fast API, optional ML API, ingress, and secret integration
+type: application
+version: 0.2.0
+appVersion: "0.2.0"
+keywords:
+  - ai
+  - agents
+  - governance
+  - security
+home: https://github.com/baturhantasdelen-sudo/core-ai-firewall
+sources:
+  - https://github.com/baturhantasdelen-sudo/core-ai-firewall
+maintainers:
+  - name: Nexus Shield Team
+    email: dev@nexusshield.ai

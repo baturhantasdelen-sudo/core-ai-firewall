@@ -1,6 +1,6 @@
 """Nexus Shield Security Engine — in-RAM PII guardrail proxy (Agent Action Governance is the primary platform)."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .action_receipt import build_action_receipt, inspect_action
 

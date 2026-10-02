@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nexus-shield.fullname" . }}-fast
+  labels:
+    {{- include "nexus-shield.labels" . | nindent 4 }}
+    app.kubernetes.io/component: fast-api
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "nexus-shield.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: fast-api
+  template:
+    metadata:
+      labels:
+        {{- include "nexus-shield.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: fast-api
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nexus-shield.fullname" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: nexus-shield-api
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.fastApi.image.repository }}:{{ .Values.fastApi.image.tag }}"
+          imagePullPolicy: {{ .Values.fastApi.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: NEXUS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nexus-shield.apiSecretName" . }}
+                  key: {{ .Values.apiKey.secretKey }}
+            - name: RATE_LIMIT_REQUESTS
+              value: {{ .Values.fastApi.env.RATE_LIMIT_REQUESTS | quote }}
+            - name: RATE_LIMIT_WINDOW_SECONDS
+              value: {{ .Values.fastApi.env.RATE_LIMIT_WINDOW_SECONDS | quote }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.fastApi.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+{{- if .Values.ml.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nexus-shield.fullname" . }}-ml
+  labels:
+    {{- include "nexus-shield.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ml-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "nexus-shield.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: ml-api
+  template:
+    metadata:
+      labels:
+        {{- include "nexus-shield.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: ml-api
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nexus-shield.fullname" . }}
+      containers:
+        - name: nexus-api
+          image: "{{ .Values.ml.image.repository }}:{{ .Values.ml.image.tag }}"
+          imagePullPolicy: {{ .Values.ml.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: NEXUS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "nexus-shield.apiSecretName" . }}
+                  key: {{ .Values.apiKey.secretKey }}
+            - name: NEXUS_SKIP_STARTUP_WARMUP
+              value: "1"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 60
+          resources:
+            {{- toYaml .Values.ml.resources | nindent 12 }}
+{{- end }}

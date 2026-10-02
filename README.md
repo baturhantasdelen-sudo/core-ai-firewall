@@ -6,13 +6,28 @@
 
 > **Know what your agents are allowed to do. Stop what they shouldn't. Prove what actually happened.**
 
+## Deployment paths
+
+| Audience | Path | Doc |
+|----------|------|-----|
+| **Developers** | `pip install -e .` → `nexus-shield reference up` | [Quick Start (CLI / Compose)](docs/QUICKSTART_DEVELOPER.md) |
+| **Enterprise K8s** | `helm install` + Vault/K8s Secrets | [Helm & air-gapped K8s](docs/ENTERPRISE_HELM_DEPLOY.md) |
+| **Single VM (GCP)** | Docker Compose prod | [DEPLOYMENT.md](DEPLOYMENT.md) |
+
+```bash
+pip install -e .
+nexus-shield reference up --build -d    # :8090 reference sidecar
+nexus-shield policy test                # governance pytest suite
+```
+
 ## Try it in 30 Seconds (No Registration Required)
 
-Run the air-gapped enterprise demo stack locally and generate your first cryptographic **Universal Action Receipt (UAR)**:
+Run the air-gapped enterprise demo stack locally and generate your first tamper-evident **Universal Action Receipt (UAR)**:
 
 ```bash
 git clone https://github.com/baturhantasdelen-sudo/core-ai-firewall.git && cd core-ai-firewall
 docker compose -f docker-compose.nexus-reference.yml up --build
+# or: nexus-shield reference up --build -d
 # legacy enterprise demo: deployments/enterprise-demo
 ```
 

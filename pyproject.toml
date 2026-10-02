@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# Install from monorepo root: pip install -e .
+# PyPI package name: nexus-shield (SDK + developer CLI)
+[project]
+name = "nexus-shield"
+version = "0.2.0"
+description = "Nexus Shield — Agent Action Governance, UAR receipts, and developer CLI."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Nexus Shield Team", email = "dev@nexusshield.ai" }]
+keywords = ["ai", "agents", "governance", "uar", "security", "kubernetes", "helm"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Security",
+  "Environment :: Console",
+]
+dependencies = []
+
+[project.optional-dependencies]
+proxy = [
+  "fastapi>=0.110.0",
+  "httpx>=0.27.0",
+  "uvicorn[standard]>=0.27.0",
+]
+dev = ["pytest>=8.0", "httpx>=0.27.0"]
+
+[project.scripts]
+nexus-shield = "nexus_shield.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/baturhantasdelen-sudo/core-ai-firewall"
+Documentation = "https://github.com/baturhantasdelen-sudo/core-ai-firewall/blob/main/docs/QUICKSTART_DEVELOPER.md"
+Repository = "https://github.com/baturhantasdelen-sudo/core-ai-firewall"
+
+[tool.setuptools.package-dir]
+"" = "packages/python"
+
+[tool.setuptools.packages.find]
+where = ["packages/python"]
+include = ["nexus_shield*"]

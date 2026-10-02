@@ -1,0 +1,17 @@
+Nexus Shield has been installed.
+
+Fast API (in-cluster):
+  kubectl port-forward svc/{{ include "nexus-shield.fullname" . }}-fast 8080:{{ .Values.fastApi.service.port }}
+  curl http://127.0.0.1:8080/healthz
+
+{{- if .Values.ingress.enabled }}
+
+Ingress:
+{{- range .Values.ingress.hosts }}
+  https://{{ .host }}
+{{- end }}
+{{- end }}
+
+API key is stored in Secret {{ include "nexus-shield.apiSecretName" . }} (key: {{ .Values.apiKey.secretKey }}).
+
+Docs: docs/ENTERPRISE_HELM_DEPLOY.md

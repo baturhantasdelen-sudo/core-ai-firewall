@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nexus-shield"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
   { name = "Nexus Shield Team", email = "dev@nexusshield.ai" },
 ]
 description = "Security Engine: in-RAM PII redaction guardrail for LLMs (LiteLLM, LangChain, OpenAI). Primary platform: Agent Action Governance & Verification."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -21,6 +21,9 @@ classifiers = [
     "Typing :: Typed",
 ]
 keywords = ["llm", "pii", "guardrails", "security", "litellm", "langchain", "presidio", "latency", "proxy"]
+
+[project.scripts]
+nexus-shield = "nexus_shield.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/baturhantasdelen-sudo/core-ai-firewall"

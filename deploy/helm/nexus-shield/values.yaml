@@ -1,0 +1,87 @@
+# Default values for nexus-shield Helm chart.
+# Lightweight production: Fast API only. Enable ml.enabled for PyTorch nexus-api.
+
+replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: ""
+
+imagePullSecrets: []
+global:
+  airGap: false
+
+fastApi:
+  image:
+    repository: nexusshield/nexus-shield-fast
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources: {}
+  env:
+    RATE_LIMIT_REQUESTS: "60"
+    RATE_LIMIT_WINDOW_SECONDS: "60"
+
+ml:
+  enabled: false
+  image:
+    repository: nexusshield/nexus-quantum-guard
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 8000
+  resources: {}
+
+nginx:
+  enabled: false
+  image:
+    repository: nginx
+    tag: 1.27-alpine
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+
+apiKey:
+  # Prefer existing Kubernetes Secret (Vault → ESO → Secret, or sealed-secrets).
+  existingSecret: ""
+  secretName: nexus-shield-api-key
+  secretKey: nexus-api-key
+  create: true
+  # Set via helm install --set-file apiKey.value=./key.txt (dev only; never commit).
+  value: ""
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: nexus-shield.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+externalSecrets:
+  enabled: false
+  apiVersion: external-secrets.io/v1beta1
+  kind: ExternalSecret
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  remoteRef:
+    key: secret/nexus-shield
+    property: nexus-api-key
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podSecurityContext: {}
+securityContext: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
