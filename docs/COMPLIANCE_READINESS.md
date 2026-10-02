@@ -2,6 +2,8 @@
 
 Technical guide for mapping Nexus Shield **on-device runtime protection**, **OWASP-aligned detections**, and **automated harness proofs** to enterprise GRC workflows (Vanta, Drata, Secureframe) and audit frameworks (**SOC 2**, **ISO 27001**).
 
+**Related:** [Trust Center (enterprise deployment & signals)](./TRUST_CENTER_ENTERPRISE.md) · [Architecture whitepaper](./architecture-whitepaper.md)
+
 ---
 
 ## 1. Architecture & privacy model (auditor narrative)
@@ -12,8 +14,17 @@ Technical guide for mapping Nexus Shield **on-device runtime protection**, **OWA
 | **Cloud proxy** | **Not required** for block/allow decisions (`external_cloud_proxy: false` in evidence metadata) |
 | **Data residency** | Customer-controlled runtime; prompts/tool args stay in the deployment boundary |
 | **Suitability** | Restricted enterprise, public sector, defense-adjacent / critical infrastructure patterns |
+| **Data exfiltration** | Self-hosted / air-gapped modes: prompts and action payloads are **not** sent to Nexus-operated systems (see Trust Center data privacy commitment) |
 
 Optional SaaS dashboard (Proof Center) is a **read-only telemetry surface**; continuous compliance evidence is generated from the **open harness** and the **`/api/v1/compliance/evidence`** API.
+
+### Deployment paths (audit scope)
+
+| Path | Doc |
+|------|-----|
+| Helm / Kubernetes + Vault or K8s Secrets | [ENTERPRISE_HELM_DEPLOY.md](./ENTERPRISE_HELM_DEPLOY.md) |
+| Docker Compose reference / PoC | [QUICKSTART_DEVELOPER.md](./QUICKSTART_DEVELOPER.md) |
+| Single VM production | [DEPLOYMENT.md](../DEPLOYMENT.md) |
 
 ---
 

@@ -72,6 +72,21 @@ export default async function TrustHubPage() {
             Verify every agent outcome with cryptographic proof — live governance audit trail, Proof Center
             benchmarks, evidence verification, and human-in-the-loop approval across the Nexus Shield fleet.
           </p>
+          <p className="mt-3 max-w-3xl text-xs text-zinc-500">
+            Enterprise deployment (Helm, Compose, Vault/K8s/AWS secrets) and air-gapped architecture:{' '}
+            <Link href="/trust" className="text-cyan-400 hover:underline">
+              Trust Center
+            </Link>
+            {' · '}
+            <a
+              href="https://github.com/baturhantasdelen-sudo/core-ai-firewall/blob/main/docs/TRUST_CENTER_ENTERPRISE.md"
+              className="text-cyan-400 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              TRUST_CENTER_ENTERPRISE.md
+            </a>
+          </p>
         </div>
 
         <TrustHubAuditStream />

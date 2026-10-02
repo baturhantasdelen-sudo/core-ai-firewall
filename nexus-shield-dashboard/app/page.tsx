@@ -22,6 +22,7 @@ import { LandingNav } from '@/components/landing/LandingNav';
 import { AttackDemo } from '@/components/landing/AttackDemo';
 import { McpHijackTrajectoryDemo } from '@/components/landing/McpHijackTrajectoryDemo';
 import { ContactSection } from '@/components/landing/ContactSection';
+import { TrustCenterSection } from '@/components/landing/TrustCenterSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
 import { ProofCenterUarPlayground } from '@/components/proof-center/ProofCenterUarPlayground';
@@ -453,6 +454,7 @@ export default function Home() {
         <ProofCenterUarPlayground />
       </section>
       <PublicProofCenterSection />
+      <TrustCenterSection />
       <PricingSection />
       <ContactSection />
       <LandingFooter />

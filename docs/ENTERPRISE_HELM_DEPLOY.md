@@ -2,6 +2,8 @@
 
 Deploy Nexus Shield on **EKS, AKS, GKE, or private clusters** with a single Helm release. The chart targets the **lightweight Fast API** (`/v1/shield`, Proof Center, governance routes). Optional **ML API** (PyTorch) is behind `ml.enabled`.
 
+**Trust & architecture:** [TRUST_CENTER_ENTERPRISE.md](./TRUST_CENTER_ENTERPRISE.md) · [architecture-whitepaper.md](./architecture-whitepaper.md)
+
 Chart path: [`deploy/helm/nexus-shield/`](../deploy/helm/nexus-shield/)
 
 ## Prerequisites
@@ -72,6 +74,10 @@ externalSecrets:
 ```
 
 The chart renders an `ExternalSecret` that syncs Vault → Kubernetes Secret consumed by the Deployment.
+
+### AWS Secrets Manager (External Secrets Operator)
+
+Use a `ClusterSecretStore` backed by AWS Secrets Manager and the same `externalSecrets.remoteRef` shape (`key` = secret ARN or name, `property` = JSON field). The Deployment still mounts a normal Kubernetes Secret — no credentials in Helm values or git.
 
 ## Air-gapped / private registry
 

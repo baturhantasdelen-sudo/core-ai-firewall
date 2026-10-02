@@ -79,5 +79,6 @@ Package source: [`packages/python/`](../packages/python/).
 ## Next steps
 
 - Enterprise Kubernetes: [ENTERPRISE_HELM_DEPLOY.md](./ENTERPRISE_HELM_DEPLOY.md)
+- Trust Center (Helm, secrets, air-gap): [TRUST_CENTER_ENTERPRISE.md](./TRUST_CENTER_ENTERPRISE.md)
 - UAR schema: [UAR_SCHEMA.md](./UAR_SCHEMA.md)
 - Production VM (GCP Compose): [../DEPLOYMENT.md](../DEPLOYMENT.md)

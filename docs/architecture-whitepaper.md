@@ -40,6 +40,20 @@ Extended narrative: [ARCHITECTURE_WHITE_PAPER.md](./ARCHITECTURE_WHITE_PAPER.md)
 
 Reference deployment: [`nexus-reference-app/docker-compose.yml`](../nexus-reference-app/docker-compose.yml)
 
+### 2.1 In-boundary governance pipeline (enterprise)
+
+All governed agent traffic follows one isolated chain **inside the customer VPC / cluster** — no mandatory egress to Nexus Cloud or third-party LLMs for policy decisions or UAR sealing:
+
+```
+Agent → Intent → Authority → Policy → Decision → Action → UAR
+         │          │          │          │         │        └── SHA-256 receipt (local ledger)
+         │          │          │          └── ALLOW | BLOCK | READ_ONLY | REQUIRE_APPROVAL
+         │          └── RBAC / tenant context
+         └── Declared or orchestrator-attested intent (not untrusted agent-only text)
+```
+
+Trust Center summary: [TRUST_CENTER_ENTERPRISE.md](./TRUST_CENTER_ENTERPRISE.md)
+
 ---
 
 ## 3. Air-gapped operation

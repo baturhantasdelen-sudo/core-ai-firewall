@@ -22,9 +22,10 @@ const PLATFORM_LINKS: NavItem[] = [
 ];
 
 const TRUST_LINKS: NavItem[] = [
-  { href: '/#trust-center', label: 'Trust Center' },
-  { href: '/dashboard', label: 'SOC Dashboard' },
-  { href: '/#compliance', label: 'Compliance' },
+  { href: '/trust', label: 'Trust Page' },
+  { href: '/#trust-center', label: 'Trust Center (home)' },
+  { href: '/dashboard/trust-hub', label: 'Trust Hub' },
+  { href: '/dashboard/compliance', label: 'Compliance' },
 ];
 
 const COMPANY_LINKS: NavItem[] = [

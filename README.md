@@ -13,6 +13,7 @@
 | **Developers** | `pip install -e .` → `nexus-shield reference up` | [Quick Start (CLI / Compose)](docs/QUICKSTART_DEVELOPER.md) |
 | **Enterprise K8s** | `helm install` + Vault/K8s Secrets | [Helm & air-gapped K8s](docs/ENTERPRISE_HELM_DEPLOY.md) |
 | **Single VM (GCP)** | Docker Compose prod | [DEPLOYMENT.md](DEPLOYMENT.md) |
+| **Trust & security review** | Air-gap, deployment paths, CISO signals | [Trust Center (docs)](docs/TRUST_CENTER_ENTERPRISE.md) · [Live Trust Page](https://nexus-shield-dashboard.vercel.app/trust) |
 
 ```bash
 pip install -e .
@@ -174,6 +175,20 @@ Details: [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.m
 ```
 
 Deployment: [deployments/](./deployments/) · [DATA_PLANE_AND_CONTROL_PLANE.md](./docs/DATA_PLANE_AND_CONTROL_PLANE.md)
+
+### Enterprise Trust Center (summary)
+
+| Topic | Detail |
+|-------|--------|
+| **Helm / K8s** | One `helm upgrade --install` for Fast API governance plane + optional ML engine — [ENTERPRISE_HELM_DEPLOY.md](./docs/ENTERPRISE_HELM_DEPLOY.md) |
+| **Compose PoC** | `nexus-reference-app`, `docker-compose.nexus-reference.yml`, `nexus-shield reference up` |
+| **Secrets** | Kubernetes Secrets, Vault (ESO), AWS Secrets Manager via ExternalSecrets — chart [`values.yaml`](./deploy/helm/nexus-shield/values.yaml) |
+| **Air-gap flow** | Agent → Intent → Authority → Policy → Decision → Action → UAR (customer boundary) — [architecture-whitepaper.md](./docs/architecture-whitepaper.md) |
+| **Privacy** | Nexus Shield does not exfiltrate prompt or action payload data to Nexus-operated systems in self-hosted modes |
+| **Open proof** | MIT runtime + Apache 2.0 harness; auditable source; SBOM via standard container scanners |
+| **Sandbox PoC** | Landing `/api/sandbox` + local `:8090` reference stack |
+
+Full guide: [TRUST_CENTER_ENTERPRISE.md](./docs/TRUST_CENTER_ENTERPRISE.md)
 
 ### 2-minute enterprise self-hosted trial
 

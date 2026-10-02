@@ -16,3 +16,5 @@ curl -s http://localhost:8090/healthz
 ```
 
 See [docs/under-the-hood.md](../docs/under-the-hood.md) for the 8-step evidence chain mapped to source modules.
+
+Enterprise trust, Helm, and secret management: [docs/TRUST_CENTER_ENTERPRISE.md](../docs/TRUST_CENTER_ENTERPRISE.md).

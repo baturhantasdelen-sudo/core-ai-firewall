@@ -1,62 +1,34 @@
-import { Lock, ShieldCheck, Timer } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-
-interface TrustCard {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  accent: string;
-}
-
-const TRUST_CARDS: TrustCard[] = [
-  {
-    icon: Lock,
-    title: 'Data Privacy & Encryption',
-    description:
-      'TLS 1.3 in-transit and AES-256 at-rest encryption for all telemetry logs.',
-    accent: 'bg-indigo-500/10 text-indigo-400',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Zero Data Retention (ZDR)',
-    description:
-      'Prompts and responses are sanitized in-flight and never stored on disk.',
-    accent: 'bg-emerald-500/10 text-emerald-400',
-  },
-  {
-    icon: Timer,
-    title: 'Incident Response & SLA',
-    description:
-      '99.99% Uptime SLA with 24/7 automated threat detection and status monitoring.',
-    accent: 'bg-fuchsia-500/10 text-fuchsia-400',
-  },
-];
+import Link from 'next/link';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { EnterpriseTrustContent } from '@/components/trust/enterprise-trust-content';
 
 export function TrustCenterSection() {
   return (
-    <section id="trust-center" className="scroll-mt-20 mx-auto max-w-7xl px-6 py-20">
-      <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
-          Trust Center
-        </h2>
-        <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-          Security, privacy, and reliability commitments for production AI workloads.
-        </p>
-      </div>
-
-      <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
-        {TRUST_CARDS.map(({ icon: Icon, title, description, accent }) => (
-          <div
-            key={title}
-            className="rounded-xl border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-sm transition-colors hover:border-white/20"
-          >
-            <div className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${accent}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <h3 className="mt-4 text-sm font-semibold text-zinc-100">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-500">{description}</p>
+    <section id="trust-center" className="scroll-mt-20 border-t border-white/5 bg-zinc-950/50 py-20">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-xs font-medium text-emerald-300">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Enterprise trust
           </div>
-        ))}
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
+            Trust Center
+          </h2>
+          <p className="mt-3 text-sm text-zinc-500 sm:text-base">
+            Deployment simplicity, air-gapped guarantees, and CISO-ready signals — without shipping your
+            prompts to third parties.
+          </p>
+          <Link
+            href="/trust"
+            className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-indigo-400 hover:text-indigo-300"
+          >
+            Full Trust Page
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="mt-12">
+          <EnterpriseTrustContent compact />
+        </div>
       </div>
     </section>
   );
