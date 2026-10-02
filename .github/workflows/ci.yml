@@ -26,6 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-fast.txt -r requirements-ci.txt
           pip install pytest httpx
+          pip install -e .
 
       - name: Start Docker Compose (Redis + FastAPI v2.0)
         env:
