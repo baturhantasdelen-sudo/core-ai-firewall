@@ -32,6 +32,7 @@ pip install -e packages/python
 | `nexus-shield reference up --build -d` | Start Phase 1–4 reference stack (`:8090` sidecar, `:8100` mock MCP) |
 | `nexus-shield reference down` | Stop reference stack (`down --remove-orphans`) |
 | `nexus-shield policy test` | Run policy + governance pytest suite |
+| `nexus-shield uar verify <receipt.json>` | Verify SHA-256 UAR integrity locally |
 | `nexus-shield proxy -p 8080` | Optional PII proxy (requires `pip install -e packages/cli` or `[proxy]` extras) |
 
 Set `NEXUS_SHIELD_ROOT=/path/to/core-ai-firewall` if you run the CLI outside the clone directory.
@@ -80,5 +81,7 @@ Package source: [`packages/python/`](../packages/python/).
 
 - Enterprise Kubernetes: [ENTERPRISE_HELM_DEPLOY.md](./ENTERPRISE_HELM_DEPLOY.md)
 - Trust Center (Helm, secrets, air-gap): [TRUST_CENTER_ENTERPRISE.md](./TRUST_CENTER_ENTERPRISE.md)
+- Open source vs enterprise runtime: [ARCHITECTURE_MAPPING.md](./ARCHITECTURE_MAPPING.md)
+- Zero-rewrite MCP: [examples/zero-rewrite-mcp/](../examples/zero-rewrite-mcp/)
 - UAR schema: [UAR_SCHEMA.md](./UAR_SCHEMA.md)
 - Production VM (GCP Compose): [../DEPLOYMENT.md](../DEPLOYMENT.md)

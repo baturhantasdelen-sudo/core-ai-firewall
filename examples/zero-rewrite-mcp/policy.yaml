@@ -1,0 +1,15 @@
+version: "1"
+description: Zero-rewrite MCP demo — tool allowlist with payment guardrail
+agent_id: zero-rewrite-demo:agent-01
+default_decision: BLOCK
+default_rule_id: DEFAULT_DENY
+
+tools:
+  read_invoice:
+    decision: ALLOW
+    rule_id: ALLOW_READ_ONLY_TOOLS
+  post_payment:
+    decision: BLOCK
+    rule_id: BLOCK_PAYMENTS_WITHOUT_APPROVAL
+    unless:
+      approved: true

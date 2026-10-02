@@ -122,17 +122,32 @@
         
         <div class="inline-flex items-center space-x-2 bg-slate-800/80 border border-slate-700 px-3 py-1 rounded-full text-xs font-medium text-slate-300 mb-6">
             <span class="w-2 h-2 rounded-full bg-shield-green animate-pulse"></span>
-            <span>Agent Action Governance &amp; Verification</span>
+            <span>Agent Action Control Plane · Universal Action Receipts</span>
         </div>
 
         <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
-            Agents can act. <br>
-            <span class="gradient-text">Nexus decides — with tamper-evident UAR proof.</span>
+            Agent Action Control Plane<br>
+            <span class="gradient-text">with Universal Action Receipts</span>
         </h1>
 
         <p class="mt-6 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Runtime governance for agent tool calls, Universal Action Receipts, and adaptive degradation. <strong class="text-slate-300 font-medium">Security Engines</strong> below add PII masking, jailbreak detection, and prompt guardrails before data reaches OpenAI, Anthropic, or Gemini. KVKK &amp; GDPR aligned.
+            Govern tool execution, seal SHA-256 UARs, and prove what happened inside your infrastructure. Optional <strong class="text-slate-300 font-medium">Security Engines</strong> add PII masking and jailbreak guardrails — secondary to the Action Control Plane.
         </p>
+
+        <div class="mt-8 max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+            <div class="rounded-xl border border-shield-border bg-shield-card/80 p-4">
+                <div class="text-xs font-bold text-brand-500 uppercase tracking-wider">1. Connect SDK</div>
+                <p class="text-xs text-slate-400 mt-1">Python / bridge clients → intercept API</p>
+            </div>
+            <div class="rounded-xl border border-shield-border bg-shield-card/80 p-4">
+                <div class="text-xs font-bold text-brand-500 uppercase tracking-wider">2. Enforce Policy</div>
+                <p class="text-xs text-slate-400 mt-1">Sidecar, Helm, or zero-rewrite MCP gateway</p>
+            </div>
+            <div class="rounded-xl border border-shield-border bg-shield-card/80 p-4">
+                <div class="text-xs font-bold text-brand-500 uppercase tracking-wider">3. Verify UAR</div>
+                <p class="text-xs text-slate-400 mt-1"><code class="text-brand-400">nexus-shield uar verify</code></p>
+            </div>
+        </div>
 
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button type="button" onclick="openTrialModal()" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2">

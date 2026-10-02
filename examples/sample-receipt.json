@@ -1,0 +1,27 @@
+{
+  "receipt_id": "uar_sample_zero_rewrite_001",
+  "timestamp": "2026-10-02T12:00:00Z",
+  "agent": {
+    "id": "zero-rewrite-demo:agent-01",
+    "identity_verified": false
+  },
+  "intent": "Read invoice #1001 for accounts payable review",
+  "proposed_action": {
+    "tool": "read_invoice",
+    "params": {
+      "invoice_id": "1001"
+    }
+  },
+  "policy_evaluated": {
+    "rule_id": "ALLOW_READ_ONLY_TOOLS",
+    "action": "ALLOW"
+  },
+  "decision": "ALLOW",
+  "execution_state": {
+    "before_hash": "sha256:8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4",
+    "after_hash": "sha256:4a7f08e8f207987b2e0f3e24ee1f0e2760d8a17b0da7491a7042bd38111ad6b",
+    "execution_status": "executed"
+  },
+  "evidence_bundle_hash": "53caa450197557eb3a56f6b2864d99b3d256fa2a59e3639615fabab3d9d7fb7a",
+  "signature": "53caa450197557eb3a56f6b2864d99b3d256fa2a59e3639615fabab3d9d7fb7a"
+}

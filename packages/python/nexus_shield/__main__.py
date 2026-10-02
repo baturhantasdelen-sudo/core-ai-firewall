@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from nexus_shield import __version__
+from nexus_shield.uar_verify import verify_receipt_file
 
 
 def _repo_root() -> Path:
@@ -66,6 +67,26 @@ def _cmd_policy_test(args: argparse.Namespace) -> int:
     return _run(cmd, cwd=root)
 
 
+def _cmd_uar_verify(args: argparse.Namespace) -> int:
+    path = Path(args.receipt).expanduser().resolve()
+    try:
+        result = verify_receipt_file(path)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"[INVALID] {exc}", file=sys.stderr)
+        return 1
+    if result.get("valid"):
+        rid = result.get("receipt_id") or "unknown"
+        fmt = result.get("format") or "receipt"
+        print(f"[VERIFIED] {fmt} receipt_id={rid} sha256={result.get('stored_sha256')}")
+        return 0
+    errors = ", ".join(result.get("errors") or ["verification failed"])
+    print(f"[INVALID] {errors}", file=sys.stderr)
+    if result.get("computed_sha256"):
+        print(f"  computed={result.get('computed_sha256')}", file=sys.stderr)
+        print(f"  stored={result.get('stored_sha256')}", file=sys.stderr)
+    return 1
+
+
 def _cmd_proxy(args: argparse.Namespace) -> int:
     try:
         from nexus_shield_cli.proxy import run_proxy  # type: ignore
@@ -111,6 +132,11 @@ def _build_parser() -> argparse.ArgumentParser:
     proxy.add_argument("--host", default="127.0.0.1")
     proxy.add_argument("--mask-all", action="store_true")
 
+    uar = sub.add_parser("uar", help="Universal Action Receipt utilities")
+    uar_sub = uar.add_subparsers(dest="action", required=True)
+    uv = uar_sub.add_parser("verify", help="Verify SHA-256 UAR / Action Receipt integrity")
+    uv.add_argument("receipt", help="Path to receipt JSON file")
+
     return parser
 
 
@@ -122,6 +148,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_policy_test(args)
     if args.command == "proxy":
         return _cmd_proxy(args)
+    if args.command == "uar" and args.action == "verify":
+        return _cmd_uar_verify(args)
     return 1
 
 

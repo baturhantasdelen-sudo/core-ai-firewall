@@ -1,10 +1,25 @@
-# Nexus Shield — AI Agent Action Governance & Verification Platform
+# Nexus Shield — Agent Action Control Plane with Universal Action Receipts
 
 ![Docker Pulls](https://img.shields.io/docker/pulls/nexusshield/runtime)
 ![Evidence Harness](https://img.shields.io/badge/Harness-Evidence%20First-blue)
 ![UAR Standard](https://img.shields.io/badge/UAR-SHA--256%20Verified-success)
 
 > **Know what your agents are allowed to do. Stop what they shouldn't. Prove what actually happened.**
+
+Nexus Shield is an **Agent Action Control Plane with Universal Action Receipts (UAR)** — runtime governance for **tool execution**, tamper-evident SHA-256 receipts, and local verification. Legacy **prompt-only “AI firewall”** positioning applies only to optional **Security Engines** (PII / jailbreak), not the core product.
+
+### Integrate in 3 steps
+
+| Step | What you do | Resources |
+|------|-------------|-----------|
+| **1. Connect SDK** | Point agents at intercept / evaluate APIs (`nexus-agent-sdk-python`, `nexus-agent-sdk-bridge`) | [Architecture mapping](docs/ARCHITECTURE_MAPPING.md) |
+| **2. Enforce policy** | Deploy data plane (Compose, Helm, or sidecar) with `policy.yaml` rules | [Zero-rewrite MCP example](examples/zero-rewrite-mcp/) |
+| **3. Verify UAR** | Seal and audit receipts; validate offline with `nexus-shield uar verify` | [UAR schema](docs/UAR_SCHEMA.md) · `examples/sample-receipt.json` |
+
+```bash
+pip install -e .
+nexus-shield uar verify examples/sample-receipt.json
+```
 
 ## Deployment paths
 
