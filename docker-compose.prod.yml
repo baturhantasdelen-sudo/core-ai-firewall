@@ -131,7 +131,8 @@ services:
       nexus-shield-api:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/nginx-live | grep -q OK"]
+      # /nginx-live = nginx process up; /healthz = full proxy path (after Fast API healthy)
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/nginx-live | grep -q OK && wget -qO- http://127.0.0.1/healthz | grep -q HEALTHY"]
       interval: 10s
       timeout: 5s
       retries: 5
