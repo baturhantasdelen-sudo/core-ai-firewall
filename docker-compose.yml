@@ -38,7 +38,10 @@ services:
     depends_on:
       - redis
     networks:
-      - nexus_network
+      nexus_network:
+        aliases:
+          - nexus-shield-api-prod
+          - nexus-shield-api
     restart: always
     healthcheck:
       test:
@@ -93,7 +96,10 @@ services:
         "--reload",
       ]
     networks:
-      - nexus_network
+      nexus_network:
+        aliases:
+          - nexus-api-prod
+          - nexus-api
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/healthz"]
@@ -114,7 +120,13 @@ services:
       nexus-shield-api:
         condition: service_healthy
       nexus-api:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/healthz | grep -q HEALTHY || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
     networks:
       - nexus_network
     restart: always

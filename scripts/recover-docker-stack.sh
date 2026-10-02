@@ -35,8 +35,12 @@ echo "==> Build lightweight Fast API (Dockerfile.fast)"
 export DOCKER_FAST_IMAGE="${DOCKER_FAST_IMAGE:-nexus-shield-fast:local}"
 $DOCKER compose -f "${COMPOSE_FILE}" build nexus-shield-api
 
-echo "==> Start Fast API + nginx gateway"
-$DOCKER compose -f "${COMPOSE_FILE}" up -d nexus-shield-api nginx-gateway
+echo "==> Start Fast API + nginx gateway (wait for healthy)"
+if [[ -f .env ]]; then
+  $DOCKER compose --env-file .env -f "${COMPOSE_FILE}" up -d --wait nexus-shield-api nginx-gateway
+else
+  $DOCKER compose -f "${COMPOSE_FILE}" up -d --wait nexus-shield-api nginx-gateway
+fi
 
 if [[ "${DEPLOY_ML_IMAGE}" == "1" ]]; then
   MIN_ML_KB=$((5120 * 1024))
@@ -51,10 +55,8 @@ else
   echo "==> Lightweight recovery: ML API skipped (set DEPLOY_ML_IMAGE=1 to enable)"
 fi
 
-echo "==> Wait for health"
-sleep 15
 $DOCKER compose -f "${COMPOSE_FILE}" ps
 
 echo "==> Runtime checks"
-curl -fsS http://127.0.0.1:8080/healthz | grep -q HEALTHY && echo "Fast API: OK" || echo "Fast API: FAIL"
-curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY && echo "Nginx gateway: OK" || echo "Nginx gateway: FAIL"
+bash "$(dirname "$0")/wait-for-http.sh" "http://127.0.0.1:8080/healthz" HEALTHY 30 2 && echo "Fast API: OK" || echo "Fast API: FAIL"
+bash "$(dirname "$0")/wait-for-http.sh" "http://127.0.0.1:80/healthz" HEALTHY 45 2 && echo "Nginx gateway: OK" || echo "Nginx gateway: FAIL"

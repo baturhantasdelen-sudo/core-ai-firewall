@@ -198,7 +198,7 @@ jobs:
           debug: true
           timeout: 120s
           command_timeout: 15m
-          source: "deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,deploy/cloudflared/nexus-tunnel.service,deploy/cloudflared/tunnel-keepalive.service,scripts/fix-cloudflare-tunnel-origin.sh,scripts/start-tunnel.sh,scripts/setup-cloudflare-service.sh,scripts/setup-unified-api-domain.sh,scripts/deploy-p2-policy-engine.sh,scripts/post-deploy-healthcheck.sh,scripts/recover-docker-stack.sh,scripts/run_proof_center_benchmark.py,scripts/run_proof_center_benchmark.sh,scripts/load_test.py,scripts/check_system_health.py,scripts/deploy-vercel-dashboard.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,scripts/tunnel-keepalive.js,package.json,Dockerfile,Dockerfile.fast,nexus_quantum_guard.py,nexus_shield_api.py,nexus_observability.py,nexus_shield_fast_api.py,nexus_auth.py,nexus_governance,requirements-docker.txt,requirements-fast.txt,.dockerignore"
+          source: "deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,deploy/cloudflared/nexus-tunnel.service,deploy/cloudflared/tunnel-keepalive.service,scripts/fix-cloudflare-tunnel-origin.sh,scripts/start-tunnel.sh,scripts/setup-cloudflare-service.sh,scripts/setup-unified-api-domain.sh,scripts/deploy-p2-policy-engine.sh,scripts/post-deploy-healthcheck.sh,scripts/recover-docker-stack.sh,scripts/wait-for-http.sh,scripts/run_proof_center_benchmark.py,scripts/run_proof_center_benchmark.sh,scripts/load_test.py,scripts/check_system_health.py,scripts/deploy-vercel-dashboard.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,scripts/tunnel-keepalive.js,package.json,Dockerfile,Dockerfile.fast,nexus_quantum_guard.py,nexus_shield_api.py,nexus_observability.py,nexus_shield_fast_api.py,nexus_auth.py,nexus_governance,requirements-docker.txt,requirements-fast.txt,.dockerignore"
           target: /opt/nexus-core-firewall/
 
       - name: Reload landing after minimal SCP (extended sync skipped or failed)
@@ -300,7 +300,7 @@ jobs:
             df -h / /var/lib/docker 2>/dev/null || df -h /
             echo "==> Build lightweight Fast API locally (no PyTorch pull)..."
             sudo docker compose --env-file .env -f docker-compose.prod.yml build nexus-shield-api
-            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans nexus-shield-api nginx-gateway
+            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans --wait nexus-shield-api nginx-gateway
             if [[ "${DEPLOY_ML_IMAGE}" == "1" ]]; then
               AVAIL_KB="$(df -Pk / | awk 'NR==2 {print $4}')"
               MIN_ML_KB=$((5120 * 1024))
@@ -314,21 +314,9 @@ jobs:
             else
               echo "==> Lightweight deploy: nexus-quantum-guard (PyTorch) skipped"
             fi
-            echo "==> Wait for nginx-gateway before cloudflared + healthcheck..."
-            for _i in $(seq 1 45); do
-              if curl -fsS http://127.0.0.1:80/healthz 2>/dev/null | grep -q HEALTHY; then
-                break
-              fi
-              sleep 2
-            done
-            sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d cloudflared || true
-            sudo docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
-            for _i in $(seq 1 30); do
-              if curl -fsS http://127.0.0.1:80/healthz 2>/dev/null | grep -q HEALTHY; then
-                break
-              fi
-              sleep 2
-            done
+            bash scripts/wait-for-http.sh "http://127.0.0.1:80/healthz" HEALTHY 45 2
+            sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d --wait cloudflared || true
+            bash scripts/wait-for-http.sh "http://127.0.0.1:80/healthz" HEALTHY 30 2
             sudo bash scripts/post-deploy-healthcheck.sh
             sudo bash scripts/start-tunnel.sh || sudo bash scripts/fix-cloudflare-tunnel-origin.sh
             if command -v node >/dev/null 2>&1; then
