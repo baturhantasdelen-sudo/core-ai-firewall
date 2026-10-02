@@ -7,8 +7,12 @@ PATTERN="${2:-HEALTHY}"
 MAX_ATTEMPTS="${3:-45}"
 SLEEP_SEC="${4:-2}"
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/http-check.sh
+source "${_SCRIPT_DIR}/lib/http-check.sh"
+
 for ((i = 1; i <= MAX_ATTEMPTS; i++)); do
-  if curl -fsS "${URL}" 2>/dev/null | grep -q "${PATTERN}"; then
+  if curl_body_must_contain "${URL}" "${PATTERN}"; then
     echo "wait-for-http: OK ${URL} (attempt ${i})"
     exit 0
   fi

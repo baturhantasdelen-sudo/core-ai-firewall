@@ -10,6 +10,9 @@ set -euo pipefail
 DEPLOY_PATH="${DEPLOY_PATH:-/opt/nexus-core-firewall}"
 cd "$DEPLOY_PATH"
 
+# shellcheck source=scripts/lib/http-check.sh
+source "${DEPLOY_PATH}/scripts/lib/http-check.sh"
+
 DEPLOY_ML_IMAGE="${DEPLOY_ML_IMAGE:-0}"
 if [[ -f .env ]]; then
   DEPLOY_ML_IMAGE="$(grep '^DEPLOY_ML_IMAGE=' .env 2>/dev/null | cut -d= -f2- || echo "${DEPLOY_ML_IMAGE}")"
@@ -22,7 +25,7 @@ wait_http() {
   local pattern="${2:-HEALTHY}"
   local attempts="${3:-45}"
   for ((i = 1; i <= attempts; i++)); do
-    if curl -fsS "${url}" 2>/dev/null | grep -q "${pattern}"; then
+    if curl_body_must_contain "${url}" "${pattern}"; then
       return 0
     fi
     sleep 2
@@ -40,21 +43,23 @@ wait_http "http://127.0.0.1:8080/healthz" HEALTHY 30
 log "3/5 Nginx gateway (liveness /nginx-live, then proxied /healthz + API routes)"
 wait_http "http://127.0.0.1:80/nginx-live" OK 20
 wait_http "http://127.0.0.1:80/healthz" HEALTHY 45
-curl -fsS http://127.0.0.1:80/healthz | grep -q HEALTHY
-curl -fsS http://127.0.0.1:80/api/health | grep -q HEALTHY
-curl -fsS http://127.0.0.1:80/api/v1/health | grep -q '"healthy":true'
+curl_body_must_contain "http://127.0.0.1:80/healthz" HEALTHY
+curl_body_must_contain "http://127.0.0.1:80/api/health" HEALTHY
+curl_body_must_contain "http://127.0.0.1:80/api/v1/health" '"healthy":true'
 
 if docker ps --format '{{.Names}}' | grep -q '^nexus-api-prod$'; then
   log "4/5 ML API direct (container /healthz)"
-  docker exec nexus-api-prod curl -fsS http://127.0.0.1:8000/healthz | grep -q HEALTHY
+  _ml_body="$(docker exec nexus-api-prod curl -fsS http://127.0.0.1:8000/healthz)"
+  body_must_contain "${_ml_body}" HEALTHY
 else
   log "4/5 ML API skipped (lightweight deploy, DEPLOY_ML_IMAGE=${DEPLOY_ML_IMAGE})"
 fi
 
 log "5/5 Landing page marker"
-curl -fsS http://127.0.0.1:80/ | grep -q 'sandbox-v3'
-curl -fsS http://127.0.0.1:80/ | grep -q '/api/sandbox'
-curl -fsS http://127.0.0.1:80/ | grep -q '<title>'
+_landing_body="$(curl -fsS http://127.0.0.1:80/)"
+body_must_contain "${_landing_body}" 'sandbox-v3'
+body_must_contain "${_landing_body}" '/api/sandbox'
+body_must_contain "${_landing_body}" '<title>'
 
 if docker ps --format '{{.Names}}' | grep -q '^cloudflared-prod$'; then
   _cf_status=$(docker inspect cloudflared-prod --format '{{.State.Status}}')
