@@ -242,6 +242,7 @@ python test_integration.py
 | `503 UNHEALTHY` | Warm-up başarısız / model yüklenemedi | `docker logs nexus-api-prod` inceleyin |
 | Deploy disk hatası | Root disk dolu | GCP Console'dan disk genişletin, `growpart` + `resize2fs` |
 | cloudflared başlamıyor | Boş `CLOUDFLARE_TUNNEL_TOKEN` | GitHub Secret veya `.env` güncelleyin |
+| `Port 127.0.0.1:8080 is already allocated` | Eski `nexus-shield-api-prod` / dev `nexus_shield_app` hâlâ çalışıyor | `cd /opt/nexus-core-firewall` → `sudo bash scripts/prod-release-bound-port.sh 8080` → `sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --wait` |
 
 ## 9. Güvenlik notları
 

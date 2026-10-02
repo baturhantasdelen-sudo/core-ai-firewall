@@ -12,7 +12,8 @@ DEPLOY_ML_IMAGE="${DEPLOY_ML_IMAGE:-0}"
 echo "==> Disk usage before cleanup"
 df -h / /var/lib/docker 2>/dev/null || df -h /
 
-echo "==> Stop stack"
+echo "==> Stop stack and release host :8080"
+bash "$(dirname "$0")/prod-release-bound-port.sh" 8080 || true
 $DOCKER compose -f "${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
 echo "==> Docker cleanup (images, build cache, stopped containers)"
