@@ -52,6 +52,8 @@ else
 fi
 
 log "5/5 Landing page marker"
+curl -fsS http://127.0.0.1:80/ | grep -q 'sandbox-v3'
+curl -fsS http://127.0.0.1:80/ | grep -q '/api/sandbox'
 curl -fsS http://127.0.0.1:80/ | grep -q '<title>'
 
 if docker ps --format '{{.Names}}' | grep -q '^cloudflared-prod$'; then
