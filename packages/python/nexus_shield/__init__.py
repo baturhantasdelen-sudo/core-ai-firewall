@@ -13,7 +13,13 @@ from .outcome_verifier import verify_outcome
 from .passport import AgentPassport, validate_passport
 from .uar_verify import build_uar_v2_receipt, verify_receipt_dict
 
+try:
+    from . import core as accountability_core
+except ImportError:  # pragma: no cover
+    accountability_core = None  # type: ignore[assignment]
+
 __all__ = [
+    "accountability_core",
     "NexusClient",
     "AgentBlackBox",
     "AgentCircuitBreaker",

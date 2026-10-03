@@ -20,7 +20,10 @@ classifiers = [
   "Topic :: Security",
   "Environment :: Console",
 ]
-dependencies = []
+dependencies = [
+  "pydantic>=2.0",
+  "cryptography>=42.0",
+]
 
 [project.optional-dependencies]
 proxy = [
