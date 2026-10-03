@@ -3,10 +3,23 @@ import type { NextConfig } from 'next';
 /** Standalone is for self-hosted/Docker; Vercel uses its own serverless output trace. */
 const isVercel = process.env.VERCEL === '1';
 
+const API_SUBDOMAIN = 'api.nexusshield.ai';
+const PRIMARY_ORIGIN = 'https://nexusshield.ai';
+
 const nextConfig: NextConfig = {
   ...(isVercel ? {} : { output: 'standalone' as const }),
   compress: true,
   poweredByHeader: false,
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: API_SUBDOMAIN }],
+        destination: `${PRIMARY_ORIGIN}/:path*`,
+        permanent: true,
+      },
+    ];
+  },
   /** Align with Cloudflare canonical URLs — avoid trailing-slash 308 loops. */
   trailingSlash: false,
   /**

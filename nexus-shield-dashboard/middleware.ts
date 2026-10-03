@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
+import { API_SUBDOMAIN_HOST, redirectUrlFromApiSubdomain } from '@/lib/site';
 
 function safeRedirectPath(path: string | null): string | null {
   if (!path || !path.startsWith('/') || path.startsWith('//')) {
@@ -13,6 +14,12 @@ function safeRedirectPath(path: string | null): string | null {
 
 export async function middleware(request: NextRequest) {
   try {
+    const hostname = request.headers.get('host')?.split(':')[0]?.toLowerCase();
+    if (hostname === API_SUBDOMAIN_HOST) {
+      const { pathname, search } = request.nextUrl;
+      return NextResponse.redirect(redirectUrlFromApiSubdomain(pathname, search), 301);
+    }
+
     const { response, user } = await updateSession(request);
     const { pathname } = request.nextUrl;
 
@@ -46,6 +53,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    {
+      source: '/:path*',
+      has: [{ type: 'host', value: 'api.nexusshield.ai' }],
+    },
     /*
      * Run auth middleware only on app pages — skip static assets, Next internals,
      * and API routes (webhooks/health must not block on Supabase).

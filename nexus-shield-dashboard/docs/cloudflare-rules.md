@@ -167,6 +167,32 @@ resource "cloudflare_ruleset" "nexus_api_mutations_bypass" {
 
 ---
 
+## Rule — Permanent redirect `api.nexusshield.ai` → apex
+
+**Type:** Redirect Rule (Single Redirect)
+
+**Expression:**
+
+```
+(http.host eq "api.nexusshield.ai")
+```
+
+**Target URL:** `https://nexusshield.ai${uri}${query_string}` (Dynamic)
+
+**Status code:** 301 (Permanent)
+
+Also enforced in-repo via `next.config.ts`, `vercel.json`, `middleware.ts`, and `deploy/nginx/nexus-shield.conf`.
+
+Verify:
+
+```bash
+curl -sI "https://api.nexusshield.ai/docs/benchmark?utm=1" | grep -iE '^(HTTP|location:)'
+# HTTP/2 301
+# location: https://nexusshield.ai/docs/benchmark?utm=1
+```
+
+---
+
 ## Verification checklist
 
 1. `curl -I https://<domain>/_next/static/<chunk>.js` → `Cache-Control: public, max-age=31536000, immutable`

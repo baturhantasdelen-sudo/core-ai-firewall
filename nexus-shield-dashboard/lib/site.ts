@@ -3,6 +3,15 @@ import type { Metadata } from 'next';
 /** Canonical marketing origin once DNS is configured at Cloudflare. */
 export const PRIMARY_SITE_URL = 'https://nexusshield.ai';
 
+/** Legacy API hostname — permanently redirected to {@link PRIMARY_SITE_URL}. */
+export const API_SUBDOMAIN_HOST = 'api.nexusshield.ai' as const;
+
+/** Build 301 target for requests that still hit the API subdomain (path + query preserved). */
+export function redirectUrlFromApiSubdomain(pathname: string, search: string): string {
+  const path = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  return `${PRIMARY_SITE_URL}${path}${search}`;
+}
+
 /** Alternate canonical host (redirect handled by Vercel domain settings). */
 export const WWW_SITE_URL = 'https://www.nexusshield.ai';
 
@@ -56,7 +65,7 @@ function originFromHost(host: string): string {
 export function isApiSubdomainOrigin(url: string): boolean {
   try {
     const hostname = new URL(url).hostname.toLowerCase();
-    return hostname === 'api.nexusshield.ai' || hostname.startsWith('api.');
+    return hostname === API_SUBDOMAIN_HOST || hostname.startsWith('api.');
   } catch {
     return false;
   }
