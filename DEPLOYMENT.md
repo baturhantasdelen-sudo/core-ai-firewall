@@ -243,6 +243,7 @@ python test_integration.py
 | Deploy disk hatası | Root disk dolu | GCP Console'dan disk genişletin, `growpart` + `resize2fs` |
 | cloudflared başlamıyor | Boş `CLOUDFLARE_TUNNEL_TOKEN` | GitHub Secret veya `.env` güncelleyin |
 | `Port 127.0.0.1:8080 is already allocated` | Eski `nexus-shield-api-prod` / dev `nexus_shield_app` hâlâ çalışıyor | `cd /opt/nexus-core-firewall` → `sudo bash scripts/prod-release-bound-port.sh 8080` → `sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --wait` |
+| `nexus-shield-api` servisi / konteyner bulunamıyor, eski container ID | Preflight `down` sonrası compose state ile gerçek konteyner adı (`nexus-shield-api-prod`) uyumsuz; dev stack `nexus_shield_app` kalmış | SSH → `docker ps -a` ile **`nexus-shield-api-prod`** ve **`nginx-gateway-prod`** arayın. Prod dizininde **`docker-compose.prod.yml`** kullanın (kök `docker-compose.yml` değil). Tek komut: `sudo bash scripts/prod-stack-restart.sh` — veya `sudo bash scripts/recover-docker-stack.sh` (disk temizliği + rebuild). Manuel: `sudo docker compose --env-file .env -f docker-compose.prod.yml down --remove-orphans` → `build nexus-shield-api` → `up -d --force-recreate --wait nexus-shield-api nginx-gateway` |
 
 ## 9. Güvenlik notları
 

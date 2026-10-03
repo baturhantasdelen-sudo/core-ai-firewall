@@ -36,11 +36,11 @@ echo "==> Build lightweight Fast API (Dockerfile.fast)"
 export DOCKER_FAST_IMAGE="${DOCKER_FAST_IMAGE:-nexus-shield-fast:local}"
 $DOCKER compose -f "${COMPOSE_FILE}" build nexus-shield-api
 
-echo "==> Start Fast API + nginx gateway (wait for healthy)"
+echo "==> Start Fast API + nginx gateway (force-recreate — avoids stale container IDs)"
 if [[ -f .env ]]; then
-  $DOCKER compose --env-file .env -f "${COMPOSE_FILE}" up -d --wait nexus-shield-api nginx-gateway
+  $DOCKER compose --env-file .env -f "${COMPOSE_FILE}" up -d --remove-orphans --force-recreate --wait nexus-shield-api nginx-gateway
 else
-  $DOCKER compose -f "${COMPOSE_FILE}" up -d --wait nexus-shield-api nginx-gateway
+  $DOCKER compose -f "${COMPOSE_FILE}" up -d --remove-orphans --force-recreate --wait nexus-shield-api nginx-gateway
 fi
 
 if [[ "${DEPLOY_ML_IMAGE}" == "1" ]]; then
