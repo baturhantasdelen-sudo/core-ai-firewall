@@ -27,7 +27,6 @@
     "test:actions": "tsx --test test/action-firewall.test.ts",
     "test:immune": "tsx --test test/immune-network.test.ts",
     "test:simulator": "tsx --test test/simulator.test.ts",
-    "test:action-control-simulator": "tsx --test test/action-control-simulator.test.ts",
     "test:trust": "tsx --test test/advanced-trust.test.ts",
     "test:full-stack": "tsx --test test/full-stack-trust.test.ts",
     "test:katman1-see": "tsx --test test/katman1-see.test.ts",
