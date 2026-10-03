@@ -5,6 +5,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
 import { ProveItDemoCard } from '@/components/landing/ProveItDemoCard';
 import { ProofCenterUarPlayground } from '@/components/proof-center/ProofCenterUarPlayground';
+import { ActionVerificationCenter } from '@/components/proof-center/ActionVerificationCenter';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +40,10 @@ export default function ProofCenterPage() {
 
       <section className="mx-auto max-w-7xl px-6 py-10">
         <ProofCenterUarPlayground />
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 pb-16">
+        <ActionVerificationCenter />
       </section>
 
       <PublicProofCenterSection compact />

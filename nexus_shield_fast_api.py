@@ -315,6 +315,19 @@ app.include_router(auth_router)
 app.include_router(governance_router)
 app.include_router(agent_router)
 
+try:
+    from nexus_shield.accountability.routes import create_accountability_router
+    from nexus_shield.middleware.gateway import AccountabilityGatewayMiddleware
+
+    app.add_middleware(
+        AccountabilityGatewayMiddleware,
+        path_prefix="/v1/accountability",
+        post_verify=False,
+    )
+    app.include_router(create_accountability_router())
+except ImportError as exc:
+    logger.warning("Accountability v2 routes not loaded: %s", exc)
+
 
 @app.middleware("http")
 async def monitor_requests(request: Request, call_next):

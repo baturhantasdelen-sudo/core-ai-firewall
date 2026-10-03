@@ -28,6 +28,7 @@
     "test:immune": "tsx --test test/immune-network.test.ts",
     "test:simulator": "tsx --test test/simulator.test.ts",
     "test:api-subdomain-redirect": "tsx --test test/api-subdomain-redirect.test.ts",
+    "test:proof-center-v2": "tsx --test test/proof-center-v2.test.ts",
     "test:trust": "tsx --test test/advanced-trust.test.ts",
     "test:full-stack": "tsx --test test/full-stack-trust.test.ts",
     "test:katman1-see": "tsx --test test/katman1-see.test.ts",
