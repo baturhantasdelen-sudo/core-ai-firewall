@@ -5,7 +5,13 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-DOCKER="${DOCKER:-sudo docker}"
+if ! command -v docker >/dev/null 2>&1; then
+  echo "ERROR: docker is not installed or not in PATH."
+  echo "       Install Docker Engine on this host or ensure the deploy user can run docker (e.g. docker group membership)."
+  exit 1
+fi
+
+export DOCKER="${DOCKER:-docker}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 DEPLOY_ML_IMAGE="${DEPLOY_ML_IMAGE:-0}"
 
@@ -20,12 +26,12 @@ _dc=("${DOCKER}" compose -f "${COMPOSE_FILE}")
 
 echo "==> Purge locked/stale nexus-shield-api service"
 "${_dc[@]}" rm -fsv nexus-shield-api 2>/dev/null || true
-${DOCKER} rm -f nexus-shield-api-prod 2>/dev/null || true
+"${DOCKER}" rm -f nexus-shield-api-prod 2>/dev/null || true
 
 echo "==> Docker cleanup (images, build cache, stopped containers)"
-$DOCKER container prune -f || true
-$DOCKER builder prune -af || true
-$DOCKER image prune -af || true
+"${DOCKER}" container prune -f || true
+"${DOCKER}" builder prune -af || true
+"${DOCKER}" image prune -af || true
 
 echo "==> Disk usage after cleanup"
 df -h / /var/lib/docker 2>/dev/null || df -h /
@@ -49,8 +55,8 @@ if [[ "${DEPLOY_ML_IMAGE}" == "1" ]]; then
   MIN_ML_KB=$((5120 * 1024))
   if [[ "${AVAIL_KB}" -ge "${MIN_ML_KB}" ]]; then
     echo "==> DEPLOY_ML_IMAGE=1 — pull/start PyTorch ML API"
-    $DOCKER compose -f "${COMPOSE_FILE}" pull nexus-api || true
-    $DOCKER compose -f "${COMPOSE_FILE}" --profile ml up -d nexus-api
+    "${DOCKER}" compose -f "${COMPOSE_FILE}" pull nexus-api || true
+    "${DOCKER}" compose -f "${COMPOSE_FILE}" --profile ml up -d nexus-api
   else
     echo "WARN: Skipping ML API — need 5 GiB free for PyTorch image"
   fi
@@ -58,7 +64,7 @@ else
   echo "==> Lightweight recovery: ML API skipped (set DEPLOY_ML_IMAGE=1 to enable)"
 fi
 
-$DOCKER compose -f "${COMPOSE_FILE}" ps
+"${DOCKER}" compose -f "${COMPOSE_FILE}" ps
 
 echo "==> Runtime checks"
 bash "$(dirname "$0")/wait-for-http.sh" "http://127.0.0.1:8080/healthz" HEALTHY 30 2 && echo "Fast API: OK" || echo "Fast API: FAIL"
