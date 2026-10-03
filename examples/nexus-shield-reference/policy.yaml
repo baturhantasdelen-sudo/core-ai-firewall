@@ -1,0 +1,18 @@
+version: "1"
+description: Phase 1 Agent Passports — accountability reference stack
+
+passports:
+  ap_agent_01:
+    owner: "finance-bot@example.com"
+    organization: "Acme Corp AP"
+    purpose: "Read-only invoice lookup and limited payments under CFO cap"
+    allowed_systems:
+      - mock-erp
+    allowed_tools:
+      - read_invoice
+      - post_payment
+    max_financial_authority: 5000.0
+    time_validity:
+      start_hour: 0
+      end_hour: 23
+    risk_level: medium

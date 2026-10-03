@@ -1,0 +1,66 @@
+# Nexus Shield Phase 1 — Accountability & Execution Verification reference
+# From repo root:
+#   docker compose -f examples/nexus-shield-reference/docker-compose.yml up --build
+
+name: nexus-shield-reference
+
+networks:
+  ref_net:
+    driver: bridge
+
+services:
+  mock-api:
+    image: python:3.12-slim
+    container_name: nsr_mock_api
+    working_dir: /app/examples/nexus-shield-reference
+    command: ["python", "mock_api.py"]
+    volumes:
+      - ../..:/app:ro
+    networks:
+      - ref_net
+
+  accountability-sidecar:
+    image: python:3.12-slim
+    container_name: nsr_accountability_sidecar
+    working_dir: /app/examples/nexus-shield-reference
+    environment:
+      POLICY_FILE: /app/examples/nexus-shield-reference/policy.yaml
+      MOCK_API_URL: http://mock-api:8300
+      NEXUS_SHIELD_PKG: /app/packages/python
+      BIND_PORT: "8092"
+    command: ["sh", "-c", "pip install -q pyyaml && python accountability_sidecar.py"]
+    volumes:
+      - ../..:/app:ro
+    depends_on:
+      mock-api:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8092/healthz')",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - ref_net
+
+  agent-simulator:
+    image: python:3.12-slim
+    container_name: nsr_agent_simulator
+    working_dir: /app/examples/nexus-shield-reference
+    environment:
+      ACCOUNTABILITY_URL: http://accountability-sidecar:8092/v1/accountability
+      AGENT_ID: ap_agent_01
+    command: ["python", "agent_simulator.py"]
+    volumes:
+      - ../..:/app:ro
+    depends_on:
+      accountability-sidecar:
+        condition: service_healthy
+    networks:
+      - ref_net

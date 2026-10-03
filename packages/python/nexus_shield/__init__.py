@@ -3,8 +3,21 @@
 __version__ = "0.2.0"
 
 from .action_receipt import build_action_receipt, inspect_action
+from .outcome_verifier import verify_outcome
+from .passport import AgentPassport, validate_passport
+from .uar_verify import build_uar_v2_receipt, verify_receipt_dict
 
-__all__ = ["NexusClient", "build_action_receipt", "inspect_action", "__version__"]
+__all__ = [
+    "NexusClient",
+    "AgentPassport",
+    "build_action_receipt",
+    "build_uar_v2_receipt",
+    "inspect_action",
+    "validate_passport",
+    "verify_outcome",
+    "verify_receipt_dict",
+    "__version__",
+]
 
 
 class NexusClient:
