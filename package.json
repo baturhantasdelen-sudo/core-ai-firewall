@@ -8,7 +8,8 @@
     "tunnel:keepalive": "node scripts/tunnel-keepalive.js",
     "tunnel:keepalive:prod": "cross-env CLOUDFLARED_MODE=docker LOCAL_HEALTH_URL=http://127.0.0.1:80/healthz PUBLIC_HEALTH_URL=https://api.nexusshield.ai/healthz node scripts/tunnel-keepalive.js",
     "tunnel:setup": "bash scripts/setup-cloudflare-service.sh",
-    "tunnel:recover": "bash scripts/start-tunnel.sh"
+    "tunnel:recover": "bash scripts/start-tunnel.sh",
+    "demo:record": "npm run record:accountability-demo --prefix nexus-shield-dashboard"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

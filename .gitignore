@@ -59,3 +59,7 @@ data/api_keys.json
 .vercel
 .env*
 !.env*.example
+
+# Generated demo recordings (local / CI artifacts)
+outputs/
+!outputs/.gitkeep
