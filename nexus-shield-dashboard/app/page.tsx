@@ -25,6 +25,7 @@ import { ContactSection } from '@/components/landing/ContactSection';
 import { TrustCenterSection } from '@/components/landing/TrustCenterSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
+import { ActionControlSimulator } from '@/components/landing/ActionControlSimulator';
 import { ProofCenterUarPlayground } from '@/components/proof-center/ProofCenterUarPlayground';
 import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
 import {
@@ -389,6 +390,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ActionControlSimulator />
 
       <section id="modules" className="scroll-mt-20 mx-auto max-w-7xl px-6 py-20">
         <div className="mx-auto max-w-2xl text-center">
