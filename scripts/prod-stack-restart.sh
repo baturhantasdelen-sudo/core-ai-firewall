@@ -30,6 +30,10 @@ echo "==> Compose down (remove orphans)"
 "${_dc[@]}" --profile cloudflare --profile ml down --remove-orphans \
   || "${_dc[@]}" down --remove-orphans || true
 
+echo "==> Purge locked/stale nexus-shield-api service (compose rm + force container remove)"
+"${_dc[@]}" rm -fsv nexus-shield-api 2>/dev/null || true
+${DOCKER} rm -f nexus-shield-api-prod 2>/dev/null || true
+
 echo "==> Rebuild and start nexus-shield-api + nginx-gateway"
 "${_dc[@]}" build nexus-shield-api
 "${_dc[@]}" up -d --remove-orphans --force-recreate --wait nexus-shield-api nginx-gateway

@@ -14,7 +14,13 @@ df -h / /var/lib/docker 2>/dev/null || df -h /
 
 echo "==> Stop stack and release host :8080"
 bash "$(dirname "$0")/prod-release-bound-port.sh" 8080 || true
-$DOCKER compose -f "${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
+_dc=("${DOCKER}" compose -f "${COMPOSE_FILE}")
+[[ -f .env ]] && _dc+=(--env-file .env)
+"${_dc[@]}" down --remove-orphans 2>/dev/null || true
+
+echo "==> Purge locked/stale nexus-shield-api service"
+"${_dc[@]}" rm -fsv nexus-shield-api 2>/dev/null || true
+${DOCKER} rm -f nexus-shield-api-prod 2>/dev/null || true
 
 echo "==> Docker cleanup (images, build cache, stopped containers)"
 $DOCKER container prune -f || true
@@ -34,14 +40,10 @@ fi
 
 echo "==> Build lightweight Fast API (Dockerfile.fast)"
 export DOCKER_FAST_IMAGE="${DOCKER_FAST_IMAGE:-nexus-shield-fast:local}"
-$DOCKER compose -f "${COMPOSE_FILE}" build nexus-shield-api
+"${_dc[@]}" build nexus-shield-api
 
 echo "==> Start Fast API + nginx gateway (force-recreate — avoids stale container IDs)"
-if [[ -f .env ]]; then
-  $DOCKER compose --env-file .env -f "${COMPOSE_FILE}" up -d --remove-orphans --force-recreate --wait nexus-shield-api nginx-gateway
-else
-  $DOCKER compose -f "${COMPOSE_FILE}" up -d --remove-orphans --force-recreate --wait nexus-shield-api nginx-gateway
-fi
+"${_dc[@]}" up -d --remove-orphans --force-recreate --wait nexus-shield-api nginx-gateway
 
 if [[ "${DEPLOY_ML_IMAGE}" == "1" ]]; then
   MIN_ML_KB=$((5120 * 1024))

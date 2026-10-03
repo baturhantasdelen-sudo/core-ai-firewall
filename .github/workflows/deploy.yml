@@ -306,6 +306,9 @@ jobs:
             sudo docker image prune -af || true
             sudo docker builder prune -af || true
             df -h / /var/lib/docker 2>/dev/null || df -h /
+            echo "==> Purge stale/locked nexus-shield-api before rebuild"
+            sudo docker compose --env-file .env -f docker-compose.prod.yml rm -fsv nexus-shield-api 2>/dev/null || true
+            docker rm -f nexus-shield-api-prod 2>/dev/null || true
             echo "==> Build lightweight Fast API locally (no PyTorch pull)..."
             sudo docker compose --env-file .env -f docker-compose.prod.yml build nexus-shield-api
             sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans --force-recreate --wait nexus-shield-api nginx-gateway \
