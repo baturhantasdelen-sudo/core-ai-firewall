@@ -60,8 +60,34 @@ export function ActionVerificationCenter() {
         </p>
       </div>
 
-      <ReceiptInspector receipts={receipts} />
+      <div className="space-y-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-300/90">
+          1 — Action Control
+        </p>
+        <p className="text-sm text-zinc-500">
+          Identity, authority, intent, and policy gates before consequential tools execute.
+        </p>
+      </div>
       <BlastRadiusMatrix baseline={blast} whatIfByTool={whatIf} />
+
+      <div className="space-y-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-300/90">
+          2 — Outcome Verification
+        </p>
+        <p className="text-sm text-zinc-500">
+          Cross-check HTTP success against DB, ledger, and ERP state — detect false success (UNVERIFIED).
+        </p>
+      </div>
+      <ReceiptInspector receipts={receipts} />
+
+      <div className="space-y-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300/90">
+          3 — Cryptographic UAR
+        </p>
+        <p className="text-sm text-zinc-500">
+          SHA-256 evidence hashes, Ed25519 seals, and delegation audit trails for every governed attempt.
+        </p>
+      </div>
       <DelegationTree tree={delegation} />
     </section>
   );

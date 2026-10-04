@@ -7,16 +7,16 @@ import inspect
 from typing import Any, Callable, TypeVar
 
 from nexus_shield.accountability.context import get_accountability_context
+from nexus_shield.core.action_control import evaluate_action_control, route_autonomy
 from nexus_shield.core.aar import (
     AgentReceiptBlock,
     ApiResponseBlock,
     AuthorityBlock,
     ExecutionBlock,
     IntentBlock,
-    OutcomeVerificationBlock,
     PolicyBlock,
+    build_outcome_verification_block,
 )
-from nexus_shield.core.passport import PassportError, validate_passport_action
 from nexus_shield.sdk.interceptor import intercept_and_log_outcome
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -24,20 +24,6 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 class SecureActionError(RuntimeError):
     """Passport or accountability pipeline failure."""
-
-
-def _build_outcome_block(
-    verdict: str,
-    verification_payload: dict[str, Any],
-) -> OutcomeVerificationBlock:
-    status = verdict if verdict in {"VERIFIED", "UNVERIFIED", "DISCREPANCY", "FAILED"} else "FAILED"
-    return OutcomeVerificationBlock(
-        status=status,  # type: ignore[arg-type]
-        verification_method="DB_STATE_AND_LEDGER_CROSS_CHECK",
-        state_before=verification_payload.get("state_before") or {},
-        state_after=verification_payload.get("state_after") or {},
-        discrepancy_detected=bool(verification_payload.get("discrepancy_detected")),
-    )
 
 
 def run_secure_agent_action(
@@ -59,36 +45,37 @@ def run_secure_agent_action(
     if amount is not None:
         amount = float(amount)
 
-    try:
-        validate_passport_action(
-            passport,
-            required_scopes=required_scopes,
-            amount=amount,
-            signing_key=ctx.signing_key,
-        )
-    except PassportError as exc:
-        raise SecureActionError(str(exc)) from exc
+    state_before = dict(handler_kwargs.get("state_snapshot_before") or {})
+    raw_prompt = str(handler_kwargs.get("raw_prompt") or "")
+    target_resource = str(handler_kwargs.get(target_resource_key) or handler_kwargs.get("target_resource") or "")
+    intent_preview = {
+        "raw_prompt": raw_prompt,
+        "parsed_intent": parsed_intent,
+        "target_resource": target_resource,
+    }
+    preliminary_risk = 0.15 if parsed_intent == "EXECUTE_PAYMENT" else 0.4
+    control = evaluate_action_control(
+        passport=passport,
+        intent=intent_preview,
+        required_scopes=required_scopes,
+        amount=amount,
+        signing_key=ctx.signing_key,
+        delegation_graph=ctx.delegation_graph,
+        risk_score=preliminary_risk,
+        revoked_passport_ids=ctx.circuit_breaker.state.revoked_passport_ids if ctx.circuit_breaker else None,
+    )
+    if not control.allowed:
+        if ctx.circuit_breaker is not None:
+            ctx.circuit_breaker.trip(
+                reason="POLICY_VIOLATION",
+                passport_id=passport.passport_id,
+                agent_id=passport.identity,
+                delegation_graph=ctx.delegation_graph,
+                metadata={"reason": control.reason, "details": control.details},
+            )
+        raise SecureActionError(control.reason or "action control denied")
 
     graph = ctx.delegation_graph
-    if graph is not None:
-        delegation = graph.validate_action(
-            passport.identity,
-            required_scopes=required_scopes,
-            amount=amount,
-        )
-        if not delegation.get("allowed"):
-            ctx.store.append_audit(
-                {
-                    "event": "DELEGATION_DENIED",
-                    "agent_id": passport.identity,
-                    "reason": delegation.get("reason"),
-                }
-            )
-            raise SecureActionError(str(delegation.get("reason", "delegation denied")))
-
-    state_before = dict(handler_kwargs.get("state_snapshot_before") or {})
-    target_resource = str(handler_kwargs.get(target_resource_key) or handler_kwargs.get("target_resource") or "")
-    raw_prompt = str(handler_kwargs.get("raw_prompt") or "")
     tool_called = str(handler_kwargs.get("tool_called") or handler.__name__)
     request_payload = dict(handler_kwargs.get("request_payload") or {})
 
@@ -109,10 +96,15 @@ def run_secure_agent_action(
         intent=intent,
         execution_result=execution_result,
         state_snapshot_before=state_before,
+        passport_id=passport.passport_id,
+        agent_id=passport.identity,
     )
 
     policy_eval = "ALLOW" if verdict == "VERIFIED" else "REQUIRE_APPROVAL"
     risk_score = 0.12 if verdict == "VERIFIED" else 0.82
+    autonomy = route_autonomy(risk_score)
+    if autonomy == "BLOCK" and verdict != "VERIFIED":
+        policy_eval = "BLOCK"
 
     receipt = ctx.aar_engine.seal(
         agent=AgentReceiptBlock(
@@ -141,7 +133,15 @@ def run_secure_agent_action(
             request_payload=request_payload,
             api_response=ApiResponseBlock(status_code=status_code, raw_body=raw_body),
         ),
-        outcome_verification=_build_outcome_block(verdict, verification_payload),
+        outcome_verification=build_outcome_verification_block(
+            status=verdict if verdict in {"VERIFIED", "UNVERIFIED", "DISCREPANCY", "FAILED"} else "FAILED",  # type: ignore[arg-type]
+            verification_method=verification_payload.get("verification_method", "DB_STATE_AND_LEDGER_CROSS_CHECK"),  # type: ignore[arg-type]
+            state_before=verification_payload.get("state_before") or {},
+            state_after=verification_payload.get("state_after") or {},
+            discrepancy_detected=bool(verification_payload.get("discrepancy_detected")),
+            external_transaction_id=verification_payload.get("external_transaction_id"),
+            signing_key=ctx.signing_key,
+        ),
     )
 
     ctx.store.index_receipt(receipt)

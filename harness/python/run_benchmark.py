@@ -7,13 +7,15 @@ import argparse
 import json
 import os
 import statistics
+import sys
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
 
-DEFAULT_BASE_URL = os.environ.get("HARNESS_BASE_URL", "http://127.0.0.1:8080")
+DEFAULT_BASE_URL = os.environ.get("HARNESS_BASE_URL", "http://127.0.0.1:8080").rstrip("/")
+DEFAULT_V1_PROXY = os.environ.get("NEXUS_SHIELD_V1_BASE", f"{DEFAULT_BASE_URL}/v1")
 DEFAULT_HEADERS = {
     "Content-Type": "application/json",
     "X-Nexus-Agent-Id": os.environ.get("HARNESS_AGENT_ID", "harness-agent-01"),
@@ -117,9 +119,23 @@ def run_benchmarks(
 
     accuracy = (blocked_count / attack_samples * 100) if attack_samples else 0.0
 
+    outcome_pass: bool | None = None
+    if os.environ.get("HARNESS_OUTCOME_CHECK", "1") == "1":
+        try:
+            script_dir = Path(__file__).resolve().parent
+            if str(script_dir) not in sys.path:
+                sys.path.insert(0, str(script_dir))
+            from run_outcome_correctness import run_outcome_correctness_checks  # noqa: WPS433
+
+            outcome_pass = bool(run_outcome_correctness_checks().get("pass"))
+        except Exception:
+            outcome_pass = False
+
     return {
         "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "base_url": base_url,
+        "v1_proxy_base": DEFAULT_V1_PROXY,
+        "outcome_correctness_pass": outcome_pass,
         "latency_ms": {
             "samples": latency_samples,
             "avg": round(avg_latency, 2),

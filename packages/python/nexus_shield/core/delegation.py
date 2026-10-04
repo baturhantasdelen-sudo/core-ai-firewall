@@ -41,10 +41,12 @@ class DelegationGraph:
     root: DelegationNode
     _nodes: dict[str, DelegationNode] | None = None
     _parent: dict[str, str] | None = None
+    _frozen: set[str] | None = None
 
     def __post_init__(self) -> None:
         self._nodes = {self.root.agent_id: self.root}
         self._parent = {}
+        self._frozen = set()
 
     def add_delegation(self, delegator: str, delegatee: DelegationNode) -> None:
         assert self._nodes is not None and self._parent is not None
@@ -92,6 +94,25 @@ class DelegationGraph:
             raise DelegationGraphError(f"agent {agent_id} not in delegation graph")
         return self._nodes[agent_id]
 
+    def descendants(self, agent_id: str) -> list[str]:
+        assert self._parent is not None
+        children: list[str] = []
+        for delegatee, delegator in self._parent.items():
+            if delegator == agent_id:
+                children.append(delegatee)
+                children.extend(self.descendants(delegatee))
+        return children
+
+    def freeze_subtree(self, agent_id: str) -> list[str]:
+        assert self._frozen is not None
+        frozen = [agent_id, *self.descendants(agent_id)]
+        self._frozen.update(frozen)
+        return frozen
+
+    def is_frozen(self, agent_id: str) -> bool:
+        assert self._frozen is not None
+        return agent_id in self._frozen
+
     def validate_action(
         self,
         agent_id: str,
@@ -99,6 +120,12 @@ class DelegationGraph:
         required_scopes: list[str],
         amount: float | None = None,
     ) -> dict[str, Any]:
+        if self.is_frozen(agent_id):
+            return {
+                "allowed": False,
+                "reason": f"agent {agent_id} frozen by circuit breaker",
+                "depth": self.depth(agent_id) if agent_id in (self._nodes or {}) else 0,
+            }
         node = self.effective_node(agent_id)
         for required in required_scopes:
             if not any(

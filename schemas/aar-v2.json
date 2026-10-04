@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nexusshield.ai/schemas/aar-v2.json",
+  "title": "Universal Action Receipt (UAR v2)",
+  "type": "object",
+  "required": [
+    "$schema",
+    "receipt_id",
+    "timestamp",
+    "agent",
+    "intent",
+    "authority",
+    "policy",
+    "execution",
+    "outcome_verification",
+    "cryptographic_proof"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "const": "https://nexusshield.ai/schemas/aar-v2.json" },
+    "receipt_id": { "type": "string", "pattern": "^aar_[a-f0-9]{16}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "agent": {
+      "type": "object",
+      "required": ["identity", "passport_id", "owner"],
+      "additionalProperties": false,
+      "properties": {
+        "identity": { "type": "string" },
+        "passport_id": { "type": "string", "pattern": "^pas_[a-z]+_[a-z0-9]+$" },
+        "owner": { "type": "string" }
+      }
+    },
+    "intent": {
+      "type": "object",
+      "required": ["raw_prompt", "parsed_intent", "target_resource"],
+      "additionalProperties": false,
+      "properties": {
+        "raw_prompt": { "type": "string" },
+        "parsed_intent": { "type": "string" },
+        "target_resource": { "type": "string" }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "required": ["allowed_scopes", "financial_limit", "delegation_depth", "verified_by_graph"],
+      "additionalProperties": false,
+      "properties": {
+        "allowed_scopes": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "financial_limit": { "type": "number", "minimum": 0 },
+        "delegation_depth": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "verified_by_graph": { "type": "boolean" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["policy_id", "evaluation", "risk_score"],
+      "additionalProperties": false,
+      "properties": {
+        "policy_id": { "type": "string" },
+        "evaluation": { "enum": ["ALLOW", "BLOCK", "REQUIRE_APPROVAL", "READ_ONLY"] },
+        "risk_score": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "required": ["tool_called", "request_payload", "api_response"],
+      "additionalProperties": false,
+      "properties": {
+        "tool_called": { "type": "string" },
+        "request_payload": { "type": "object" },
+        "api_response": {
+          "type": "object",
+          "required": ["status_code", "raw_body"],
+          "additionalProperties": false,
+          "properties": {
+            "status_code": { "type": "integer" },
+            "raw_body": { "type": "string" }
+          }
+        }
+      }
+    },
+    "outcome_verification": {
+      "type": "object",
+      "required": [
+        "status",
+        "verification_method",
+        "state_before",
+        "state_after",
+        "state_before_hash",
+        "state_after_hash",
+        "verifier_signature",
+        "discrepancy_detected"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "enum": ["VERIFIED", "UNVERIFIED", "DISCREPANCY", "FAILED"] },
+        "verification_method": {
+          "enum": [
+            "DB_STATE_AND_LEDGER_CROSS_CHECK",
+            "API_ONLY",
+            "MANUAL_AUDIT",
+            "HASH_CHAIN"
+          ]
+        },
+        "state_before": { "type": "object" },
+        "state_after": { "type": "object" },
+        "state_before_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "state_after_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "external_transaction_id": { "type": ["string", "null"], "maxLength": 256 },
+        "verifier_signature": { "type": "string", "minLength": 1 },
+        "discrepancy_detected": { "type": "boolean" }
+      }
+    },
+    "cryptographic_proof": {
+      "type": "object",
+      "required": ["evidence_hash", "signature"],
+      "additionalProperties": false,
+      "properties": {
+        "evidence_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "signature": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

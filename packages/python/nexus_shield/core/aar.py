@@ -10,7 +10,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-AAR_SCHEMA_ID = "https://nexusshield.ai/schemas/aar-v1.json"
+AAR_SCHEMA_ID = "https://nexusshield.ai/schemas/aar-v2.json"
+AAR_SCHEMA_V1_ID = "https://nexusshield.ai/schemas/aar-v1.json"
 SIGNATURE_PREFIX = "sig_nexus_ed25519_"
 
 VerificationStatus = Literal["VERIFIED", "UNVERIFIED", "DISCREPANCY", "FAILED"]
@@ -94,6 +95,10 @@ class OutcomeVerificationBlock(BaseModel):
     verification_method: VerificationMethod
     state_before: dict[str, Any]
     state_after: dict[str, Any]
+    state_before_hash: str = Field(pattern=r"^sha256:[a-f0-9]{64}$")
+    state_after_hash: str = Field(pattern=r"^sha256:[a-f0-9]{64}$")
+    external_transaction_id: str | None = Field(default=None, max_length=256)
+    verifier_signature: str = Field(min_length=1)
     discrepancy_detected: bool
 
 
@@ -144,6 +149,43 @@ def canonical_json_bytes(payload: dict[str, Any]) -> bytes:
 def compute_evidence_hash(payload: dict[str, Any]) -> str:
     digest = hashlib.sha256(canonical_json_bytes(payload)).hexdigest()
     return f"sha256:{digest}"
+
+
+def hash_state_snapshot(state: dict[str, Any]) -> str:
+    return compute_evidence_hash({"snapshot": state})
+
+
+def build_outcome_verification_block(
+    *,
+    status: VerificationStatus,
+    verification_method: VerificationMethod,
+    state_before: dict[str, Any],
+    state_after: dict[str, Any],
+    discrepancy_detected: bool,
+    signing_key: AARSigningKeyPair,
+    external_transaction_id: str | None = None,
+) -> OutcomeVerificationBlock:
+    before_hash = hash_state_snapshot(state_before)
+    after_hash = hash_state_snapshot(state_after)
+    verifier_payload = {
+        "status": status,
+        "verification_method": verification_method,
+        "state_before_hash": before_hash,
+        "state_after_hash": after_hash,
+        "external_transaction_id": external_transaction_id,
+    }
+    verifier_signature = signing_key.sign_payload(verifier_payload)
+    return OutcomeVerificationBlock(
+        status=status,
+        verification_method=verification_method,
+        state_before=state_before,
+        state_after=state_after,
+        state_before_hash=before_hash,
+        state_after_hash=after_hash,
+        external_transaction_id=external_transaction_id,
+        verifier_signature=verifier_signature,
+        discrepancy_detected=discrepancy_detected,
+    )
 
 
 class AARSigningKeyPair:

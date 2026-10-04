@@ -185,4 +185,6 @@ def test_privilege_escalation_blocked_at_gateway(accountability_client) -> None:
     report = response.json()
     assert report["error"] == "policy_violation"
     audit = ctx.store.list_audit_trail()
-    assert any(e.get("event") == "GATEWAY_DELEGATION_DENIED" for e in audit)
+    assert any(
+        e.get("event") in {"GATEWAY_DELEGATION_DENIED", "CIRCUIT_BREAKER_TRIP"} for e in audit
+    )

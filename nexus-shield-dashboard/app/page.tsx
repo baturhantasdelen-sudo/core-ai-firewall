@@ -34,6 +34,7 @@ import {
   NEXUS_HARNESS_LATENCY_FOOTNOTE,
   NEXUS_RUNTIME_LATENCY_METRIC,
   NEXUS_VALUE_PROP_HOOK,
+  NEXUS_VALUE_PROP_SUBTITLE,
 } from '@/lib/brand/copy-standards';
 
 /** Core Action Control Plane — product spine. */
@@ -54,7 +55,7 @@ const ACTION_CONTROL_PLANE = [
   },
   {
     phase: 'CONTROL',
-    title: 'Action Firewall & Policy',
+    title: 'Action Control & Policy',
     href: '/dashboard/actions',
     icon: ShieldAlert,
     border: 'border-rose-500/25',
@@ -114,7 +115,7 @@ const CONTROL_PLANE_EXTENSIONS = [
 ] as const;
 
 const QUICK_NAV = [
-  { label: 'Action Firewall', href: '/dashboard/actions', chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200 hover:border-rose-500/40' },
+  { label: 'Action Control', href: '/dashboard/actions', chip: 'border-rose-500/20 bg-rose-500/10 text-rose-200 hover:border-rose-500/40' },
   { label: 'Proof Center', href: '/proof-center', chip: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200 hover:border-emerald-500/40' },
   { label: 'Free Scan', href: '/scan', chip: 'border-violet-500/20 bg-violet-500/10 text-violet-200 hover:border-violet-500/40' },
   { label: 'Demo / UAR', href: '/demo', chip: 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200 hover:border-cyan-500/40' },
@@ -197,7 +198,7 @@ export default function Home() {
             </h1>
 
             <p className="mx-auto mt-5 max-w-3xl text-lg text-zinc-300 sm:text-xl">
-              Agent Action Governance &amp; Verification — not a prompt-only firewall.
+              {NEXUS_VALUE_PROP_SUBTITLE}
             </p>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-zinc-500">{NEXUS_GOVERNANCE_TAGLINE}</p>
             <p className="mx-auto mt-3 max-w-3xl text-xs leading-relaxed text-zinc-500">
@@ -372,7 +373,7 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
             {[
               { label: 'Agent Inventory', href: '/dashboard/agents' },
-              { label: 'Action Firewall', href: '/dashboard/actions' },
+              { label: 'Action Control', href: '/dashboard/actions' },
               { label: 'Proof Center', href: '/proof-center' },
               { label: 'Trust Hub', href: '/dashboard/trust-hub' },
               { label: 'Red Team Simulator', href: '/dashboard/simulator' },

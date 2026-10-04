@@ -24,9 +24,25 @@ from .blast_radius import (
 )
 from .delegation import DelegationGraph, DelegationGraphError, DelegationNode
 from .passport import AgentPassportRecord, PassportError, validate_passport_action
+from .action_control import ActionControlDecision, AutonomyRoute, evaluate_action_control, route_autonomy
+from .circuit_breaker import AgentCircuitBreaker, CircuitBreakerState
+from .outcome_verifier import (
+    ConsequentialAction,
+    OutcomeVerifier,
+    resolve_consequential_action,
+)
 from .verification import OutcomeVerificationEngine, OutcomeVerdict
 
 __all__ = [
+    "ActionControlDecision",
+    "AgentCircuitBreaker",
+    "AutonomyRoute",
+    "CircuitBreakerState",
+    "ConsequentialAction",
+    "OutcomeVerifier",
+    "evaluate_action_control",
+    "resolve_consequential_action",
+    "route_autonomy",
     "AAREngine",
     "AARSigningKeyPair",
     "AgentReceiptBlock",

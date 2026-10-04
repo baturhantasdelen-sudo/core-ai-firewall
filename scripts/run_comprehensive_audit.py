@@ -391,7 +391,9 @@ def _profile_c_escalation(ctx: AccountabilityContext, client: TestClient, sub: A
     )
     payload = response.json()
     audit = ctx.store.list_audit_trail()
-    audit_ok = any(e.get("event") == "GATEWAY_DELEGATION_DENIED" for e in audit)
+    audit_ok = any(
+        e.get("event") in {"GATEWAY_DELEGATION_DENIED", "CIRCUIT_BREAKER_TRIP"} for e in audit
+    )
 
     passed = (
         response.status_code == 403

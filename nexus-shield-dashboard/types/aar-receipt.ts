@@ -38,6 +38,10 @@ export interface AarReceiptDocument {
     verification_method: string;
     state_before: Record<string, unknown>;
     state_after: Record<string, unknown>;
+    state_before_hash?: string;
+    state_after_hash?: string;
+    external_transaction_id?: string | null;
+    verifier_signature?: string;
     discrepancy_detected: boolean;
   };
   cryptographic_proof: {

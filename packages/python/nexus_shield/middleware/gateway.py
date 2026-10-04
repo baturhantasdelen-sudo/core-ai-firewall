@@ -10,7 +10,8 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
 from nexus_shield.accountability.context import get_accountability_context
-from nexus_shield.core.passport import AgentPassportRecord, PassportError, validate_passport_action
+from nexus_shield.core.action_control import evaluate_action_control
+from nexus_shield.core.passport import AgentPassportRecord
 from nexus_shield.sdk.interceptor import intercept_and_log_outcome
 
 
@@ -84,46 +85,48 @@ def validate_gateway_request(request: Request) -> tuple[AgentPassportRecord, dic
     required_scopes = _required_scopes_from_request(request)
     amount = _financial_amount(request)
 
-    try:
-        validate_passport_action(
-            passport,
-            required_scopes=required_scopes,
-            amount=amount,
-            signing_key=ctx.signing_key,
-        )
-    except PassportError as exc:
-        raise GatewayPolicyViolation(
-            "PASSPORT_SCOPE_VIOLATION",
-            str(exc),
-            {"required_scopes": required_scopes, "amount": amount},
-        ) from exc
-
-    graph = ctx.delegation_graph
-    if graph is not None:
-        check = graph.validate_action(
-            passport.identity,
-            required_scopes=required_scopes,
-            amount=amount,
-        )
-        if not check.get("allowed"):
-            ctx.store.append_audit(
-                {
-                    "event": "GATEWAY_DELEGATION_DENIED",
-                    "agent_id": passport.identity,
-                    "reason": check.get("reason"),
-                }
-            )
-            raise GatewayPolicyViolation(
-                "DELEGATION_VIOLATION",
-                str(check.get("reason")),
-                check,
-            )
-
     intent = {
         "raw_prompt": request.headers.get("x-agent-intent") or "",
         "parsed_intent": request.headers.get("x-nexus-parsed-intent") or "EXECUTE_PAYMENT",
         "target_resource": request.headers.get("x-nexus-target-resource") or "",
     }
+    risk_header = request.headers.get("x-nexus-risk-score")
+    risk_score = 0.25
+    if risk_header:
+        try:
+            risk_score = float(risk_header)
+        except ValueError:
+            raise GatewayPolicyViolation(
+                "INVALID_RISK_SCORE",
+                "X-Nexus-Risk-Score must be numeric",
+                {"value": risk_header},
+            ) from None
+
+    control = evaluate_action_control(
+        passport=passport,
+        intent=intent,
+        required_scopes=required_scopes,
+        amount=amount,
+        signing_key=ctx.signing_key,
+        delegation_graph=ctx.delegation_graph,
+        risk_score=risk_score,
+        revoked_passport_ids=ctx.circuit_breaker.state.revoked_passport_ids if ctx.circuit_breaker else None,
+    )
+    if not control.allowed:
+        if ctx.circuit_breaker is not None:
+            trip = ctx.circuit_breaker.trip(
+                reason="POLICY_VIOLATION",
+                passport_id=passport.passport_id,
+                agent_id=passport.identity,
+                delegation_graph=ctx.delegation_graph,
+                metadata={"reason": control.reason, "details": control.details},
+            )
+            ctx.store.append_audit(trip)
+        raise GatewayPolicyViolation(
+            "ACTION_CONTROL_DENIED",
+            control.reason or "action control denied",
+            {"autonomy_route": control.autonomy_route, "risk_band": control.risk_band},
+        )
     request.state.nexus_passport = passport  # type: ignore[attr-defined]
     request.state.nexus_intent = intent  # type: ignore[attr-defined]
     return passport, intent
@@ -185,10 +188,13 @@ class AccountabilityGatewayMiddleware(BaseHTTPMiddleware):
                 "raw_body": body_bytes.decode("utf-8", errors="replace") or "{}",
             }
             try:
+                passport = getattr(request.state, "nexus_passport", None)
                 verdict, payload = intercept_and_log_outcome(
                     intent=intent,
                     execution_result=execution_result,
                     state_snapshot_before=state_before,
+                    passport_id=getattr(passport, "passport_id", None),
+                    agent_id=getattr(passport, "identity", None),
                 )
                 if verdict == "UNVERIFIED":
                     get_accountability_context().store.append_audit(

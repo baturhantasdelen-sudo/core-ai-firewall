@@ -1,0 +1,41 @@
+"""UAR v2 engine — public entrypoint (re-exports AAREngine and helpers)."""
+
+from nexus_shield.core.aar import (
+    AAREngine,
+    AARSigningKeyPair,
+    AAR_SCHEMA_ID,
+    AAR_SCHEMA_V1_ID,
+    AgentReceiptBlock,
+    AuthorityBlock,
+    ApiResponseBlock,
+    ExecutionBlock,
+    IntentBlock,
+    OutcomeVerificationBlock,
+    PolicyBlock,
+    UniversalActionReceipt,
+    build_aar_receipt_id,
+    build_outcome_verification_block,
+    compute_evidence_hash,
+    hash_state_snapshot,
+    verify_aar_integrity,
+)
+
+__all__ = [
+    "AAREngine",
+    "AARSigningKeyPair",
+    "AAR_SCHEMA_ID",
+    "AAR_SCHEMA_V1_ID",
+    "AgentReceiptBlock",
+    "AuthorityBlock",
+    "ApiResponseBlock",
+    "ExecutionBlock",
+    "IntentBlock",
+    "OutcomeVerificationBlock",
+    "PolicyBlock",
+    "UniversalActionReceipt",
+    "build_aar_receipt_id",
+    "build_outcome_verification_block",
+    "compute_evidence_hash",
+    "hash_state_snapshot",
+    "verify_aar_integrity",
+]

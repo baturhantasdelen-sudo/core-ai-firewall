@@ -7,7 +7,7 @@ import type {
 
 export const DEMO_AAR_RECEIPTS: AarReceiptDocument[] = [
   {
-    $schema: 'https://nexusshield.ai/schemas/aar-v1.json',
+    $schema: 'https://nexusshield.ai/schemas/aar-v2.json',
     receipt_id: 'aar_9f8b2c4e7d1a3f6e',
     timestamp: '2026-10-03T21:45:00.124Z',
     agent: {
@@ -45,7 +45,7 @@ export const DEMO_AAR_RECEIPTS: AarReceiptDocument[] = [
     },
   },
   {
-    $schema: 'https://nexusshield.ai/schemas/aar-v1.json',
+    $schema: 'https://nexusshield.ai/schemas/aar-v2.json',
     receipt_id: 'aar_false_success_demo01',
     timestamp: '2026-10-03T22:10:00.000Z',
     agent: {
@@ -83,7 +83,7 @@ export const DEMO_AAR_RECEIPTS: AarReceiptDocument[] = [
     },
   },
   {
-    $schema: 'https://nexusshield.ai/schemas/aar-v1.json',
+    $schema: 'https://nexusshield.ai/schemas/aar-v2.json',
     receipt_id: 'aar_failed_gateway01',
     timestamp: '2026-10-03T22:15:00.000Z',
     agent: {

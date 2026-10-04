@@ -12,17 +12,21 @@ from nexus_shield.core.aar import (
     AuthorityBlock,
     ExecutionBlock,
     IntentBlock,
-    OutcomeVerificationBlock,
     PolicyBlock,
     ApiResponseBlock,
     UniversalActionReceipt,
+    build_outcome_verification_block,
     deterministic_demo_receipt_id,
     verify_aar_integrity,
 )
+from nexus_shield.core.action_control import evaluate_action_control, route_autonomy
+from nexus_shield.core.circuit_breaker import AgentCircuitBreaker
+from nexus_shield.core.outcome_verifier import OutcomeVerifier, resolve_consequential_action
 from nexus_shield.core.blast_radius import BlastRadiusSimulator, ExposureEdge, RiskTier
 from nexus_shield.core.delegation import DelegationGraph, DelegationGraphError, DelegationNode
 from nexus_shield.core.passport import AgentPassportRecord, PassportError, validate_passport_action
 from nexus_shield.core.verification import OutcomeVerificationEngine
+from nexus_shield.core.aar import AAR_SCHEMA_ID
 
 
 class FakeDb:
@@ -208,12 +212,13 @@ def test_aar_seal_and_verify(signing_key: AARSigningKeyPair) -> None:
             request_payload={"amount": 450_000, "currency": "usd", "destination": "ac_123456789"},
             api_response=ApiResponseBlock(status_code=200, raw_body='{"id": "tr_1OxyZ2", "status": "succeeded"}'),
         ),
-        outcome_verification=OutcomeVerificationBlock(
+        outcome_verification=build_outcome_verification_block(
             status="VERIFIED",
             verification_method="DB_STATE_AND_LEDGER_CROSS_CHECK",
             state_before={"invoice_status": "PENDING", "ledger_balance": 150_000.0},
             state_after={"invoice_status": "PAID", "ledger_balance": 145_500.0},
             discrepancy_detected=False,
+            signing_key=signing_key,
         ),
         receipt_id=deterministic_demo_receipt_id("finance-payment-1024"),
         timestamp="2026-10-03T21:45:00.124Z",
@@ -222,7 +227,9 @@ def test_aar_seal_and_verify(signing_key: AARSigningKeyPair) -> None:
     assert verify_aar_integrity(receipt, signing_key)
     assert receipt.cryptographic_proof.signature.startswith("sig_nexus_ed25519_")
     doc = receipt.model_dump_document()
-    assert doc["$schema"] == "https://nexusshield.ai/schemas/aar-v1.json"
+    assert doc["$schema"] == AAR_SCHEMA_ID
+    assert doc["outcome_verification"]["state_before_hash"].startswith("sha256:")
+    assert doc["outcome_verification"]["verifier_signature"].startswith("sig_nexus_ed25519_")
 
 
 def test_aar_tamper_detection(signing_key: AARSigningKeyPair) -> None:
@@ -250,12 +257,13 @@ def test_aar_tamper_detection(signing_key: AARSigningKeyPair) -> None:
             request_payload={"amount": 1},
             api_response=ApiResponseBlock(status_code=200, raw_body="{}"),
         ),
-        outcome_verification=OutcomeVerificationBlock(
+        outcome_verification=build_outcome_verification_block(
             status="VERIFIED",
             verification_method="DB_STATE_AND_LEDGER_CROSS_CHECK",
             state_before={"invoice_status": "PENDING", "ledger_balance": 1.0},
             state_after={"invoice_status": "PAID", "ledger_balance": 0.0},
             discrepancy_detected=False,
+            signing_key=signing_key,
         ),
         receipt_id=deterministic_demo_receipt_id("tamper-test"),
         timestamp="2026-10-03T21:45:00.124Z",
@@ -271,7 +279,7 @@ def test_aar_schema_validation_rejects_bad_receipt_id() -> None:
     with pytest.raises(ValidationError):
         UniversalActionReceipt.model_validate(
             {
-                "$schema": "https://nexusshield.ai/schemas/aar-v1.json",
+                "$schema": AAR_SCHEMA_ID,
                 "receipt_id": "not-a-valid-id",
                 "timestamp": "2026-10-03T21:45:00.124Z",
                 "agent": {
@@ -301,6 +309,9 @@ def test_aar_schema_validation_rejects_bad_receipt_id() -> None:
                     "verification_method": "DB_STATE_AND_LEDGER_CROSS_CHECK",
                     "state_before": {},
                     "state_after": {},
+                    "state_before_hash": "sha256:" + "c" * 64,
+                    "state_after_hash": "sha256:" + "d" * 64,
+                    "verifier_signature": "sig_nexus_ed25519_" + "e" * 32,
                     "discrepancy_detected": False,
                 },
                 "cryptographic_proof": {
@@ -332,3 +343,73 @@ def test_blast_radius_simulator_scoring() -> None:
     reduced = sim.what_if_remove_tool("stripe_create_transfer")
     assert reduced.score < report.score
     assert reduced.tool_count == 1
+
+
+def test_consequential_action_registry() -> None:
+    assert resolve_consequential_action("EXECUTE_PAYMENT") is not None
+    assert resolve_consequential_action("unknown_intent") is None
+
+
+def test_autonomy_routing() -> None:
+    assert route_autonomy(0.1) == "AUTO"
+    assert route_autonomy(0.5) == "VERIFY"
+    assert route_autonomy(0.75) == "HUMAN"
+    assert route_autonomy(0.95) == "BLOCK"
+
+
+def test_circuit_breaker_freezes_delegation_subtree(signing_key: AARSigningKeyPair) -> None:
+    root = DelegationNode(
+        agent_id="human-root",
+        allowed_scopes=frozenset({"invoices:read", "payments:write"}),
+        financial_limit=10_000.0,
+    )
+    graph = DelegationGraph(root=root)
+    graph.add_delegation(
+        "human-root",
+        DelegationNode(
+            agent_id="finance-agent-04",
+            allowed_scopes=frozenset({"invoices:read", "payments:write"}),
+            financial_limit=5_000.0,
+        ),
+    )
+    graph.add_delegation(
+        "finance-agent-04",
+        DelegationNode(
+            agent_id="finance-agent-sub",
+            allowed_scopes=frozenset({"invoices:read"}),
+            financial_limit=1_000.0,
+        ),
+    )
+    breaker = AgentCircuitBreaker()
+    breaker.trip(
+        reason="UNVERIFIED_OUTCOME",
+        passport_id="pas_live_subagent",
+        agent_id="finance-agent-04",
+        delegation_graph=graph,
+    )
+    assert graph.is_frozen("finance-agent-sub")
+    denied = graph.validate_action("finance-agent-sub", required_scopes=["payments:write"])
+    assert denied["allowed"] is False
+
+
+def test_action_control_denies_revoked_passport(signing_key: AARSigningKeyPair) -> None:
+    passport = AgentPassportRecord(
+        passport_id="pas_live_88192a",
+        identity="finance-agent-04",
+        owner="Finance Department",
+        allowed_scopes=["payments:write"],
+        financial_limit=5000.0,
+        delegation_depth=0,
+    ).seal(signing_key)
+    decision = evaluate_action_control(
+        passport=passport,
+        intent={"parsed_intent": "EXECUTE_PAYMENT", "target_resource": "invoice_1024", "raw_prompt": "pay"},
+        required_scopes=["payments:write"],
+        amount=100.0,
+        signing_key=signing_key,
+        delegation_graph=None,
+        risk_score=0.2,
+        revoked_passport_ids={"pas_live_88192a"},
+    )
+    assert decision.allowed is False
+    assert decision.autonomy_route == "BLOCK"

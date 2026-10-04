@@ -9,6 +9,8 @@ from nexus_shield.core.aar import AAREngine, AARSigningKeyPair
 from nexus_shield.core.blast_radius import BlastRadiusSimulator
 from nexus_shield.core.delegation import DelegationGraph
 from nexus_shield.core.passport import AgentPassportRecord
+from nexus_shield.core.circuit_breaker import AgentCircuitBreaker, CircuitBreakerState
+from nexus_shield.core.outcome_verifier import OutcomeVerifier
 from nexus_shield.core.verification import LedgerConnector, OutcomeVerificationEngine, ResourceStateConnector
 
 from .store import AARStore
@@ -26,13 +28,16 @@ class AccountabilityContext:
     ledger_connector: LedgerConnector | None = None
     verification_engine: OutcomeVerificationEngine | None = None
     policy_id: str = "FIN-PAY-07"
+    circuit_breaker: AgentCircuitBreaker | None = None
 
     def __post_init__(self) -> None:
         if self.aar_engine is None:
             self.aar_engine = AAREngine(self.signing_key)
+        if self.circuit_breaker is None:
+            self.circuit_breaker = AgentCircuitBreaker(CircuitBreakerState())
         if self.db_connector is not None and self.ledger_connector is not None:
             if self.verification_engine is None:
-                self.verification_engine = OutcomeVerificationEngine(
+                self.verification_engine = OutcomeVerifier(
                     self.db_connector,
                     self.ledger_connector,
                 )
