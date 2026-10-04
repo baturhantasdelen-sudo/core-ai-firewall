@@ -5,6 +5,11 @@ import { Loader2, Shield, Zap } from 'lucide-react';
 import { SecretValidationBadge } from '@/components/dashboard/badges';
 import { UpgradeLimitModal } from '@/components/auth/UpgradeLimitModal';
 import { FREE_TIER_MONTHLY_SCANS } from '@/config/pricing';
+import {
+  DEFAULT_DEMO_MODEL,
+  DEMO_MODEL_GROUPS,
+  demoModelLabel,
+} from '@/lib/playground/demo-models';
 
 type PresetKey = 'pii' | 'leet' | 'clean';
 
@@ -69,7 +74,7 @@ async function fetchUsage(): Promise<{ used: number; limit: number; remaining: n
 
 export function PlaygroundSection() {
   const [input, setInput] = useState(PRESETS.pii.text);
-  const [targetModel, setTargetModel] = useState('gpt-4o');
+  const [targetModel, setTargetModel] = useState(DEFAULT_DEMO_MODEL);
   const [status, setStatus] = useState<ResultStatus>('idle');
   const [output, setOutput] = useState('Click "Inspect & Shield" to see results...');
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
@@ -232,8 +237,8 @@ export function PlaygroundSection() {
     <>
       <section id="playground" className="scroll-mt-20 mx-auto max-w-7xl px-6 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-400">
-            Live Interceptor Preview
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-400">
+            Live Interceptor Preview · Secondary Security Engine
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
             Attack → Detect → Block → Evidence Generated
@@ -257,40 +262,57 @@ export function PlaygroundSection() {
           </p>
         </div>
 
-        <div className="mt-10 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 shadow-xl shadow-indigo-500/5 backdrop-blur-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 bg-zinc-900/80 p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Presets:</span>
+        <div className="mt-10 overflow-hidden rounded-2xl border border-cyan-500/15 bg-zinc-950/80 shadow-xl shadow-cyan-500/5 backdrop-blur-sm">
+          <div className="flex flex-col gap-4 border-b border-white/10 bg-zinc-900/90 p-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+                Presets
+              </span>
               {(Object.keys(PRESETS) as PresetKey[]).map((key) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => loadPreset(key)}
-                  className="select-none cursor-pointer rounded-lg border border-white/10 bg-zinc-800/80 px-3 py-1.5 text-xs text-zinc-200 transition-colors hover:border-white/20 hover:bg-zinc-800"
+                  className="select-none cursor-pointer rounded-lg border border-white/10 bg-zinc-900/80 px-3 py-1.5 text-xs text-zinc-200 transition-colors hover:border-cyan-500/30 hover:bg-zinc-800"
                 >
                   {PRESETS[key].emoji} {PRESETS[key].label}
                 </button>
               ))}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-xs font-medium text-indigo-300">
-                Live demo — sub-10ms engine
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
+              <span className="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-200">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
+                Live demo
               </span>
-              <label htmlFor="targetModel" className="text-xs font-semibold text-zinc-500">
-                Model:
-              </label>
-              <select
-                id="targetModel"
-                value={targetModel}
-                onChange={(e) => setTargetModel(e.target.value)}
-                className="rounded-lg border border-white/10 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-200 focus:border-indigo-500 focus:outline-none"
-              >
-                <option value="gpt-4o">OpenAI gpt-4o</option>
-                <option value="claude-3-5-sonnet">Anthropic Claude 3.5</option>
-                <option value="gemini-1.5-pro">Google Gemini 1.5 Pro</option>
-                <option value="ollama/llama3">Ollama llama3</option>
-              </select>
+              <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-md sm:flex-none">
+                <label htmlFor="targetModel" className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+                  Agent backend
+                </label>
+                <select
+                  id="targetModel"
+                  value={targetModel}
+                  onChange={(e) => setTargetModel(e.target.value)}
+                  className="w-full min-w-0 rounded-lg border border-cyan-500/20 bg-zinc-950 px-3 py-2 text-xs text-zinc-100 shadow-inner shadow-black/30 transition-colors focus:border-cyan-500/45 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 sm:min-w-[240px]"
+                  aria-describedby="targetModelHint"
+                >
+                  {DEMO_MODEL_GROUPS.map((group) => (
+                    <optgroup key={group.id} label={group.label}>
+                      {group.options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                <p id="targetModelHint" className="truncate text-[10px] text-zinc-600">
+                  Routing: <span className="font-mono text-cyan-400/90">{demoModelLabel(targetModel)}</span>
+                </p>
+              </div>
             </div>
           </div>
 
