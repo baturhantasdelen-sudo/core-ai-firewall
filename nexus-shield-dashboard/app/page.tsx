@@ -26,6 +26,7 @@ import { TrustCenterSection } from '@/components/landing/TrustCenterSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { PublicProofCenterSection } from '@/components/landing/PublicProofCenterSection';
 import { ProofCenterUarPlayground } from '@/components/proof-center/ProofCenterUarPlayground';
+import { DeceptionProofSection } from '@/app/components/DeceptionProofSection';
 import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
 import {
   NEXUS_DEFENSIVE_POSITIONING,
@@ -269,6 +270,28 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section
+        id="deception-demo"
+        className="scroll-mt-24 border-b border-white/5 bg-zinc-950 py-16 sm:py-20"
+      >
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-400/90">
+              Outcome verification
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
+              See It In Action: Catching Agent Deception &amp; False Success
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-zinc-400 sm:text-base">
+              Watch the 20-second control-plane narrative, then run the live deception test to inspect a
+              sealed UAR v2 receipt — no external video file required.
+            </p>
+          </div>
+
+          <DeceptionProofSection />
         </div>
       </section>
 
