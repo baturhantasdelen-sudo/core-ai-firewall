@@ -23,9 +23,59 @@ fun signingValue(vararg envNames: String, propertyName: String): String? {
 fun projectProp(name: String): String? =
     (findProperty(name) as String?)?.trim()?.takeIf { it.isNotEmpty() }
 
-val isCi =
-    System.getenv("CI") == "true" ||
-        System.getenv("GITHUB_ACTIONS") == "true"
+val releaseStorePassword =
+    projectProp("android.injected.signing.store.password")
+        ?: signingValue("ANDROID_KEYSTORE_PASSWORD", propertyName = "storePassword")
+val releaseKeyAlias =
+    projectProp("android.injected.signing.key.alias")
+        ?: signingValue("ANDROID_KEYSTORE_ALIAS", "ANDROID_KEY_ALIAS", propertyName = "keyAlias")
+val releaseKeyPassword =
+    projectProp("android.injected.signing.key.password")
+        ?: signingValue("ANDROID_KEY_PASSWORD", propertyName = "keyPassword")
+
+val injectedStoreFilePath = projectProp("android.injected.signing.store.file")
+val keystorePath =
+    injectedStoreFilePath
+        ?: signingValue("ANDROID_KEYSTORE_PATH", propertyName = "storeFile")
+
+val appModuleKeystore = file("upload-keystore.jks")
+
+fun resolveReleaseKeystoreFile(): java.io.File? {
+    if (!keystorePath.isNullOrBlank()) {
+        val declared = file(keystorePath)
+        val resolved =
+            when {
+                declared.isAbsolute && declared.exists() -> declared
+                declared.exists() -> declared
+                rootProject.file(keystorePath).exists() -> rootProject.file(keystorePath)
+                else -> null
+            }
+        if (resolved != null) {
+            return resolved
+        }
+    }
+
+    if (appModuleKeystore.exists()) {
+        return appModuleKeystore
+    }
+
+    System.getenv("ANDROID_KEYSTORE_BASE64")?.trim()?.takeIf { it.isNotEmpty() }?.let { encoded ->
+        val normalized = encoded.replace("\\s".toRegex(), "")
+        appModuleKeystore.parentFile?.mkdirs()
+        appModuleKeystore.writeBytes(Base64.getDecoder().decode(normalized))
+        return appModuleKeystore
+    }
+
+    return null
+}
+
+val releaseKeystoreFile = resolveReleaseKeystoreFile()
+val hasReleaseSigning =
+    releaseKeystoreFile != null &&
+        releaseKeystoreFile.exists() &&
+        !releaseStorePassword.isNullOrBlank() &&
+        !releaseKeyAlias.isNullOrBlank() &&
+        !releaseKeyPassword.isNullOrBlank()
 
 android {
     namespace = "ai.nexusshield.nexusshield_mobile"
@@ -45,97 +95,57 @@ android {
         versionName = flutter.versionName
     }
 
-    val storePassword =
-        projectProp("android.injected.signing.store.password")
-            ?: signingValue("ANDROID_KEYSTORE_PASSWORD", propertyName = "storePassword")
-    val keyAlias =
-        projectProp("android.injected.signing.key.alias")
-            ?: signingValue("ANDROID_KEYSTORE_ALIAS", "ANDROID_KEY_ALIAS", propertyName = "keyAlias")
-    val keyPassword =
-        projectProp("android.injected.signing.key.password")
-            ?: signingValue("ANDROID_KEY_PASSWORD", propertyName = "keyPassword")
-
-    val injectedStoreFilePath = projectProp("android.injected.signing.store.file")
-    val keystorePath =
-        injectedStoreFilePath
-            ?: signingValue("ANDROID_KEYSTORE_PATH", propertyName = "storeFile")
-
-    val appModuleKeystore = file("upload-keystore.jks")
-
-    fun resolveReleaseKeystoreFile(): java.io.File? {
-        if (!keystorePath.isNullOrBlank()) {
-            val declared = file(keystorePath)
-            val resolved =
-                when {
-                    declared.isAbsolute && declared.exists() -> declared
-                    declared.exists() -> declared
-                    rootProject.file(keystorePath).exists() -> rootProject.file(keystorePath)
-                    else -> null
-                }
-            if (resolved != null) {
-                return resolved
-            }
-        }
-
-        if (appModuleKeystore.exists()) {
-            return appModuleKeystore
-        }
-
-        System.getenv("ANDROID_KEYSTORE_BASE64")?.trim()?.takeIf { it.isNotEmpty() }?.let { encoded ->
-            val normalized = encoded.replace("\\s".toRegex(), "")
-            appModuleKeystore.parentFile?.mkdirs()
-            appModuleKeystore.writeBytes(Base64.getDecoder().decode(normalized))
-            return appModuleKeystore
-        }
-
-        return null
-    }
-
-    val releaseKeystoreFile = resolveReleaseKeystoreFile()
-    val hasReleaseSigning =
-        releaseKeystoreFile != null &&
-            releaseKeystoreFile.exists() &&
-            !storePassword.isNullOrBlank() &&
-            !keyAlias.isNullOrBlank() &&
-            !keyPassword.isNullOrBlank()
-
     if (!hasReleaseSigning) {
-        val message =
-            "Release signing is required. Configure android/key.properties, Gradle -Pandroid.injected.signing.*, " +
-                "or env: ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEYSTORE_ALIAS, ANDROID_KEY_PASSWORD."
-        if (isCi) {
-            throw GradleException(message)
-        } else {
-            logger.warn(message)
-        }
+        logger.warn(
+            "Release signing not configured (debug builds are unaffected). " +
+                "For release: android/key.properties, -Pandroid.injected.signing.*, or " +
+                "ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEYSTORE_ALIAS, ANDROID_KEY_PASSWORD.",
+        )
     }
 
     signingConfigs {
         if (hasReleaseSigning) {
             create("release") {
                 storeFile = releaseKeystoreFile
-                this.storePassword = storePassword
-                this.keyAlias = keyAlias
-                this.keyPassword = keyPassword
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
             }
         }
     }
 
     buildTypes {
         release {
-            if (!hasReleaseSigning) {
-                throw GradleException("Release build refused: upload keystore is not configured.")
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
             }
-            val releaseSigning = signingConfigs.getByName("release")
-            signingConfig = releaseSigning
             isMinifyEnabled = false
             isShrinkResources = false
         }
         debug {
-            // Prevent accidental debug signing inheritance on release tasks.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+// Fail only when a release packaging task runs without keystore (debug CI must not require secrets).
+gradle.taskGraph.whenReady {
+    if (hasReleaseSigning) return@whenReady
+    val needsReleaseSigning = allTasks.any { task ->
+        val n = task.name
+        (n.contains("Release", ignoreCase = true)) &&
+            (
+                n.startsWith("assemble") ||
+                    n.startsWith("bundle") ||
+                    n.startsWith("package") ||
+                    n == "signReleaseBundle"
+                )
+    }
+    if (!needsReleaseSigning) return@whenReady
+    throw GradleException(
+        "Release signing is required for ${allTasks.filter { it.name.contains("Release") }.joinToString { it.name }}. " +
+            "Configure android/key.properties or ANDROID_KEYSTORE_* env vars (debug builds do not need this).",
+    )
 }
 
 fun assertReleaseNotDebugSigned(taskLabel: String) {
