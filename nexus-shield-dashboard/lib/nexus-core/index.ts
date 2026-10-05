@@ -4,6 +4,7 @@ export type {
   SevenEnginePipelineResult,
   NexusRiskDecision,
 } from '@/lib/nexus-core/types';
+export type { EffectiveAuthorityReport } from '@/lib/engine/agents/effective-authority';
 export {
   runAgentDiscoveryEngine,
   runAuthorityEngine,

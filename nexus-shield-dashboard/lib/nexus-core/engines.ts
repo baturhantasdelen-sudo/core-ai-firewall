@@ -1,6 +1,9 @@
 import { createHash, randomBytes } from 'node:crypto';
 import type { AgentAsset, AgentCapability } from '@/lib/engine/discovery';
-import { detectEffectiveAuthority } from '@/lib/engine/agents/effective-authority';
+import {
+  detectEffectiveAuthority,
+  type EffectiveAuthorityReport,
+} from '@/lib/engine/agents/effective-authority';
 import { analyzeIntentDivergence } from '@/lib/engine/action-firewall/intent-engine';
 import { verifyActionOutcome } from '@/lib/engine/evidence/evidential-verifier';
 import { computeActionProofBundle } from '@/lib/accountability/action-proof';
