@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/dashboard/dashboard_screen.dart';
 import '../models/telemetry_stats.dart';
 import '../providers/shield_providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/live_playground_panel.dart';
-import '../widgets/nexus_screen_header.dart';
-import '../widgets/shield_button.dart';
 import '../widgets/telemetry_card.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -28,21 +27,15 @@ class HomeScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const NexusScreenHeader(
-                  title: 'Personal AI Guard',
-                  subtitle:
-                      'On-device PII firewall • BYOK vault • Deepfake scanner',
-                ),
+                const DashboardScreen(),
                 const SizedBox(height: 24),
-                Center(
-                  child: ShieldButton(
-                    active: isActive,
-                    latencyMs: telemetry.averageLatencyMs.round(),
-                    onPressed: () =>
-                        ref.read(shieldStatusProvider.notifier).toggle(),
-                  ),
+                Text(
+                  'Canlı telemetri',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
                 _TelemetryGrid(
                   telemetry: telemetry,
                   settings: settings,

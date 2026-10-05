@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'features/call_fraud/call_fraud_provider.dart';
+import 'features/network/wifi_security_provider.dart';
+import 'features/permissions/permission_scan_provider.dart';
+import 'features/remote_access/remote_access_provider.dart';
 import 'providers/vault_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
@@ -46,6 +50,10 @@ class _RootShellState extends ConsumerState<_RootShell> {
   @override
   Widget build(BuildContext context) {
     ref.watch(vaultServiceProvider);
+    ref.watch(securityEventBridgeProvider);
+    ref.watch(wifiSecurityProvider);
+    ref.watch(remoteAccessProvider);
+    ref.watch(callFraudProvider);
     const pages = [
       HomeScreen(),
       VaultScreen(),

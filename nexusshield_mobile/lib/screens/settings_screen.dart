@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/shield_providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/nexus_screen_header.dart';
+import '../features/ai_shield/ai_shield_screen.dart';
+import '../features/call_fraud/call_fraud_screen.dart';
+import '../features/permissions/permission_scan_screen.dart';
 import 'app_protection_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -67,6 +70,33 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
+          const SizedBox(height: 12),
+          _LinkTile(
+            icon: Icons.admin_panel_settings_outlined,
+            title: 'İzin tarayıcısı',
+            subtitle: 'Kamera, mikrofon, rehber, konum risk listesi',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const PermissionScanScreen(),
+              ),
+            ),
+          ),
+          _LinkTile(
+            icon: Icons.psychology_alt_outlined,
+            title: 'AI API kalkanı & rıza',
+            subtitle: 'Harici AI erişimi — şifreli onay akışı',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AiShieldScreen()),
+            ),
+          ),
+          _LinkTile(
+            icon: Icons.phone_disabled_outlined,
+            title: 'Arama / dolandırıcılık engeli',
+            subtitle: 'Call Screening & Call Directory feed',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const CallFraudScreen()),
+            ),
+          ),
           const SizedBox(height: 24),
           const CyberCard(
             child: ListTile(
@@ -79,6 +109,36 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LinkTile extends StatelessWidget {
+  const _LinkTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: CyberCard(
+        child: ListTile(
+          leading: Icon(icon, color: NexusBrand.cyberCyan),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(subtitle, style: const TextStyle(color: NexusBrand.muted)),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: onTap,
+        ),
       ),
     );
   }
