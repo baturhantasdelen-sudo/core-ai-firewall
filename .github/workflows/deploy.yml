@@ -1,82 +1,364 @@
-name: CI - Nexus Shield Mobile
+name: CI/CD Pipeline - Build, Push & Deploy
 
 on:
   push:
     branches:
       - main
       - master
-  pull_request:
-    branches:
-      - main
-      - master
+
+env:
+  IMAGE_NAME: nexus-quantum-guard
+  DEPLOY_PATH: /opt/nexus-core-firewall
 
 jobs:
-  mobile-analyze-test:
-    name: Flutter analyze & test
+  test:
+    name: Test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: nexusshield_mobile
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          channel: stable
-          cache: true
+          python-version: "3.11"
+          cache: pip
 
       - name: Install dependencies
-        run: flutter pub get
-
-      - name: Verify mobile feature layout
         run: |
-          set -euo pipefail
-          for dir in \
-            lib/domain \
-            lib/features/dashboard \
-            lib/features/permissions \
-            lib/features/ai_shield \
-            lib/features/network \
-            lib/features/call_fraud \
-            lib/features/remote_access \
-            lib/core/platform
-          do
-            test -d "$dir" || { echo "Missing required path: $dir"; exit 1; }
-          done
-          echo "Mobile architecture directories OK"
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+          pip install -e .
 
-      - name: Flutter analyze
-        run: flutter analyze --fatal-infos
+      - name: Verify Phase 1-4 artifacts
+        run: bash scripts/verify_phase_artifacts.sh
 
-      - name: Flutter test
-        run: flutter test
+      - name: Run tests
+        run: python -m pytest tests/ -v --tb=short
 
-  mobile-android-compile:
-    name: Android compile (debug)
+  dashboard-build:
+    name: Dashboard build (Next.js)
     runs-on: ubuntu-latest
-    needs: mobile-analyze-test
+    needs: test
     defaults:
       run:
-        working-directory: nexusshield_mobile
+        working-directory: nexus-shield-dashboard
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          distribution: temurin
-          java-version: "17"
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: nexus-shield-dashboard/package-lock.json
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Build Android APK (debug, no store signing)
+      - name: Install and build dashboard
         run: |
-          flutter pub get
-          flutter build apk --debug
+          npm ci
+          npm run build
+
+      - name: Deploy dashboard to Vercel (optional)
+        continue-on-error: true
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "VERCEL_TOKEN not set — skip Vercel deploy (GitHub/Vercel git integration may still deploy)."
+            exit 0
+          fi
+          npx vercel deploy --prod --token "$VERCEL_TOKEN" --yes
+
+  docker-push:
+    name: Docker Build & Push
+    needs: [test, dashboard-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:latest
+            ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Fast API Image (landing + /v1/shield)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.fast
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/nexus-shield-fast:latest
+            ${{ secrets.DOCKER_USERNAME }}/nexus-shield-fast:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  production-deploy:
+    name: Production SSH Deploy
+    needs: docker-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Preflight — disk, deploy path, write test
+        id: preflight
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 120s
+          command_timeout: 5m
+          script: |
+            set -x
+            echo "==> Preflight user: $(whoami) uid=$(id -u)"
+            df -h / /opt /var/lib/docker 2>/dev/null || df -h /
+            avail_kb() { df -Pk / | awk 'NR==2 {print $4}'; }
+            ls -la /opt/ 2>/dev/null || true
+            sudo mkdir -p /opt/nexus-core-firewall
+            sudo chown -R "$(whoami):$(whoami)" /opt/nexus-core-firewall || true
+            cd /opt/nexus-core-firewall
+            if [[ -f docker-compose.prod.yml ]]; then
+              echo "==> Preflight: compose down --remove-orphans + network prune"
+              _dc=(sudo docker compose -f docker-compose.prod.yml)
+              [[ -f .env ]] && _dc+=(--env-file .env)
+              "${_dc[@]}" --profile cloudflare --profile ml down --remove-orphans \
+                || "${_dc[@]}" down --remove-orphans || true
+              sudo docker network prune -f || true
+              docker rm -f cloudflared-prod 2>/dev/null || true
+              if [[ -f scripts/prod-release-bound-port.sh ]]; then
+                bash scripts/prod-release-bound-port.sh 8080 || true
+              else
+                docker rm -f nexus-shield-api-prod nexus_shield_app 2>/dev/null || true
+              fi
+            fi
+            AVAIL="$(avail_kb)"
+            echo "==> Root free after stack teardown: ${AVAIL} KiB"
+            # SCP unpack needs scratch space — full disk was the root cause of drone-scp exit 1.
+            if [[ "${AVAIL}" -lt $((512 * 1024)) ]]; then
+              echo "WARN: low disk — pruning unused Docker data before SCP..."
+              sudo docker system prune -af || true
+              sudo docker builder prune -af || true
+              sudo journalctl --vacuum-size=128M 2>/dev/null || true
+              AVAIL="$(avail_kb)"
+              df -h /
+              echo "==> Root free after prune: ${AVAIL} KiB"
+            fi
+            if [[ "${AVAIL}" -lt $((64 * 1024)) ]]; then
+              echo "ERROR: need at least 64MiB free on / for SCP extract (have ${AVAIL} KiB). Free disk on the prod VM."
+              exit 1
+            fi
+            ls -la /opt/nexus-core-firewall | head -20
+            test -w /opt/nexus-core-firewall || { echo "ERROR: deploy path not writable"; exit 1; }
+            echo "ci-preflight-$(date +%s)" > /opt/nexus-core-firewall/.ci-write-test
+            rm -f /opt/nexus-core-firewall/.ci-write-test
+            echo "PREFLIGHT_OK"
+
+      - name: SCP sync (minimal — landing + compose)
+        id: scp_minimal
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          overwrite: true
+          debug: true
+          timeout: 120s
+          command_timeout: 15m
+          source: "index.html,docker-compose.yml,docker-compose.prod.yml,nginx.conf,config/policies.json"
+          target: /opt/nexus-core-firewall/
+
+      - name: SCP sync (extended — app, scripts, Docker build context)
+        id: scp_extended
+        if: steps.scp_minimal.outcome == 'success'
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          overwrite: true
+          debug: true
+          timeout: 120s
+          command_timeout: 15m
+          source: "deploy/nginx/nexus-shield.conf,deploy/cloudflared/config.yml,deploy/cloudflared/nexus-tunnel.service,deploy/cloudflared/tunnel-keepalive.service,scripts/fix-cloudflare-tunnel-origin.sh,scripts/start-tunnel.sh,scripts/setup-cloudflare-service.sh,scripts/setup-unified-api-domain.sh,scripts/deploy-p2-policy-engine.sh,scripts/lib/http-check.sh,scripts/prod-release-bound-port.sh,scripts/prod-stack-restart.sh,scripts/post-deploy-healthcheck.sh,scripts/recover-docker-stack.sh,scripts/wait-for-http.sh,scripts/run_proof_center_benchmark.py,scripts/run_proof_center_benchmark.sh,scripts/load_test.py,scripts/check_system_health.py,scripts/deploy-vercel-dashboard.sh,scripts/traffic_report.sh,scripts/install-traffic-report-cron.sh,scripts/activate_cloudflare_analytics.sh,scripts/tunnel-keepalive.js,package.json,Dockerfile,Dockerfile.fast,nexus_quantum_guard.py,nexus_shield_api.py,nexus_observability.py,nexus_shield_fast_api.py,nexus_auth.py,nexus_governance,requirements-docker.txt,requirements-fast.txt,.dockerignore"
+          target: /opt/nexus-core-firewall/
+
+      - name: Reload landing after minimal SCP (extended sync skipped or failed)
+        if: steps.scp_minimal.outcome == 'success' && steps.scp_extended.outcome != 'success'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 120s
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            cd /opt/nexus-core-firewall
+            grep -q 'sandbox-v3' index.html
+            if [[ -f .env ]]; then
+              sudo docker compose --env-file .env -f docker-compose.prod.yml restart nginx-gateway
+            else
+              sudo docker compose -f docker-compose.prod.yml restart nginx-gateway || true
+            fi
+            _landing="$(curl -fsS http://127.0.0.1:80/)"
+            echo "${_landing}" | grep -qF 'sandbox-v3'
+            echo "Landing refreshed from minimal SCP bundle"
+
+      - name: Deploy to Production Server via SSH
+        if: steps.scp_extended.outcome == 'success'
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-quantum-guard:${{ github.sha }}
+          DOCKER_FAST_IMAGE: ${{ secrets.DOCKER_USERNAME }}/nexus-shield-fast:${{ github.sha }}
+          API_KEY_SECRET: ${{ secrets.API_KEY_SECRET }}
+          CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+          POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
+          CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ secrets.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
+          DEPLOY_ML_IMAGE: ${{ vars.DEPLOY_ML_IMAGE || '0' }}
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 30m
+          command_timeout: 30m
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,DOCKER_FAST_IMAGE,API_KEY_SECRET,CLOUDFLARE_TUNNEL_TOKEN,POSTHOG_API_KEY,POSTHOG_HOST,CLOUDFLARE_WEB_ANALYTICS_TOKEN,DEPLOY_ML_IMAGE
+          script: |
+            set -euo pipefail
+            sudo mkdir -p /opt/nexus-core-firewall
+            sudo chown -R "$(whoami):$(whoami)" /opt/nexus-core-firewall || true
+            cd /opt/nexus-core-firewall
+            echo "==> Pre-deploy: compose down --remove-orphans + network prune"
+            if [[ -f docker-compose.prod.yml ]]; then
+              _dc=(sudo docker compose -f docker-compose.prod.yml)
+              [[ -f .env ]] && _dc+=(--env-file .env)
+              "${_dc[@]}" --profile cloudflare --profile ml down --remove-orphans \
+                || "${_dc[@]}" down --remove-orphans || true
+            fi
+            sudo docker network prune -f || true
+            docker rm -f cloudflared-prod 2>/dev/null || true
+            bash scripts/prod-release-bound-port.sh 8080
+            if [[ -d .git ]]; then
+              git fetch origin main 2>/dev/null || true
+              git checkout main 2>/dev/null || true
+              git pull --ff-only origin main 2>/dev/null || echo "WARN: git pull skipped (using SCP sync)"
+            fi
+            _prev_posthog=""
+            _prev_cf_web=""
+            if [[ -f .env ]]; then
+              _prev_posthog=$(grep '^POSTHOG_API_KEY=' .env 2>/dev/null | cut -d= -f2- || true)
+              _prev_cf_web=$(grep '^CLOUDFLARE_WEB_ANALYTICS_TOKEN=' .env 2>/dev/null | cut -d= -f2- || true)
+            fi
+            DEPLOY_ML_IMAGE="${DEPLOY_ML_IMAGE:-0}"
+            echo "DOCKER_IMAGE=${DOCKER_IMAGE}" > .env
+            echo "DOCKER_FAST_IMAGE=nexus-shield-fast:local" >> .env
+            echo "DEPLOY_ML_IMAGE=${DEPLOY_ML_IMAGE}" >> .env
+            echo "NEXUS_API_KEY=${API_KEY_SECRET}" >> .env
+            echo "RATE_LIMIT_REQUESTS=60" >> .env
+            echo "RATE_LIMIT_WINDOW_SECONDS=60" >> .env
+            _posthog="${POSTHOG_API_KEY:-${_prev_posthog}}"
+            _cf_web="${CLOUDFLARE_WEB_ANALYTICS_TOKEN:-${_prev_cf_web}}"
+            _posthog_host="${POSTHOG_HOST:-https://us.i.posthog.com}"
+            if [[ -n "${_posthog}" ]]; then
+              echo "POSTHOG_API_KEY=${_posthog}" >> .env
+            fi
+            echo "POSTHOG_HOST=${_posthog_host}" >> .env
+            if [[ -n "${_cf_web}" ]]; then
+              echo "CLOUDFLARE_WEB_ANALYTICS_TOKEN=${_cf_web}" >> .env
+            fi
+            if [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]; then
+              echo "CLOUDFLARE_TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}" >> .env
+            fi
+            sudo mkdir -p /var/log/nginx
+            sudo chown 101:101 /var/log/nginx 2>/dev/null || true
+            grep -q 'sandbox-v3' index.html || (echo "index.html missing sandbox-v3 playground marker" && exit 1)
+            echo "${DOCKER_PASSWORD}" | sudo docker login -u "${DOCKER_USERNAME}" --password-stdin
+            echo "==> Disk cleanup before deploy..."
+            sudo docker image prune -af || true
+            sudo docker builder prune -af || true
+            df -h / /var/lib/docker 2>/dev/null || df -h /
+            echo "==> Purge stale/locked nexus-shield-api before rebuild"
+            sudo docker compose --env-file .env -f docker-compose.prod.yml rm -fsv nexus-shield-api 2>/dev/null || true
+            docker rm -f nexus-shield-api-prod 2>/dev/null || true
+            echo "==> Build lightweight Fast API locally (no PyTorch pull)..."
+            sudo docker compose --env-file .env -f docker-compose.prod.yml build nexus-shield-api
+            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans --force-recreate --wait nexus-shield-api nginx-gateway \
+              || { echo "WARN: compose up failed — running recover-docker-stack.sh"; bash scripts/recover-docker-stack.sh; }
+            if [[ "${DEPLOY_ML_IMAGE}" == "1" ]]; then
+              AVAIL_KB="$(df -Pk / | awk 'NR==2 {print $4}')"
+              MIN_ML_KB=$((5120 * 1024))
+              if [[ "${AVAIL_KB}" -ge "${MIN_ML_KB}" ]]; then
+                echo "==> DEPLOY_ML_IMAGE=1 — pulling PyTorch ML image..."
+                sudo docker compose --env-file .env -f docker-compose.prod.yml pull nexus-api || echo "WARN: ML image pull failed"
+                sudo docker compose --env-file .env -f docker-compose.prod.yml --profile ml up -d nexus-api
+              else
+                echo "WARN: Skipping ML image — need 5GiB free, have $(( AVAIL_KB / 1024 / 1024 ))GiB"
+              fi
+            else
+              echo "==> Lightweight deploy: nexus-quantum-guard (PyTorch) skipped"
+            fi
+            bash scripts/wait-for-http.sh "http://127.0.0.1:80/healthz" HEALTHY 45 2
+            sudo docker compose --env-file .env --profile cloudflare -f docker-compose.prod.yml up -d --wait cloudflared || true
+            bash scripts/wait-for-http.sh "http://127.0.0.1:80/healthz" HEALTHY 30 2
+            sudo bash scripts/post-deploy-healthcheck.sh
+            sudo bash scripts/start-tunnel.sh || sudo bash scripts/fix-cloudflare-tunnel-origin.sh
+            if command -v node >/dev/null 2>&1; then
+              sudo cp deploy/cloudflared/tunnel-keepalive.service /etc/systemd/system/tunnel-keepalive.service
+              sudo systemctl daemon-reload
+              sudo systemctl enable tunnel-keepalive.service
+              sudo systemctl restart tunnel-keepalive.service || echo "WARN: tunnel-keepalive service start skipped"
+            else
+              echo "WARN: node not installed — run scripts/setup-cloudflare-service.sh on server for keepalive watchdog"
+            fi
+            # shellcheck disable=SC1091
+            source scripts/lib/http-check.sh
+            _landing="$(curl -fsS http://127.0.0.1:80/)"
+            body_must_contain "${_landing}" 'sandbox-v3' || (echo "Landing page on :80 missing sandbox-v3 marker" && exit 1)
+            body_must_contain "${_landing}" '/api/sandbox' || (echo "Landing page on :80 missing /api/sandbox" && exit 1)
+            curl_body_must_contain "http://127.0.0.1:80/healthz" HEALTHY || (echo "Nginx gateway /healthz failed on :80" && exit 1)
+            curl_body_must_match_ere "http://127.0.0.1:80/api/health" 'HEALTHY|"status"' || (echo "Nginx gateway /api/health failed on :80" && exit 1)
+            sudo bash scripts/install-traffic-report-cron.sh || echo "WARN: traffic report cron install skipped"
+            body_must_contain "${_landing}" '<title>' || (echo "Landing page check failed on :80" && exit 1)
+            curl_body_must_contain "http://127.0.0.1:8080/healthz" HEALTHY || (echo "Fast API healthz failed on :8080" && exit 1)
+            mkdir -p data
+            sed -i 's/\r$//' scripts/run_proof_center_benchmark.sh || true
+            chmod +x scripts/run_proof_center_benchmark.sh || true
+            BASE_URL=http://127.0.0.1:8080 OUT_FILE=/opt/nexus-core-firewall/data/proof_center_benchmark.json \
+              bash scripts/run_proof_center_benchmark.sh || echo "WARN: Proof Center benchmark skipped"
+            curl_body_must_contain "http://127.0.0.1:8080/api/proof-center" '"latency"' || echo "WARN: Proof Center API check skipped"
+            _analytics="$(curl -fsS http://127.0.0.1:8080/analytics-config.js)"
+            body_must_contain "${_analytics}" NEXUS_ANALYTICS || (echo "analytics-config.js check failed" && exit 1)
+            if ! body_must_match_ere "${_analytics}" '"cloudflareToken": "[^"]+' ; then
+              echo "WARN: CLOUDFLARE_WEB_ANALYTICS_TOKEN not set — add GitHub secret or run scripts/activate_cloudflare_analytics.sh"
+            fi
+            sudo docker image prune -f
+            echo "Deploy tamamlandi: nexus-shield-fast:local (ML=${DEPLOY_ML_IMAGE})"

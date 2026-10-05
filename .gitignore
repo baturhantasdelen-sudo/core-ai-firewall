@@ -63,3 +63,6 @@ data/api_keys.json
 # Generated demo recordings (local / CI artifacts)
 outputs/
 !outputs/.gitkeep
+
+# Mobile app: https://github.com/baturhantasdelen-sudo/nexus-shield (do not commit here)
+nexusshield_mobile/
