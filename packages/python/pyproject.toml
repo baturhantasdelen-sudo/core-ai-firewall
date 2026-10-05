@@ -37,4 +37,4 @@ Repository = "https://github.com/baturhantasdelen-sudo/core-ai-firewall"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["nexus_shield*"]
+include = ["nexus_shield*", "nexus"]

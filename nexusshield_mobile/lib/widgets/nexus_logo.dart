@@ -26,7 +26,8 @@ class NexusLogo extends StatelessWidget {
   final NexusLogoVariant variant;
   final bool showFallbackIcon;
 
-  static const lockupAspect = 698 / 606;
+  /// Matches trimmed transparent lockup PNG (`assets/icon/nexus_logo_transparent.png`).
+  static const lockupAspect = 336 / 291; // from 1024px source art crop
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +43,7 @@ class NexusLogo extends StatelessWidget {
         child: ClipRect(
           child: Align(
             alignment: Alignment.topCenter,
-            heightFactor: 0.68,
+            heightFactor: 0.42,
             child: _asset(
               width: side,
               height: side / 0.68,

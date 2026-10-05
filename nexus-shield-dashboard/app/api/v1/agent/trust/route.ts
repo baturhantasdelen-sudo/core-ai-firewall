@@ -7,12 +7,14 @@ import {
   listAgentReputationCards,
   verifyInterAgentTrust,
 } from '@/lib/engine/reputation';
+import { getActivePermissions } from '@/lib/engine/action-firewall/capability-revocation';
 
 export const runtime = 'nodejs';
 
 const trustSchema = z.object({
   source_agent_id: z.string().min(1),
   target_agent_id: z.string().min(1),
+  include_capability_state: z.boolean().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -41,7 +43,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { source_agent_id, target_agent_id } = parsed.data;
+    const { source_agent_id, target_agent_id, include_capability_state } = parsed.data;
     const targetRecord = getAgentReputation(target_agent_id);
 
     if (!targetRecord) {
@@ -55,12 +57,25 @@ export async function POST(req: NextRequest) {
     const sourceCard = getAgentReputationCard(source_agent_id);
     const targetCard = getAgentReputationCard(target_agent_id);
 
+    const targetPermissions = getActivePermissions(target_agent_id);
+    const sourcePermissions = getActivePermissions(source_agent_id);
+
     return NextResponse.json({
       success: true,
       decision: trust.recommendation,
       trust,
       source: sourceCard,
       target: targetCard,
+      capabilities_revoked:
+        targetPermissions.mode !== 'FULL' || sourcePermissions.mode !== 'FULL',
+      ...(include_capability_state
+        ? {
+            capability_state: {
+              source: sourcePermissions,
+              target: targetPermissions,
+            },
+          }
+        : {}),
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Internal Server Error';
@@ -95,9 +110,17 @@ export async function GET(req: NextRequest) {
           { status: 404 },
         );
       }
+      const permissions = getActivePermissions(agentId);
       return NextResponse.json({
         success: true,
         reputation_card: card,
+        capabilities_revoked: permissions.mode !== 'FULL',
+        agent_status:
+          permissions.mode === 'FROZEN'
+            ? 'FROZEN'
+            : permissions.mode === 'READ_ONLY'
+              ? 'READ_ONLY'
+              : 'ACTIVE',
       });
     }
 

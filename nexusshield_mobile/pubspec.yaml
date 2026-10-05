@@ -46,31 +46,29 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.4.6
 
+# Brand: lockup in-app / splash; emblem-only for adaptive launcher foreground.
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: assets/images/nexusshield-logo.png
+  image_path: assets/icon/nexus_emblem_transparent.png
   min_sdk_android: 21
-  adaptive_icon_background: "#0B1220"
-  adaptive_icon_foreground: assets/images/nexusshield-logo.png
+  adaptive_icon_background: "#0d1117"
+  adaptive_icon_foreground: assets/icon/nexus_emblem_transparent.png
   remove_alpha_ios: true
-  background_color_ios: "#0B1220"
-  web:
-    generate: false
+  background_color_ios: "#0d1117"
 
 flutter_native_splash:
-  color: "#0B1220"
-  image: assets/images/nexusshield-logo.png
+  color: "#0d1117"
+  image: assets/icon/nexus_logo_transparent.png
   android: true
   ios: true
   web: false
   android_gravity: center
   ios_content_mode: center
   android_12:
-    color: "#0B1220"
-    image: assets/images/nexusshield-logo.png
-    icon_background_color: "#0B1220"
-
+    color: "#0d1117"
+    image: assets/icon/nexus_logo_transparent.png
+    icon_background_color: "#0d1117"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -84,7 +82,8 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/nexusshield-logo.png
+    - assets/icon/nexus_logo_transparent.png
+    - assets/icon/nexus_emblem_transparent.png
     - assets/threat_intel/scam_numbers.json
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/shield_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/nexus_logo.dart';
 import '../../widgets/nexus_screen_header.dart';
 import '../ai_shield/ai_shield_screen.dart';
 import '../call_fraud/call_fraud_screen.dart';
@@ -74,6 +75,16 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
         const SizedBox(height: 8),
+        if (shieldActive)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: NexusLogo(
+                size: 56,
+                maxWidth: MediaQuery.sizeOf(context).width * 0.72,
+              ),
+            ),
+          ),
         Center(
           child: ProtectionScoreRing(
             score: dashboard.score,

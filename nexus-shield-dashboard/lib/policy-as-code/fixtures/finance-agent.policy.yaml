@@ -1,0 +1,8 @@
+agent: finance-agent
+allowed_intents:
+  - READ_INVOICE
+requires_approval:
+  - CREATE_PAYMENT > $10000
+blocked_actions:
+  - EXPORT_CUSTOMER_DATABASE
+  - DELETE_RECORD
