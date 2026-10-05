@@ -1,6 +1,17 @@
 /** Multi-scenario deception proof fixtures for landing demo (self-contained, no API). */
 
+import type { TripartiteState } from '@/lib/landing/tripartite-state';
+
 export type DeceptionScenarioId = 'financial' | 'exfiltration' | 'privilege';
+
+export interface DeceptionActionProof {
+  intentHash: string;
+  policyHash: string;
+  toolCallHash: string;
+  transactionId: string;
+  resultHash: string;
+  actionProofHash: string;
+}
 
 export type BadgeTone = 'cyan' | 'amber' | 'rose' | 'emerald' | 'violet';
 
@@ -64,6 +75,7 @@ export interface DeceptionUarReceipt {
     evidence_hash: string;
     signature: string;
   };
+  action_proof: DeceptionActionProof;
   circuit_breaker?: {
     event: string;
     reason: string;
@@ -81,6 +93,9 @@ export interface DeceptionScenario {
   pillLabel: string;
   title: string;
   subtitle: string;
+  /** Primary tripartite outcome for this scenario narrative. */
+  tripartiteState: TripartiteState;
+  tripartiteHeadline: string;
   timelineSteps: DeceptionTimelineStep[];
   sandboxScript: DeceptionSandboxLine[];
   uarReceipt: DeceptionUarReceipt;
@@ -257,6 +272,8 @@ export const DECEPTION_SCENARIOS: Record<DeceptionScenarioId, DeceptionScenario>
     pillLabel: 'Financial Deception',
     title: 'Unauthorized $50k refund · API 200 false success',
     subtitle: 'Outcome verifier catches ledger mismatch · circuit breaker contains blast radius.',
+    tripartiteState: 'UNVERIFIED',
+    tripartiteHeadline: 'False success: ERP returned 200 OK while ledger state did not move.',
     timelineSteps: TIMELINE_FINANCIAL,
     sandboxScript: [
       { delayMs: 0, line: '$ nexus-shield run-deception-test --scenario financial-false-success' },
@@ -310,8 +327,16 @@ export const DECEPTION_SCENARIOS: Record<DeceptionScenarioId, DeceptionScenario>
         discrepancy_detected: true,
       },
       cryptographic_proof: {
-        evidence_hash: 'sha256:e1d2c3b4a5968778695a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1',
+        evidence_hash: 'sha256:fe03cbe913dbb5400fc357d4ce63130b25191f09ce07071706287e7c7cf7570a',
         signature: 'sig_nexus_ed25519_7714853662812f6f844eca644e9777d324b20c582d050904a1b2c3d4e5f6',
+      },
+      action_proof: {
+        intentHash: 'sha256:3f87aa5c3fbfedf380320c41da7acffeca7fc6b62356d6657928a7e995144ce1',
+        policyHash: 'sha256:031cfdccd23ab5aa36fadc37cf9d1c1b8c9a27e6b8e0cbae5949c61b38c1e7ab',
+        toolCallHash: 'sha256:7949e72f92303d60df4212410e877d282f3e69ae7e0b1b4df45392179dfd23e9',
+        transactionId: 'rf_hallucinated_99',
+        resultHash: 'sha256:b125557ad1c9de3a4c70320744278af9f5ffd3314e13376ce490e522031e6c37',
+        actionProofHash: 'sha256:fe03cbe913dbb5400fc357d4ce63130b25191f09ce07071706287e7c7cf7570a',
       },
       circuit_breaker: {
         event: 'CIRCUIT_BREAKER_TRIP',
@@ -337,6 +362,8 @@ export const DECEPTION_SCENARIOS: Record<DeceptionScenarioId, DeceptionScenario>
     pillLabel: 'Data Exfiltration',
     title: 'PII table dump intercepted by circuit breaker',
     subtitle: 'Bulk export blocked before data crosses the trust boundary.',
+    tripartiteState: 'BLOCKED',
+    tripartiteHeadline: 'Blocked at policy boundary — no consequential egress from the trust zone.',
     timelineSteps: TIMELINE_EXFIL,
     sandboxScript: [
       { delayMs: 0, line: '$ nexus-shield run-deception-test --scenario data-exfiltration' },
@@ -374,7 +401,7 @@ export const DECEPTION_SCENARIOS: Record<DeceptionScenarioId, DeceptionScenario>
         api_response: { status_code: 200, raw_body: '{"status":"streaming","bytes":50331648}' },
       },
       outcome_verification: {
-        status: 'FAILED',
+        status: 'BLOCKED',
         verification_method: 'HASH_CHAIN',
         state_before: { egress_bytes: 0, pii_boundary: 'customers_pii' },
         state_after: { egress_bytes: 0, pii_boundary: 'customers_pii' },
@@ -385,8 +412,16 @@ export const DECEPTION_SCENARIOS: Record<DeceptionScenarioId, DeceptionScenario>
         discrepancy_detected: false,
       },
       cryptographic_proof: {
-        evidence_hash: 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        evidence_hash: 'sha256:7f9636e5deef6307f729d7caa76b939bc4fb8695a50dd4fa6391c5476c944e54',
         signature: 'sig_nexus_ed25519_cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+      },
+      action_proof: {
+        intentHash: 'sha256:9b69a027cbd3cc5b6a8b328f1759e965fdafe1ef41658d32ca1903dbfa52843b',
+        policyHash: 'sha256:fba71408ba1e1b29e68562b0d54ba22b044d172c957210d31b701e9ae45e778e',
+        toolCallHash: 'sha256:af699a4ffe2c1e661fbe7d35a61560a78ec8f353727d9c424254283b5783fe56',
+        transactionId: 'exfil-blocked',
+        resultHash: 'sha256:5c1493abafcbaa6b945aff4fde76520ae4a28607198cea6bfa293c5e6c08b00d',
+        actionProofHash: 'sha256:7f9636e5deef6307f729d7caa76b939bc4fb8695a50dd4fa6391c5476c944e54',
       },
       circuit_breaker: {
         event: 'CIRCUIT_BREAKER_TRIP',
@@ -411,6 +446,8 @@ export const DECEPTION_SCENARIOS: Record<DeceptionScenarioId, DeceptionScenario>
     pillLabel: 'Privilege Escalation',
     title: 'Sub-agent lateral movement blocked by Action Control',
     subtitle: 'Delegation graph denies payments:write before execution.',
+    tripartiteState: 'BLOCKED',
+    tripartiteHeadline: 'Blocked before ERP touch — delegation graph denied payments:write.',
     timelineSteps: TIMELINE_PRIV,
     sandboxScript: [
       { delayMs: 0, line: '$ nexus-shield run-deception-test --scenario privilege-escalation' },
@@ -451,7 +488,7 @@ export const DECEPTION_SCENARIOS: Record<DeceptionScenarioId, DeceptionScenario>
         },
       },
       outcome_verification: {
-        status: 'FAILED',
+        status: 'BLOCKED',
         verification_method: 'API_ONLY',
         state_before: { invoice_status: 'PENDING' },
         state_after: { invoice_status: 'PENDING' },
@@ -462,8 +499,16 @@ export const DECEPTION_SCENARIOS: Record<DeceptionScenarioId, DeceptionScenario>
         discrepancy_detected: false,
       },
       cryptographic_proof: {
-        evidence_hash: 'sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        evidence_hash: 'sha256:19a967059983e23a56bb1e0c0118f750b93848b2c6a87532e4341f4ee93034c5',
         signature: 'sig_nexus_ed25519_9999999999999999999999999999999999999999999999999999999999999999',
+      },
+      action_proof: {
+        intentHash: 'sha256:22d050d59e193163d6ae901b035dd4eb6ed4b521551c1d7d222d47531c093ade',
+        policyHash: 'sha256:29e477f33e6e483826480e252353e24316852b1116b732965da4b9279dbd87c8',
+        toolCallHash: 'sha256:6ffc84e1e4353363a18fe89d51797aa54e8f3778f0bc09f4fa629ab6bccbc454',
+        transactionId: 'invoice_1024',
+        resultHash: 'sha256:5c1493abafcbaa6b945aff4fde76520ae4a28607198cea6bfa293c5e6c08b00d',
+        actionProofHash: 'sha256:19a967059983e23a56bb1e0c0118f750b93848b2c6a87532e4341f4ee93034c5',
       },
       action_control: {
         event: 'ACTION_CONTROL_DENIED',

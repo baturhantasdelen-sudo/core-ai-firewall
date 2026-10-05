@@ -29,6 +29,8 @@ import { ProofCenterUarPlayground } from '@/components/proof-center/ProofCenterU
 import { DeceptionProofSection } from '@/app/components/DeceptionProofSection';
 import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
 import {
+  NEXUS_CATEGORY_POSITIONING,
+  NEXUS_CORE_LOOP_LABEL,
   NEXUS_DEFENSIVE_POSITIONING,
   NEXUS_GOVERNANCE_TAGLINE,
   NEXUS_RUNTIME_FLOW_LABEL,
@@ -65,7 +67,21 @@ const ACTION_CONTROL_PLANE = [
     bullets: [
       'POST /api/v1/action/evaluate — intent divergence & BLOCK',
       'READ_ONLY / REQUIRE_APPROVAL / Kill Switch degradation',
-      'Self-hosted POST /v1/intercept (air-gapped data plane)',
+      'Policy-as-code YAML — allowed intents & blocked actions',
+    ],
+  },
+  {
+    phase: 'VERIFY',
+    title: 'Outcome & Transaction Verification',
+    href: '/proof-center',
+    icon: ScanSearch,
+    border: 'border-amber-500/25',
+    accent: 'text-amber-400',
+    chip: 'border-amber-500/20 bg-amber-500/10 text-amber-200',
+    bullets: [
+      'Tripartite states: VERIFIED · BLOCKED · UNVERIFIED (ghost action)',
+      'Ledger / ERP cross-check vs agent-reported HTTP success',
+      'Seven-engine pipeline — transaction & false-success detection',
     ],
   },
   {
@@ -77,8 +93,8 @@ const ACTION_CONTROL_PLANE = [
     accent: 'text-emerald-400',
     chip: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200',
     bullets: [
-      'SHA-256 Universal Action Receipts on every governed attempt',
-      'POST /api/v1/uar/inspect — instant developer receipt JSON',
+      'Action proof: Intent + Policy + Tool + Transaction + Result hashes',
+      'Ed25519 / SHA-256 seals — executive export & UAR v2 JSON',
       'Public Proof Center vs production UAR ledger (transparent lanes)',
     ],
   },
@@ -191,7 +207,7 @@ export default function Home() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/5 px-4 py-1.5 text-xs font-semibold tracking-widest text-cyan-200 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-              Action Control Plane
+              {NEXUS_CORE_LOOP_LABEL}
             </div>
 
             <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
@@ -259,7 +275,7 @@ export default function Home() {
 
           <div className="mx-auto mt-8 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: 'Action Control Plane', sub: 'SEE · CONTROL · PROVE' },
+              { label: 'Accountability layer', sub: NEXUS_CORE_LOOP_LABEL },
               { label: 'Open harness', sub: 'core-ai-firewall/harness' },
               { label: 'P99 6.1ms', sub: NEXUS_HARNESS_LATENCY_FOOTNOTE },
               { label: 'UAR receipts', sub: 'Tamper-evident SHA-256' },
@@ -283,11 +299,11 @@ export default function Home() {
               Outcome verification
             </p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-              See It In Action: Catching Agent Deception &amp; False Success
+              Proof Center Live: VERIFIED, BLOCKED &amp; Ghost Actions
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-zinc-400 sm:text-base">
-              Watch the 20-second control-plane narrative, then run the live deception test to inspect a
-              sealed UAR v2 receipt — no external video file required.
+              Watch the cinematic narrative for Financial Deception, Data Exfiltration, and Privilege
+              Escalation — then run the sandbox to verify Ed25519 / SHA-256 action proofs and export UAR v2.
             </p>
           </div>
 
@@ -343,11 +359,11 @@ export default function Home() {
               {NEXUS_RUNTIME_FLOW_LABEL}
             </div>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-              Action Control Plane
+              {NEXUS_CATEGORY_POSITIONING}
             </h2>
             <p className="mt-3 text-sm text-zinc-500 sm:text-base">
-              One engine: intercept, authorize, execute under policy, prove with UAR. Extensions (intel, red team,
-              compliance) plug into this spine.
+              {NEXUS_CORE_LOOP_LABEL} — intercept, govern, verify outcomes against systems of record, prove with
+              UAR v2.
             </p>
           </div>
 
@@ -356,12 +372,12 @@ export default function Home() {
             <ArrowRight className="hidden h-4 w-4 sm:block" />
             <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-rose-400">CONTROL</span>
             <ArrowRight className="hidden h-4 w-4 sm:block" />
-            <span className="rounded-full border border-zinc-500/20 bg-zinc-500/10 px-3 py-1 text-zinc-300">EXECUTE</span>
+            <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-amber-300">VERIFY</span>
             <ArrowRight className="hidden h-4 w-4 sm:block" />
             <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-emerald-400">PROVE</span>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {ACTION_CONTROL_PLANE.map(({ phase, title, href, icon: Icon, accent, border, chip, bullets }) => (
               <Link
                 key={phase}

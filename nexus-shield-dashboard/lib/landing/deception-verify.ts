@@ -15,6 +15,15 @@ export function validateDemoReceiptStructure(receipt: DeceptionUarReceipt): bool
   if (!SHA256_HEX.test(proof.evidence_hash)) return false;
   if (!SHA256_HEX.test(outcome.state_before_hash)) return false;
   if (!SHA256_HEX.test(outcome.state_after_hash)) return false;
+  const ap = receipt.action_proof;
+  if (ap) {
+    if (!SHA256_HEX.test(ap.intentHash)) return false;
+    if (!SHA256_HEX.test(ap.policyHash)) return false;
+    if (!SHA256_HEX.test(ap.toolCallHash)) return false;
+    if (!SHA256_HEX.test(ap.resultHash)) return false;
+    if (!SHA256_HEX.test(ap.actionProofHash)) return false;
+    if (ap.actionProofHash !== receipt.cryptographic_proof.evidence_hash) return false;
+  }
   return true;
 }
 

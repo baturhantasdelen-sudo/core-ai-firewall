@@ -17,7 +17,7 @@ export function DeceptionProofSection() {
     <>
       <div className="mx-auto mt-10 max-w-4xl">
         <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-          Enterprise scenario
+          Tripartite outcomes · VERIFIED · BLOCKED · UNVERIFIED (ghost action)
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           {DECEPTION_SCENARIO_ORDER.map((id) => {

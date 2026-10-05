@@ -5,6 +5,8 @@ import { Download, FileText, Loader2, ShieldCheck, Terminal, Zap } from 'lucide-
 import type { DeceptionScenario } from '@/lib/landing/deception-demo';
 import { downloadExecutiveReportHtml, downloadUarJson } from '@/lib/landing/deception-export';
 import { runDemoVerificationAnimation, type VerifyPhase } from '@/lib/landing/deception-verify';
+import { TripartiteOutcomeBanner } from '@/app/components/TripartiteOutcomeBanner';
+import { ActionProofBadges } from '@/app/components/ActionProofBadges';
 
 type SandboxPhase = 'idle' | 'running' | 'complete';
 
@@ -87,6 +89,12 @@ export function InteractiveDeceptionSandbox({ scenario }: InteractiveDeceptionSa
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-5">
+        <TripartiteOutcomeBanner
+          activeState={scenario.tripartiteState}
+          headline={phase === 'complete' ? scenario.tripartiteHeadline : undefined}
+          compact
+        />
+
         <div className="min-h-[180px] flex-1 overflow-y-auto rounded-xl border border-white/10 bg-black/60 p-4 font-mono text-[11px] leading-relaxed text-zinc-300 sm:text-xs">
           {lines.length === 0 ? (
             <p className="text-zinc-600">
@@ -116,18 +124,26 @@ export function InteractiveDeceptionSandbox({ scenario }: InteractiveDeceptionSa
         <div className="flex min-h-[160px] flex-col rounded-xl border border-cyan-500/20 bg-zinc-900/50">
           <div className="border-b border-white/10 px-3 py-2">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-cyan-400/90">
-              UAR v2 cryptographic receipt
+              UAR v2 proof center · action proof factors
             </p>
           </div>
-          <pre
-            className={`max-h-52 flex-1 overflow-auto p-3 font-mono text-[10px] leading-relaxed sm:text-[11px] ${
-              phase === 'complete' ? 'text-emerald-200/90' : 'text-zinc-600'
-            }`}
-          >
-            {phase === 'complete'
-              ? JSON.stringify(scenario.uarReceipt, null, 2)
-              : '// Receipt appears after pipeline completes…'}
-          </pre>
+          <div className="flex-1 overflow-auto p-3">
+            {phase === 'complete' ? (
+              <>
+                <ActionProofBadges
+                  proof={scenario.uarReceipt.action_proof}
+                  signature={scenario.uarReceipt.cryptographic_proof.signature}
+                />
+                <pre className="mt-3 max-h-40 overflow-auto font-mono text-[10px] leading-relaxed text-emerald-200/80 sm:text-[11px]">
+                  {JSON.stringify(scenario.uarReceipt, null, 2)}
+                </pre>
+              </>
+            ) : (
+              <p className="font-mono text-[10px] text-zinc-600">
+                // Intent + Policy + Tool + Transaction + Result → Action Proof (SHA-256) …
+              </p>
+            )}
+          </div>
         </div>
 
         {phase === 'complete' ? (

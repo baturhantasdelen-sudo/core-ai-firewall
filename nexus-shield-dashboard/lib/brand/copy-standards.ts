@@ -1,14 +1,17 @@
 /** Canonical marketing & benchmark copy — single source of truth. */
 
-/** Primary value proposition hook — headers & hero. */
+/** Primary tagline — category anchor for hero & headers. */
 export const NEXUS_VALUE_PROP_HOOK =
-  'Agent Action Control Plane with Universal Action Receipts';
+  'AI agents can be authorized — and still do the wrong thing.';
 
-/** Hero subtitle — action → outcome → proof. */
+/** Hero subtitle — category definition. */
 export const NEXUS_VALUE_PROP_SUBTITLE =
-  'Control the action. Verify the outcome. Prove what happened.';
+  'The independent verification and accountability layer for consequential AI-agent actions.';
 
-export const NEXUS_CATEGORY_POSITIONING = NEXUS_VALUE_PROP_HOOK;
+export const NEXUS_CATEGORY_POSITIONING = NEXUS_VALUE_PROP_SUBTITLE;
+
+/** Core product loop — landing & proof center. */
+export const NEXUS_CORE_LOOP_LABEL = 'SEE → CONTROL → VERIFY → PROVE';
 
 export const NEXUS_DEFENSIVE_POSITIONING =
   'Nexus combines runtime action governance, trajectory-aware control, and tamper-evident SHA-256 Universal Action Receipts (UAR) in a local-first, air-gapped deployment layer.';
@@ -32,11 +35,10 @@ export const NEXUS_OPEN_EVALUATION_MATRIX_LABEL = 'Nexus Shield Open Evaluation 
 export const NEXUS_REPRODUCIBLE_BASELINE_LABEL = 'Reproducible Agent Security Baseline';
 
 export const NEXUS_GOVERNANCE_TAGLINE =
-  'Independent verification and proof layer — complements Microsoft, Palo Alto, and AWS; does not replace them.';
+  'Runtime governance complements your existing stack — Nexus proves what agents actually did to systems of record.';
 
-/** SEE → CONTROL → execution → PROVE */
-export const NEXUS_RUNTIME_FLOW_LABEL =
-  'Interception (SEE) → Authority / Policy (CONTROL) → Execution → State Change → Tamper-evident UAR (VERIFY)';
+/** SEE → CONTROL → VERIFY → PROVE */
+export const NEXUS_RUNTIME_FLOW_LABEL = NEXUS_CORE_LOOP_LABEL;
 
 /** Threat model — intent must not come from a compromised agent alone. */
 export const NEXUS_INTENT_THREAT_MODEL_NOTE =

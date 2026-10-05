@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pause, Play, RotateCcw } from 'lucide-react';
 import type { DeceptionScenario } from '@/lib/landing/deception-demo';
+import { TripartiteOutcomeBanner } from '@/app/components/TripartiteOutcomeBanner';
+import { getTripartiteMeta } from '@/lib/landing/tripartite-state';
 
 const DURATION_MS = 20_000;
 
@@ -66,6 +68,17 @@ export function CinematicVideoPlayer({ scenario }: CinematicVideoPlayerProps) {
   const progress = Math.min(100, (elapsedMs / DURATION_MS) * 100);
   const activeIndex = Math.min(steps.length - 1, Math.floor(elapsedMs / stepMs));
   const activeStep = steps[activeIndex];
+  const tripartite = getTripartiteMeta(scenario.tripartiteState);
+  const cinematicHeadline =
+    activeStep.id === 'false-success' || activeStep.badge === 'FALSE SUCCESS'
+      ? scenario.tripartiteHeadline
+      : activeStep.id === 'verify' && scenario.tripartiteState === 'UNVERIFIED'
+        ? 'Ghost action detected — API success without ledger mutation.'
+        : activeStep.id === 'breaker' && scenario.tripartiteState === 'BLOCKED'
+          ? scenario.tripartiteHeadline
+          : activeStep.id === 'block'
+            ? scenario.tripartiteHeadline
+            : undefined;
 
   const restart = () => {
     elapsedRef.current = 0;
@@ -101,11 +114,26 @@ export function CinematicVideoPlayer({ scenario }: CinematicVideoPlayerProps) {
               {scenario.pillLabel} · cinematic
             </span>
           </div>
-          <span
-            className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${BADGE_STYLES[activeStep.badgeTone]}`}
-          >
-            {activeStep.badge}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${BADGE_STYLES[activeStep.badgeTone]}`}
+            >
+              {activeStep.badge}
+            </span>
+            <span
+              className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${tripartite.border} ${tripartite.bg} ${tripartite.text}`}
+            >
+              {scenario.tripartiteState}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-3">
+          <TripartiteOutcomeBanner
+            activeState={scenario.tripartiteState}
+            headline={cinematicHeadline}
+            compact
+          />
         </div>
 
         <div className="mt-3 flex items-center gap-3">

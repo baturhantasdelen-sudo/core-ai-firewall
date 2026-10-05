@@ -36,9 +36,16 @@ export function downloadExecutiveReportHtml(scenario: DeceptionScenario): void {
   <h2>Key findings</h2>
   <ul>${executiveReport.findings.map((f) => `<li>${f}</li>`).join('')}</ul>
   <div class="rec"><strong>Recommendation:</strong> ${executiveReport.recommendation}</div>
+  <h2>Action proof (UAR v2)</h2>
+  <p class="mono">intentHash: ${uarReceipt.action_proof.intentHash}</p>
+  <p class="mono">policyHash: ${uarReceipt.action_proof.policyHash}</p>
+  <p class="mono">toolCallHash: ${uarReceipt.action_proof.toolCallHash}</p>
+  <p class="mono">transactionId: ${uarReceipt.action_proof.transactionId}</p>
+  <p class="mono">resultHash: ${uarReceipt.action_proof.resultHash}</p>
+  <p class="mono">actionProofHash: ${uarReceipt.action_proof.actionProofHash}</p>
   <h2>Evidence reference</h2>
   <p class="mono">evidence_hash: ${uarReceipt.cryptographic_proof.evidence_hash}</p>
-  <p class="mono">signature: ${uarReceipt.cryptographic_proof.signature.slice(0, 48)}…</p>
+  <p class="mono">signature: ${uarReceipt.cryptographic_proof.signature}</p>
   <p style="margin-top:2rem;font-size:0.75rem;color:#666;">Print this page to PDF (Ctrl+P) for board-ready distribution.</p>
 </body>
 </html>`;
