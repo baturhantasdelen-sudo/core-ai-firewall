@@ -67,9 +67,25 @@ describe('seven engine pipeline', () => {
       stateBefore: state,
       stateAfter: state,
       apiResult: { status_code: 200, body: '{"status":"success"}' },
+      outcomeAdapter: 'SAP',
     });
+    assert.equal(result.outcomeVerification.status, 'UNVERIFIED');
+    assert.equal(result.outcomeVerification.false_success_detected, true);
     assert.equal(result.transactionVerification.ghostActionSuspected, true);
     assert.equal(result.decision, 'BLOCK');
+    assert.equal(result.uarReceipt.cryptographic_anchor.binding_valid, true);
+  });
+
+  it('builds five-dimensional UAR v2 trace on allow path', () => {
+    const result = runSevenEnginePipeline({
+      agentId: 'finance-agent-04',
+      userIntent: 'retrieve invoice 8291',
+      toolCall: { name: 'read_invoice', args: { invoice_id: '8291' } },
+      authority: ['READ', 'API_CALL'],
+    });
+    assert.ok(result.uarReceipt.trace.who.agent_id);
+    assert.ok(result.uarReceipt.trace.can.effective_scopes.length > 0);
+    assert.match(result.uarReceipt.trace.why.intent_hash, /^sha256:/);
   });
 });
 

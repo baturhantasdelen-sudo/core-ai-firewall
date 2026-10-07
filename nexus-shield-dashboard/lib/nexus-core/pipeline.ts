@@ -9,10 +9,12 @@ import {
   runActionVerificationEngine,
   runAgentDiscoveryEngine,
   runAuthorityEngine,
-  runEvidenceEngine,
   runRiskEngine,
   runTransactionVerificationEngine,
 } from '@/lib/nexus-core/engines';
+import { runOutcomeVerificationEngine } from '@/lib/nexus-core/outcome-verification';
+import { buildUarV2Receipt, runEvidenceEngine } from '@/lib/nexus-core/evidence';
+import { applyAutonomousContainment } from '@/lib/nexus-core/containment';
 import type { SevenEnginePipelineResult, VerifyActionRequest } from '@/lib/nexus-core/types';
 
 export type { VerifyActionRequest, SevenEnginePipelineResult, NexusRiskDecision } from '@/lib/nexus-core/types';
@@ -37,13 +39,14 @@ function extractPaymentAmount(args: Record<string, unknown>): number | undefined
   return undefined;
 }
 
-/** Orchestrates all seven Nexus Shield core engines for a single action evaluation. */
+/** Orchestrates Nexus Shield core engines including Outcome Verification Motor. */
 export function runSevenEnginePipeline(req: VerifyActionRequest): SevenEnginePipelineResult {
   const started = performance.now();
   const authority = req.authority;
   const { snapshot, asset } = runAgentDiscoveryEngine(req);
   const authorityReport = runAuthorityEngine(asset, authority);
   const actionVerification = runActionVerificationEngine(req.userIntent, req.toolCall);
+  const outcomeVerification = runOutcomeVerificationEngine(req);
   const policy = resolvePolicy(req);
 
   const parsedIntent = req.userIntent.toUpperCase().replace(/\s+/g, '_');
@@ -90,7 +93,15 @@ export function runSevenEnginePipeline(req: VerifyActionRequest): SevenEnginePip
   if (authorityReport.privilegeEscalationDetected) {
     violations.push('Authority engine: privilege escalation detected');
   }
-  if (transactionVerification.falseSuccessSuspected) {
+  if (outcomeVerification.false_success_detected) {
+    violations.push(
+      outcomeVerification.divergence_reason ??
+        'Outcome verification: False Success / Ghost Action detected',
+    );
+  } else if (outcomeVerification.status === 'UNVERIFIED') {
+    violations.push(outcomeVerification.divergence_reason ?? 'Outcome verification: UNVERIFIED');
+  }
+  if (transactionVerification.falseSuccessSuspected && !outcomeVerification.false_success_detected) {
     violations.push('Transaction verification: false success / ghost action suspected');
   }
   if (policyEvaluation && !policyEvaluation.allowed) {
@@ -100,6 +111,7 @@ export function runSevenEnginePipeline(req: VerifyActionRequest): SevenEnginePip
   let decision = runRiskEngine(
     firewall,
     transactionVerification,
+    outcomeVerification,
     policyEvaluation?.requiresApproval,
   );
 
@@ -107,7 +119,27 @@ export function runSevenEnginePipeline(req: VerifyActionRequest): SevenEnginePip
     decision = 'BLOCK';
   }
 
-  const evidence = runEvidenceEngine(req, policy ?? {}, decision);
+  const containment = applyAutonomousContainment({
+    agentId: req.agentId,
+    parentAgentId: req.parentAgentId,
+    decision,
+    actionVerification,
+    outcome: outcomeVerification,
+    authority: authorityReport,
+  });
+
+  decision = containment.decision;
+  violations.push(...containment.reasons);
+
+  const evidence = runEvidenceEngine(req, policy ?? {}, decision, outcomeVerification.status);
+  const uarReceipt = buildUarV2Receipt({
+    req,
+    decision,
+    authority: authorityReport,
+    outcome: outcomeVerification,
+    evidence,
+    containment,
+  });
 
   return {
     decision,
@@ -115,11 +147,15 @@ export function runSevenEnginePipeline(req: VerifyActionRequest): SevenEnginePip
     discovery: snapshot,
     authority: authorityReport,
     actionVerification,
+    outcomeVerification,
     transactionVerification,
     policyEvaluation,
     evidence,
+    containment,
+    uarReceipt,
     violations,
-    capabilitiesRevoked: firewall.capabilitiesRevoked ?? false,
+    capabilitiesRevoked: containment.capabilitiesRevoked || (firewall.capabilitiesRevoked ?? false),
+    agentStatus: containment.agentStatus,
     latencyMs: Math.round((performance.now() - started) * 100) / 100,
   };
 }

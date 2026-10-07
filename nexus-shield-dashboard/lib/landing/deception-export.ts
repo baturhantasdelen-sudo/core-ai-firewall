@@ -1,4 +1,6 @@
 import type { DeceptionScenario, DeceptionUarReceipt } from '@/lib/landing/deception-demo';
+import { formatExecutiveAuditHtml as formatCoreExecutiveHtml } from '@/lib/nexus-core/executive-export';
+import type { UarV2Receipt } from '@/lib/nexus-core/schemas/uar-v2';
 
 export function downloadUarJson(receipt: DeceptionUarReceipt, filename: string): void {
   const blob = new Blob([JSON.stringify(receipt, null, 2)], { type: 'application/json' });
@@ -10,46 +12,53 @@ export function downloadUarJson(receipt: DeceptionUarReceipt, filename: string):
   URL.revokeObjectURL(url);
 }
 
-export function downloadExecutiveReportHtml(scenario: DeceptionScenario): void {
-  const { executiveReport, uarReceipt, pillLabel } = scenario;
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Nexus Shield Executive Audit Report</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; color: #111; line-height: 1.5; }
-    h1 { font-size: 1.35rem; margin-bottom: 0.25rem; }
-    .meta { color: #555; font-size: 0.85rem; margin-bottom: 1.5rem; }
-    h2 { font-size: 1rem; margin-top: 1.5rem; border-bottom: 1px solid #ddd; padding-bottom: 0.25rem; }
-    ul { padding-left: 1.25rem; }
-    .rec { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: 8px; margin-top: 1rem; }
-    .mono { font-family: ui-monospace, monospace; font-size: 0.8rem; }
-    @media print { body { margin: 1cm; } }
-  </style>
-</head>
-<body>
-  <h1>${executiveReport.headline}</h1>
-  <p class="meta">Nexus Shield · Scenario: ${pillLabel} · Receipt ${uarReceipt.receipt_id} · ${uarReceipt.timestamp}</p>
-  <h2>Executive summary</h2>
-  <p>${executiveReport.summary}</p>
-  <h2>Key findings</h2>
-  <ul>${executiveReport.findings.map((f) => `<li>${f}</li>`).join('')}</ul>
-  <div class="rec"><strong>Recommendation:</strong> ${executiveReport.recommendation}</div>
-  <h2>Action proof (UAR v2)</h2>
-  <p class="mono">intentHash: ${uarReceipt.action_proof.intentHash}</p>
-  <p class="mono">policyHash: ${uarReceipt.action_proof.policyHash}</p>
-  <p class="mono">toolCallHash: ${uarReceipt.action_proof.toolCallHash}</p>
-  <p class="mono">transactionId: ${uarReceipt.action_proof.transactionId}</p>
-  <p class="mono">resultHash: ${uarReceipt.action_proof.resultHash}</p>
-  <p class="mono">actionProofHash: ${uarReceipt.action_proof.actionProofHash}</p>
-  <h2>Evidence reference</h2>
-  <p class="mono">evidence_hash: ${uarReceipt.cryptographic_proof.evidence_hash}</p>
-  <p class="mono">signature: ${uarReceipt.cryptographic_proof.signature}</p>
-  <p style="margin-top:2rem;font-size:0.75rem;color:#666;">Print this page to PDF (Ctrl+P) for board-ready distribution.</p>
-</body>
-</html>`;
+/** Map landing demo receipt to core UAR v2 shape for executive export. */
+export function deceptionReceiptToUarV2(receipt: DeceptionUarReceipt): UarV2Receipt {
+  const ap = receipt.action_proof;
+  return {
+    $schema: 'https://nexusshield.ai/schemas/aar-v2.json',
+    receipt_id: receipt.receipt_id,
+    timestamp: receipt.timestamp,
+    trace: {
+      who: { agent_id: receipt.agent.identity, passport_id: receipt.agent.passport_id },
+      can: {
+        effective_scopes: receipt.authority.allowed_scopes,
+        authority_hash: ap.policyHash,
+      },
+      why: { user_intent: receipt.intent.raw_prompt, intent_hash: ap.intentHash },
+      did: {
+        tool_name: receipt.execution.tool_called,
+        tool_call_hash: ap.toolCallHash,
+        transaction_id: ap.transactionId,
+      },
+      outcome: {
+        status: receipt.outcome_verification.status,
+        result_hash: ap.resultHash,
+        adapter_system: 'INLINE_STATE',
+        divergence_reason: receipt.outcome_verification.discrepancy_detected
+          ? 'False Success / Ghost Action detected'
+          : undefined,
+      },
+    },
+    cryptographic_anchor: {
+      evidence_hash: receipt.cryptographic_proof.evidence_hash,
+      signature: receipt.cryptographic_proof.signature,
+      action_proof: ap,
+      binding_valid: receipt.cryptographic_proof.evidence_hash === ap.actionProofHash,
+    },
+    decision: receipt.policy.evaluation,
+    agent_status: receipt.outcome_verification.status === 'UNVERIFIED' ? 'READ_ONLY' : 'ACTIVE',
+    capabilities_revoked: receipt.outcome_verification.status === 'UNVERIFIED',
+  };
+}
 
+export function downloadExecutiveReportHtml(scenario: DeceptionScenario): void {
+  const { executiveReport, uarReceipt } = scenario;
+  const html = formatCoreExecutiveHtml(
+    deceptionReceiptToUarV2(uarReceipt),
+    executiveReport.headline,
+    executiveReport.summary,
+  );
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');

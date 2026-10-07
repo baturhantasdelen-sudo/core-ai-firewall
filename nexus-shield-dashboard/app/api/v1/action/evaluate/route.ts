@@ -43,6 +43,10 @@ const evaluateSchema = z.object({
       body: z.string(),
     })
     .optional(),
+  outcome_adapter: z
+    .enum(['SAP', 'SALESFORCE', 'HUBSPOT', 'DATABASE', 'AWS_IAM', 'INLINE_STATE'])
+    .optional(),
+  parent_agent_id: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -84,6 +88,8 @@ export async function POST(req: NextRequest) {
       state_before,
       state_after,
       api_result,
+      outcome_adapter,
+      parent_agent_id,
     } = parsed.data;
 
     const effectiveAuthority =
@@ -104,6 +110,8 @@ export async function POST(req: NextRequest) {
       stateBefore: state_before,
       stateAfter: state_after,
       apiResult: api_result,
+      outcomeAdapter: outcome_adapter,
+      parentAgentId: parent_agent_id,
     });
 
     const result = pipeline.firewall;
@@ -139,8 +147,10 @@ export async function POST(req: NextRequest) {
         risk_score: result.riskScore,
         intent_match_score: result.intentMatchScore,
         intent_divergence_percent: pipeline.actionVerification.mismatchPercent,
-        agent_status: result.agentStatus ?? 'ACTIVE',
+        agent_status: pipeline.agentStatus ?? result.agentStatus ?? 'ACTIVE',
         capabilities_revoked: pipeline.capabilitiesRevoked,
+        human_in_the_loop: pipeline.containment.humanInTheLoop,
+        uar_v2_receipt: pipeline.uarReceipt,
         violations: pipeline.violations,
         kill_switch_triggered: result.killSwitchTriggered,
         latency_ms: pipeline.latencyMs,
@@ -155,13 +165,23 @@ export async function POST(req: NextRequest) {
             divergence_score: pipeline.actionVerification.divergenceScore,
             mismatch_percent: pipeline.actionVerification.mismatchPercent,
           },
+          outcome_verification: {
+            status: pipeline.outcomeVerification.status,
+            divergence_reason: pipeline.outcomeVerification.divergence_reason,
+            adapter_system: pipeline.outcomeVerification.adapter_system,
+            false_success_detected: pipeline.outcomeVerification.false_success_detected,
+            actual_state: pipeline.outcomeVerification.actual,
+          },
           transaction_verification: pipeline.transactionVerification,
           evidence: {
             receipt_id: pipeline.evidence.receiptId,
             action_proof: pipeline.evidence.actionProof,
             evidence_hash: pipeline.evidence.evidenceHash,
             signature: pipeline.evidence.signature,
+            binding_valid:
+              pipeline.evidence.evidenceHash === pipeline.evidence.actionProof.actionProofHash,
           },
+          containment: pipeline.containment,
           policy: pipeline.policyEvaluation,
         },
         owasp_classification: classifyOwaspThreat(threatCategory, pipeline.violations),

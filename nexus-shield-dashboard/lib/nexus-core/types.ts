@@ -5,8 +5,15 @@ import type { EffectiveAuthorityReport } from '@/lib/engine/agents/effective-aut
 import type { AgentAsset } from '@/lib/engine/discovery';
 import type { OutcomeVerificationResult } from '@/lib/engine/evidence/evidential-verifier';
 import type { IntentDivergenceReport } from '@/lib/engine/action-firewall/intent-divergence';
+import type { OutcomeAdapterSystem } from '@/lib/nexus-core/adapters/types';
+import type { EngineOutcomeVerification } from '@/lib/nexus-core/outcome-verification';
+import type { AutonomousContainmentResult } from '@/lib/nexus-core/containment';
+import type { UarV2Receipt } from '@/lib/nexus-core/schemas/uar-v2';
 
 export type NexusRiskDecision = 'BLOCK' | 'ALLOW' | 'REQUIRE_APPROVAL';
+
+export type { EngineOutcomeVerification } from '@/lib/nexus-core/outcome-verification';
+export type { UarV2Receipt } from '@/lib/nexus-core/schemas/uar-v2';
 
 export interface VerifyActionRequest {
   agentId: string;
@@ -29,6 +36,8 @@ export interface VerifyActionRequest {
   stateAfter?: Record<string, unknown>;
   apiResult?: { status_code: number; body: string };
   mcpTools?: string[];
+  outcomeAdapter?: OutcomeAdapterSystem;
+  parentAgentId?: string;
 }
 
 export interface EngineDiscoverySnapshot {
@@ -66,6 +75,7 @@ export interface SevenEnginePipelineResult {
   discovery: EngineDiscoverySnapshot;
   authority: EffectiveAuthorityReport;
   actionVerification: EngineActionVerification;
+  outcomeVerification: EngineOutcomeVerification;
   transactionVerification: EngineTransactionVerification;
   policyEvaluation?: {
     allowed: boolean;
@@ -73,7 +83,10 @@ export interface SevenEnginePipelineResult {
     reason?: string;
   };
   evidence: EngineEvidenceSeal;
+  containment: AutonomousContainmentResult;
+  uarReceipt: UarV2Receipt;
   violations: string[];
   capabilitiesRevoked: boolean;
+  agentStatus: 'ACTIVE' | 'READ_ONLY' | 'FROZEN';
   latencyMs: number;
 }

@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import type { AgentAsset, AgentCapability } from '@/lib/engine/discovery';
 import {
   detectEffectiveAuthority,
@@ -6,15 +6,14 @@ import {
 } from '@/lib/engine/agents/effective-authority';
 import { analyzeIntentDivergence } from '@/lib/engine/action-firewall/intent-engine';
 import { verifyActionOutcome } from '@/lib/engine/evidence/evidential-verifier';
-import { computeActionProofBundle } from '@/lib/accountability/action-proof';
 import type {
   EngineActionVerification,
   EngineDiscoverySnapshot,
-  EngineEvidenceSeal,
   EngineTransactionVerification,
   NexusRiskDecision,
   VerifyActionRequest,
 } from '@/lib/nexus-core/types';
+import type { EngineOutcomeVerification } from '@/lib/nexus-core/outcome-verification';
 import type { ActionEvaluationResult } from '@/lib/engine/action-firewall';
 
 const CAPABILITY_SET = new Set<string>([
@@ -128,13 +127,19 @@ export function runTransactionVerificationEngine(req: VerifyActionRequest): Engi
   };
 }
 
-/** Risk Engine — consolidate firewall + transaction signals into BLOCK | ALLOW | REQUIRE_APPROVAL. */
+/** Risk Engine — consolidate firewall + outcome + transaction signals. */
 export function runRiskEngine(
   firewall: ActionEvaluationResult,
   transaction: EngineTransactionVerification,
+  outcome: EngineOutcomeVerification,
   policyRequiresApproval?: boolean,
 ): NexusRiskDecision {
-  if (transaction.falseSuccessSuspected || transaction.ghostActionSuspected) {
+  if (
+    outcome.false_success_detected ||
+    outcome.status === 'UNVERIFIED' ||
+    transaction.falseSuccessSuspected ||
+    transaction.ghostActionSuspected
+  ) {
     return 'BLOCK';
   }
   if (firewall.decision === 'BLOCK') return 'BLOCK';
@@ -142,37 +147,4 @@ export function runRiskEngine(
     return 'REQUIRE_APPROVAL';
   }
   return 'ALLOW';
-}
-
-/** Evidence Engine — UAR v2 action proof + Ed25519-style seal (deterministic demo signature). */
-export function runEvidenceEngine(
-  req: VerifyActionRequest,
-  policyDocument: unknown,
-  decision: NexusRiskDecision,
-): EngineEvidenceSeal {
-  const transactionId = req.transactionId ?? req.evidenceBundle?.transactionId ?? `TXN-${req.agentId}-${Date.now()}`;
-  const actionProof = computeActionProofBundle({
-    intent: req.userIntent,
-    policyDocument,
-    toolCall: req.toolCall,
-    transactionId,
-    result: {
-      decision,
-      tool: req.toolCall.name,
-      args: req.toolCall.args,
-    },
-  });
-
-  const evidenceHash = actionProof.actionProofHash;
-  const sigMaterial = createHash('sha256')
-    .update(`${evidenceHash}:${req.agentId}:${decision}`)
-    .digest('hex');
-  const signature = `sig_nexus_ed25519_${sigMaterial.slice(0, 48)}`;
-
-  return {
-    actionProof,
-    evidenceHash,
-    signature,
-    receiptId: `aar_${randomBytes(12).toString('hex')}`,
-  };
 }
