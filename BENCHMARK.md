@@ -1,18 +1,29 @@
-# Nexus Agent Action Verification Benchmark 2027
+# Nexus Agent Action Assurance Benchmarks
 
-**Product:** Consequential Agent Action Verification & Accountability  
-**Core suite:** `cd nexus-shield-dashboard && npm run test:nexus-core` → **24 / 24 PASS**
+**Platform:** Business Action Assurance & Accountability  
+**Philosophy:** *DO NOT TRUST THE AGENT. DO NOT TRUST THE TOOL RESPONSE. VERIFY THE WORLD.*
+
+| Suite | Command | Result |
+|-------|---------|--------|
+| **nexus-core** (pipeline + outcome) | `npm run test:nexus-core` | **24 / 24 PASS** |
+| **A2B** (Finance / ERP / CRM) | `npm run test:benchmark` | **20 / 20 PASS** |
 
 | Metric | Result |
 |--------|--------|
-| False Success Detection Rate | **100%** (scenarios test_3, test_4) |
-| Outcome scenario accuracy | **12 / 12 PASS** |
-| Production Definition of Done | **42 / 42** |
+| False Success Detection Rate (A2B + outcome fixtures) | **100%** |
+| Outcome scenario accuracy (12 tests) | **12 / 12** |
+| A2B vertical scenarios | **20 / 20** |
+| Production Definition of Done (outcome) | **42 / 42** |
 
-Full methodology, scenario tables, UAR v2 proof rules, and category matrix:
+**Documentation**
 
-**→ [docs/benchmark-2027.md](docs/benchmark-2027.md)**
+- [docs/ASSURANCE_AND_UAR20.md](docs/ASSURANCE_AND_UAR20.md) — Assurance Core, UAR 2.0, Proof Center, A2B
+- [docs/benchmark-2027.md](docs/benchmark-2027.md) — Outcome Verification Engine (12 scenarios)
 
-Philosophy:
+**Reproduce**
 
-> **DO NOT TRUST THE AGENT. DO NOT TRUST THE TOOL RESPONSE. VERIFY THE WORLD.**
+```bash
+cd nexus-shield-dashboard
+npm run test:nexus-core
+npm run test:benchmark
+```

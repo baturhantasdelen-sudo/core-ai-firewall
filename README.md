@@ -1,26 +1,28 @@
-# Nexus Shield — Consequential Agent Action Verification & Accountability
+# Nexus Shield — Business Action Assurance & Accountability Platform
 
-![Outcome Verification](https://img.shields.io/badge/Outcome%20Verification-24%2F24%20PASS-success)
-![UAR v2](https://img.shields.io/badge/UAR%20v2-SHA--256%20Hash%20Chain-violet)
-![Benchmark 2027](https://img.shields.io/badge/Benchmark-2027-blue)
+![A2B Benchmark](https://img.shields.io/badge/A2B-20%2F20%20PASS-success)
+![Outcome Verification](https://img.shields.io/badge/nexus--core-24%2F24%20PASS-success)
+![UAR 2.0](https://img.shields.io/badge/UAR%202.0-Ed25519%20%2B%20SHA--256-violet)
 
 > **DO NOT TRUST THE AGENT. DO NOT TRUST THE TOOL RESPONSE. VERIFY THE WORLD.**
 
-Nexus Shield is a **Consequential Agent Action Verification & Accountability** platform. Agents invoke tools; tools return HTTP success. **Neither is ground truth.** Nexus reads **external systems of record** (ledger, ERP, CRM, database, IAM), compares **expected vs. actual outcome**, detects **false success and ghost actions**, and seals **UAR v2** receipts with hash-chained evidence.
+Nexus Shield is a **Business Action Assurance & Accountability Platform**. Agents invoke tools; tools return HTTP success. **Neither is ground truth.** The **Assurance Core** maps each business claim to an **authoritative vertical** (payment provider, ledger, ERP, CRM, IAM), verifies **expected vs. actual** state, detects **false success, ghost actions, and side effects**, and seals **UAR 2.0** receipts that separate **what happened** (action) from **was it verified** (multi-source proof).
 
-**Flow:** SEE (intent & tool) → CONTROL (policy & authority) → **VERIFY THE WORLD (outcome)** → PROVE (UAR v2 + evidence chain).
+**Flow:** SEE → CONTROL → **ASSURE (authoritative verification)** → PROVE (UAR 2.0 + Proof Center export).
 
 | Step | What you do | Resources |
 |------|-------------|-----------|
 | **1. Evaluate actions** | `POST /api/v1/action/evaluate` — seven-engine pipeline + outcome merge | [`nexus-shield-dashboard/`](nexus-shield-dashboard/) |
 | **2. Verify outcomes** | `POST /api/v1/outcome/verify` — expected state vs. adapter read | [Benchmark 2027](docs/benchmark-2027.md) |
-| **3. Audit proof** | UAR v2 trace + `GET /api/v1/outcome/{id}/evidence` | [UAR schema](docs/UAR_SCHEMA.md) |
+| **3. Proof Center** | `GET /api/v1/proof/{transaction_id}` — per-claim evidence + integrity | [Assurance & UAR 2.0](docs/ASSURANCE_AND_UAR20.md) |
+| **4. Offline verify** | `npm run nexus-proof -- proof.json` | Public key in `lib/nexus-core/uar/keys.ts` |
 
 Optional **Security Engines** (PII / prompt inspection) may sit upstream; they are **not** the product. The product is **verified consequential action** and **accountability receipts**.
 
 ```bash
 cd nexus-shield-dashboard
 npm run test:nexus-core   # 24/24 — pipeline + outcome scenarios
+npm run test:benchmark    # 20/20 — A2B finance/erp/crm assurance
 npm run build
 ```
 
@@ -42,7 +44,40 @@ Reproducible gate for the Outcome Verification Engine. Full report: **[docs/benc
 | **TEMPORAL / SLA** | Pending / eventual consistency | PASS |
 | **POST-BLOCK** | Blocked actions never “verified” | PASS |
 
-**Combined `test:nexus-core`:** **24 / 24 PASS** · False success detection **100%** on benchmark fixtures · DoD **42 / 42**
+**Combined `test:nexus-core`:** **24 / 24 PASS** · **A2B (`test:benchmark`):** **20 / 20 PASS** · False success detection **100%** · DoD **42 / 42**
+
+### A2B — Independent Agent Action Assurance Benchmark
+
+Open fixtures in `lib/nexus-core/benchmark/a2b-scenarios.ts` — **8 Finance**, **7 ERP**, **5 CRM** vertical scenarios. Metrics: **False Success Detection Rate 100%**, **Outcome Verification Accuracy 100%** on the fixed suite.
+
+## Proof Center API
+
+Per-transaction evidence viewer (populated when `POST /api/v1/action/evaluate` runs — UAR 2.0 is persisted by transaction id):
+
+```bash
+curl http://localhost:3000/api/v1/proof/TXN-8842 \
+  -H "x-nexus-api-key: nex_YOUR_KEY"
+```
+
+Export signed bundle for auditors:
+
+```bash
+curl http://localhost:3000/api/v1/proof/TXN-8842/export \
+  -H "x-nexus-api-key: nex_YOUR_KEY"
+```
+
+Returns `proof.json` payload + manifest with `signature_valid`, `chain_valid`, and `authority_valid` checks.
+
+## Assurance architecture (code map)
+
+| Module | Path |
+|--------|------|
+| Authoritative sources & rules | `lib/nexus-core/assurance/` |
+| Finance / ERP / CRM adapters | `lib/nexus-core/adapters/vertical/` |
+| UAR 2.0 vendor-neutral receipt | `lib/nexus-core/uar/` |
+| Proof assembly & store | `lib/nexus-core/proof/` |
+| A2B benchmark | `lib/nexus-core/benchmark/` |
+| Legacy outcome engine (compatible) | `lib/nexus-core/outcome/` |
 
 ## Outcome verification API
 
@@ -106,9 +141,11 @@ If the tool reports success but the adapter sees `PENDING` or no ledger row, sta
 | `POST` | `/api/v1/outcome/verify` | Run verification |
 | `GET` | `/api/v1/outcome/{verification_id}` | Fetch result + diffs |
 | `GET` | `/api/v1/outcome/{verification_id}/evidence` | Hash-chained evidence |
-| `POST` | `/api/v1/action/evaluate` | Full pipeline + `uar_v2_receipt` |
+| `POST` | `/api/v1/action/evaluate` | Full pipeline + `uar_v2_receipt` + `uar20` |
+| `GET` | `/api/v1/proof/{transaction_id}` | Claim-level evidence viewer |
+| `GET` | `/api/v1/proof/{transaction_id}/export` | Signed `proof.json` + manifest |
 
-Implementation: `nexus-shield-dashboard/lib/nexus-core/outcome/`
+Implementation: `lib/nexus-core/assurance/`, `outcome/`, `uar/`, `proof/`
 
 ---
 
@@ -208,7 +245,8 @@ Every governed action produces a tamper-evident receipt. Outcome verification ad
 
 | Lane | Source | What it proves |
 |------|--------|----------------|
-| **Outcome Verification Benchmark 2027** | `npm run test:nexus-core` | World-state verification, 12 scenarios, 24/24 PASS |
+| **Outcome Verification Benchmark 2027** | `npm run test:nexus-core` | 12 outcome scenarios, 24/24 PASS |
+| **A2B Assurance Benchmark** | `npm run test:benchmark` | 20 vertical scenarios, 20/20 PASS |
 | **MCP harness** | `harness/` | Framework scoring on fixed attack scenarios |
 
 Do not confuse harness leaderboard scores with production outcome verification. See [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.md).
@@ -250,7 +288,8 @@ Gateway (optional LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION
 
 | Document | Topic |
 |----------|--------|
-| **[benchmark-2027.md](./docs/benchmark-2027.md)** | Outcome Verification Benchmark — 12 scenarios, metrics, UAR v2 proof |
+| **[ASSURANCE_AND_UAR20.md](./docs/ASSURANCE_AND_UAR20.md)** | Assurance Core, UAR 2.0, Proof Center, A2B |
+| **[benchmark-2027.md](./docs/benchmark-2027.md)** | Outcome Verification Benchmark — 12 scenarios, metrics |
 | **[BENCHMARK.md](./BENCHMARK.md)** | Benchmark index |
 | [UAR_SCHEMA.md](./docs/UAR_SCHEMA.md) | Canonical UAR fields |
 | [ACTION_RECEIPT_API.md](./docs/ACTION_RECEIPT_API.md) | Action Receipt standard |
@@ -268,8 +307,14 @@ Gateway (optional LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION
 
 | Path | Description |
 |------|-------------|
-| `nexus-shield-dashboard/lib/nexus-core/outcome/` | Outcome Verification Engine |
+| `nexus-shield-dashboard/lib/nexus-core/assurance/` | Assurance Core (sources, rules, side-effects) |
+| `nexus-shield-dashboard/lib/nexus-core/adapters/vertical/` | Finance / ERP / CRM read adapters |
+| `nexus-shield-dashboard/lib/nexus-core/uar/` | UAR 2.0 receipt + offline verify |
+| `nexus-shield-dashboard/lib/nexus-core/proof/` | Proof Center bundles |
+| `nexus-shield-dashboard/lib/nexus-core/benchmark/` | A2B scenarios + runner |
+| `nexus-shield-dashboard/lib/nexus-core/outcome/` | Outcome Verification Engine (legacy-compatible) |
 | `nexus-shield-dashboard/app/api/v1/outcome/` | Outcome verify REST API |
+| `nexus-shield-dashboard/app/api/v1/proof/` | Proof Center REST API |
 | `enterprise/` | Governance runtime, UAR store |
 | `harness/` | MCP benchmark harness (evaluation only) |
 | `deployments/` | On-prem / air-gapped packaging |
@@ -279,7 +324,7 @@ Gateway (optional LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION
 ## Tests
 
 ```bash
-cd nexus-shield-dashboard && npm run test:nexus-core && npm run build
+cd nexus-shield-dashboard && npm run test:nexus-core && npm run test:benchmark && npm run build
 python -m enterprise.cloud_panel --demo
 ```
 

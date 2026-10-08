@@ -26,6 +26,8 @@
     "test:compliance-audit": "tsx --test test/compliance-audit.test.ts",
     "test:actions": "tsx --test test/action-firewall.test.ts",
     "test:nexus-core": "tsx --test test/nexus-core-pipeline.test.ts test/outcome-verification-scenarios.test.ts",
+    "test:benchmark": "tsx --test test/a2b-benchmark.test.ts test/assurance-core.test.ts",
+    "nexus-proof": "tsx scripts/nexus-proof-verify.ts",
     "test:immune": "tsx --test test/immune-network.test.ts",
     "test:simulator": "tsx --test test/simulator.test.ts",
     "test:api-subdomain-redirect": "tsx --test test/api-subdomain-redirect.test.ts",

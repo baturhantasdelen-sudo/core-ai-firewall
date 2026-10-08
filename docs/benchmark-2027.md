@@ -134,15 +134,35 @@ Counters exported from `lib/nexus-core/outcome/metrics.ts`:
 - `outcome_diff_critical_total`
 - `evidence_chain_appended_total`
 
+## A2B — Independent Agent Action Assurance Benchmark
+
+Vertical assurance benchmark (Finance / ERP / CRM) in `lib/nexus-core/benchmark/`:
+
+```bash
+cd nexus-shield-dashboard
+npm run test:benchmark   # 20 / 20 PASS
+```
+
+| Vertical | Scenarios | IDs |
+|----------|-----------|-----|
+| Finance | 8 | A2B-F01 … A2B-F08 |
+| ERP | 7 | A2B-E01 … A2B-E07 |
+| CRM | 5 | A2B-C01 … A2B-C05 |
+
+**A2B metrics (fixed suite):** False Success Detection Rate **100%** · Outcome Verification Accuracy **100%**.
+
+See [ASSURANCE_AND_UAR20.md](./ASSURANCE_AND_UAR20.md) for UAR 2.0 and Proof Center integration.
+
 ## Related documents
 
 | Document | Topic |
 |----------|--------|
-| [BENCHMARK.md](../BENCHMARK.md) | Short index (this report) |
+| [BENCHMARK.md](../BENCHMARK.md) | Public benchmark index (nexus-core + A2B) |
+| [ASSURANCE_AND_UAR20.md](./ASSURANCE_AND_UAR20.md) | Assurance Core, UAR 2.0, Proof Center |
 | [BENCHMARK_VS_ACTION_FIREWALL.md](./BENCHMARK_VS_ACTION_FIREWALL.md) | Harness scores vs production UAR ledger |
 | [security-benchmarks.md](./security-benchmarks.md) | MCP harness latency & transparency |
 | [UAR_SCHEMA.md](./UAR_SCHEMA.md) | Canonical receipt fields |
 
 ---
 
-*Nexus Shield — Consequential Agent Action Verification & Accountability.*
+*Nexus Shield — Business Action Assurance & Accountability Platform.*

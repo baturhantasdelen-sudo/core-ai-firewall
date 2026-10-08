@@ -9,6 +9,7 @@ import type { OutcomeAdapterSystem } from '@/lib/nexus-core/adapters/types';
 import type { EngineOutcomeVerification } from '@/lib/nexus-core/outcome-verification';
 import type { AutonomousContainmentResult } from '@/lib/nexus-core/containment';
 import type { UarV2Receipt } from '@/lib/nexus-core/schemas/uar-v2';
+import type { Uar20Receipt } from '@/lib/nexus-core/uar/models';
 
 export type NexusRiskDecision = 'BLOCK' | 'ALLOW' | 'REQUIRE_APPROVAL';
 
@@ -85,6 +86,8 @@ export interface SevenEnginePipelineResult {
   evidence: EngineEvidenceSeal;
   containment: AutonomousContainmentResult;
   uarReceipt: UarV2Receipt;
+  /** UAR 2.0 vendor-neutral assurance receipt (action vs verification). */
+  uar20?: Uar20Receipt;
   violations: string[];
   capabilitiesRevoked: boolean;
   agentStatus: 'ACTIVE' | 'READ_ONLY' | 'FROZEN';

@@ -14,3 +14,4 @@ export { salesforceOutcomeAdapter } from '@/lib/nexus-core/adapters/salesforce';
 export { hubspotOutcomeAdapter } from '@/lib/nexus-core/adapters/hubspot';
 export { databaseOutcomeAdapter } from '@/lib/nexus-core/adapters/database';
 export { awsIamOutcomeAdapter } from '@/lib/nexus-core/adapters/aws-iam';
+export * from '@/lib/nexus-core/adapters/vertical';

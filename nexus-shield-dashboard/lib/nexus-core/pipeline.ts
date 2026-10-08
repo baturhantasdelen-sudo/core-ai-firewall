@@ -15,6 +15,8 @@ import {
 import { runOutcomeVerificationEngine } from '@/lib/nexus-core/outcome-verification';
 import { buildUarV2Receipt, runEvidenceEngine } from '@/lib/nexus-core/evidence';
 import { applyAutonomousContainment } from '@/lib/nexus-core/containment';
+import { buildUar20Receipt } from '@/lib/nexus-core/uar/builder';
+import { persistUar20Proof } from '@/lib/nexus-core/proof/store';
 import type { SevenEnginePipelineResult, VerifyActionRequest } from '@/lib/nexus-core/types';
 
 export type { VerifyActionRequest, SevenEnginePipelineResult, NexusRiskDecision } from '@/lib/nexus-core/types';
@@ -141,6 +143,16 @@ export function runSevenEnginePipeline(req: VerifyActionRequest): SevenEnginePip
     containment,
   });
 
+  const uar20 = buildUar20Receipt({
+    req,
+    decision,
+    authority: authorityReport,
+    outcome: outcomeVerification,
+    evidence,
+    policyHash: undefined,
+  });
+  persistUar20Proof(uar20);
+
   return {
     decision,
     firewall,
@@ -153,6 +165,7 @@ export function runSevenEnginePipeline(req: VerifyActionRequest): SevenEnginePip
     evidence,
     containment,
     uarReceipt,
+    uar20,
     violations,
     capabilitiesRevoked: containment.capabilitiesRevoked || (firewall.capabilitiesRevoked ?? false),
     agentStatus: containment.agentStatus,
