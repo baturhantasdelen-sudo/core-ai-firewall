@@ -13,6 +13,18 @@ export interface UarV2FiveDimensionalTrace {
     result_hash: string;
     adapter_system: string;
     divergence_reason?: string;
+    verification_status?: OutcomeVerificationStatus | string;
+    verification_id?: string;
+    evidence_ids?: string[];
+    outcome_diff?: Array<{
+      field: string;
+      expected: unknown;
+      actual: unknown;
+      difference: string;
+      severity: string;
+    }>;
+    verification_score?: number;
+    false_success_detected?: boolean;
   };
 }
 

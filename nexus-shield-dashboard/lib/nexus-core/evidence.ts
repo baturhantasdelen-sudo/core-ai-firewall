@@ -38,6 +38,12 @@ export function buildUarV2Receipt(params: {
         result_hash: resultHash,
         adapter_system: outcome.adapter_system,
         divergence_reason: outcome.divergence_reason,
+        verification_status: outcome.verification_status ?? outcome.status,
+        verification_id: outcome.verification_id,
+        evidence_ids: outcome.evidence_ids,
+        outcome_diff: outcome.outcome_diff,
+        verification_score: outcome.verification_score,
+        false_success_detected: outcome.false_success_detected,
       },
     },
     cryptographic_anchor: {

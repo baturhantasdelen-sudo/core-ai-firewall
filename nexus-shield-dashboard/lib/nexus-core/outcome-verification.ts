@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { resolveOutcomeAdapter } from '@/lib/nexus-core/adapters/registry';
 import type { ExternalStateResult, OutcomeAdapterSystem } from '@/lib/nexus-core/adapters/types';
+import type { OutcomeDiff } from '@/lib/nexus-core/outcome/models';
+import { defaultVerificationPlan, runOutcomeVerificationSync } from '@/lib/nexus-core/outcome/verifier';
 import type { VerifyActionRequest } from '@/lib/nexus-core/types';
 
 export type OutcomeVerificationStatus = 'VERIFIED' | 'UNVERIFIED' | 'BLOCKED';
@@ -21,6 +23,11 @@ export interface EngineOutcomeVerification {
   api_reports_success: boolean;
   state_delta_observed: boolean;
   false_success_detected: boolean;
+  verification_id?: string;
+  verification_status?: OutcomeVerificationStatus;
+  verification_score?: number;
+  evidence_ids?: string[];
+  outcome_diff?: OutcomeDiff[];
 }
 
 function hashRecord(value: Record<string, unknown>): string {
@@ -146,7 +153,7 @@ export function runOutcomeVerificationEngine(req: VerifyActionRequest): EngineOu
       ? hashRecord(req.stateBefore) !== hashRecord(req.stateAfter)
       : stateMatchesExpectation(expected, req.stateBefore, actual.current_state);
 
-  const false_success_detected =
+  let false_success_detected =
     expected.consequential &&
     api_reports_success &&
     !state_delta_observed;
@@ -164,6 +171,38 @@ export function runOutcomeVerificationEngine(req: VerifyActionRequest): EngineOu
     status = 'VERIFIED';
   }
 
+  const v2 = runOutcomeVerificationSync({
+    agent_id: req.agentId,
+    action_id: req.transactionId ?? req.toolCall.name,
+    expected_outcome: {
+      outcome_id: `out_${req.transactionId ?? req.toolCall.name}`,
+      action_id: req.transactionId ?? req.toolCall.name,
+      type: expected.description,
+      expected_state: { ...expected.expected_delta },
+    },
+    verification_plan: defaultVerificationPlan(),
+    adapter_id: 'inline',
+    tool_response: req.apiResult
+      ? { status_code: req.apiResult.status_code, body: req.apiResult.body }
+      : undefined,
+    observed_state_override: actual.current_state,
+    resource_id: req.transactionId,
+  });
+
+  if (v2.false_success_detected && status === 'VERIFIED') {
+    status = 'UNVERIFIED';
+    divergence_reason = v2.divergence_reason ?? divergence_reason;
+    false_success_detected = true;
+  } else if (v2.status === 'FAILED' && status === 'VERIFIED') {
+    status = 'UNVERIFIED';
+    divergence_reason = v2.divergence_reason ?? divergence_reason;
+  } else if (v2.status === 'UNVERIFIED' && expected.consequential && status === 'VERIFIED') {
+    status = 'UNVERIFIED';
+    divergence_reason = v2.divergence_reason ?? divergence_reason;
+  }
+
+  const mergedFalseSuccess = false_success_detected || v2.false_success_detected;
+
   return {
     status,
     divergence_reason,
@@ -173,6 +212,11 @@ export function runOutcomeVerificationEngine(req: VerifyActionRequest): EngineOu
     actual_before,
     api_reports_success,
     state_delta_observed,
-    false_success_detected,
+    false_success_detected: mergedFalseSuccess,
+    verification_id: v2.verification_id,
+    verification_status: status,
+    verification_score: v2.score,
+    evidence_ids: v2.evidence.map((e) => e.evidence_id),
+    outcome_diff: v2.diff,
   };
 }
