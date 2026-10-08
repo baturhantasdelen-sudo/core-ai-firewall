@@ -1,25 +1,116 @@
-# Nexus Shield — Agent Action Control Plane with Universal Action Receipts
+# Nexus Shield — Consequential Agent Action Verification & Accountability
 
-![Docker Pulls](https://img.shields.io/docker/pulls/nexusshield/runtime)
-![Evidence Harness](https://img.shields.io/badge/Harness-Evidence%20First-blue)
-![UAR Standard](https://img.shields.io/badge/UAR-SHA--256%20Verified-success)
+![Outcome Verification](https://img.shields.io/badge/Outcome%20Verification-24%2F24%20PASS-success)
+![UAR v2](https://img.shields.io/badge/UAR%20v2-SHA--256%20Hash%20Chain-violet)
+![Benchmark 2027](https://img.shields.io/badge/Benchmark-2027-blue)
 
-> **Know what your agents are allowed to do. Stop what they shouldn't. Prove what actually happened.**
+> **DO NOT TRUST THE AGENT. DO NOT TRUST THE TOOL RESPONSE. VERIFY THE WORLD.**
 
-Nexus Shield is an **Agent Action Control Plane with Universal Action Receipts (UAR)** — runtime governance for **tool execution**, tamper-evident SHA-256 receipts, and local verification. Legacy **prompt-only “AI firewall”** positioning applies only to optional **Security Engines** (PII / jailbreak), not the core product.
+Nexus Shield is a **Consequential Agent Action Verification & Accountability** platform. Agents invoke tools; tools return HTTP success. **Neither is ground truth.** Nexus reads **external systems of record** (ledger, ERP, CRM, database, IAM), compares **expected vs. actual outcome**, detects **false success and ghost actions**, and seals **UAR v2** receipts with hash-chained evidence.
 
-### Integrate in 3 steps
+**Flow:** SEE (intent & tool) → CONTROL (policy & authority) → **VERIFY THE WORLD (outcome)** → PROVE (UAR v2 + evidence chain).
 
 | Step | What you do | Resources |
 |------|-------------|-----------|
-| **1. Connect SDK** | Point agents at intercept / evaluate APIs (`nexus-agent-sdk-python`, `nexus-agent-sdk-bridge`) | [Architecture mapping](docs/ARCHITECTURE_MAPPING.md) |
-| **2. Enforce policy** | Deploy data plane (Compose, Helm, or sidecar) with `policy.yaml` rules | [Zero-rewrite MCP example](examples/zero-rewrite-mcp/) |
-| **3. Verify UAR** | Seal and audit receipts; validate offline with `nexus-shield uar verify` | [UAR schema](docs/UAR_SCHEMA.md) · `examples/sample-receipt.json` |
+| **1. Evaluate actions** | `POST /api/v1/action/evaluate` — seven-engine pipeline + outcome merge | [`nexus-shield-dashboard/`](nexus-shield-dashboard/) |
+| **2. Verify outcomes** | `POST /api/v1/outcome/verify` — expected state vs. adapter read | [Benchmark 2027](docs/benchmark-2027.md) |
+| **3. Audit proof** | UAR v2 trace + `GET /api/v1/outcome/{id}/evidence` | [UAR schema](docs/UAR_SCHEMA.md) |
+
+Optional **Security Engines** (PII / prompt inspection) may sit upstream; they are **not** the product. The product is **verified consequential action** and **accountability receipts**.
 
 ```bash
-pip install -e .
-nexus-shield uar verify examples/sample-receipt.json
+cd nexus-shield-dashboard
+npm run test:nexus-core   # 24/24 — pipeline + outcome scenarios
+npm run build
 ```
+
+## Nexus Agent Action Verification Benchmark 2027
+
+Reproducible gate for the Outcome Verification Engine. Full report: **[docs/benchmark-2027.md](docs/benchmark-2027.md)** · Summary: **[BENCHMARK.md](BENCHMARK.md)**
+
+| Category | Coverage | Status |
+|----------|----------|--------|
+| **FINANCIAL** | Ledger posting, amount integrity, refunds | PASS |
+| **ERP** | SAP-style outcome adapters | PASS |
+| **CRM** | Salesforce / HubSpot read paths | PASS |
+| **DATABASE** | Read-only SELECT + query fingerprint | PASS |
+| **IAM** | AWS IAM / effective authority | PASS |
+| **DESTRUCTIVE** | Delete / purge consequential checks | PASS |
+| **MULTI-AGENT** | Delegation, trust isolation, containment | PASS |
+| **HTTP / API** | Tool response vs. observed state | PASS |
+| **SIDE-EFFECT** | Constraint violations (`NOT_EXISTS`, etc.) | PASS |
+| **TEMPORAL / SLA** | Pending / eventual consistency | PASS |
+| **POST-BLOCK** | Blocked actions never “verified” | PASS |
+
+**Combined `test:nexus-core`:** **24 / 24 PASS** · False success detection **100%** on benchmark fixtures · DoD **42 / 42**
+
+## Outcome verification API
+
+Validate **expected world state** after an agent action. Requires `x-nexus-api-key` or `x-api-key` (same as evaluate).
+
+```bash
+curl -X POST http://localhost:3000/api/v1/outcome/verify \
+  -H "Content-Type: application/json" \
+  -H "x-nexus-api-key: nex_YOUR_KEY" \
+  -d '{
+    "agent_id": "finance-agent-01",
+    "action_id": "pay-invoice-8842",
+    "expected_outcome": {
+      "outcome_id": "out_pay_8842",
+      "action_id": "pay-invoice-8842",
+      "type": "ledger_posting",
+      "expected_state": {
+        "status": "POSTED",
+        "amount": 50000,
+        "ledger_entry": true
+      }
+    },
+    "adapter_id": "mock",
+    "mock_fixture": "exact_match",
+    "tool_response": {
+      "status_code": 200,
+      "body": "{\"success\":true}"
+    },
+    "resource_id": "TXN-8842"
+  }'
+```
+
+**Example response (truncated):**
+
+```json
+{
+  "verification_status": "VERIFIED",
+  "evidence_ids": ["ev_…"],
+  "outcome_diff": [],
+  "uar_v2_outcome": {
+    "verification_status": "VERIFIED",
+    "verification_id": "ov_…",
+    "evidence_ids": ["ev_…"],
+    "outcome_diff": [],
+    "score": 100,
+    "false_success_detected": false
+  },
+  "verification": {
+    "score": 100,
+    "integrity": { "hash_chain_valid": true, "evidence_count": 1 }
+  }
+}
+```
+
+If the tool reports success but the adapter sees `PENDING` or no ledger row, status is **`UNVERIFIED`** with `false_success_detected: true` — never promoted to VERIFIED based on HTTP alone.
+
+**Related endpoints**
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/api/v1/outcome/verify` | Run verification |
+| `GET` | `/api/v1/outcome/{verification_id}` | Fetch result + diffs |
+| `GET` | `/api/v1/outcome/{verification_id}/evidence` | Hash-chained evidence |
+| `POST` | `/api/v1/action/evaluate` | Full pipeline + `uar_v2_receipt` |
+
+Implementation: `nexus-shield-dashboard/lib/nexus-core/outcome/`
+
+---
 
 ## Deployment paths
 
@@ -28,38 +119,33 @@ nexus-shield uar verify examples/sample-receipt.json
 | **Developers** | `pip install -e .` → `nexus-shield reference up` | [Quick Start (CLI / Compose)](docs/QUICKSTART_DEVELOPER.md) |
 | **Enterprise K8s** | `helm install` + Vault/K8s Secrets | [Helm & air-gapped K8s](docs/ENTERPRISE_HELM_DEPLOY.md) |
 | **Single VM (GCP)** | Docker Compose prod | [DEPLOYMENT.md](DEPLOYMENT.md) |
-| **Trust & security review** | Air-gap, deployment paths, CISO signals | [Trust Center (docs)](docs/TRUST_CENTER_ENTERPRISE.md) · [Live Trust Page](https://nexus-shield-dashboard.vercel.app/trust) |
+| **Trust & security review** | Air-gap, deployment paths, CISO signals | [Trust Center (docs)](docs/TRUST_CENTER_ENTERPRISE.md) |
 
 ```bash
 pip install -e .
 nexus-shield reference up --build -d    # :8090 reference sidecar
-nexus-shield policy test                # governance pytest suite
+nexus-shield uar verify examples/sample-receipt.json
 ```
 
-## Try it in 30 Seconds (No Registration Required)
-
-Run the air-gapped enterprise demo stack locally and generate your first tamper-evident **Universal Action Receipt (UAR)**:
+## Try it in 30 seconds (local)
 
 ```bash
 git clone https://github.com/baturhantasdelen-sudo/core-ai-firewall.git && cd core-ai-firewall
-docker compose -f docker-compose.nexus-reference.yml up --build
-# or: nexus-shield reference up --build -d
-# legacy enterprise demo: deployments/enterprise-demo
+cd nexus-shield-dashboard && npm run dev   # :3000
 ```
 
-The runtime prints a **Proof Banner** on startup and listens on **`:8090`**. Verify a receipt instantly (local dashboard on `:3000` after `cd nexus-shield-dashboard && npm run dev`):
+Seven-engine evaluate + UAR v2:
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/uar/inspect \
+curl -X POST http://localhost:3000/api/v1/action/evaluate \
   -H "Content-Type: application/json" \
-  -d '{"user_intent":"Test action","tool_call":{"name":"export_db","args":{}}}'
+  -H "x-nexus-api-key: nex_YOUR_KEY" \
+  -d '{"agent_id":"demo","user_intent":"Pay invoice","tool_call":{"name":"execute_payment","args":{}}}'
 ```
 
-Or run the dashboard locally and open **Proof Center Playground** (`/proof-center#proof-playground`) after `cd nexus-shield-dashboard && npm run dev`.
+Proof Center: `/proof-center` · Inspect UAR: `POST /api/v1/uar/inspect`
 
 ### GitHub Action — verify agent tool calls in CI
-
-Govern proposed agent actions in workflows and emit a **SHA-256 UAR** plus `Passed` / `Blocked` / `Requires Approval`:
 
 ```yaml
 name: Agent governance
@@ -78,35 +164,14 @@ jobs:
       - run: echo "${{ steps.nexus.outputs.uar_receipt_id }} — ${{ steps.nexus.outputs.verification_status }}"
 ```
 
-Same action from this repository: `uses: baturhantasdelen-sudo/core-ai-firewall@v1`. Point `policy_endpoint` at a running data plane (`NEXUS_DATA_PLANE_BOOTSTRAP=true` on `:8090`) or rely on the bundled offline policy engine when the runtime is unreachable. PII/security scanning remains at [`.github/actions/security-scan`](./.github/actions/security-scan/action.yml).
-
-**Self-healing (local-first):** blocked actions and optional `feedback: false_positive` feed the encrypted ledger ([`nexus/memory.py`](./nexus/memory.py)); [`nexus/evolution.py`](./nexus/evolution.py) patches `policy.yml` with a SHA-256 self-audit UAR. Roll back one command:
-
-```bash
-python .github/actions/verify/verify.py rollback
-# or: python -m nexus.evolution rollback
-```
-
-Data plane intercept (demo stack only):
-
-```bash
-curl -X POST http://localhost:8090/v1/intercept \
-  -H "Content-Type: application/json" \
-  -d '{"user_intent":"Test action","tool":"export_db","params":{}}'
-```
+Same action from this repository: `uses: baturhantasdelen-sudo/core-ai-firewall@v1`.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](packages/vscode-extension/LICENSE)
 [![GitHub](https://img.shields.io/badge/GitHub-core--ai--firewall-181717)](https://github.com/baturhantasdelen-sudo/core-ai-firewall)
-[![Harness](https://img.shields.io/badge/Harness-nexus--harness--benchmark-blue)](https://github.com/baturhantasdelen-sudo/core-ai-firewall/tree/main/harness)
-[![Governance](https://img.shields.io/badge/Platform-Action%20Governance%20%26%20Verification-0ea5e9)](docs/UAR_SCHEMA.md)
-[![Data Plane](https://img.shields.io/badge/Data%20Plane-Air--Gap%20Ready-059669)](deployments/README.md)
+[![Governance](https://img.shields.io/badge/Platform-Action%20Verification%20%26%20Accountability-0ea5e9)](docs/benchmark-2027.md)
 [![UAR](https://img.shields.io/badge/UAR-Tamper--evident%20SHA--256-violet)](docs/UAR_SCHEMA.md)
-[![Compliance](https://img.shields.io/badge/SOC%202%20%7C%20ISO%2027001-Audit%20Ready-6366f1)](docs/COMPLIANCE_READINESS.md)
-[![P99 harness](https://img.shields.io/badge/P99%20intercept-6.1ms%20(harness)-22c55e)](docs/security-benchmarks.md)
 
-**Source:** [github.com/baturhantasdelen-sudo/core-ai-firewall](https://github.com/baturhantasdelen-sudo/core-ai-firewall) · **Dashboard UI:** [`nexus-shield-dashboard/`](nexus-shield-dashboard/) (local `npm run dev`) · **Harness:** [`harness/`](harness/) · **Optional cloud runtime:** [api.nexusshield.ai/healthz](https://api.nexusshield.ai/healthz)
-
-*P99 intercept figures are **harness benchmark** measurements — see [security-benchmarks.md](docs/security-benchmarks.md).*
+**Source:** [github.com/baturhantasdelen-sudo/core-ai-firewall](https://github.com/baturhantasdelen-sudo/core-ai-firewall) · **Dashboard:** [`nexus-shield-dashboard/`](nexus-shield-dashboard/) · **Harness (MCP scoring):** [`harness/`](harness/)
 
 *Infrastructure promise:* **Your AI agents. Your infrastructure. Your data. Your policies.** — [Data plane vs control plane](./docs/DATA_PLANE_AND_CONTROL_PLANE.md)
 
@@ -114,159 +179,62 @@ curl -X POST http://localhost:8090/v1/intercept \
 
 ## What Nexus Shield is (and is not)
 
-**Your AI agent can call your APIs. Who verifies the action?**
-
-Nexus Shield is an **AI Agent Action Governance & Verification Platform** — **not** a generic AI security checkbox or prompt-only LLM firewall. It governs **tool execution**, parameter hijacking, and intent divergence, and issues **Universal Action Receipts (UAR)** so you can prove what occurred.
-
-> Nexus combines runtime action governance, trajectory-aware control, and tamper-evident SHA-256 Universal Action Receipts in a local-first, air-gapped deployment layer.
-
-**Flow:** Interception (SEE) → Authority / Policy (CONTROL) → Execution → State Change → Cryptographic Proof (VERIFY).
-
-Architecture: [ARCHITECTURE_WHITE_PAPER.md](./docs/ARCHITECTURE_WHITE_PAPER.md) · Action Receipt API: [ACTION_RECEIPT_API.md](./docs/ACTION_RECEIPT_API.md)
+**Your agent called the API. Did the business world actually change?**
 
 | We are | We are not |
-|---|---|
-| Action governance + cryptographic verification | A generic “AI security” checkbox |
-| Runtime tool-call decisions + UAR ledger | A prompt-only firewall |
-| Enterprise multi-tenant RBAC + SIEM-ready audits | Benchmark scores masquerading as production proof |
+|--------|------------|
+| Outcome verification against systems of record | Trusting tool HTTP 200 as proof |
+| UAR v2 accountability (who / can / why / did / **outcome**) | A prompt-only “AI firewall” product |
+| False success & ghost-action detection | Benchmark scores without world-state checks |
+| Policy, authority, containment, evidence | Generic LLM security checkbox |
 
-Upstream LLM inspection and PII engines are **supporting Security Engines** — the product object is the **UAR**.
+Architecture: [ARCHITECTURE_WHITE_PAPER.md](./docs/ARCHITECTURE_WHITE_PAPER.md) · Outcome engine: [docs/benchmark-2027.md](./docs/benchmark-2027.md)
 
 ---
 
-## Universal Action Receipt (UAR) — core product object
+## Universal Action Receipt (UAR) v2 — proof object
 
-Every governed **action attempt** at the runtime boundary produces a UAR — regardless of
-`ALLOW`, `BLOCK`, `READ_ONLY`, or `REQUIRE_APPROVAL`. Canonical fields (see [UAR_SCHEMA.md](./docs/UAR_SCHEMA.md)):
+Every governed action produces a tamper-evident receipt. Outcome verification adds **`verification_status`**, **`evidence_ids`**, **`outcome_diff`**, and **`false_success_detected`** on the trace. See [UAR_SCHEMA.md](./docs/UAR_SCHEMA.md).
 
 | Field | Role |
-|---|---|
+|-------|------|
 | `receipt_id` | Unique receipt identifier |
-| `agent_id` | Agent under governance |
-| `intent` | Declared intent at decision time |
-| `intent_divergence` | Risk / violations context (API envelope + audit) |
-| `decision` | `ALLOW` · `BLOCK` · `READ_ONLY` · `REQUIRE_APPROVAL` |
-| `execution_state` | Before/after state hashes |
-| `evidence_hash` | SHA-256 over receipt core (`evidence_bundle_hash`) |
-
-Evidence chain: **Intent → Action → Policy → Decision → Execution → State → UAR** — [`enterprise/evidence_chain.py`](./enterprise/evidence_chain.py)
+| `trace.outcome` | Verification status, adapter, diffs, evidence ids |
+| `cryptographic_anchor` | Action proof + evidence hash binding |
 
 ---
 
-## Proof Center — two transparent lanes
+## Proof Center — two lanes
 
-Do not mix benchmark marketing metrics with production proof. Public Proof Center counts such as
-**tool calls analyzed** and **harness evidence bundles** include full trajectory evaluation
-(ALLOW + BLOCK + other decisions) — they are **not** a count of blocked actions alone.
+| Lane | Source | What it proves |
+|------|--------|----------------|
+| **Outcome Verification Benchmark 2027** | `npm run test:nexus-core` | World-state verification, 12 scenarios, 24/24 PASS |
+| **MCP harness** | `harness/` | Framework scoring on fixed attack scenarios |
 
-| Lane | Source | What it proves | Where |
-|---|---|---|---|
-| **Reproducible benchmark results** | `nexus-harness-benchmark` (`harness/`) | How frameworks *score* on fixed scenarios; one SHA-256 bundle per evaluated step | [`harness/results/`](harness/results/), [security-benchmarks.md](docs/security-benchmarks.md) |
-| **Deterministic action evidence / UAR ledger** | Data plane runtime | What *your* agents attempted, what was decided, tamper-evident SHA-256 UAR per attempt | `enterprise/data/uar_receipts.jsonl`, `GET /v1/receipts/{id}/verify` |
-
-Details: [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.md)
+Do not confuse harness leaderboard scores with production outcome verification. See [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.md).
 
 ---
 
-## Nexus Enterprise Ecosystem
+## Nexus ecosystem
 
-| Component | Codename | Role |
-|---|---|---|
-| **Runtime** | **`nexus`** | Data plane — governance, UAR store ([`data_plane_api.py`](./enterprise/data_plane_api.py)) |
-| **Control plane** | **`nexus-control`** | Optional Nexus Cloud — `CloudPanelService` ([`cloud_panel.py`](./enterprise/cloud_panel.py)) |
-| **Python SDK** | **`nexus-agent-sdk-python`** | [`packages/python`](./packages/python) |
-| **Bridge SDK** | **`nexus-agent-sdk-bridge`** | [`packages/npm`](./packages/npm) |
-| **Evaluation** | **`nexus-harness-benchmark`** | Open scoring only — **not** the action firewall — [`harness/`](./harness/) |
-
-```
-                    ┌──────────── Optional nexus-control (Nexus Cloud) ────────────┐
-                    │  license · signatures · opt-in telemetry                  │
-                    └─────────────────────────┬──────────────────────────────────┘
-                                              │ NEXUS_CLOUD_CONNECT=false default
-┌─────────────────────────────────────────────▼────────────────────────────────────────────┐
-│  DATA PLANE (nexus) — AI Agent Action Governance & Verification                          │
-│  Policy engine · UAR ledger · SIEM/compliance JSONL · tenant RBAC                        │
-└────────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
-Deployment: [deployments/](./deployments/) · [DATA_PLANE_AND_CONTROL_PLANE.md](./docs/DATA_PLANE_AND_CONTROL_PLANE.md)
-
-### Enterprise Trust Center (summary)
-
-| Topic | Detail |
-|-------|--------|
-| **Helm / K8s** | One `helm upgrade --install` for Fast API governance plane + optional ML engine — [ENTERPRISE_HELM_DEPLOY.md](./docs/ENTERPRISE_HELM_DEPLOY.md) |
-| **Compose PoC** | `nexus-reference-app`, `docker-compose.nexus-reference.yml`, `nexus-shield reference up` |
-| **Secrets** | Kubernetes Secrets, Vault (ESO), AWS Secrets Manager via ExternalSecrets — chart [`values.yaml`](./deploy/helm/nexus-shield/values.yaml) |
-| **Air-gap flow** | Agent → Intent → Authority → Policy → Decision → Action → UAR (customer boundary) — [architecture-whitepaper.md](./docs/architecture-whitepaper.md) |
-| **Privacy** | Nexus Shield does not exfiltrate prompt or action payload data to Nexus-operated systems in self-hosted modes |
-| **Open proof** | MIT runtime + Apache 2.0 harness; auditable source; SBOM via standard container scanners |
-| **Sandbox PoC** | Landing `/api/sandbox` + local `:8090` reference stack |
-
-Full guide: [TRUST_CENTER_ENTERPRISE.md](./docs/TRUST_CENTER_ENTERPRISE.md)
-
-### 2-minute enterprise self-hosted trial
-
-```bash
-cd deployments/enterprise-demo
-docker compose up
-# mock LangChain-style agent → intercept → UAR logs on :8090
-curl http://localhost:8090/healthz
-```
-
-See [deployments/enterprise-demo/README.md](./deployments/enterprise-demo/README.md). Inspect UAR JSON locally: `POST /api/v1/uar/inspect` (dashboard) or `python -c "from nexus_shield import inspect_action; print(inspect_action(...))"`.
-
-### Air-gapped data plane (production-style)
-
-```bash
-cd deployments && NEXUS_AIRGAP=true NEXUS_CLOUD_CONNECT=false docker compose up -d
-curl http://localhost:8090/healthz
-```
+| Component | Role |
+|-----------|------|
+| **`nexus-shield-dashboard`** | Evaluate API, Outcome Verification API, Proof Center UI |
+| **`nexus` / `enterprise/`** | Data plane, UAR store, SIEM export |
+| **`nexus-harness-benchmark`** | Open MCP evaluation (separate from outcome engine) |
+| **SDKs** | [`packages/python`](./packages/python), [`packages/npm`](./packages/npm) |
 
 ---
 
-## Enterprise modules
+## Runtime APIs (summary)
 
-| Module | Purpose |
-|---|---|
-| [`tenant_manager.py`](./enterprise/tenant_manager.py) | Multi-tenant isolation, policy overrides, RBAC |
-| [`cloud_panel.py`](./enterprise/cloud_panel.py) | Control plane orchestration, `process_agent_action` |
-| [`uar_store.py`](./enterprise/uar_store.py) | Local UAR ledger |
-| [`siem_exporter.py`](./enterprise/siem_exporter.py) | Splunk / Datadog / Elastic + SOC 2 / ISO audit records |
+| API | Role |
+|-----|------|
+| `POST /api/v1/action/evaluate` | Seven-engine pipeline + `uar_v2_receipt` |
+| `POST /api/v1/outcome/verify` | Standalone expected vs. actual verification |
+| `POST /v1/intercept` | Data plane intercept (`:8090`) |
 
-### RBAC
-
-| Role | Capabilities |
-|---|---|
-| **Admin** | Tenants, SIEM configuration |
-| **SecurityEngineer** | Policy overrides, interception, export |
-| **Auditor** | Read-only audits and UAR verification |
-
----
-
-## Quick start
-
-```bash
-# Control plane demo (UAR + RBAC + SIEM)
-python -m enterprise.cloud_panel --demo
-
-# Data plane HTTP API (returns UAR envelope)
-NEXUS_DATA_PLANE_BOOTSTRAP=true uvicorn enterprise.data_plane_api:app --port 8090
-
-# Harness benchmarks only (not production ledger)
-docker run --rm ghcr.io/baturhantasdelen-sudo/harness:latest --eval-mcp
-python scripts/simulate_vulnerability_preset.py --all --write-public-json
-```
-
-Public CVE demo: [`nexus-shield-dashboard/app/demo`](nexus-shield-dashboard/app/demo) (self-host) · [DETECT_AND_DEMONSTRATE_PROOF.md](./docs/DETECT_AND_DEMONSTRATE_PROOF.md)
-
----
-
-## Runtime API (UAR-bearing)
-
-**Dashboard:** `POST /api/v1/action/evaluate` · **Data plane:** `POST /v1/intercept` · Header: `x-api-key` (cloud) or bootstrap actor (on-prem)
-
-Responses include **`universal_action_receipt`**, **`intent_divergence`** context, and **`evidence_hash`** / verify URL.
+Data plane example:
 
 ```bash
 curl -X POST http://localhost:8090/v1/intercept \
@@ -274,29 +242,23 @@ curl -X POST http://localhost:8090/v1/intercept \
   -d '{"user_intent":"read invoice","tool":"export_customer_database","params":{}}'
 ```
 
-Verify: `GET /v1/receipts/{receipt_id}/verify` · Dashboard UI: `/verify` when running `nexus-shield-dashboard` locally
-
-Gateway (LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION.md)
+Gateway (optional LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION.md)
 
 ---
 
 ## Documentation
 
 | Document | Topic |
-|---|---|
-| [under-the-hood.md](./docs/under-the-hood.md) | 8-step chain → GitHub module map |
-| [integration-quickstart.md](./docs/integration-quickstart.md) | Python SDK, MCP config, `POST /v1/intercept` curl |
-| [architecture-whitepaper.md](./docs/architecture-whitepaper.md) | CISO ADD — air-gap, PBKDF2 ledger, zero telemetry |
-| [security-benchmarks.md](./docs/security-benchmarks.md) | Harness raw scores & transparency template |
-| [nexus-reference-app/README.md](./nexus-reference-app/README.md) | Agent + MCP + sidecar Docker reference stack |
-| [ARCHITECTURE_WHITE_PAPER.md](./docs/ARCHITECTURE_WHITE_PAPER.md) | Multi-repo hierarchy & Action Control Plane |
-| [ACTION_RECEIPT_API.md](./docs/ACTION_RECEIPT_API.md) | Living UAR / Action Receipt standard |
-| [ENTERPRISE_PITCH_AND_VISION.md](./docs/ENTERPRISE_PITCH_AND_VISION.md) | CISO / CTO pitch & architecture (PDF: `python scripts/generate_enterprise_deck.py --lang en`) |
-| [ENTERPRISE_PITCH_AND_VISION_TR.md](./docs/ENTERPRISE_PITCH_AND_VISION_TR.md) | Turkish enterprise pitch (PDF: `python scripts/generate_enterprise_deck.py --lang tr`) |
+|----------|--------|
+| **[benchmark-2027.md](./docs/benchmark-2027.md)** | Outcome Verification Benchmark — 12 scenarios, metrics, UAR v2 proof |
+| **[BENCHMARK.md](./BENCHMARK.md)** | Benchmark index |
 | [UAR_SCHEMA.md](./docs/UAR_SCHEMA.md) | Canonical UAR fields |
-| [DATA_PLANE_AND_CONTROL_PLANE.md](./docs/DATA_PLANE_AND_CONTROL_PLANE.md) | Air-gap, nexus vs nexus-control |
-| [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.md) | Benchmark vs UAR ledger |
-| [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION.md) | Routers & upstream path |
+| [ACTION_RECEIPT_API.md](./docs/ACTION_RECEIPT_API.md) | Action Receipt standard |
+| [ARCHITECTURE_WHITE_PAPER.md](./docs/ARCHITECTURE_WHITE_PAPER.md) | Control plane architecture |
+| [QUICKSTART_DEVELOPER.md](./docs/QUICKSTART_DEVELOPER.md) | SDK & intercept quick start |
+| [TRUST_CENTER_ENTERPRISE.md](./docs/TRUST_CENTER_ENTERPRISE.md) | Enterprise trust |
+| [BENCHMARK_VS_ACTION_FIREWALL.md](./docs/BENCHMARK_VS_ACTION_FIREWALL.md) | Harness vs UAR ledger |
+| [security-benchmarks.md](./docs/security-benchmarks.md) | MCP harness transparency |
 | [COMPLIANCE_READINESS.md](./docs/COMPLIANCE_READINESS.md) | SOC 2 / ISO |
 | [SECURITY.md](./SECURITY.md) | Privacy & OWASP |
 
@@ -305,20 +267,20 @@ Gateway (LLM path): [GATEWAY_INTEGRATION.md](./docs/GATEWAY_INTEGRATION.md)
 ## Project structure
 
 | Path | Description |
-|---|---|
-| `enterprise/` | Governance runtime, UAR store, control plane |
-| `harness/` | **nexus-harness-benchmark** (evaluation only) |
+|------|-------------|
+| `nexus-shield-dashboard/lib/nexus-core/outcome/` | Outcome Verification Engine |
+| `nexus-shield-dashboard/app/api/v1/outcome/` | Outcome verify REST API |
+| `enterprise/` | Governance runtime, UAR store |
+| `harness/` | MCP benchmark harness (evaluation only) |
 | `deployments/` | On-prem / air-gapped packaging |
-| `nexus-shield-dashboard/` | Dashboard, Proof Center UI, `/verify` |
-| `presets/` | Reproducible CVE-style scenarios |
 
 ---
 
-## Tests & license
+## Tests
 
 ```bash
-cd nexus-shield-dashboard && npm run test:all && npm run build
+cd nexus-shield-dashboard && npm run test:nexus-core && npm run build
 python -m enterprise.cloud_panel --demo
 ```
 
-[MIT License](packages/vscode-extension/LICENSE) · [nexusshield.ai](https://nexusshield.ai) · [Book a demo](https://cal.com/baturhantasdelen/nexus-shield-demo)
+[MIT License](packages/vscode-extension/LICENSE) · [nexusshield.ai](https://nexusshield.ai)
