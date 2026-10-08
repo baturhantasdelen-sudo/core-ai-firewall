@@ -2,6 +2,8 @@
 
 import { createHash } from 'node:crypto';
 import type { Evidence } from '@/lib/nexus-core/outcome/models';
+import { assertRegisteredQuery } from '@/lib/nexus-core/assurance-engine/db-query-registry';
+import { isHttpUrlAllowed, parseAllowlistFromEnv } from '@/lib/nexus-core/assurance-engine/http-allowlist';
 import { appendEvidenceChain, sha256Canonical } from '@/lib/nexus-core/outcome/evidence';
 
 export interface OutcomeAdapterCapabilities {
@@ -41,6 +43,23 @@ const MOCK_FIXTURES: Record<string, Record<string, unknown>> = {
   sla_pending: { status: 'PENDING', amount: 50000, ledger_entry: false },
   temporal_stale: { status: 'POSTED', amount: 50000, ledger_entry: true, as_of: '1970-01-01' },
   post_block: { status: 'BLOCKED', amount: 0, ledger_entry: false },
+  finance_wrong_refund: {
+    refund_amount: 500000,
+    currency: 'TRY',
+    invoice_id: 'INV-1001',
+    status: 'REFUNDED',
+    ledger_entry: true,
+  },
+  erp_payment_pending: { status: 'PENDING', invoice_id: 'INV-2001', payment_status: 'PENDING' },
+  finance_verified_refund: {
+    refund_amount: 50000,
+    currency: 'TRY',
+    invoice_id: 'INV-3001',
+    status: 'REFUNDED',
+    ledger_entry: true,
+  },
+  blocked_unchanged: { status: 'UNCHANGED', refund_amount: 0 },
+  blocked_mutated: { status: 'REFUNDED', refund_amount: 50000, invoice_id: 'INV-BLOCK' },
 };
 
 export class MockOutcomeAdapter implements OutcomeAdapter {
@@ -89,7 +108,13 @@ export class GenericHttpOutcomeAdapter implements OutcomeAdapter {
 
   get_state(ctx: OutcomeAdapterContext): Record<string, unknown> {
     if (ctx.inline_state) return { ...ctx.inline_state };
-    return { status: 'UNKNOWN', note: 'configure inline_state or wire HTTP fetch in deployment' };
+    if (ctx.http_url) {
+      const allowed = isHttpUrlAllowed(ctx.http_url, parseAllowlistFromEnv());
+      if (!allowed.ok) {
+        throw new Error(`HTTP verification blocked: ${allowed.reason}`);
+      }
+    }
+    return { status: 'UNKNOWN', note: 'configure inline_state or allowlisted http_url with deployment fetch' };
   }
 
   verify_state(ctx: OutcomeAdapterContext, expected: Record<string, unknown>): boolean {
@@ -126,8 +151,11 @@ export class DatabaseReadOnlyOutcomeAdapter implements OutcomeAdapter {
 
   get_state(ctx: OutcomeAdapterContext): Record<string, unknown> {
     if (ctx.inline_state) return { ...ctx.inline_state };
-    if (ctx.sql && !ALLOWED_SQL.test(ctx.sql)) {
-      throw new Error('Database adapter rejects non-SELECT queries');
+    if (ctx.sql) {
+      if (!ALLOWED_SQL.test(ctx.sql)) {
+        throw new Error('Database adapter rejects non-SELECT queries');
+      }
+      assertRegisteredQuery(ctx.sql);
     }
     return { status: 'POSTED', ledger_entry: true };
   }

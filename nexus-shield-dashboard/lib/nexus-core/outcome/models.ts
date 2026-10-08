@@ -10,6 +10,12 @@ export type VerificationState =
   | 'UNVERIFIED'
   | 'BLOCKED';
 
+export type SideEffectStatus = 'NONE' | 'EXPECTED_OK' | 'PROHIBITED_DETECTED' | 'UNKNOWN';
+
+export type TransactionIntegrityStatus = 'OK' | 'MISMATCH' | 'PENDING' | 'MISSING';
+
+export type TemporalStatus = 'OK' | 'DEADLINE_EXCEEDED' | 'NOT_EVALUATED';
+
 export type VerificationResultStatus = 'VERIFIED' | 'UNVERIFIED' | 'FAILED' | 'BLOCKED';
 
 export type DiffSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
@@ -73,6 +79,10 @@ export interface OutcomeDiff {
   actual: unknown;
   difference: string;
   severity: DiffSeverity;
+  classification?: string;
+  critical?: boolean;
+  message?: string;
+  operator?: string;
 }
 
 export interface Evidence {
@@ -110,6 +120,20 @@ export interface VerificationResult {
   expected_outcome: ExpectedOutcome;
   actual_outcome?: ActualOutcome;
   completed_at: string;
+  post_block_side_effect_detected?: boolean;
+  side_effect_status?: SideEffectStatus;
+  transaction_integrity?: TransactionIntegrityStatus;
+  temporal_status?: TemporalStatus;
+  verification_latency_ms?: number;
+  verifier_version?: string;
+  authoritative_source?: string;
+  idempotency_key?: string;
+}
+
+export interface ExpectedSideEffectsPolicy {
+  allowed_fields: string[];
+  expected_mutations: Record<string, unknown>;
+  forbidden_fields?: string[];
 }
 
 export interface OutcomeVerifyRequest {
@@ -123,4 +147,10 @@ export interface OutcomeVerifyRequest {
   mock_fixture?: string;
   resource_id?: string;
   blocked_action?: boolean;
+  idempotency_key?: string;
+  state_before?: Record<string, unknown>;
+  expected_side_effects?: ExpectedSideEffectsPolicy;
+  user_intent?: string;
+  http_url?: string;
+  query_template_id?: string;
 }

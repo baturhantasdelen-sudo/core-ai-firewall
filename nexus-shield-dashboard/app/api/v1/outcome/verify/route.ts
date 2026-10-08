@@ -36,6 +36,11 @@ const verifySchema = z.object({
   mock_fixture: z.string().optional(),
   resource_id: z.string().optional(),
   blocked_action: z.boolean().optional(),
+  idempotency_key: z.string().optional(),
+  state_before: z.record(z.string(), z.unknown()).optional(),
+  user_intent: z.string().optional(),
+  http_url: z.string().url().optional(),
+  query_template_id: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -72,6 +77,11 @@ export async function POST(req: NextRequest) {
     mock_fixture: data.mock_fixture,
     resource_id: data.resource_id,
     blocked_action: data.blocked_action,
+    idempotency_key: data.idempotency_key,
+    state_before: data.state_before,
+    user_intent: data.user_intent,
+    http_url: data.http_url,
+    query_template_id: data.query_template_id,
   });
 
   const uar_extension = buildUarV2OutcomeExtension(result);
@@ -82,5 +92,8 @@ export async function POST(req: NextRequest) {
     evidence_ids: result.evidence.map((e) => e.evidence_id),
     outcome_diff: result.diff,
     uar_v2_outcome: uar_extension,
+    post_block_side_effect_detected: result.post_block_side_effect_detected ?? false,
+    verification_latency_ms: result.verification_latency_ms,
+    verifier_version: result.verifier_version,
   });
 }
