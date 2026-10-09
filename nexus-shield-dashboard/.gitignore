@@ -42,6 +42,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Local assurance SQLite (dev fallback)
+.data/
+
 # env files — never commit secrets (.env, .env.local, .env.production, etc.)
 .env
 .env.local

@@ -25,7 +25,7 @@
     "test:mesh-trust": "tsx --test test/mesh-trust.test.ts",
     "test:compliance-audit": "tsx --test test/compliance-audit.test.ts",
     "test:actions": "tsx --test test/action-firewall.test.ts",
-    "test:nexus-core": "tsx --test test/nexus-core-pipeline.test.ts test/outcome-verification-scenarios.test.ts test/assurance-engine-acceptance.test.ts test/assurance-persistence.test.ts test/proof-center-real-data.test.ts",
+    "test:nexus-core": "tsx --test test/nexus-core-pipeline.test.ts test/outcome-verification-scenarios.test.ts test/assurance-engine-acceptance.test.ts test/assurance-persistence.test.ts test/proof-center-real-data.test.ts test/phase4-pilot.test.ts",
     "test:benchmark": "tsx --test test/a2b-benchmark.test.ts test/assurance-core.test.ts",
     "test:marketing": "tsx --test test/marketing-ia.test.ts test/assessment-report.test.ts",
     "nexus-proof": "tsx scripts/nexus-proof-verify.ts",

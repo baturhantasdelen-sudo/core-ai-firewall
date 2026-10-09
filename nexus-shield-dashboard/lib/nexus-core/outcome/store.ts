@@ -9,6 +9,10 @@ import { IdempotencyConflictError } from '@/lib/nexus-core/assurance-persistence
 
 const verificationCache = new Map<string, VerificationResult>();
 
+export function cacheVerificationResult(result: VerificationResult): void {
+  verificationCache.set(result.verification_id, result);
+}
+
 export function saveVerificationResult(
   result: VerificationResult,
   scope?: PersistScope,

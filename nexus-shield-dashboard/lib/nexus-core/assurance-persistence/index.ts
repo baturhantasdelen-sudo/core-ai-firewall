@@ -13,7 +13,7 @@ let sqlitePath: string | null = null;
 export function resolveDefaultSqlitePath(): string {
   const configured = process.env.NEXUS_ASSURANCE_SQLITE_PATH?.trim();
   if (configured) return configured;
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' && process.env.NEXUS_ASSURANCE_USE_SUPABASE !== 'true') {
     throw new PersistenceUnavailableError(
       'Production requires NEXUS_ASSURANCE_SQLITE_PATH or NEXUS_ASSURANCE_USE_SUPABASE=true with schema-assurance.sql applied',
     );
@@ -34,6 +34,15 @@ export function initAssurancePersistence(options?: {
   sqlitePath?: string;
 }): AssurancePersistence {
   closeActiveSqlite();
+  if (
+    process.env.NEXUS_ASSURANCE_USE_SUPABASE === 'true' &&
+    !options?.sqlitePath &&
+    options?.mode !== 'sqlite'
+  ) {
+    active = new MemoryAssurancePersistence();
+    sqlitePath = null;
+    return active;
+  }
   if (options?.mode === 'memory') {
     active = new MemoryAssurancePersistence();
     sqlitePath = null;
@@ -84,3 +93,8 @@ export * from '@/lib/nexus-core/assurance-persistence/fingerprint';
 export * from '@/lib/nexus-core/assurance-persistence/provenance';
 export { MemoryAssurancePersistence } from '@/lib/nexus-core/assurance-persistence/memory';
 export { SqliteAssurancePersistence } from '@/lib/nexus-core/assurance-persistence/sqlite';
+export {
+  SupabaseAssurancePersistence,
+  useSupabaseAssurancePersistence,
+  getSupabaseAssurancePersistence,
+} from '@/lib/nexus-core/assurance-persistence/supabase';

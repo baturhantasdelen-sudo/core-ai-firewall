@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const result = runOutcomeVerificationForOrganization(org.id, {
+  const result = await runOutcomeVerificationForOrganization(org.id, {
     agent_id: data.agent_id,
     action_id: data.action_id,
     expected_outcome: data.expected_outcome as ExpectedOutcome,

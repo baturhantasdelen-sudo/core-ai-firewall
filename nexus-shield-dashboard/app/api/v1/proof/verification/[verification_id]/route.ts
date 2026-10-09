@@ -20,7 +20,7 @@ export async function GET(
 
   ensureAssurancePersistenceBootstrapped();
   const { verification_id } = await ctx.params;
-  const proof = loadVerificationProof(org.id, verification_id);
+  const proof = await loadVerificationProof(org.id, verification_id);
   if (!proof) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }

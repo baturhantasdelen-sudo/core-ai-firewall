@@ -21,6 +21,8 @@ type ProofPayload = {
   outcome_diff: Array<{ field: string; severity: string; message?: string; difference: string }>;
   evidence_ids: string[];
   integrity: { hash_chain_valid: boolean; evidence_count: number; last_integrity_hash: string | null };
+  hash_chain_valid: boolean;
+  signature_status: string;
   uar: { uar_id: string } | null;
 };
 
@@ -128,7 +130,11 @@ export function VerificationProofLookup({ initialVerificationId }: { initialVeri
             </div>
             <div>
               <dt className="text-zinc-500">hash_chain_valid</dt>
-              <dd>{String(proof.integrity.hash_chain_valid)}</dd>
+              <dd>{String(proof.hash_chain_valid)}</dd>
+            </div>
+            <div>
+              <dt className="text-zinc-500">signature_status</dt>
+              <dd>{proof.signature_status} (SHA-256 hash ≠ digital signature)</dd>
             </div>
             <div>
               <dt className="text-zinc-500">uar_id</dt>

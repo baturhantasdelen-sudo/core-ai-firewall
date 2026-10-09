@@ -77,9 +77,23 @@ function resolveIdempotentExisting(
   return undefined;
 }
 
-function commitVerificationResult(result: VerificationResult, scope?: PersistScope, idemKey?: string): VerificationResult {
+export interface AssuranceEngineOptions {
+  /** When true, skip durable write (caller persists via async Supabase path). */
+  skipDurable?: boolean;
+}
+
+function commitVerificationResult(
+  result: VerificationResult,
+  scope?: PersistScope,
+  idemKey?: string,
+  options?: AssuranceEngineOptions,
+): VerificationResult {
   try {
-    saveVerificationResult(result, scope);
+    if (options?.skipDurable && scope) {
+      saveVerificationResult(result);
+    } else {
+      saveVerificationResult(result, scope);
+    }
     if (!scope && idemKey) idempotencySave(idemKey, result);
     return result;
   } catch (err) {
@@ -95,7 +109,11 @@ function commitVerificationResult(result: VerificationResult, scope?: PersistSco
   }
 }
 
-export function runAssuranceEngine(req: OutcomeVerifyRequest, scope?: PersistScope): VerificationResult {
+export function runAssuranceEngine(
+  req: OutcomeVerifyRequest,
+  scope?: PersistScope,
+  options?: AssuranceEngineOptions,
+): VerificationResult {
   const started = performance.now();
   const idemKey = buildIdempotencyKey(req.action_id, req.idempotency_key);
   const idempotent = resolveIdempotentExisting(req, scope);
@@ -166,7 +184,7 @@ export function runAssuranceEngine(req: OutcomeVerifyRequest, scope?: PersistSco
       latency,
       authoritative_source: adapter.id,
     });
-    return commitVerificationResult(result, scope, idemKey);
+    return commitVerificationResult(result, scope, idemKey, options);
   }
 
   state = safeTransition(state, 'ACTION_EXECUTED');
@@ -209,7 +227,7 @@ export function runAssuranceEngine(req: OutcomeVerifyRequest, scope?: PersistSco
       authoritative_source: adapter.id,
     });
     incrementOutcomeMetric('outcome_unverified_total');
-    return commitVerificationResult(result, scope, idemKey);
+    return commitVerificationResult(result, scope, idemKey, options);
   }
 
   const agentSuccess = agentClaimsSuccess(req.tool_response);
@@ -347,7 +365,7 @@ export function runAssuranceEngine(req: OutcomeVerifyRequest, scope?: PersistSco
     authoritative_source,
   });
 
-  return commitVerificationResult(result, scope, idemKey);
+  return commitVerificationResult(result, scope, idemKey, options);
 }
 
 function finalizeResult(params: {

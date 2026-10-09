@@ -6,6 +6,7 @@ const DEFAULT_MAX_BYTES = 256 * 1024;
 export interface HttpReadOptions {
   timeout_ms?: number;
   max_bytes?: number;
+  headers?: Record<string, string>;
 }
 
 /** Read-only GET with allowlist, timeout, and size cap. */
@@ -24,7 +25,7 @@ export async function httpReadJson(
       method: 'GET',
       redirect: 'manual',
       signal: controller.signal,
-      headers: { Accept: 'application/json' },
+      headers: { Accept: 'application/json', ...(options?.headers ?? {}) },
     });
     if (res.status >= 300 && res.status < 400) {
       throw new Error('HTTP redirect not followed for verification observer');

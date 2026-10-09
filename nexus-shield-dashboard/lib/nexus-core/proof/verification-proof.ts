@@ -1,11 +1,16 @@
 import { classifyStoredProvenance } from '@/lib/nexus-core/assurance-persistence/provenance';
+import { useSupabaseAssurancePersistence } from '@/lib/nexus-core/assurance-persistence/supabase';
 import type { RecordProvenance } from '@/lib/nexus-core/assurance-persistence/types';
+import { validateEvidenceChain } from '@/lib/nexus-core/outcome/evidence';
+import { loadVerificationForOrgAsync } from '@/lib/nexus-core/outcome/persist-async';
 import {
   getVerificationEvidence,
   getVerificationResult,
   getVerificationUar,
 } from '@/lib/nexus-core/outcome/store';
 import type { VerificationResult } from '@/lib/nexus-core/outcome/models';
+import { getSupabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAssurancePersistence } from '@/lib/nexus-core/assurance-persistence/supabase';
 
 export interface VerificationProofPayload {
   record_type: RecordProvenance;
@@ -17,18 +22,40 @@ export interface VerificationProofPayload {
   evidence: VerificationResult['evidence'];
   evidence_ids: string[];
   integrity: VerificationResult['integrity'];
-  uar: ReturnType<typeof getVerificationUar> | null;
+  uar: Awaited<ReturnType<typeof getVerificationUar>> | null;
   provenance_note: string;
+  hash_chain_valid: boolean;
+  signature_status: 'NOT_APPLICABLE';
 }
 
-export function loadVerificationProof(org_id: string, verification_id: string): VerificationProofPayload | null {
-  const verification = getVerificationResult(verification_id, org_id);
+export async function loadVerificationProof(
+  org_id: string,
+  verification_id: string,
+): Promise<VerificationProofPayload | null> {
+  let verification = await loadVerificationForOrgAsync(org_id, verification_id);
+  if (!verification) {
+    verification = getVerificationResult(verification_id, org_id);
+  }
   if (!verification) return null;
+
+  let evidence = getVerificationEvidence(verification_id, org_id);
+  let uar: Awaited<ReturnType<typeof getVerificationUar>> | null =
+    getVerificationUar(verification_id, org_id) ?? null;
+
+  if (useSupabaseAssurancePersistence()) {
+    const store = getSupabaseAssurancePersistence(getSupabaseAdmin());
+    evidence = await store.getEvidence(org_id, verification_id);
+    uar = (await store.getUar(org_id, verification_id)) ?? null;
+    if (evidence.length > 0) {
+      verification = { ...verification, evidence };
+    }
+  }
 
   const stored = verification as VerificationResult & { record_provenance?: RecordProvenance };
   const record_type = classifyStoredProvenance(stored.record_provenance);
-  const evidence = getVerificationEvidence(verification_id, org_id);
-  const uar = getVerificationUar(verification_id, org_id) ?? null;
+  const chainValid = validateEvidenceChain(
+    evidence.length > 0 ? evidence : verification.evidence,
+  );
 
   return {
     record_type,
@@ -39,8 +66,13 @@ export function loadVerificationProof(org_id: string, verification_id: string): 
     outcome_diff: verification.diff,
     evidence: evidence.length > 0 ? evidence : verification.evidence,
     evidence_ids: (evidence.length > 0 ? evidence : verification.evidence).map((e) => e.evidence_id),
-    integrity: verification.integrity,
-    uar,
+    integrity: {
+      ...verification.integrity,
+      hash_chain_valid: chainValid,
+    },
+    uar: uar ?? null,
+    hash_chain_valid: chainValid,
+    signature_status: 'NOT_APPLICABLE',
     provenance_note:
       record_type === 'REAL'
         ? 'Persisted verification produced by the server assurance engine with linked evidence.'

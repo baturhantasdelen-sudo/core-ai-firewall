@@ -67,11 +67,11 @@ describe('Assurance persistence — sqlite durability', () => {
     assert.ok(getVerificationUar(result.verification_id, ORG_A));
   });
 
-  it('denies cross-tenant read (IDOR)', () => {
+  it('denies cross-tenant read (IDOR)', async () => {
     const req = demoFinanceVerified();
     const result = runAssuranceEngine(req, scope(ORG_A, req));
     assert.equal(getVerificationResult(result.verification_id, ORG_B), undefined);
-    assert.equal(loadVerificationProof(ORG_B, result.verification_id), null);
+    assert.equal(await loadVerificationProof(ORG_B, result.verification_id), null);
   });
 
   it('durable idempotency replay', () => {
@@ -97,10 +97,10 @@ describe('Assurance persistence — sqlite durability', () => {
     );
   });
 
-  it('classifies mock fixtures as DEMO provenance', () => {
+  it('classifies mock fixtures as DEMO provenance', async () => {
     const req = demoFinanceVerified();
     const result = runAssuranceEngine(req, scope(ORG_A, req));
-    const proof = loadVerificationProof(ORG_A, result.verification_id);
+    const proof = await loadVerificationProof(ORG_A, result.verification_id);
     assert.equal(proof?.record_type, 'DEMO');
   });
 });
