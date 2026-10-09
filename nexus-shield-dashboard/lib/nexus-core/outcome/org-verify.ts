@@ -4,6 +4,7 @@ import {
   initAssurancePersistence,
   type PersistScope,
 } from '@/lib/nexus-core/assurance-persistence';
+import { assertAssuranceConfigOrThrow } from '@/lib/nexus-core/assurance-persistence/config';
 import { useSupabaseAssurancePersistence } from '@/lib/nexus-core/assurance-persistence/supabase';
 import type { OutcomeVerifyRequest, VerificationResult } from '@/lib/nexus-core/outcome/models';
 import { runAssuranceEngine } from '@/lib/nexus-core/assurance-engine/engine';
@@ -16,11 +17,16 @@ import { cacheVerificationResult } from '@/lib/nexus-core/outcome/store';
 
 let persistenceBootstrapped = false;
 
+export function resetAssuranceBootstrapForTests(): void {
+  persistenceBootstrapped = false;
+}
+
 export function ensureAssurancePersistenceBootstrapped(): void {
   if (persistenceBootstrapped) return;
   if (process.env.NODE_ENV === 'test') {
     initAssurancePersistence({ mode: 'memory' });
   } else {
+    assertAssuranceConfigOrThrow();
     initAssurancePersistence();
   }
   persistenceBootstrapped = true;

@@ -119,3 +119,6 @@ alter table public.assurance_evidence enable row level security;
 alter table public.assurance_uar enable row level security;
 alter table public.assurance_idempotency enable row level security;
 alter table public.assurance_lifecycle_events enable row level security;
+
+-- Phase 4.1: apply schema-assurance-atomic.sql for atomic assurance_save_bundle RPC.
+-- Authorization model: RLS enabled, no anon/authenticated policies; server uses service_role only.

@@ -1,7 +1,7 @@
-import { createHash } from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Evidence, VerificationResult } from '@/lib/nexus-core/outcome/models';
 import { buildUarV2OutcomeExtension } from '@/lib/nexus-core/outcome/uar-bridge';
+import { buildSupabaseBundlePayload } from '@/lib/nexus-core/assurance-persistence/bundle-payload';
 import { incrementAssurancePersistenceMetric } from '@/lib/nexus-core/assurance-persistence/metrics';
 import {
   IdempotencyConflictError,
@@ -49,102 +49,26 @@ export class SupabaseAssurancePersistence {
     }
 
     const payload = uarPayload ?? (buildUarV2OutcomeExtension(result) as Record<string, unknown>);
-    const stored: StoredVerification = {
-      ...result,
-      org_id: scope.org_id,
-      record_provenance: scope.record_provenance,
-    };
+    const p_bundle = buildSupabaseBundlePayload(scope, result, payload);
 
-    const verificationRow = {
-      verification_id: result.verification_id,
-      org_id: scope.org_id,
-      action_id: scope.action_id,
-      agent_id: scope.agent_id,
-      status: result.status,
-      verification_state: result.verification_state,
-      record_provenance: scope.record_provenance,
-      authoritative_source: result.authoritative_source ?? null,
-      false_success_detected: result.false_success_detected,
-      post_block_side_effect_detected: result.post_block_side_effect_detected ?? false,
-      side_effect_status: result.side_effect_status ?? null,
-      transaction_integrity: result.transaction_integrity ?? null,
-      temporal_status: result.temporal_status ?? null,
-      verifier_version: result.verifier_version ?? null,
-      verification_latency_ms: result.verification_latency_ms ?? null,
-      idempotency_key: result.idempotency_key ?? null,
-      request_fingerprint: scope.request_fingerprint,
-      expected_outcome: result.expected_outcome,
-      actual_outcome: result.actual_outcome ?? null,
-      outcome_diff: result.diff,
-      integrity: result.integrity,
-      divergence_reason: result.divergence_reason ?? null,
-      adapter_id: scope.adapter_id ?? null,
-      mock_fixture: scope.mock_fixture ?? null,
-      environment: scope.environment ?? 'sandbox',
-      completed_at: result.completed_at,
-    };
+    const { data, error } = await this.client.rpc('assurance_save_bundle', { p_bundle });
 
-    const { error: vErr } = await this.client.from('assurance_verifications').insert(verificationRow);
-    if (vErr) {
+    if (!error && data && typeof data === 'object' && (data as { status?: string }).status === 'idempotent_replay') {
+      incrementAssurancePersistenceMetric('persistence_commit_total');
+      return;
+    }
+
+    if (error) {
       incrementAssurancePersistenceMetric('persistence_rollback_total');
-      throw new Error(`Verification insert failed: ${vErr.message}`);
-    }
-
-    if (result.evidence.length > 0) {
-      const rows = result.evidence.map((ev) => evidenceRow(ev, scope.org_id));
-      const { error: eErr } = await this.client.from('assurance_evidence').insert(rows);
-      if (eErr) {
-        await this.client.from('assurance_verifications').delete().eq('verification_id', result.verification_id);
-        incrementAssurancePersistenceMetric('persistence_rollback_total');
-        throw new Error(`Evidence insert failed: ${eErr.message}`);
+      if (
+        error.message.includes('assurance_idempotency_conflict') ||
+        error.code === '23505'
+      ) {
+        incrementAssurancePersistenceMetric('idempotency_conflict_total');
+        throw new IdempotencyConflictError('Idempotency key reused with different payload');
       }
+      throw new Error(`assurance_save_bundle failed: ${error.message}`);
     }
-
-    const uar_id = `uar_${result.verification_id}`;
-    const uarRecord: AssuranceUarRecord = {
-      uar_id,
-      verification_id: result.verification_id,
-      org_id: scope.org_id,
-      uar_version: '2.0',
-      verification_status: result.status,
-      payload,
-      integrity_hash: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
-    };
-
-    const { error: uErr } = await this.client.from('assurance_uar').insert({
-      uar_id,
-      verification_id: result.verification_id,
-      org_id: scope.org_id,
-      uar_version: '2.0',
-      verification_status: result.status,
-      payload,
-      integrity_hash: uarRecord.integrity_hash,
-    });
-    if (uErr) {
-      await this.client.from('assurance_verifications').delete().eq('verification_id', result.verification_id);
-      incrementAssurancePersistenceMetric('persistence_rollback_total');
-      throw new Error(`UAR insert failed: ${uErr.message}`);
-    }
-
-    if (result.idempotency_key) {
-      const { error: iErr } = await this.client.from('assurance_idempotency').insert({
-        org_id: scope.org_id,
-        idempotency_key: result.idempotency_key,
-        request_fingerprint: scope.request_fingerprint,
-        verification_id: result.verification_id,
-      });
-      if (iErr) {
-        incrementAssurancePersistenceMetric('persistence_rollback_total');
-        throw new Error(`Idempotency insert failed: ${iErr.message}`);
-      }
-    }
-
-    await this.client.from('assurance_lifecycle_events').insert({
-      verification_id: result.verification_id,
-      org_id: scope.org_id,
-      from_state: 'EXPECTED',
-      to_state: result.verification_state,
-    });
 
     incrementAssurancePersistenceMetric('persistence_commit_total');
   }
@@ -197,26 +121,6 @@ export class SupabaseAssurancePersistence {
       throw new Error('resetForTests only allowed in test');
     }
   }
-}
-
-function evidenceRow(ev: Evidence, org_id: string) {
-  return {
-    evidence_id: ev.evidence_id,
-    verification_id: ev.verification_id,
-    org_id,
-    source: ev.source,
-    source_type: ev.source_type,
-    resource: ev.resource,
-    resource_id: ev.resource_id,
-    observed_state_hash: ev.observed_state_hash,
-    observed_at: ev.observed_at,
-    adapter: ev.adapter,
-    query_fingerprint: ev.query_fingerprint,
-    integrity_hash: ev.integrity_hash,
-    previous_hash: ev.previous_hash,
-    sensitivity_classification: 'internal',
-    metadata: {},
-  };
 }
 
 function evidenceFromRow(row: Record<string, unknown>): Evidence {
