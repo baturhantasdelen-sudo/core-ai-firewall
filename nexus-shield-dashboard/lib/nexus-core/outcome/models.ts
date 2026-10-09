@@ -141,7 +141,7 @@ export interface OutcomeVerifyRequest {
   action_id: string;
   expected_outcome: ExpectedOutcome;
   verification_plan: VerificationPlan;
-  adapter_id: 'mock' | 'generic_http' | 'database' | 'inline';
+  adapter_id: 'mock' | 'generic_http' | 'database' | 'inline' | 'finance_erp_http';
   tool_response?: { status_code: number; body: string };
   observed_state_override?: Record<string, unknown>;
   mock_fixture?: string;

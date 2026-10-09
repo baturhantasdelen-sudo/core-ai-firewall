@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateApiKey, extractApiKey } from '@/lib/auth/api-key';
 import { getVerificationResult } from '@/lib/nexus-core/outcome/store';
+import { ensureAssurancePersistenceBootstrapped } from '@/lib/nexus-core/outcome/org-verify';
 
 export const runtime = 'nodejs';
 
@@ -17,8 +18,9 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized: Invalid API key' }, { status: 401 });
   }
 
+  ensureAssurancePersistenceBootstrapped();
   const { verification_id } = await ctx.params;
-  const result = getVerificationResult(verification_id);
+  const result = getVerificationResult(verification_id, org.id);
   if (!result) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }

@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import type { Evidence } from '@/lib/nexus-core/outcome/models';
 import { assertRegisteredQuery } from '@/lib/nexus-core/assurance-engine/db-query-registry';
 import { isHttpUrlAllowed, parseAllowlistFromEnv } from '@/lib/nexus-core/assurance-engine/http-allowlist';
+import { financeErpInlineOrConfiguredState } from '@/lib/nexus-core/adapters/finance-erp-http';
 import { appendEvidenceChain, sha256Canonical } from '@/lib/nexus-core/outcome/evidence';
 
 export interface OutcomeAdapterCapabilities {
@@ -60,6 +61,13 @@ const MOCK_FIXTURES: Record<string, Record<string, unknown>> = {
   },
   blocked_unchanged: { status: 'UNCHANGED', refund_amount: 0 },
   blocked_mutated: { status: 'REFUNDED', refund_amount: 50000, invoice_id: 'INV-BLOCK' },
+  wrong_resource: {
+    status: 'REFUNDED',
+    refund_amount: 50000,
+    currency: 'TRY',
+    invoice_id: 'INV-9999',
+    ledger_entry: true,
+  },
 };
 
 export class MockOutcomeAdapter implements OutcomeAdapter {
@@ -193,6 +201,43 @@ export class DatabaseReadOnlyOutcomeAdapter implements OutcomeAdapter {
   }
 }
 
+export class FinanceErpHttpOutcomeAdapter implements OutcomeAdapter {
+  id = 'finance_erp_http';
+
+  get_state(ctx: OutcomeAdapterContext): Record<string, unknown> {
+    return financeErpInlineOrConfiguredState(ctx);
+  }
+
+  verify_state(ctx: OutcomeAdapterContext, expected: Record<string, unknown>): boolean {
+    const state = this.get_state(ctx);
+    return Object.entries(expected).every(
+      ([k, v]) => state[k] === v || String(state[k]) === String(v),
+    );
+  }
+
+  get_evidence(ctx: OutcomeAdapterContext, verification_id: string, previous: Evidence | null): Evidence {
+    const state = this.get_state(ctx);
+    return appendEvidenceChain(verification_id, previous, {
+      source: 'finance_erp',
+      source_type: 'http_read',
+      resource: 'invoice',
+      resource_id: ctx.resource_id ?? 'unknown',
+      observed_state_hash: sha256Canonical(state),
+      observed_at: new Date().toISOString(),
+      adapter: this.id,
+      query_fingerprint: `finance_erp:invoice:${ctx.resource_id ?? 'unknown'}`,
+    });
+  }
+
+  health_check() {
+    return { ok: true, message: 'finance erp read-only observer (configure NEXUS_FINANCE_ERP_BASE_URL)' };
+  }
+
+  capabilities(): OutcomeAdapterCapabilities {
+    return { read_only: true, supports_polling: true, supports_query_fingerprint: true };
+  }
+}
+
 export class InlineOutcomeAdapter implements OutcomeAdapter {
   id = 'inline';
 
@@ -235,10 +280,17 @@ export function resolveOutcomeAdapterV2(id: OutcomeVerifyAdapterId): OutcomeAdap
       return new GenericHttpOutcomeAdapter();
     case 'database':
       return new DatabaseReadOnlyOutcomeAdapter();
+    case 'finance_erp_http':
+      return new FinanceErpHttpOutcomeAdapter();
     case 'inline':
     default:
       return new InlineOutcomeAdapter();
   }
 }
 
-export type OutcomeVerifyAdapterId = 'mock' | 'generic_http' | 'database' | 'inline';
+export type OutcomeVerifyAdapterId =
+  | 'mock'
+  | 'generic_http'
+  | 'database'
+  | 'inline'
+  | 'finance_erp_http';

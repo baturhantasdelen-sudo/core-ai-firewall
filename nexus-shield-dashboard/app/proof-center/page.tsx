@@ -6,6 +6,7 @@ import { PublicProofCenterSection } from '@/components/landing/PublicProofCenter
 import { ProveItDemoCard } from '@/components/landing/ProveItDemoCard';
 import { ProofCenterUarPlayground } from '@/components/proof-center/ProofCenterUarPlayground';
 import { ActionVerificationCenter } from '@/components/proof-center/ActionVerificationCenter';
+import { VerificationProofLookup } from '@/components/proof-center/VerificationProofLookup';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,8 @@ export default function ProofCenterPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-10">
+      <section className="mx-auto max-w-7xl px-6 py-10 space-y-10">
+        <VerificationProofLookup />
         <ProofCenterUarPlayground />
       </section>
 

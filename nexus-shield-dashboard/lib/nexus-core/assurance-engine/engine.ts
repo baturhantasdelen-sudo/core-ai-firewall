@@ -20,6 +20,9 @@ import type {
   VerificationResult,
   VerificationState,
 } from '@/lib/nexus-core/outcome/models';
+import { getAssurancePersistence } from '@/lib/nexus-core/assurance-persistence';
+import { IdempotencyConflictError } from '@/lib/nexus-core/assurance-persistence/types';
+import type { PersistScope } from '@/lib/nexus-core/assurance-persistence/types';
 import { saveVerificationResult } from '@/lib/nexus-core/outcome/store';
 import { getQueryTemplate } from '@/lib/nexus-core/assurance-engine/db-query-registry';
 
@@ -49,13 +52,54 @@ function hashState(state: Record<string, unknown>): string {
   return JSON.stringify(Object.keys(state).sort().map((k) => [k, state[k]]));
 }
 
-export function runAssuranceEngine(req: OutcomeVerifyRequest): VerificationResult {
-  const started = performance.now();
+function resolveIdempotentExisting(
+  req: OutcomeVerifyRequest,
+  scope?: PersistScope,
+): VerificationResult | undefined {
+  if (scope && req.idempotency_key) {
+    const persistence = getAssurancePersistence();
+    const row = persistence.findIdempotency(scope.org_id, req.idempotency_key);
+    if (!row) return undefined;
+    if (row.request_fingerprint !== scope.request_fingerprint) {
+      throw new IdempotencyConflictError('Idempotency key reused with different payload');
+    }
+    const existing = persistence.getVerification(scope.org_id, row.verification_id);
+    if (existing) {
+      return { ...existing, divergence_reason: 'Idempotent replay — existing verification' };
+    }
+    return undefined;
+  }
   const idemKey = buildIdempotencyKey(req.action_id, req.idempotency_key);
   const existing = idempotencyLookup(idemKey);
   if (existing) {
     return { ...existing, divergence_reason: 'Idempotent replay — existing verification' };
   }
+  return undefined;
+}
+
+function commitVerificationResult(result: VerificationResult, scope?: PersistScope, idemKey?: string): VerificationResult {
+  try {
+    saveVerificationResult(result, scope);
+    if (!scope && idemKey) idempotencySave(idemKey, result);
+    return result;
+  } catch (err) {
+    if (err instanceof IdempotencyConflictError) throw err;
+    if (result.status === 'VERIFIED' || result.status === 'FAILED' || result.status === 'BLOCKED') {
+      return {
+        ...result,
+        status: 'UNVERIFIED',
+        divergence_reason: `Persistence failed: ${err instanceof Error ? err.message : 'unknown'}`,
+      };
+    }
+    throw err;
+  }
+}
+
+export function runAssuranceEngine(req: OutcomeVerifyRequest, scope?: PersistScope): VerificationResult {
+  const started = performance.now();
+  const idemKey = buildIdempotencyKey(req.action_id, req.idempotency_key);
+  const idempotent = resolveIdempotentExisting(req, scope);
+  if (idempotent) return idempotent;
 
   incrementOutcomeMetric('outcome_verification_total');
   const verification_id = `ov_${randomBytes(10).toString('hex')}`;
@@ -122,9 +166,7 @@ export function runAssuranceEngine(req: OutcomeVerifyRequest): VerificationResul
       latency,
       authoritative_source: adapter.id,
     });
-    saveVerificationResult(result);
-    idempotencySave(idemKey, result);
-    return result;
+    return commitVerificationResult(result, scope, idemKey);
   }
 
   state = safeTransition(state, 'ACTION_EXECUTED');
@@ -167,8 +209,7 @@ export function runAssuranceEngine(req: OutcomeVerifyRequest): VerificationResul
       authoritative_source: adapter.id,
     });
     incrementOutcomeMetric('outcome_unverified_total');
-    saveVerificationResult(result);
-    return result;
+    return commitVerificationResult(result, scope, idemKey);
   }
 
   const agentSuccess = agentClaimsSuccess(req.tool_response);
@@ -306,9 +347,7 @@ export function runAssuranceEngine(req: OutcomeVerifyRequest): VerificationResul
     authoritative_source,
   });
 
-  saveVerificationResult(result);
-  idempotencySave(idemKey, result);
-  return result;
+  return commitVerificationResult(result, scope, idemKey);
 }
 
 function finalizeResult(params: {

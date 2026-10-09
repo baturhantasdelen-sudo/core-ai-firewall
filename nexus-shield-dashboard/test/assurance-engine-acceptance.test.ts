@@ -95,6 +95,24 @@ describe('Assurance engine — regression scenarios', () => {
     resetOutcomeMetricsForTests();
   });
 
+  it('Scenario D — wrong resource FAILED', () => {
+    const r = runOutcomeVerificationSync({
+      agent_id: 'a',
+      action_id: 'act-wrong-res',
+      expected_outcome: {
+        outcome_id: 'o',
+        action_id: 'act-wrong-res',
+        type: 'refund',
+        expected_state: { invoice_id: 'INV-1001', status: 'REFUNDED' },
+      },
+      verification_plan: defaultVerificationPlan(),
+      adapter_id: 'mock',
+      mock_fixture: 'wrong_resource',
+      resource_id: 'INV-1001',
+    });
+    assert.equal(r.status, 'FAILED');
+  });
+
   it('legacy outcome scenario amount_mismatch still FAILED', () => {
     const r = runOutcomeVerificationSync({
       agent_id: 'a',
