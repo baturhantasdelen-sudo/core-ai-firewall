@@ -38,9 +38,9 @@ const ALLOWED_ORIGINS = [
 /** Relative in-app documentation routes (always served from the web app origin). */
 export const APP_DOC_ROUTES = {
   docs: '/docs',
-  benchmark: '/docs/benchmark',
+  benchmark: '/assurance/benchmark',
   scorecard: '/scorecard',
-  sdk: '/docs#sdk',
+  sdk: '/developers/quickstart',
 } as const;
 
 /** Primary open-source monorepo (Action Control Plane + harness). */
@@ -134,9 +134,9 @@ export function isAllowedOrigin(origin: string | null): boolean {
 
 export function buildSiteMetadata(origin?: string): Metadata {
   const siteUrl = getSiteUrl(origin);
-  const title = 'Nexus Shield — Agent Action Control Plane with UAR';
+  const title = 'Nexus Shield — AI Agent Action Assurance Platform';
   const description =
-    'Control the action. Verify the outcome. Prove what happened. Independent verification and cryptographic Universal Action Receipts on top of your existing security stack.';
+    'Control what agents can do. Verify what they actually caused. Prove what happened. Independent outcome verification, UAR 2.0 proof, and the A2B assurance benchmark.';
 
   return {
     metadataBase: new URL(siteUrl),

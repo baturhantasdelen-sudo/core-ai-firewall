@@ -1,4 +1,4 @@
-# Nexus Shield — Business Action Assurance & Accountability Platform
+# Nexus Shield — AI Agent Action Assurance Platform
 
 ![A2B Benchmark](https://img.shields.io/badge/A2B-20%2F20%20PASS-success)
 ![Outcome Verification](https://img.shields.io/badge/nexus--core-24%2F24%20PASS-success)

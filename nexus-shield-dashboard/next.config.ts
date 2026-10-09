@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
         destination: `${PRIMARY_ORIGIN}/:path*`,
         permanent: true,
       },
+      { source: '/docs/benchmark', destination: '/assurance/benchmark', permanent: true },
+      { source: '/developers', destination: '/developers/quickstart', permanent: false },
+      { source: '/assurance', destination: '/assurance/benchmark', permanent: false },
+      { source: '/platform', destination: '/platform/outcome-verification', permanent: false },
+      { source: '/solutions', destination: '/solutions/finance', permanent: false },
+      { source: '/resources', destination: '/resources/security', permanent: false },
     ];
   },
   /** Align with Cloudflare canonical URLs — avoid trailing-slash 308 loops. */

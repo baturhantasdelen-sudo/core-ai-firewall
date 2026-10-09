@@ -1,14 +1,28 @@
 /** Canonical marketing & benchmark copy — single source of truth. */
 
+export const NEXUS_PRODUCT_CATEGORY = 'AI Agent Action Assurance Platform';
+
+export const NEXUS_MANIFESTO =
+  'Control what agents can do. Verify what they actually caused. Prove what happened.';
+
+export const NEXUS_SHORT_MESSAGE = 'CONTROL. VERIFY. PROVE.';
+
 /** Primary tagline — category anchor for hero & headers. */
 export const NEXUS_VALUE_PROP_HOOK =
   'AI agents can be authorized — and still do the wrong thing.';
 
 /** Hero subtitle — category definition. */
 export const NEXUS_VALUE_PROP_SUBTITLE =
-  'The independent verification and accountability layer for consequential AI-agent actions.';
+  'Control what agents can do. Verify what they actually caused. Prove what happened across your enterprise systems.';
 
-export const NEXUS_CATEGORY_POSITIONING = NEXUS_VALUE_PROP_SUBTITLE;
+export const NEXUS_PRODUCT_STATEMENT =
+  'Nexus Shield is the independent assurance layer for consequential AI-agent actions.';
+
+export const NEXUS_CATEGORY_POSITIONING = NEXUS_PRODUCT_CATEGORY;
+
+/** Engineering principle — use in technical pages. */
+export const NEXUS_VERIFY_WORLD =
+  'DO NOT TRUST THE AGENT. DO NOT TRUST THE TOOL RESPONSE. VERIFY THE WORLD.';
 
 /** Core product loop — landing & proof center. */
 export const NEXUS_CORE_LOOP_LABEL = 'SEE → CONTROL → VERIFY → PROVE';
