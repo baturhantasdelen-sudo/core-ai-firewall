@@ -90,9 +90,13 @@ export class SupabaseAssurancePersistence {
       .from('assurance_evidence')
       .select('*')
       .eq('verification_id', verification_id)
-      .eq('org_id', org_id);
+      .eq('org_id', org_id)
+      // created_at can tie within one RPC transaction (stable now()); evidence_id breaks ties deterministically.
+      .order('created_at', { ascending: true })
+      .order('evidence_id', { ascending: true });
     if (error) throw new Error(`Evidence load failed: ${error.message}`);
-    return (data ?? []).map((row) => evidenceFromRow(row as Record<string, unknown>));
+    const evidence = (data ?? []).map((row) => evidenceFromRow(row as Record<string, unknown>));
+    return sortEvidenceByHashChain(evidence);
   }
 
   async getUar(org_id: string, verification_id: string): Promise<AssuranceUarRecord | undefined> {
@@ -123,6 +127,46 @@ export class SupabaseAssurancePersistence {
   }
 }
 
+/**
+ * Normalize timestamptz reads to the same UTC ISO string shape used at hash time (Date.toISOString).
+ * Rejects missing/invalid timestamps. Sub-second precision loss surfaces as hash chain failure, not silent pass.
+ */
+export function normalizeObservedAtForEvidenceRead(raw: unknown): string {
+  if (raw === null || raw === undefined) {
+    throw new Error('assurance_evidence.observed_at missing');
+  }
+  const text = typeof raw === 'string' ? raw.trim() : String(raw).trim();
+  if (!text) {
+    throw new Error('assurance_evidence.observed_at empty');
+  }
+
+  const parsedMs = Date.parse(text);
+  if (Number.isNaN(parsedMs)) {
+    throw new Error('assurance_evidence.observed_at invalid');
+  }
+
+  return new Date(parsedMs).toISOString();
+}
+
+function sortEvidenceByHashChain(evidence: Evidence[]): Evidence[] {
+  if (evidence.length <= 1) return evidence;
+
+  const heads = evidence.filter((e) => e.previous_hash === null);
+  if (heads.length !== 1) return evidence;
+
+  const ordered: Evidence[] = [];
+  let current: Evidence | undefined = heads[0];
+  while (current) {
+    ordered.push(current);
+    const tail = ordered[ordered.length - 1]!;
+    current = evidence.find(
+      (e) => !ordered.includes(e) && e.previous_hash === tail.integrity_hash,
+    );
+  }
+
+  return ordered.length === evidence.length ? ordered : evidence;
+}
+
 function evidenceFromRow(row: Record<string, unknown>): Evidence {
   return {
     evidence_id: String(row.evidence_id),
@@ -132,7 +176,7 @@ function evidenceFromRow(row: Record<string, unknown>): Evidence {
     resource: String(row.resource),
     resource_id: String(row.resource_id),
     observed_state_hash: String(row.observed_state_hash),
-    observed_at: String(row.observed_at),
+    observed_at: normalizeObservedAtForEvidenceRead(row.observed_at),
     adapter: String(row.adapter),
     query_fingerprint: String(row.query_fingerprint),
     integrity_hash: String(row.integrity_hash),

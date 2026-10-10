@@ -1,3 +1,4 @@
+import { validatePilotSupabaseIdentity } from '@/lib/nexus-core/assurance-persistence/pilot-supabase-guard';
 import { PersistenceUnavailableError } from '@/lib/nexus-core/assurance-persistence/types';
 
 export interface AssuranceConfigStatus {
@@ -47,9 +48,9 @@ export function assertAssuranceConfigOrThrow(): AssuranceConfigStatus {
 }
 
 export function isSupabaseLiveIntegrationEnabled(): boolean {
-  return (
-    process.env.NEXUS_ASSURANCE_LIVE_INTEGRATION === 'true' &&
-    process.env.NEXUS_ASSURANCE_USE_SUPABASE === 'true' &&
-    resolveAssuranceBackend().ok
-  );
+  if (process.env.NEXUS_ASSURANCE_LIVE_INTEGRATION !== 'true') return false;
+  if (process.env.NEXUS_ASSURANCE_USE_SUPABASE !== 'true') return false;
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) return false;
+  if (!validatePilotSupabaseIdentity().ok) return false;
+  return true;
 }

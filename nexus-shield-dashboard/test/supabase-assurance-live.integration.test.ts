@@ -1,12 +1,15 @@
 /**
  * LIVE Supabase integration — runs only when explicitly enabled.
- * Set NEXUS_ASSURANCE_LIVE_INTEGRATION=true plus Supabase credentials and applied migrations.
+ * Set NEXUS_ASSURANCE_LIVE_INTEGRATION=true, NEXUS_ASSURANCE_USE_SUPABASE=true,
+ * SUPABASE_URL (not NEXT_PUBLIC_*), SUPABASE_SERVICE_ROLE_KEY,
+ * NEXUS_ASSURANCE_EXPECTED_PILOT_REF matching the pilot project ref, and applied migrations.
  * Does not print secrets. Does not use customer financial data.
  */
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { describe, it, before, after } from 'node:test';
 import { isSupabaseLiveIntegrationEnabled } from '@/lib/nexus-core/assurance-persistence/config';
+import { assertPilotSupabaseForLiveIntegrationOrThrow } from '@/lib/nexus-core/assurance-persistence/pilot-supabase-guard';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { demoFinanceVerified } from '@/lib/nexus-core/assurance-engine/demo-scenarios';
 import {
@@ -19,12 +22,31 @@ import { resetAssurancePersistenceForTests } from '@/lib/nexus-core/assurance-pe
 
 const LIVE = isSupabaseLiveIntegrationEnabled();
 
+function formatOrgInsertFailure(
+  label: 'orgA' | 'orgB',
+  error: { code?: string; message?: string; details?: string } | null,
+  rowId: string | undefined,
+): string {
+  if (error) {
+    const parts = [`${label}: ${error.code ?? 'unknown_code'} — ${error.message ?? 'no message'}`];
+    if (error.details?.trim()) {
+      parts.push(`details: ${error.details.trim()}`);
+    }
+    return parts.join('; ');
+  }
+  if (!rowId) {
+    return `${label}: insert returned no row id (no PostgREST error object)`;
+  }
+  return `${label}: unknown failure`;
+}
+
 describe('Supabase LIVE integration', { skip: !LIVE }, () => {
   let orgA: string;
   let orgB: string;
   let apiKeyA: string;
 
   before(async () => {
+    assertPilotSupabaseForLiveIntegrationOrThrow();
     process.env.NEXUS_ASSURANCE_USE_SUPABASE = 'true';
     resetAssuranceBootstrapForTests();
     resetAssurancePersistenceForTests();
@@ -43,7 +65,11 @@ describe('Supabase LIVE integration', { skip: !LIVE }, () => {
       .select('id')
       .single();
     if (e1 || e2 || !a?.id || !b?.id) {
-      throw new Error('Failed to create synthetic test organizations (apply schema-assurance migrations)');
+      const parts = [
+        formatOrgInsertFailure('orgA', e1, a?.id),
+        formatOrgInsertFailure('orgB', e2, b?.id),
+      ];
+      throw new Error(`Failed to create synthetic test organizations — ${parts.join(' | ')}`);
     }
     orgA = a.id;
     orgB = b.id;
@@ -51,6 +77,7 @@ describe('Supabase LIVE integration', { skip: !LIVE }, () => {
 
   after(async () => {
     if (!orgA) return;
+    assertPilotSupabaseForLiveIntegrationOrThrow();
     const supabase = getSupabaseAdmin();
     await supabase.from('organizations').delete().eq('id', orgA);
     if (orgB) await supabase.from('organizations').delete().eq('id', orgB);
